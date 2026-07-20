@@ -1,0 +1,54 @@
+name: Daily Bullion Data Update
+
+# Runs the live-data fetch every morning and commits an updated data.json.
+# GitHub cron is UTC only (no daylight-saving handling), so 10:07 UTC is
+# ~6am America/New_York during EDT (summer) and ~5am during EST (winter).
+# The exact minute is offset off :00 because GitHub delays jobs scheduled on
+# the hour under load. workflow_dispatch lets you run it by hand to test.
+on:
+  schedule:
+    - cron: "7 10 * * *"
+  workflow_dispatch:
+
+# Lets the built-in GITHUB_TOKEN push the data.json commit back to main.
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Provision FRED API key from secret
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+        run: |
+          if [ -z "$FRED_API_KEY" ]; then
+            echo "FRED_API_KEY secret is not set. Add it under" >&2
+            echo "Settings -> Secrets and variables -> Actions -> New repository secret." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.config/bullion"
+          printf '%s\n' "$FRED_API_KEY" > "$HOME/.config/bullion/fred_api_key"
+
+      - name: Fetch live financial data
+        run: python3 bullion-live-map/fetch_bullion_data.py
+
+      - name: Commit and push if data changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bullion-live-map/data.json
+          if git diff --cached --quiet; then
+            echo "No data changes today; nothing to commit."
+          else
+            git commit -m "Update live financial data for $(date -u +%F)"
+            git push
+          fi
