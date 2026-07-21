@@ -1631,7 +1631,7 @@ cd ~/minhthanh0403/claude-projects/claudekit && \
 python3 -m unittest discover -s bullion-live-map/tests -v
 ```
 
-Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `38/38 passed`.
+Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `44/44 passed`.
 
 - [ ] **Step 10: Commit**
 
@@ -1651,12 +1651,14 @@ the values feeding node colouring and scenarios are unchanged."
 ## Done criteria
 
 - `python3 -m unittest discover -s bullion-live-map/tests -v` → 33 tests, OK
-- The Chrome runner → `38/38 passed`, `RESULT: PASS`
+- The Chrome runner → `44/44 passed`, `RESULT: PASS`
 - All three fixtures verified at desktop and 640px
 - Rate Hike scenario still colours nodes correctly after Task 8
 - `preview-card.png` is 1200×630 and the eight OG tags are in `<head>`
-- `#live-provenance` no longer contains the string `Live as of`
-- Eight commits on branch `bullion-provenance`, unpushed, not yet merged to `main`
+- NO live code path emits the string `Live as of` — this means BOTH `#live-provenance`
+  AND the header badge `#live-badge`. An earlier draft named only the former, which
+  left the single-date claim standing in the more visible of the two.
+- Branch `bullion-provenance` unpushed and not yet merged to `main`
 
 ## Follow-ups (not in this plan)
 
