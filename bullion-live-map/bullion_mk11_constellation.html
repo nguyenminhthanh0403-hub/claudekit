@@ -2753,8 +2753,10 @@ function renderLiveBadge(s) {
   } else if (liveNames.length === 0) {
     el.textContent = '⚪ Simulated';
   } else {
-    const when = s.fetched_at ? new Date(s.fetched_at + 'T00:00').toLocaleDateString() : '';
-    el.textContent = `🟢 Live as of ${when}`;
+    // Deliberately no date here. See provenanceBadgeText: fetched_at is when the
+    // fetcher ran, not when any field was published, so "Live as of <date>" was
+    // asserting a currency the data does not have.
+    el.textContent = provenanceBadgeText(window.BULLION_PROVENANCE);
   }
 }
 
@@ -3455,6 +3457,27 @@ function provenanceSummaryText(prov) {
        + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1] + ' ' + Number(newest.slice(8, 10)) + '.';
 }
 // ─── PROVENANCE-SUMMARY-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-BADGE-START ─────────────────────────────────────────────────
+// The header badge's compact equivalent. It previously read
+// `Live as of {fetched_at}` — the same single-date claim as the status line,
+// but in the more visible place, and worse: fetched_at is when the FETCHER RAN,
+// not when anything was published. On a day when Core CPI's newest reading
+// describes June, "Live as of Jul 21" is simply false. The badge now reports
+// field counts and health, and never asserts a currency date.
+function provenanceBadgeText(prov) {
+  if (!prov || !prov.ok) return '⚪ Simulated';
+  const entries = Object.entries(prov.fields || {})
+                        .filter(([, f]) => f.class === 'measured');
+  if (!entries.length) return '⚪ Simulated';
+  const flagged = entries.filter(([, f]) => f.state === 'flagged').length;
+  if (flagged) return '🟠 Live · ' + flagged + ' of ' + entries.length + ' may be failing';
+  if (entries.every(([, f]) => f.state === 'unknown')) {
+    return '🟢 Live · ' + entries.length + ' fields · freshness unknown';
+  }
+  return '🟢 Live · ' + entries.length + ' fields current';
+}
+// ─── PROVENANCE-BADGE-END ───────────────────────────────────────────────────
 
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.

@@ -172,6 +172,41 @@ fetch('../bullion_mk11_constellation.html')
         provenanceSummaryText({ok:false, fields:{}}),
         'Live data unavailable — every number shown is simulated.');
     }
+
+    // ── provenanceBadgeText: the header badge ──
+    // The badge used to read `Live as of {fetched_at}`, asserting a single
+    // currency date for ten fields with ten different publication schedules —
+    // and fetched_at is when the fetcher RAN, not when anything was published.
+    const m5 = html.match(/PROVENANCE-BADGE-START([\s\S]*?)PROVENANCE-BADGE-END/);
+    if (!m5) { check('provenanceBadgeText present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m5[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceBadgeText = provenanceBadgeText;');
+
+      check('badge never asserts a currency date',
+        /as of|\d{4}-\d{2}-\d{2}/.test(provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}})),
+        false);
+      check('badge counts healthy fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}}),
+        '🟢 Live · 2 fields current');
+      check('badge surfaces failing fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'flagged'}}}),
+        '🟠 Live · 1 of 2 may be failing');
+      check('badge says freshness unknown on a v1 file',
+        provenanceBadgeText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown'}}}),
+        '🟢 Live · 1 fields · freshness unknown');
+      check('badge falls back to simulated when load failed',
+        provenanceBadgeText({ok:false, fields:{}}), '⚪ Simulated');
+      check('badge ignores simulated fields in its count',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'},
+          fomc:{class:'simulated', state:'unknown'}}}),
+        '🟢 Live · 1 fields current');
+    }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))
   .finally(() => {
