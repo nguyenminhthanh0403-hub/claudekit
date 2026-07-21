@@ -147,7 +147,9 @@ head=h[:h.index('<style>')]
 for p in ['og:type','og:title','og:description','og:url','og:image','og:image:width','og:image:height','twitter:card']:
     assert p in head, 'MISSING '+p
 print('all 8 OG tags present in <head>')
-assert h.count('<title>')==1, 'title count changed'
+assert head.count('<title>')==1, 'title count changed'
+# NB: check `head`, not `h` — a JS string literal near line 2911 builds the
+# Audit Log popup and legitimately contains a second <title>.
 print('OK')
 "
 ```
