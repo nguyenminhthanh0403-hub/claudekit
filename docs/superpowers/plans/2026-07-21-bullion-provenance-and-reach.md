@@ -986,7 +986,7 @@ function freshnessVerdict(cadence, published, today, overrideDays) {
 
 Run the same command as Step 2.
 
-Expected: 12 `PASS` lines, then `12/12 passed` and `RESULT: PASS`.
+Expected: 14 `PASS` lines, then `14/14 passed` and `RESULT: PASS`.
 
 - [ ] **Step 5: Confirm the map still loads**
 
@@ -1048,7 +1048,10 @@ Append to `bullion-live-map/tests/freshness_test.html`, inside the `.then(html =
     const m2 = html.match(/NORMALISE-ENVELOPE-START([\s\S]*?)NORMALISE-ENVELOPE-END/);
     if (!m2) { check('normaliseEnvelope present', false, true); }
     else {
-      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '; window.normaliseEnvelope = normaliseEnvelope;');
+      // The leading '\n' is REQUIRED: the captured source ends inside the closing
+      // marker line's '// ───' comment, so appended code without a newline is
+      // silently swallowed by it.
+      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '\n; window.normaliseEnvelope = normaliseEnvelope;');
 
       const v2 = { schema: 2, generated_at: '2026-07-20T10:07:14Z',
         fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
@@ -1214,7 +1217,7 @@ header badge shows its simulated state. Then restore:
 
 Run the Step 2 command from Task 5.
 
-Expected: 21 `PASS` lines, `21/21 passed`, `RESULT: PASS`.
+Expected: 23 `PASS` lines, `23/23 passed`, `RESULT: PASS`.
 
 - [ ] **Step 7: Verify all three fixtures in the browser**
 
@@ -1293,8 +1296,9 @@ Append to `bullion-live-map/tests/freshness_test.html`, after the Task 6 checks:
       // PROV_MON_ABBR must reach the global object too: it is declared `const`
       // in this block, and Task 8's strip block references it from a separate
       // eval where block-scoped consts are not visible.
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
       (0, eval)(m3[1].replace(/^[^\n]*\n/, '')
-        + '; window.provenanceSublineFor = provenanceSublineFor;'
+        + '\n; window.provenanceSublineFor = provenanceSublineFor;'
         + '  window.PROV_MON_ABBR = PROV_MON_ABBR;'
         + '  window.PROV_MONTHS = PROV_MONTHS;');
 
@@ -1432,7 +1436,7 @@ existing `renderLiveProvenance(s);` call (line ~2636).
 
 - [ ] **Step 6: Run the tests to verify they pass**
 
-Run the Step 2 command from Task 5. Expected: `26/26 passed`, `RESULT: PASS`.
+Run the Step 2 command from Task 5. Expected: `28/28 passed`, `RESULT: PASS`.
 
 - [ ] **Step 7: Verify in the browser**
 
@@ -1488,7 +1492,8 @@ Append to `bullion-live-map/tests/freshness_test.html`, after the Task 7 checks:
     const m4 = html.match(/PROVENANCE-SUMMARY-START([\s\S]*?)PROVENANCE-SUMMARY-END/);
     if (!m4) { check('provenanceSummaryText present', false, true); }
     else {
-      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '; window.provenanceSummaryText = provenanceSummaryText;');
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceSummaryText = provenanceSummaryText;');
 
       check('all fresh states the newest publication date',
         provenanceSummaryText({ok:true, schema:2, fields:{
@@ -1600,7 +1605,7 @@ After the `.prov-dot` rule:
 
 - [ ] **Step 7: Run the tests to verify they pass**
 
-Run the Step 2 command from Task 5. Expected: `30/30 passed`, `RESULT: PASS`.
+Run the Step 2 command from Task 5. Expected: `32/32 passed`, `RESULT: PASS`.
 
 - [ ] **Step 8: Verify in the browser, including a scenario run**
 
@@ -1623,7 +1628,7 @@ cd ~/minhthanh0403/claude-projects/claudekit && \
 python3 -m unittest discover -s bullion-live-map/tests -v
 ```
 
-Expected: `Ran 25 tests`, `OK`. Then re-run the Chrome runner: `30/30 passed`.
+Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `32/32 passed`.
 
 - [ ] **Step 10: Commit**
 
@@ -1642,8 +1647,8 @@ the values feeding node colouring and scenarios are unchanged."
 
 ## Done criteria
 
-- `python3 -m unittest discover -s bullion-live-map/tests -v` → 25 tests, OK
-- The Chrome runner → `30/30 passed`, `RESULT: PASS`
+- `python3 -m unittest discover -s bullion-live-map/tests -v` → 33 tests, OK
+- The Chrome runner → `32/32 passed`, `RESULT: PASS`
 - All three fixtures verified at desktop and 640px
 - Rate Hike scenario still colours nodes correctly after Task 8
 - `preview-card.png` is 1200×630 and the eight OG tags are in `<head>`
