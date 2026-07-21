@@ -305,7 +305,18 @@ the map changes and nobody remembers to retake it.
 
 `fetch_bullion_data.py` holds the logic that can actually be wrong — schema
 assembly and the freshness verdict — and it is pure Python. Tests live in
-`bullion-live-map/tests/test_fetch_bullion_data.py`, run with `pytest`.
+`bullion-live-map/tests/test_fetch_bullion_data.py`.
+
+**Tooling constraint, verified 2026-07-21: neither `pytest` nor `node` is
+installed on this machine.** Rather than add install steps to a project whose
+defining constraint is zero dependencies, both test suites use what is already
+present:
+
+- **Python: `unittest` from the standard library.** Run with
+  `python3 -m unittest discover -s bullion-live-map/tests -v`. No install.
+- **JavaScript: a self-contained HTML runner driven by headless Chrome**,
+  which is confirmed present at
+  `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. No install.
 
 Cases:
 
@@ -329,9 +340,16 @@ function freshnessVerdict(cadence, published, today, overrideDays)
 // → { state: 'fresh' | 'flagged' | 'unknown', ageDays: number }
 ```
 
-It takes no DOM and no globals, so it is testable under `node` in
-`bullion-live-map/tests/freshness.test.js`, mirroring the Python boundary cases
-above so a change to one surfaces as a failure in the other.
+It takes no DOM and no globals. Because the map must remain a single
+self-contained file, the function lives inline in the HTML between the marker
+comments `FRESHNESS-VERDICT-START` / `FRESHNESS-VERDICT-END`. The test runner
+`bullion-live-map/tests/freshness_test.html` reads the HTML, extracts the
+source between those markers, evaluates it, and asserts the same boundary cases
+as the Python suite — so a change to one surfaces as a failure in the other.
+
+Extracting from the shipped file rather than duplicating the function is what
+keeps the two from drifting. The cost is that renaming or removing the marker
+comments breaks the test, which is the intended failure mode.
 
 ### Testing constraints — stated plainly
 
