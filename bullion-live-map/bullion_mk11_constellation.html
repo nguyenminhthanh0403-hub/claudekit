@@ -350,6 +350,11 @@
   .mg-item b { color: var(--gold); font-size: 11.5px; }
   .mg-item .mg-matter { color: var(--text); }
   .mg-item .mg-read { display: block; margin-top: 2px; font-size: 10px; opacity: 0.85; }
+  .prov-sub { display:block; font-size:9.5px; color:var(--text-dim);
+              line-height:1.4; margin-top:2px; letter-spacing:0.02em; }
+  .prov-flag { color:var(--amber); }
+  .prov-dot  { display:inline-block; width:6px; height:6px; border-radius:50%;
+               background:var(--amber); margin-left:5px; vertical-align:middle; }
 </style>
 </head>
 <body>
@@ -457,15 +462,15 @@
       <div class="drawer-label">Live metrics <span class="drawer-tag" id="metricguide-toggle">what do these mean?</span></div>
       <div class="glossary-view hidden" id="metricguide-box"></div>
       <div class="metrics-grid">
-        <div class="metric-cell"><div class="metric-label">US2Y</div><div class="metric-val" id="m-us2y">&mdash;</div><div class="metric-sub">2-yr Treasury</div></div>
-        <div class="metric-cell"><div class="metric-label">US10Y</div><div class="metric-val" id="m-us10y">&mdash;</div><div class="metric-sub">10-yr Treasury</div></div>
-        <div class="metric-cell"><div class="metric-label">Spread</div><div class="metric-val" id="m-spread">&mdash;</div><div class="metric-sub">10Y&ndash;2Y bps</div></div>
-        <div class="metric-cell"><div class="metric-label">VIX</div><div class="metric-val" id="m-vix">&mdash;</div><div class="metric-sub">Fear index</div></div>
-        <div class="metric-cell"><div class="metric-label">SPX</div><div class="metric-val" id="m-spx">&mdash;</div><div class="metric-sub">S&amp;P 500</div></div>
-        <div class="metric-cell"><div class="metric-label">Core CPI</div><div class="metric-val" id="m-cpi">&mdash;</div><div class="metric-sub">YoY %</div></div>
-        <div class="metric-cell"><div class="metric-label">Gold</div><div class="metric-val" id="m-gold">&mdash;</div><div class="metric-sub">$/oz</div></div>
-        <div class="metric-cell"><div class="metric-label">Dollar</div><div class="metric-val" id="m-dxy">&mdash;</div><div class="metric-sub">DXY index</div></div>
-        <div class="metric-cell"><div class="metric-label">WTI Oil</div><div class="metric-val" id="m-wti">&mdash;</div><div class="metric-sub">$/bbl</div></div>
+        <div class="metric-cell"><div class="metric-label">US2Y</div><div class="metric-val" id="m-us2y">&mdash;</div><div class="metric-sub">2-yr Treasury</div><div class="prov-sub" id="p-us2y"></div></div>
+        <div class="metric-cell"><div class="metric-label">US10Y</div><div class="metric-val" id="m-us10y">&mdash;</div><div class="metric-sub">10-yr Treasury</div><div class="prov-sub" id="p-us10y"></div></div>
+        <div class="metric-cell"><div class="metric-label">Spread</div><div class="metric-val" id="m-spread">&mdash;</div><div class="metric-sub">10Y&ndash;2Y bps</div><div class="prov-sub" id="p-spread"></div></div>
+        <div class="metric-cell"><div class="metric-label">VIX</div><div class="metric-val" id="m-vix">&mdash;</div><div class="metric-sub">Fear index</div><div class="prov-sub" id="p-vix"></div></div>
+        <div class="metric-cell"><div class="metric-label">SPX</div><div class="metric-val" id="m-spx">&mdash;</div><div class="metric-sub">S&amp;P 500</div><div class="prov-sub" id="p-spx"></div></div>
+        <div class="metric-cell"><div class="metric-label">Core CPI</div><div class="metric-val" id="m-cpi">&mdash;</div><div class="metric-sub">YoY %</div><div class="prov-sub" id="p-cpi"></div></div>
+        <div class="metric-cell"><div class="metric-label">Gold</div><div class="metric-val" id="m-gold">&mdash;</div><div class="metric-sub">$/oz</div><div class="prov-sub" id="p-gold"></div></div>
+        <div class="metric-cell"><div class="metric-label">Dollar</div><div class="metric-val" id="m-dxy">&mdash;</div><div class="metric-sub">DXY index</div><div class="prov-sub" id="p-dxy"></div></div>
+        <div class="metric-cell"><div class="metric-label">WTI Oil</div><div class="metric-val" id="m-wti">&mdash;</div><div class="metric-sub">$/bbl</div><div class="prov-sub" id="p-wti"></div></div>
       </div>
       <div class="state-alert normal" id="state-alert" style="margin-top:8px">&#x2713; Stable &mdash; risk-on, normal policy</div>
       <div class="sim-note" id="live-provenance" style="margin-top:6px"></div>
@@ -2645,6 +2650,7 @@ function updateMetrics() {
   else if (s.tightening_bias) { alertEl.className='state-alert tight';    alertEl.textContent='\u2191 Tightening bias \u2014 hawkish signals'; }
   else                        { alertEl.className='state-alert normal';   alertEl.textContent='\u2713 Stable \u2014 risk-on, normal policy'; }
   renderLiveProvenance(s);
+  renderMetricProvenance();
   renderLiveBadge(s);
   renderStats(s);
   updateGraph(s);
@@ -2656,6 +2662,33 @@ function updateMetrics() {
 // blurred together — the same provenance-tier honesty mechanism used
 // everywhere else on this map.
 const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500' };
+
+// Metric cell id suffix -> data.json field name. `spread` is absent because it
+// is computed from us10y and us2y rather than fetched — it is class 'derived'
+// and carries no publication date of its own. `ffr` and `nfp_mom` are fetched
+// but have no cell in the metrics grid.
+const METRIC_CELL_FIELD = {
+  'us2y': 'us2y', 'us10y': 'us10y', 'vix': 'vix', 'spx': 'spx',
+  'cpi': 'cpi_yoy', 'gold': 'gold_px', 'dxy': 'dxy', 'wti': 'wti_px',
+};
+
+function renderMetricProvenance() {
+  const prov = window.BULLION_PROVENANCE;
+  for (const [suffix, fieldName] of Object.entries(METRIC_CELL_FIELD)) {
+    const el = document.getElementById('p-' + suffix);
+    if (!el) continue;
+    const field = (prov && prov.fields) ? prov.fields[fieldName] : null;
+    const text = provenanceSublineFor(field);
+    el.textContent = text || '';
+    el.className = 'prov-sub' + (field && field.state === 'flagged' ? ' prov-flag' : '');
+  }
+  // The spread is derived, so it states that rather than a publication date.
+  const spreadEl = document.getElementById('p-spread');
+  if (spreadEl) {
+    spreadEl.textContent = (prov && prov.schema === 2) ? 'derived from 10Y and 2Y' : '';
+    spreadEl.className = 'prov-sub';
+  }
+}
 const ALWAYS_SIMULATED_LABEL = 'FOMC hike/cut odds';
 
 // Fields actually present in the current live/historical source, including
@@ -3344,6 +3377,35 @@ function normaliseEnvelope(raw, todayISO) {
   return out;
 }
 // ─── NORMALISE-ENVELOPE-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-SUBLINE-START ───────────────────────────────────────────────
+// What appears under a metric's value. Fresh daily fields return null and show
+// nothing: appending "as of today" to eight daily fields would be noise that
+// trains the reader to ignore the line, defeating it on the one field where it
+// matters.
+const PROV_MONTHS = ['January','February','March','April','May','June','July',
+                     'August','September','October','November','December'];
+const PROV_MON_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function provenanceSublineFor(field) {
+  if (!field) return null;
+  if (field.class === 'simulated') return 'model estimate · not market data';
+  if (field.state === 'flagged') {
+    return 'Expected ' + field.cadence + ', last published ' + field.ageDays
+         + ' days ago — the source may be failing.';
+  }
+  if (field.state === 'unknown') return null;
+  if (field.cadence === 'daily') return null;   // fresh and daily: silence
+  if (field.cadence === 'monthly') {
+    const ref = field.refDate ? new Date(field.refDate + 'T00:00:00Z') : null;
+    const pub = field.published ? new Date(field.published + 'T00:00:00Z') : null;
+    if (!ref || !pub) return null;
+    return PROV_MONTHS[ref.getUTCMonth()] + ' · published '
+         + PROV_MON_ABBR[pub.getUTCMonth()] + ' ' + pub.getUTCDate() + ' · monthly';
+  }
+  return null;
+}
+// ─── PROVENANCE-SUBLINE-END ─────────────────────────────────────────────────
 
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.

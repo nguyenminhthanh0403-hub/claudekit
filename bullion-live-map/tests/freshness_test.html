@@ -113,6 +113,39 @@ fetch('../bullion_mk11_constellation.html')
       check('null envelope reports not-ok', nFail.ok, false);
       check('null envelope has no fields', Object.keys(nFail.fields).length, 0);
     }
+
+    // ── provenanceSubline: what appears under a metric ──
+    const m3 = html.match(/PROVENANCE-SUBLINE-START([\s\S]*?)PROVENANCE-SUBLINE-END/);
+    if (!m3) { check('provenanceSubline present', false, true); }
+    else {
+      // PROV_MON_ABBR must reach the global object too: it is declared `const`
+      // in this block, and Task 8's strip block references it from a separate
+      // eval where block-scoped consts are not visible.
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m3[1].replace(/^[^\n]*\n/, '')
+        + '\n; window.provenanceSublineFor = provenanceSublineFor;'
+        + '  window.PROV_MON_ABBR = PROV_MON_ABBR;'
+        + '  window.PROV_MONTHS = PROV_MONTHS;');
+
+      check('fresh daily field shows nothing',
+        provenanceSublineFor({class:'measured', cadence:'daily', refDate:'2026-07-17',
+                              published:'2026-07-17', state:'fresh', ageDays:0}), null);
+      check('monthly field shows period and publication date',
+        provenanceSublineFor({class:'measured', cadence:'monthly', refDate:'2026-06-01',
+                              published:'2026-07-14', state:'fresh', ageDays:6}),
+        'June · published Jul 14 · monthly');
+      check('simulated field says so',
+        provenanceSublineFor({class:'simulated', cadence:'fomc', refDate:null,
+                              published:null, state:'unknown', ageDays:null}),
+        'model estimate · not market data');
+      check('flagged field explains the fault',
+        provenanceSublineFor({class:'measured', cadence:'daily', refDate:'2026-07-08',
+                              published:'2026-07-08', state:'flagged', ageDays:12}),
+        'Expected daily, last published 12 days ago — the source may be failing.');
+      check('unknown cadence shows nothing',
+        provenanceSublineFor({class:'measured', cadence:'unknown', refDate:'2026-07-17',
+                              published:null, state:'unknown', ageDays:null}), null);
+    }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))
   .finally(() => {
