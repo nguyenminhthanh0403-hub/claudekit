@@ -355,6 +355,7 @@
   .prov-flag { color:var(--amber); }
   .prov-dot  { display:inline-block; width:6px; height:6px; border-radius:50%;
                background:var(--amber); margin-left:5px; vertical-align:middle; }
+  .sim-mark { color:var(--amber); font-weight:600; margin-left:3px; cursor:help; }
 </style>
 </head>
 <body>
@@ -2591,7 +2592,7 @@ const STATS_VARS = [
   { key:'dxy',   label:'Dollar (DXY)', unit:'index' },
   { key:'gold_px', label:'Gold', unit:'$/oz' },
   { key:'wti_px', label:'WTI Crude', unit:'$/bbl' },
-  { key:'fomc_prob_hike', label:'FOMC Hike Prob', unit:'probability' },
+  { key:'fomc_prob_hike', label:'FOMC Hike Prob', unit:'probability', sim:true },
 ];
 function renderStats(shocked) {
   const rowsEl = document.getElementById('stats-rows');
@@ -2620,7 +2621,8 @@ function renderStats(shocked) {
     const sign = d.pct > 0 ? '+' : '';
     const deltaTxt = dir === 'flat' ? '0.0%' : (sign + d.pct.toFixed(1) + '%');
     return '<div class="stat-row">'
-      + '<div class="stat-label">' + d.label + '<small>' + d.unit + '</small></div>'
+      + '<div class="stat-label">' + d.label + (d.sim ? '<span class="sim-mark" title="Model estimate, not market data — FOMC odds have no free live source">~</span>' : '')
+      + '<small>' + d.unit + (d.sim ? ' · model estimate' : '') + '</small></div>'
       + '<div class="stat-track"><div class="stat-track-mid"></div>'
       +   '<div class="stat-bar ' + dir + '" style="left:' + left + '%;width:' + width + '%"></div></div>'
       + '<div class="stat-delta ' + dir + '">' + deltaTxt + '</div>'
@@ -2681,6 +2683,24 @@ function renderMetricProvenance() {
     const text = provenanceSublineFor(field);
     el.textContent = text || '';
     el.className = 'prov-sub' + (field && field.state === 'flagged' ? ' prov-flag' : '');
+    // Amber dot on the label itself, not just the amber sub-line — this runs
+    // on every metric update, so reuse/remove rather than append, or dots
+    // would accumulate across re-renders.
+    const cell = el.parentElement;
+    const labelEl = cell ? cell.querySelector('.metric-label') : null;
+    if (labelEl) {
+      let dot = labelEl.querySelector('.prov-dot');
+      if (field && field.state === 'flagged') {
+        if (!dot) {
+          dot = document.createElement('span');
+          dot.className = 'prov-dot';
+          labelEl.appendChild(dot);
+        }
+        dot.title = text || '';
+      } else if (dot) {
+        dot.remove();
+      }
+    }
   }
   // The spread is derived, so it states that rather than a publication date.
   const spreadEl = document.getElementById('p-spread');
@@ -2717,8 +2737,9 @@ function renderLiveProvenance(s) {
       : 'Simulated view (live data is available — toggle "Live Data" back on to use it).';
     return;
   }
-  const when = s.fetched_at ? new Date(s.fetched_at + 'T00:00').toLocaleDateString() : 'unknown time';
-  el.textContent = `Live as of ${when}: ${liveNames.join(', ')}. Still simulated: ${ALWAYS_SIMULATED_LABEL}.`;
+  const prov = window.BULLION_PROVENANCE;
+  el.textContent = `Live: ${liveNames.join(', ')}. Still simulated: ${ALWAYS_SIMULATED_LABEL}. `
+                 + provenanceSummaryText(prov);
 }
 
 // Condensed one-line version of the same status, shown in the header so it's
@@ -3406,6 +3427,34 @@ function provenanceSublineFor(field) {
   return null;
 }
 // ─── PROVENANCE-SUBLINE-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-SUMMARY-START ───────────────────────────────────────────────
+// One sentence replacing the old `Live as of {fetched_at}` stamp. That stamp
+// applied a single date to ten fields published on ten different schedules,
+// which is the misrepresentation this plan exists to remove.
+function provenanceSummaryText(prov) {
+  if (!prov || !prov.ok) return 'Live data unavailable — every number shown is simulated.';
+  const entries = Object.entries(prov.fields || {})
+                        .filter(([, f]) => f.class === 'measured');
+  if (!entries.length) return 'Live data unavailable — every number shown is simulated.';
+  if (entries.every(([, f]) => f.state === 'unknown')) {
+    return 'Publication dates unavailable in this data file — freshness unknown.';
+  }
+  const published = entries.map(([, f]) => f.published).filter(Boolean).sort();
+  const newest = published.length ? published[published.length - 1] : null;
+  const newestTxt = newest
+    ? ' Most recent publication ' + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1]
+      + ' ' + Number(newest.slice(8, 10)) + '.'
+    : '';
+  const flagged = entries.filter(([, f]) => f.state === 'flagged').map(([n]) => n);
+  if (flagged.length) {
+    return flagged.length + ' of ' + entries.length + ' measured fields may be failing: '
+         + flagged.join(', ') + '.' + newestTxt;
+  }
+  return 'All ' + entries.length + ' measured fields are current — most recent publication '
+       + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1] + ' ' + Number(newest.slice(8, 10)) + '.';
+}
+// ─── PROVENANCE-SUMMARY-END ─────────────────────────────────────────────────
 
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.

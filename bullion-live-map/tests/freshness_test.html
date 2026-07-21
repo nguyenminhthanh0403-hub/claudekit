@@ -146,6 +146,32 @@ fetch('../bullion_mk11_constellation.html')
         provenanceSublineFor({class:'measured', cadence:'unknown', refDate:'2026-07-17',
                               published:null, state:'unknown', ageDays:null}), null);
     }
+
+    // ── provenanceSummaryText ──
+    const m4 = html.match(/PROVENANCE-SUMMARY-START([\s\S]*?)PROVENANCE-SUMMARY-END/);
+    if (!m4) { check('provenanceSummaryText present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceSummaryText = provenanceSummaryText;');
+
+      check('all fresh states the newest publication date',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          b:{class:'measured', state:'fresh', published:'2026-07-14'}}}),
+        'All 2 measured fields are current — most recent publication Jul 17.');
+      check('flagged fields are named',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          vix:{class:'measured', state:'flagged', published:'2026-07-01', ageDays:19}}}),
+        '1 of 2 measured fields may be failing: vix. Most recent publication Jul 17.');
+      check('v1 file says freshness is unknown',
+        provenanceSummaryText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown', published:null}}}),
+        'Publication dates unavailable in this data file — freshness unknown.');
+      check('failed load says so',
+        provenanceSummaryText({ok:false, fields:{}}),
+        'Live data unavailable — every number shown is simulated.');
+    }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))
   .finally(() => {
