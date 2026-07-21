@@ -3287,7 +3287,17 @@ function normaliseEnvelope(raw, todayISO) {
     return out;
   }
 
-  if (raw.schema === 2) {
+  // Branch on shape, not just the version number: a future schema that keeps
+  // the v2 envelope shape ({fields, history}) still loads correctly here,
+  // rather than falling into the v1 path and treating "fields"/"history" as
+  // literal date keys.
+  const hasEnvelopeShape = raw.fields && typeof raw.fields === 'object' &&
+    raw.history && typeof raw.history === 'object';
+
+  if (hasEnvelopeShape) {
+    if (raw.schema !== 2) {
+      console.warn('data.json schema', raw.schema, 'is newer than this page understands; reading as v2');
+    }
     out.schema = 2;
     out.generatedAt = raw.generated_at || null;
     out.history = raw.history || {};
@@ -3304,8 +3314,12 @@ function normaliseEnvelope(raw, todayISO) {
     return out;
   }
 
-  if (raw.schema != null && raw.schema > 2) {
-    console.warn('data.json schema', raw.schema, 'is newer than this page understands; reading as v1');
+  if (raw.schema != null) {
+    // A schema number is present but the envelope shape isn't recognisable.
+    // Fail closed rather than walking it as a v1 date map: rendering nothing
+    // is correct, rendering corrupted values is not.
+    out.error = 'unrecognised data.json schema ' + raw.schema;
+    return out;
   }
 
   // v1: a bare {date: {field: value}} map. Reconstruct per-field latest by

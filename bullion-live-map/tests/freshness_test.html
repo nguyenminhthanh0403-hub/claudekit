@@ -86,6 +86,29 @@ fetch('../bullion_mk11_constellation.html')
       check('v1 still exposes values', n1.fields.gold_px.value, 4018.8);
       check('v1 history is reconstructed', Object.keys(n1.history).length, 2);
 
+      const v1ord = { '2026-07-10': { gold_px: 3900.0 }, '2026-07-17': { gold_px: 4018.8 } };
+      const n1ord = normaliseEnvelope(v1ord, '2026-07-20');
+      check('v1 later date wins for the same field',
+        n1ord.fields.gold_px.value, 4018.8);
+      check('v1 later date also supplies the reference date',
+        n1ord.fields.gold_px.refDate, '2026-07-17');
+
+      // ── normaliseEnvelope: forward-compat with unknown future schemas ──
+      const v3 = { schema: 3, generated_at: '2026-07-20T10:07:14Z',
+        fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
+                             ref_date:'2026-06-01', published:'2026-07-14', value:2.6 } },
+        history: { '2026-06-01': { cpi_yoy: 2.6 } } };
+      const n3 = normaliseEnvelope(v3, '2026-07-20');
+      check('schema 3 with recognisable v2 shape loads via v2 path', n3.ok, true);
+      check('schema 3 with recognisable v2 shape computes a real state',
+        n3.fields.cpi_yoy.state, 'fresh');
+
+      const v3bad = { schema: 3, somethingElse: {} };
+      const n3bad = normaliseEnvelope(v3bad, '2026-07-20');
+      check('schema 3 without recognisable shape reports not-ok', n3bad.ok, false);
+      check('schema 3 without recognisable shape does not populate fields',
+        Object.keys(n3bad.fields).length, 0);
+
       const nFail = normaliseEnvelope(null, '2026-07-20');
       check('null envelope reports not-ok', nFail.ok, false);
       check('null envelope has no fields', Object.keys(nFail.fields).length, 0);
