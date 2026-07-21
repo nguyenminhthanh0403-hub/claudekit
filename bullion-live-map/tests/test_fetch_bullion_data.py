@@ -302,6 +302,17 @@ class TestBuildEnvelope(unittest.TestCase):
         self.assertIn("gold_px", env["fields"])
         self.assertNotIn("cpi_yoy", env["fields"])
 
+    def test_unmetadata_field_raises_rather_than_shipping_unlabelled(self):
+        # The defect this whole schema exists to prevent: a value reaching
+        # data.json with no provenance. Without this test, replacing the raise
+        # with `continue` would silently drop the field and every other test
+        # here would still pass.
+        with self.assertRaises(KeyError):
+            build_envelope(
+                {"not_a_real_field": {"value": 1.0, "ref_date": "2026-07-17",
+                                      "published": "2026-07-17"}},
+                {}, "2026-07-20T10:07:14Z")
+
     def test_every_known_field_has_metadata(self):
         # A field fetched but absent from FIELD_META would ship with no
         # provenance, which is the bug this whole change exists to prevent.
