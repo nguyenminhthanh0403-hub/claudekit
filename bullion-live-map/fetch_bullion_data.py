@@ -42,6 +42,41 @@ YAHOO_SYMBOLS = {
     "^GSPC":     ("spx",     2),
 }
 
+# Cadence tolerances, in days, applied to a field's PUBLICATION date — never
+# its reference date. June CPI references 2026-06-01 but publishes 2026-07-14;
+# judged on reference date it looks broken, judged on publication it is on
+# time. Calibrated 2026-07-20 against observed publication lags: daily FRED
+# series ran 3-4 days, wti_px 5, CPI 6, PAYEMS 18.
+CADENCE_TOLERANCE_DAYS = {
+    "daily":   7,    # observed 3-4d; absorbs a three-day weekend plus a holiday
+    "monthly": 45,   # observed 6d and 18d; silent for 45d means genuinely broken
+    "fomc":    None, # simulated, never judged
+}
+
+# wti_px publishes on a structurally longer lag than the other dailies — it sat
+# at 5 days while perfectly healthy, so the 7-day default would have produced a
+# false alarm immediately.
+FIELD_TOLERANCE_OVERRIDE = {
+    "wti_px": 10,
+}
+
+
+def freshness_verdict(cadence, published, today, override_days=None):
+    """Decide whether a field's latest value is fresh, judged on publication.
+
+    Returns (state, age_days) where state is 'fresh', 'flagged' or 'unknown'.
+    'unknown' means the question does not apply (simulated data) or cannot be
+    answered (no publication date, unrecognised cadence) — callers must render
+    nothing rather than guess.
+    """
+    if published is None or cadence == "fomc":
+        return ("unknown", None)
+    tolerance = override_days if override_days is not None else CADENCE_TOLERANCE_DAYS.get(cadence)
+    if tolerance is None:
+        return ("unknown", None)
+    age_days = (today - published).days
+    return ("flagged" if age_days > tolerance else "fresh", age_days)
+
 SOURCE_NOTE = (
     "us2y/us10y/vix/ffr/wti_px: FRED daily series (DGS2, DGS10, VIXCLS, DFF, "
     "DCOILWTICO), official supported API. cpi_yoy: FRED CPILFESL, percent "
