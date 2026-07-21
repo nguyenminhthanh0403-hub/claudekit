@@ -85,5 +85,82 @@ class TestFreshnessVerdict(unittest.TestCase):
         self.assertEqual(FIELD_TOLERANCE_OVERRIDE["wti_px"], 10)
 
 
+from fetch_bullion_data import parse_fred_observations, parse_yahoo_chart
+
+
+class TestParseFredObservations(unittest.TestCase):
+    PAYLOAD = {
+        "observations": [
+            {"realtime_start": "2026-05-12", "realtime_end": "9999-12-31",
+             "date": "2026-04-01", "value": "335.423"},
+            {"realtime_start": "2026-06-10", "realtime_end": "9999-12-31",
+             "date": "2026-05-01", "value": "336.121"},
+            {"realtime_start": "2026-07-14", "realtime_end": "9999-12-31",
+             "date": "2026-06-01", "value": "336.065"},
+        ]
+    }
+
+    def test_returns_latest_value_reference_and_publication_dates(self):
+        value, ref, pub, hist = parse_fred_observations(self.PAYLOAD, decimals=1)
+        self.assertEqual(value, 336.1)
+        self.assertEqual(ref, "2026-06-01")
+        self.assertEqual(pub, "2026-07-14")
+
+    def test_builds_full_history_keyed_by_reference_date(self):
+        _, _, _, hist = parse_fred_observations(self.PAYLOAD, decimals=1)
+        self.assertEqual(len(hist), 3)
+        self.assertEqual(hist["2026-04-01"], 335.4)
+
+    def test_skips_missing_value_sentinel(self):
+        payload = {"observations": [
+            {"realtime_start": "2026-07-16", "date": "2026-07-15", "value": "."},
+            {"realtime_start": "2026-07-17", "date": "2026-07-16", "value": "4.21"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.21)
+        self.assertEqual(ref, "2026-07-16")
+        self.assertEqual(len(hist), 1)
+
+    def test_empty_payload_returns_all_none(self):
+        value, ref, pub, hist = parse_fred_observations({"observations": []}, decimals=2)
+        self.assertIsNone(value)
+        self.assertIsNone(ref)
+        self.assertIsNone(pub)
+        self.assertEqual(hist, {})
+
+    def test_missing_realtime_start_yields_none_publication(self):
+        payload = {"observations": [
+            {"date": "2026-07-16", "value": "4.21"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.21)
+        self.assertEqual(ref, "2026-07-16")
+        self.assertIsNone(pub)
+
+
+class TestParseYahooChart(unittest.TestCase):
+    PAYLOAD = {
+        "chart": {"result": [{
+            "timestamp": [1784332800, 1784419200],
+            "indicators": {"quote": [{"close": [4001.5, 4018.84]}]},
+            "meta": {"regularMarketPrice": 4018.84},
+        }]}
+    }
+
+    def test_reference_and_publication_dates_are_equal(self):
+        value, ref, pub, hist = parse_yahoo_chart(self.PAYLOAD, decimals=2)
+        self.assertEqual(value, 4018.84)
+        self.assertEqual(ref, pub,
+                         "a daily close is both the reference period and the "
+                         "moment it exists")
+
+    def test_unexpected_shape_returns_all_none(self):
+        value, ref, pub, hist = parse_yahoo_chart({"chart": {"result": []}}, decimals=2)
+        self.assertIsNone(value)
+        self.assertIsNone(ref)
+        self.assertIsNone(pub)
+        self.assertEqual(hist, {})
+
+
 if __name__ == "__main__":
     unittest.main()

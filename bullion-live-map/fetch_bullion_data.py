@@ -109,8 +109,82 @@ def http_get_json(url, timeout=15):
         return json.load(resp)
 
 
+def parse_fred_observations(data, decimals):
+    """Pure parse of a FRED observations payload.
+
+    Returns (latest_value, ref_date, published, history). `published` comes
+    from the observation's realtime_start, which is the date the reading
+    became available — this is what freshness is judged on.
+    """
+    history = {}
+    published_by_ref = {}
+    for obs in data.get("observations", []):
+        val = obs.get("value")
+        if val is None or val == ".":
+            continue
+        try:
+            history[obs["date"]] = round(float(val), decimals)
+        except (ValueError, KeyError):
+            continue
+        published_by_ref[obs["date"]] = obs.get("realtime_start")
+
+    if not history:
+        return (None, None, None, {})
+    latest_ref = max(history)
+    return (history[latest_ref], latest_ref, published_by_ref.get(latest_ref), history)
+
+
+def fred_url(params):
+    return "https://api.stlouisfed.org/fred/series/observations?" + "&".join(
+        f"{k}={urllib.request.quote(str(v))}" for k, v in params.items()
+    )
+
+
+def fetch_fred_publication_date(series_id, key, start, end):
+    """Publication date of a series' latest observation, as its own request.
+
+    Verified against the live API 2026-07-21: FRED rejects a realtime RANGE
+    combined with any `units` transform other than 'lin' —
+
+      400: "If output_type is '1' and units is not 'lin', then realtime_start
+            must equal realtime_end..."
+
+    CPILFESL uses units=pc1 and PAYEMS uses units=chg, so the two monthly
+    series this whole feature exists for cannot carry realtime parameters on
+    their values request. Publication date is a property of the observation and
+    not of the transform, so the untransformed series answers the question and
+    the observation dates join exactly.
+
+    Note the trap: omitting realtime parameters entirely does NOT work either.
+    FRED then returns realtime_start = today (a current-vintage marker), which
+    would silently read as "published today" for every series.
+
+    Returns (ref_date, published), or (None, None) if unavailable.
+    """
+    params = {
+        "series_id": series_id,
+        "api_key": key,
+        "file_type": "json",
+        "sort_order": "desc",
+        "limit": 1,
+        "observation_start": start,
+        "observation_end": end,
+        "realtime_start": start,
+        "realtime_end": "9999-12-31",
+    }
+    try:
+        data = http_get_json(fred_url(params))
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  FRED {series_id}: publication-date lookup failed ({e})", file=sys.stderr)
+        return (None, None)
+    obs = data.get("observations") or []
+    if not obs:
+        return (None, None)
+    return (obs[0].get("date"), obs[0].get("realtime_start"))
+
+
 def fetch_fred_series(series_id, key, units, decimals, start, end):
-    """Returns (latest_value, {date_str: value}) for one FRED series."""
+    """Network wrapper around parse_fred_observations."""
     params = {
         "series_id": series_id,
         "api_key": key,
@@ -121,50 +195,48 @@ def fetch_fred_series(series_id, key, units, decimals, start, end):
     }
     if units:
         params["units"] = units
-    url = "https://api.stlouisfed.org/fred/series/observations?" + "&".join(
-        f"{k}={urllib.request.quote(str(v))}" for k, v in params.items()
-    )
+    else:
+        # Safe only without a units transform — see fetch_fred_publication_date.
+        params["realtime_start"] = start
+        params["realtime_end"] = "9999-12-31"
+
     try:
-        data = http_get_json(url)
+        data = http_get_json(fred_url(params))
     except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
         print(f"  FRED {series_id}: fetch failed ({e})", file=sys.stderr)
-        return None, {}
+        return (None, None, None, {})
 
-    history = {}
-    for obs in data.get("observations", []):
-        val = obs.get("value")
-        if val is None or val == ".":
-            continue
-        try:
-            history[obs["date"]] = round(float(val), decimals)
-        except ValueError:
-            continue
-
-    if not history:
+    value, ref, pub, hist = parse_fred_observations(data, decimals)
+    if value is None:
         print(f"  FRED {series_id}: no usable observations in range", file=sys.stderr)
-        return None, {}
-    latest_date = max(history)
-    return history[latest_date], history
+        return (None, None, None, {})
+
+    if units:
+        # The values request could not carry realtime parameters, so the
+        # publication date comes from a second, untransformed lookup.
+        pub_ref, pub = fetch_fred_publication_date(series_id, key, start, end)
+        if pub_ref and pub_ref != ref:
+            print(f"  FRED {series_id}: publication lookup returned {pub_ref}, "
+                  f"values latest is {ref}; leaving published unset", file=sys.stderr)
+            pub = None
+
+    return (value, ref, pub, hist)
 
 
-def fetch_yahoo_symbol(symbol, decimals, range_="1y"):
-    """Returns (latest_value, {date_str: value}) for one Yahoo chart symbol."""
-    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.request.quote(symbol)}"
-           f"?range={range_}&interval=1d")
-    try:
-        data = http_get_json(url)
-    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
-        print(f"  Yahoo {symbol}: fetch failed ({e})", file=sys.stderr)
-        return None, {}
+def parse_yahoo_chart(data, decimals):
+    """Pure parse of a Yahoo chart payload.
 
+    Returns (latest_value, ref_date, published, history). For a daily close the
+    reference date and publication date are the same day — the close IS the
+    moment the number exists.
+    """
     try:
         result = data["chart"]["result"][0]
         timestamps = result["timestamp"]
         closes = result["indicators"]["quote"][0]["close"]
         latest = result["meta"].get("regularMarketPrice")
     except (KeyError, IndexError, TypeError):
-        print(f"  Yahoo {symbol}: unexpected response shape", file=sys.stderr)
-        return None, {}
+        return (None, None, None, {})
 
     history = {}
     for ts, close in zip(timestamps, closes):
@@ -173,15 +245,27 @@ def fetch_yahoo_symbol(symbol, decimals, range_="1y"):
         date_str = datetime.fromtimestamp(ts, tz=timezone.utc).strftime("%Y-%m-%d")
         history[date_str] = round(float(close), decimals)
 
-    if latest is not None:
-        latest = round(float(latest), decimals)
-    elif history:
-        latest = history[max(history)]
-    else:
-        print(f"  Yahoo {symbol}: no usable data", file=sys.stderr)
-        return None, {}
+    if not history:
+        return (None, None, None, {})
+    latest_ref = max(history)
+    latest = round(float(latest), decimals) if latest is not None else history[latest_ref]
+    return (latest, latest_ref, latest_ref, history)
 
-    return latest, history
+
+def fetch_yahoo_symbol(symbol, decimals, range_="1y"):
+    """Network wrapper around parse_yahoo_chart."""
+    url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{urllib.request.quote(symbol)}"
+           f"?range={range_}&interval=1d")
+    try:
+        data = http_get_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  Yahoo {symbol}: fetch failed ({e})", file=sys.stderr)
+        return (None, None, None, {})
+
+    value, ref, pub, hist = parse_yahoo_chart(data, decimals)
+    if value is None:
+        print(f"  Yahoo {symbol}: unexpected response shape or no usable data", file=sys.stderr)
+    return (value, ref, pub, hist)
 
 
 def main():
@@ -194,16 +278,16 @@ def main():
     history_by_date = {}  # date_str -> {field: value}
 
     for series_id, (field, units, decimals) in FRED_SERIES.items():
-        latest, hist = fetch_fred_series(series_id, key, units, decimals, start, end)
-        if latest is not None:
-            latest_out[field] = latest
+        value, ref, pub, hist = fetch_fred_series(series_id, key, units, decimals, start, end)
+        if value is not None:
+            latest_out[field] = {"value": value, "ref_date": ref, "published": pub}
         for date_str, val in hist.items():
             history_by_date.setdefault(date_str, {})[field] = val
 
     for symbol, (field, decimals) in YAHOO_SYMBOLS.items():
-        latest, hist = fetch_yahoo_symbol(symbol, decimals)
-        if latest is not None:
-            latest_out[field] = latest
+        value, ref, pub, hist = fetch_yahoo_symbol(symbol, decimals)
+        if value is not None:
+            latest_out[field] = {"value": value, "ref_date": ref, "published": pub}
         for date_str, val in hist.items():
             history_by_date.setdefault(date_str, {})[field] = val
 
