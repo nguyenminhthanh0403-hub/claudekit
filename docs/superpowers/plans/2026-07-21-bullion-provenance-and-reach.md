@@ -1237,7 +1237,10 @@ Fixture 2 — v1 data:
 
 ```bash
 cd ~/minhthanh0403/claude-projects/claudekit/bullion-live-map && \
-git show HEAD~2:bullion-live-map/data.json > /tmp/v1-data.json && \
+# NB: locate the last v1 commit by content, not by a fixed HEAD~N offset —
+# review-fix commits shift history. `aad4067^` was correct as of 2026-07-21.
+git show "$(git log --format=%H -- bullion-live-map/data.json | sed -n 2p)":bullion-live-map/data.json > /tmp/v1-data.json && \
+python3 -c "import json,sys; d=json.load(open('/tmp/v1-data.json')); assert 'schema' not in d, 'not a v1 file'; print('confirmed schema v1')" && \
 cp data.json /tmp/v2-data.json && cp /tmp/v1-data.json data.json && \
 open -a "Google Chrome" http://localhost:8899/bullion_mk11_constellation.html
 ```
@@ -1436,7 +1439,7 @@ existing `renderLiveProvenance(s);` call (line ~2636).
 
 - [ ] **Step 6: Run the tests to verify they pass**
 
-Run the Step 2 command from Task 5. Expected: `28/28 passed`, `RESULT: PASS`.
+Run the Step 2 command from Task 5. Expected: `34/34 passed`, `RESULT: PASS`.
 
 - [ ] **Step 7: Verify in the browser**
 
@@ -1605,7 +1608,7 @@ After the `.prov-dot` rule:
 
 - [ ] **Step 7: Run the tests to verify they pass**
 
-Run the Step 2 command from Task 5. Expected: `32/32 passed`, `RESULT: PASS`.
+Run the Step 2 command from Task 5. Expected: `38/38 passed`, `RESULT: PASS`.
 
 - [ ] **Step 8: Verify in the browser, including a scenario run**
 
@@ -1628,7 +1631,7 @@ cd ~/minhthanh0403/claude-projects/claudekit && \
 python3 -m unittest discover -s bullion-live-map/tests -v
 ```
 
-Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `32/32 passed`.
+Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `38/38 passed`.
 
 - [ ] **Step 10: Commit**
 
@@ -1648,7 +1651,7 @@ the values feeding node colouring and scenarios are unchanged."
 ## Done criteria
 
 - `python3 -m unittest discover -s bullion-live-map/tests -v` → 33 tests, OK
-- The Chrome runner → `32/32 passed`, `RESULT: PASS`
+- The Chrome runner → `38/38 passed`, `RESULT: PASS`
 - All three fixtures verified at desktop and 640px
 - Rate Hike scenario still colours nodes correctly after Task 8
 - `preview-card.png` is 1200×630 and the eight OG tags are in `<head>`
