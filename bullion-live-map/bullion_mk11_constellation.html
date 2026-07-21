@@ -3273,40 +3273,101 @@ function freshnessVerdict(cadence, published, today, overrideDays) {
 }
 // ─── FRESHNESS-VERDICT-END ──────────────────────────────────────────────────
 
+// ─── NORMALISE-ENVELOPE-START ───────────────────────────────────────────────
+// Turns whatever data.json contained into one shape the rest of the map can
+// rely on. GitHub Pages caches aggressively, so a new HTML will meet an old
+// data.json and vice versa — hence the schema branch. A v1 file has no
+// publication dates, so its freshness is reported 'unknown' and the UI shows
+// nothing, rather than inventing dates the file never carried.
+function normaliseEnvelope(raw, todayISO) {
+  const out = { schema: 0, generatedAt: null, fields: {}, history: {}, ok: false, error: null };
+
+  if (!raw || typeof raw !== 'object') {
+    out.error = 'no data';
+    return out;
+  }
+
+  if (raw.schema === 2) {
+    out.schema = 2;
+    out.generatedAt = raw.generated_at || null;
+    out.history = raw.history || {};
+    out.ok = true;
+    for (const [name, f] of Object.entries(raw.fields || {})) {
+      const verdict = freshnessVerdict(
+        f.cadence, f.published, todayISO, FIELD_TOLERANCE_OVERRIDE[name]);
+      out.fields[name] = {
+        class: f.class, cadence: f.cadence, source: f.source,
+        refDate: f.ref_date, published: f.published, value: f.value,
+        state: verdict.state, ageDays: verdict.ageDays,
+      };
+    }
+    return out;
+  }
+
+  if (raw.schema != null && raw.schema > 2) {
+    console.warn('data.json schema', raw.schema, 'is newer than this page understands; reading as v1');
+  }
+
+  // v1: a bare {date: {field: value}} map. Reconstruct per-field latest by
+  // walking dates ascending, exactly as the pre-provenance loader did.
+  out.schema = 1;
+  out.history = raw;
+  out.ok = true;
+  const snapshot = {};
+  for (const dt of Object.keys(raw).sort()) {
+    const row = raw[dt];
+    if (row && typeof row === 'object') {
+      for (const [k, v] of Object.entries(row)) snapshot[k] = { value: v, refDate: dt };
+    }
+  }
+  for (const [name, rec] of Object.entries(snapshot)) {
+    out.fields[name] = {
+      class: 'measured', cadence: 'unknown', source: null,
+      refDate: rec.refDate, published: null, value: rec.value,
+      state: 'unknown', ageDays: null,
+    };
+  }
+  return out;
+}
+// ─── NORMALISE-ENVELOPE-END ─────────────────────────────────────────────────
+
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.
 fetch('data.json')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(json => {
-    window.BULLION_LIVE_HISTORY = json;
-    // Sources publish on different lags (daily FRED/Yahoo vs monthly CPI/NFP),
-    // so no single date has every field. Build the "current conditions"
-    // snapshot from each field's most recent value: walk dates ascending and
-    // let later dates overwrite each field, so every field ends at its latest
-    // available reading. This reproduces the retired bullion_live_data.js.
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const prov = normaliseEnvelope(json, todayISO);
+    window.BULLION_PROVENANCE = prov;
+    window.BULLION_LIVE_HISTORY = prov.history;
+
+    // Sources publish on different lags, so no single date has every field.
+    // The snapshot takes each field's latest value; provenance now records
+    // which date each one actually came from instead of stamping them all
+    // with one misleading date.
     const snapshot = {};
-    let latestDateWithData = null;
-    for (const dt of Object.keys(json).sort()) {
-      const row = json[dt];
-      if (Object.keys(row).length) {
-        Object.assign(snapshot, row);
-        latestDateWithData = dt;
-      }
-    }
-    if (latestDateWithData) {
-      snapshot.fetched_at = latestDateWithData;
+    for (const [name, f] of Object.entries(prov.fields)) snapshot[name] = f.value;
+    if (Object.keys(snapshot).length) {
+      // Must stay a bare YYYY-MM-DD: renderLiveProvenance does
+      // `new Date(s.fetched_at + 'T00:00')`, which yields an Invalid Date if
+      // handed the full ISO timestamp that generated_at carries.
+      snapshot.fetched_at = prov.generatedAt ? prov.generatedAt.slice(0, 10) : null;
       window.BULLION_LIVE_DATA = snapshot;
     }
   })
   .catch(err => {
     console.warn('data.json fetch failed, falling back to simulated baseline:', err);
+    window.BULLION_PROVENANCE = {
+      schema: 0, generatedAt: null, fields: {}, history: {},
+      ok: false, error: err.message,
+    };
   })
   .finally(() => {
     setupHistoryDatePicker();
-    // Mirror applyDate(): refreshDriverBases() moves each d.base to the live
-    // value, so the manual-driver rows (first built above with simulated
-    // bases, before this fetch resolved) must be rebuilt or their sliders and
-    // "baseline" labels would disagree with the live model.
+    // refreshDriverBases() moves each d.base to the live value, so the manual
+    // driver rows (first built with simulated bases, before this fetch
+    // resolved) must be rebuilt or their sliders and baseline labels would
+    // disagree with the live model.
     refreshDriverBases();
     buildManualRows();
     syncManualUI();

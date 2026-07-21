@@ -59,6 +59,37 @@ fetch('../bullion_mk11_constellation.html')
     check('tolerance table matches spec',
       [window.CADENCE_TOLERANCE_DAYS.daily, window.CADENCE_TOLERANCE_DAYS.monthly,
        window.CADENCE_TOLERANCE_DAYS.fomc, WTI], [7, 45, null, 10]);
+
+    // ── normaliseEnvelope: schema branching ──
+    const m2 = html.match(/NORMALISE-ENVELOPE-START([\s\S]*?)NORMALISE-ENVELOPE-END/);
+    if (!m2) { check('normaliseEnvelope present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED: the captured source ends inside the closing
+      // marker line's '// ───' comment, so appended code without a newline is
+      // silently swallowed by it.
+      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '\n; window.normaliseEnvelope = normaliseEnvelope;');
+
+      const v2 = { schema: 2, generated_at: '2026-07-20T10:07:14Z',
+        fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
+                             ref_date:'2026-06-01', published:'2026-07-14', value:2.6 } },
+        history: { '2026-06-01': { cpi_yoy: 2.6 } } };
+      const n2 = normaliseEnvelope(v2, '2026-07-20');
+      check('v2 is recognised', n2.schema, 2);
+      check('v2 field carries a freshness state', n2.fields.cpi_yoy.state, 'fresh');
+      check('v2 field carries an age', n2.fields.cpi_yoy.ageDays, 6);
+
+      const v1 = { '2026-06-01': { cpi_yoy: 2.6 }, '2026-07-17': { gold_px: 4018.8 } };
+      const n1 = normaliseEnvelope(v1, '2026-07-20');
+      check('v1 is detected', n1.schema, 1);
+      check('v1 suppresses freshness rather than guessing',
+        n1.fields.gold_px.state, 'unknown');
+      check('v1 still exposes values', n1.fields.gold_px.value, 4018.8);
+      check('v1 history is reconstructed', Object.keys(n1.history).length, 2);
+
+      const nFail = normaliseEnvelope(null, '2026-07-20');
+      check('null envelope reports not-ok', nFail.ok, false);
+      check('null envelope has no fields', Object.keys(nFail.fields).length, 0);
+    }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))
   .finally(() => {
