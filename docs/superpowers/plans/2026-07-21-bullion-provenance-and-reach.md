@@ -147,7 +147,9 @@ head=h[:h.index('<style>')]
 for p in ['og:type','og:title','og:description','og:url','og:image','og:image:width','og:image:height','twitter:card']:
     assert p in head, 'MISSING '+p
 print('all 8 OG tags present in <head>')
-assert h.count('<title>')==1, 'title count changed'
+assert head.count('<title>')==1, 'title count changed'
+# NB: check `head`, not `h` — a JS string literal near line 2911 builds the
+# Audit Log popup and legitimately contains a second <title>.
 print('OK')
 "
 ```
@@ -984,7 +986,7 @@ function freshnessVerdict(cadence, published, today, overrideDays) {
 
 Run the same command as Step 2.
 
-Expected: 12 `PASS` lines, then `12/12 passed` and `RESULT: PASS`.
+Expected: 14 `PASS` lines, then `14/14 passed` and `RESULT: PASS`.
 
 - [ ] **Step 5: Confirm the map still loads**
 
@@ -1009,16 +1011,33 @@ is not installed."
 
 ---
 
-### Task 6: Load schema v2, branch on version, make failure visible
+### Task 6: Load schema v2 and branch on version
 
-Completes Tier 1. After this the map reads provenance and stops lying when the fetch fails.
+Completes Tier 1's data path.
+
+**IMPORTANT — existing machinery this task must NOT duplicate.** The map already
+renders provenance status in two places, added by an earlier plan:
+
+- `renderLiveProvenance(s)` (line ~2662) writes `#live-provenance`:
+  `Live as of {date}: US2Y, Core CPI, … Still simulated: FOMC hike/cut odds.`
+  On a failed fetch it already writes `All metrics are simulated — data.json
+  not found or failed to load.`
+- `renderLiveBadge(s)` (line ~2684) writes a condensed version to `#live-badge`
+  in the header.
+- `LIVE_FIELD_LABEL` maps field name → display name; `ALWAYS_SIMULATED_LABEL`
+  already names FOMC odds as simulated.
+
+**A visible failure state therefore already exists.** Do not add a parallel one.
+This task supplies the per-field provenance those functions will consume in
+Tasks 7 and 8; it changes no rendering.
 
 **Files:**
 - Modify: `bullion_mk11_constellation.html:3246-3283` (the `fetch('data.json')` block)
 
 **Interfaces:**
 - Consumes: `freshnessVerdict` (Task 5), the v2 envelope (Task 4)
-- Produces: `normaliseEnvelope(raw, todayISO)` and `window.BULLION_PROVENANCE` — `{schema, generatedAt, fields, history, ok, error}` where `fields` maps field name to `{class, cadence, source, refDate, published, value, state, ageDays}`. Also `renderProvenanceState()`, extended in Task 8. Consumed by Tasks 7 and 8.
+- Produces: `normaliseEnvelope(raw, todayISO)` and `window.BULLION_PROVENANCE` — `{schema, generatedAt, fields, history, ok, error}` where `fields` maps field name to `{class, cadence, source, refDate, published, value, state, ageDays}`. Consumed by Tasks 7 and 8.
+- **Preserves:** `window.BULLION_LIVE_HISTORY` and `window.BULLION_LIVE_DATA` keep their current shapes, including `fetched_at` as a bare `YYYY-MM-DD` string — `renderLiveProvenance` does `new Date(s.fetched_at + 'T00:00')`, which produces an Invalid Date if handed a full ISO timestamp.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1029,7 +1048,10 @@ Append to `bullion-live-map/tests/freshness_test.html`, inside the `.then(html =
     const m2 = html.match(/NORMALISE-ENVELOPE-START([\s\S]*?)NORMALISE-ENVELOPE-END/);
     if (!m2) { check('normaliseEnvelope present', false, true); }
     else {
-      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '; window.normaliseEnvelope = normaliseEnvelope;');
+      // The leading '\n' is REQUIRED: the captured source ends inside the closing
+      // marker line's '// ───' comment, so appended code without a newline is
+      // silently swallowed by it.
+      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '\n; window.normaliseEnvelope = normaliseEnvelope;');
 
       const v2 = { schema: 2, generated_at: '2026-07-20T10:07:14Z',
         fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
@@ -1146,7 +1168,10 @@ fetch('data.json')
     const snapshot = {};
     for (const [name, f] of Object.entries(prov.fields)) snapshot[name] = f.value;
     if (Object.keys(snapshot).length) {
-      snapshot.fetched_at = prov.generatedAt || null;
+      // Must stay a bare YYYY-MM-DD: renderLiveProvenance does
+      // `new Date(s.fetched_at + 'T00:00')`, which yields an Invalid Date if
+      // handed the full ISO timestamp that generated_at carries.
+      snapshot.fetched_at = prov.generatedAt ? prov.generatedAt.slice(0, 10) : null;
       window.BULLION_LIVE_DATA = snapshot;
     }
   })
@@ -1168,36 +1193,31 @@ fetch('data.json')
     syncManualUI();
     state = buildBaseState();
     updateMetrics();
-    renderProvenanceState();
   });
 ```
 
-- [ ] **Step 5: Add the visible failure state**
+- [ ] **Step 5: Confirm the existing failure state still works**
 
-Immediately before the `fetch('data.json')` block, insert:
+No new failure UI is added — `renderLiveProvenance` already handles it. This step
+verifies the existing behaviour survived the loader rewrite.
 
-```js
-// The old failure path was a bare console.warn: on a failed fetch the user saw
-// simulated numbers under a lit "Live Data" button with nothing indicating it.
-// That is the same defect as the staleness one, so it is fixed in the same pass.
-function renderProvenanceState() {
-  const prov = window.BULLION_PROVENANCE;
-  const btn = document.getElementById('live-toggle-btn');
-  if (!prov || !btn) return;
-  if (!prov.ok) {
-    btn.textContent = 'Simulated — live data unavailable';
-    btn.classList.remove('active');
-    btn.title = 'Could not load data.json (' + (prov.error || 'unknown error')
-              + '). Every number shown is from the simulated baseline.';
-  }
-}
+```bash
+cd ~/minhthanh0403/claude-projects/claudekit/bullion-live-map && \
+python3 -m http.server 8899 >/dev/null 2>&1 &
+sleep 1 && mv data.json /tmp/data-hidden.json && \
+open -a "Google Chrome" http://localhost:8899/bullion_mk11_constellation.html
 ```
+
+Confirm `#live-provenance` reads *"All metrics are simulated — data.json not
+found or failed to load. Run fetch_bullion_data.py to pull live data."* and the
+header badge shows its simulated state. Then restore:
+`mv /tmp/data-hidden.json data.json`
 
 - [ ] **Step 6: Run the tests to verify they pass**
 
 Run the Step 2 command from Task 5.
 
-Expected: 21 `PASS` lines, `21/21 passed`, `RESULT: PASS`.
+Expected: 23 `PASS` lines, `23/23 passed`, `RESULT: PASS`.
 
 - [ ] **Step 7: Verify all three fixtures in the browser**
 
@@ -1217,7 +1237,10 @@ Fixture 2 — v1 data:
 
 ```bash
 cd ~/minhthanh0403/claude-projects/claudekit/bullion-live-map && \
-git show HEAD~2:bullion-live-map/data.json > /tmp/v1-data.json && \
+# NB: locate the last v1 commit by content, not by a fixed HEAD~N offset —
+# review-fix commits shift history. `aad4067^` was correct as of 2026-07-21.
+git show "$(git log --format=%H -- bullion-live-map/data.json | sed -n 2p)":bullion-live-map/data.json > /tmp/v1-data.json && \
+python3 -c "import json,sys; d=json.load(open('/tmp/v1-data.json')); assert 'schema' not in d, 'not a v1 file'; print('confirmed schema v1')" && \
 cp data.json /tmp/v2-data.json && cp /tmp/v1-data.json data.json && \
 open -a "Google Chrome" http://localhost:8899/bullion_mk11_constellation.html
 ```
@@ -1233,9 +1256,10 @@ mv data.json /tmp/data-hidden.json && \
 open -a "Google Chrome" http://localhost:8899/bullion_mk11_constellation.html
 ```
 
-Confirm the Live Data button reads **"Simulated — live data unavailable"** and
-is no longer highlighted. Then restore: `mv /tmp/data-hidden.json data.json` and
-`kill %1`.
+Confirm `#live-provenance` reads **"All metrics are simulated — data.json not
+found or failed to load…"** (the pre-existing failure message, which this task
+must not have broken) and `BULLION_PROVENANCE.ok` is `false`. Then restore:
+`mv /tmp/data-hidden.json data.json` and `kill %1`.
 
 Repeat fixture 1 at the 640px breakpoint using Chrome's device toolbar.
 
@@ -1275,8 +1299,9 @@ Append to `bullion-live-map/tests/freshness_test.html`, after the Task 6 checks:
       // PROV_MON_ABBR must reach the global object too: it is declared `const`
       // in this block, and Task 8's strip block references it from a separate
       // eval where block-scoped consts are not visible.
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
       (0, eval)(m3[1].replace(/^[^\n]*\n/, '')
-        + '; window.provenanceSublineFor = provenanceSublineFor;'
+        + '\n; window.provenanceSublineFor = provenanceSublineFor;'
         + '  window.PROV_MON_ABBR = PROV_MON_ABBR;'
         + '  window.PROV_MONTHS = PROV_MONTHS;');
 
@@ -1356,32 +1381,65 @@ Amber rather than red deliberately: this warns about the data pipeline, and red 
 
 - [ ] **Step 5: Render the sub-line in the metrics panel**
 
-Find the metric-row construction inside `updateMetrics()`. For each row whose
-field name exists in `BULLION_PROVENANCE.fields`, append after the value element:
+The metrics grid is **static markup with fixed ids**, not constructed rows. Each
+cell (lines 451-459) has this shape:
 
-```js
-  const provField = (window.BULLION_PROVENANCE && window.BULLION_PROVENANCE.fields)
-                  ? window.BULLION_PROVENANCE.fields[fieldName] : null;
-  const subline = provenanceSublineFor(provField);
-  if (subline) {
-    const sub = document.createElement('span');
-    sub.className = 'prov-sub' + (provField.state === 'flagged' ? ' prov-flag' : '');
-    sub.textContent = subline;
-    row.appendChild(sub);
-  }
-  if (provField && provField.state === 'flagged') {
-    const dot = document.createElement('span');
-    dot.className = 'prov-dot';
-    dot.title = subline;
-    labelEl.appendChild(dot);
-  }
+```html
+<div class="metric-cell">
+  <div class="metric-label">Core CPI</div>
+  <div class="metric-val" id="m-cpi">&mdash;</div>
+  <div class="metric-sub">YoY %</div>
+</div>
 ```
 
-Adapt `row`, `labelEl` and `fieldName` to the identifiers already used in `updateMetrics()`.
+Add an empty provenance line to each of the nine cells, after its
+`.metric-sub` div. Use the id pattern `p-<same suffix as m->`:
+
+```html
+<div class="prov-sub" id="p-cpi"></div>
+```
+
+The nine ids: `p-us2y`, `p-us10y`, `p-spread`, `p-vix`, `p-spx`, `p-cpi`,
+`p-gold`, `p-dxy`, `p-wti`.
+
+Then add the id → field mapping and the render pass. Insert next to
+`LIVE_FIELD_LABEL` (line ~2649):
+
+```js
+// Metric cell id suffix -> data.json field name. `spread` is absent because it
+// is computed from us10y and us2y rather than fetched — it is class 'derived'
+// and carries no publication date of its own. `ffr` and `nfp_mom` are fetched
+// but have no cell in the metrics grid.
+const METRIC_CELL_FIELD = {
+  'us2y': 'us2y', 'us10y': 'us10y', 'vix': 'vix', 'spx': 'spx',
+  'cpi': 'cpi_yoy', 'gold': 'gold_px', 'dxy': 'dxy', 'wti': 'wti_px',
+};
+
+function renderMetricProvenance() {
+  const prov = window.BULLION_PROVENANCE;
+  for (const [suffix, fieldName] of Object.entries(METRIC_CELL_FIELD)) {
+    const el = document.getElementById('p-' + suffix);
+    if (!el) continue;
+    const field = (prov && prov.fields) ? prov.fields[fieldName] : null;
+    const text = provenanceSublineFor(field);
+    el.textContent = text || '';
+    el.className = 'prov-sub' + (field && field.state === 'flagged' ? ' prov-flag' : '');
+  }
+  // The spread is derived, so it states that rather than a publication date.
+  const spreadEl = document.getElementById('p-spread');
+  if (spreadEl) {
+    spreadEl.textContent = (prov && prov.schema === 2) ? 'derived from 10Y and 2Y' : '';
+    spreadEl.className = 'prov-sub';
+  }
+}
+```
+
+Call `renderMetricProvenance()` from `updateMetrics()`, immediately after the
+existing `renderLiveProvenance(s);` call (line ~2636).
 
 - [ ] **Step 6: Run the tests to verify they pass**
 
-Run the Step 2 command from Task 5. Expected: `26/26 passed`, `RESULT: PASS`.
+Run the Step 2 command from Task 5. Expected: `34/34 passed`, `RESULT: PASS`.
 
 - [ ] **Step 7: Verify in the browser**
 
@@ -1409,173 +1467,198 @@ silent. Fields breaching their own tolerance get an amber marker."
 
 ---
 
-### Task 8: Provenance strip and simulated-value markers
+### Task 8: Per-field provenance summary and simulated-value markers
 
-Completes Tier 2. The simulated-marker work touches node colouring and scenario output, so it lands last and on its own.
+Completes Tier 2. Lands last and alone because it touches `STATS_VARS`, which
+feeds the scenario stats panel.
+
+**IMPORTANT — extend, do not duplicate.** `renderLiveProvenance()` (line ~2662)
+and `renderLiveBadge()` (line ~2684) already exist and already say which fields
+are live and that FOMC odds are simulated. This task replaces their single
+`Live as of {fetched_at}` date — the misleading stamp this whole plan exists to
+remove — with per-field freshness, and marks FOMC where its number is displayed
+rather than only in the status line. Do not add a new strip element.
 
 **Files:**
-- Modify: `bullion_mk11_constellation.html` (near `live-toggle-btn` at line 357; FOMC rendering; CSS)
+- Modify: `bullion_mk11_constellation.html` — `renderLiveProvenance` (~2662), `STATS_VARS` (~2570), `renderStats` (~2582), CSS
 
 **Interfaces:**
-- Consumes: `window.BULLION_PROVENANCE` (Task 6), `provenanceSublineFor` (Task 7)
-- Produces: no exports; UI only
+- Consumes: `window.BULLION_PROVENANCE` (Task 6), `provenanceSublineFor` and `PROV_MON_ABBR` (Task 7)
+- Produces: `provenanceSummaryText(prov)` — one sentence describing field freshness. No other exports; UI only.
 
 - [ ] **Step 1: Write the failing test**
 
-Append to `bullion-live-map/tests/freshness_test.html`:
+Append to `bullion-live-map/tests/freshness_test.html`, after the Task 7 checks:
 
 ```js
-    // ── provenanceStripText ──
-    const m4 = html.match(/PROVENANCE-STRIP-START([\s\S]*?)PROVENANCE-STRIP-END/);
-    if (!m4) { check('provenanceStripText present', false, true); }
+    // ── provenanceSummaryText ──
+    const m4 = html.match(/PROVENANCE-SUMMARY-START([\s\S]*?)PROVENANCE-SUMMARY-END/);
+    if (!m4) { check('provenanceSummaryText present', false, true); }
     else {
-      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '; window.provenanceStripText = provenanceStripText;');
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceSummaryText = provenanceSummaryText;');
 
-      const okProv = { ok:true, schema:2, generatedAt:'2026-07-20T10:07:14Z', fields:{
-        a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'},
-        c:{class:'simulated', state:'unknown'} } };
-      check('counts measured and simulated fields',
-        provenanceStripText(okProv), 'Live · 2 fields measured · 1 simulated · updated Jul 20');
-      check('failed load explains itself',
-        provenanceStripText({ok:false, fields:{}, error:'HTTP 404'}),
-        'Could not load live data — showing simulated baseline.');
-      check('v1 file omits the update date',
-        provenanceStripText({ok:true, schema:1, generatedAt:null, fields:{
-          a:{class:'measured', state:'unknown'} }}),
-        'Live · 1 field measured');
-      check('flagged fields are surfaced in the strip',
-        provenanceStripText({ok:true, schema:2, generatedAt:'2026-07-20T10:07:14Z', fields:{
-          a:{class:'measured', state:'flagged'}, b:{class:'measured', state:'fresh'} }}),
-        'Live · 2 fields measured · 1 may be failing · updated Jul 20');
+      check('all fresh states the newest publication date',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          b:{class:'measured', state:'fresh', published:'2026-07-14'}}}),
+        'All 2 measured fields are current — most recent publication Jul 17.');
+      check('flagged fields are named',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          vix:{class:'measured', state:'flagged', published:'2026-07-01', ageDays:19}}}),
+        '1 of 2 measured fields may be failing: vix. Most recent publication Jul 17.');
+      check('v1 file says freshness is unknown',
+        provenanceSummaryText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown', published:null}}}),
+        'Publication dates unavailable in this data file — freshness unknown.');
+      check('failed load says so',
+        provenanceSummaryText({ok:false, fields:{}}),
+        'Live data unavailable — every number shown is simulated.');
     }
 ```
 
 - [ ] **Step 2: Run to verify it fails**
 
-Run the Step 2 command from Task 5. Expected: `FAIL  provenanceStripText present`.
+Run the Step 2 command from Task 5. Expected: `FAIL  provenanceSummaryText present`.
 
-- [ ] **Step 3: Write the strip**
+- [ ] **Step 3: Write the summary function**
 
 After the `PROVENANCE-SUBLINE-END` marker, insert:
 
 ```js
-// ─── PROVENANCE-STRIP-START ─────────────────────────────────────────────────
-// One line summarising where the numbers came from. Clicking it opens the
-// existing Audit Log rather than introducing a second, competing explanation.
-function provenanceStripText(prov) {
-  if (!prov || !prov.ok) return 'Could not load live data — showing simulated baseline.';
-  const fields = Object.values(prov.fields || {});
-  const measured  = fields.filter(f => f.class === 'measured').length;
-  const simulated = fields.filter(f => f.class === 'simulated').length;
-  const flagged   = fields.filter(f => f.state === 'flagged').length;
-  const parts = ['Live', measured + (measured === 1 ? ' field measured' : ' fields measured')];
-  if (simulated) parts.push(simulated + ' simulated');
-  if (flagged)   parts.push(flagged + ' may be failing');
-  if (prov.generatedAt) {
-    const d = new Date(prov.generatedAt);
-    parts.push('updated ' + PROV_MON_ABBR[d.getUTCMonth()] + ' ' + d.getUTCDate());
+// ─── PROVENANCE-SUMMARY-START ───────────────────────────────────────────────
+// One sentence replacing the old `Live as of {fetched_at}` stamp. That stamp
+// applied a single date to ten fields published on ten different schedules,
+// which is the misrepresentation this plan exists to remove.
+function provenanceSummaryText(prov) {
+  if (!prov || !prov.ok) return 'Live data unavailable — every number shown is simulated.';
+  const entries = Object.entries(prov.fields || {})
+                        .filter(([, f]) => f.class === 'measured');
+  if (!entries.length) return 'Live data unavailable — every number shown is simulated.';
+  if (entries.every(([, f]) => f.state === 'unknown')) {
+    return 'Publication dates unavailable in this data file — freshness unknown.';
   }
-  return parts.join(' · ');
+  const published = entries.map(([, f]) => f.published).filter(Boolean).sort();
+  const newest = published.length ? published[published.length - 1] : null;
+  const newestTxt = newest
+    ? ' Most recent publication ' + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1]
+      + ' ' + Number(newest.slice(8, 10)) + '.'
+    : '';
+  const flagged = entries.filter(([, f]) => f.state === 'flagged').map(([n]) => n);
+  if (flagged.length) {
+    return flagged.length + ' of ' + entries.length + ' measured fields may be failing: '
+         + flagged.join(', ') + '.' + newestTxt;
+  }
+  return 'All ' + entries.length + ' measured fields are current — most recent publication '
+       + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1] + ' ' + Number(newest.slice(8, 10)) + '.';
 }
-// ─── PROVENANCE-STRIP-END ───────────────────────────────────────────────────
+// ─── PROVENANCE-SUMMARY-END ─────────────────────────────────────────────────
 ```
 
-- [ ] **Step 4: Render the strip and wire it to the audit log**
+- [ ] **Step 4: Use it in `renderLiveProvenance`**
 
-Add the element after the `live-toggle-btn` button (line 357):
+In `renderLiveProvenance` (line ~2662), replace the final two lines — the ones
+building `when` from `s.fetched_at` and assigning `el.textContent` — with:
 
-```html
-<div id="prov-strip" class="prov-strip" title="Where these numbers come from — click for the full audit log"></div>
+```js
+  const prov = window.BULLION_PROVENANCE;
+  el.textContent = `Live: ${liveNames.join(', ')}. Still simulated: ${ALWAYS_SIMULATED_LABEL}. `
+                 + provenanceSummaryText(prov);
 ```
 
-CSS, after the `.prov-dot` rule:
+Leave the `selectedHistoryDate` and empty-`liveNames` branches above it
+untouched — they already behave correctly and Task 6 verified them.
+
+Delete the now-unused `when` local. `s.fetched_at` stays on the state object
+(other code reads it); it simply no longer drives this sentence.
+
+- [ ] **Step 5: Mark FOMC where its number is displayed**
+
+`fomc_prob_hike` appears in `STATS_VARS` (line ~2578) as `FOMC Hike Prob`, which
+`renderStats` renders in the scenario stats panel. Add a `sim` flag:
+
+```js
+  { key:'fomc_prob_hike', label:'FOMC Hike Prob', unit:'probability', sim:true },
+```
+
+In `renderStats`, where the row label is built:
+
+```js
+      + '<div class="stat-label">' + d.label + '<small>' + d.unit + '</small></div>'
+```
+
+replace with:
+
+```js
+      + '<div class="stat-label">' + d.label + (d.sim ? '<span class="sim-mark" title="Model estimate, not market data — FOMC odds have no free live source">~</span>' : '')
+      + '<small>' + d.unit + (d.sim ? ' · model estimate' : '') + '</small></div>'
+```
+
+**Display only.** Do not change how `fomc_prob_hike` is computed or how it feeds
+node colouring — the model is unchanged, only its presentation gains the marker.
+
+- [ ] **Step 6: Add the marker CSS**
+
+After the `.prov-dot` rule:
 
 ```css
-  .prov-strip { font-size:10px; color:var(--text-dim); margin-top:4px;
-                cursor:pointer; letter-spacing:0.02em; }
-  .prov-strip:hover { color:var(--gold-dim); }
-  .prov-strip.bad { color:var(--amber); }
+  .sim-mark { color:var(--amber); font-weight:600; margin-left:3px; cursor:help; }
 ```
 
-Extend `renderProvenanceState()` from Task 6:
+- [ ] **Step 7: Run the tests to verify they pass**
 
-```js
-  const strip = document.getElementById('prov-strip');
-  if (strip) {
-    strip.textContent = provenanceStripText(prov);
-    strip.classList.toggle('bad', !prov.ok ||
-      Object.values(prov.fields).some(f => f.state === 'flagged'));
-    strip.onclick = () => document.getElementById('audit-log-btn').click();
-  }
-```
+Run the Step 2 command from Task 5. Expected: `38/38 passed`, `RESULT: PASS`.
 
-- [ ] **Step 5: Mark simulated values at their point of display**
+- [ ] **Step 8: Verify in the browser, including a scenario run**
 
-Find where FOMC hike/hold/cut odds are rendered. Prefix each displayed
-percentage with `~` and attach the sub-line:
+Serve and open as in Task 6. Confirm:
 
-```js
-  const fomcSub = provenanceSublineFor({ class:'simulated', cadence:'fomc',
-    refDate:null, published:null, state:'unknown', ageDays:null });
-  // → 'model estimate · not market data'
-```
-
-Render the value as `'~' + pct + '%'` and append a `.prov-sub` span carrying
-`fomcSub`, matching the pattern from Task 7 Step 5.
-
-Do **not** change how FOMC odds feed node colouring or scenario computation —
-this is a display change only. The numbers driving the model stay exactly as
-they are; only their presentation gains the marker.
-
-- [ ] **Step 6: Run the tests to verify they pass**
-
-Run the Step 2 command from Task 5. Expected: `30/30 passed`, `RESULT: PASS`.
-
-- [ ] **Step 7: Verify in the browser, including a scenario run**
-
-Serve and open as before. Confirm:
-- The strip reads `Live · 10 fields measured · 1 simulated · updated <date>`
-- Clicking it opens the Audit Log
-- FOMC odds display as `~72%` with `model estimate · not market data` beneath
-- **Run the Rate Hike scenario and confirm node colours still change as before** — this is the regression that matters, since FOMC odds feed the model
-- Click through 3–4 nodes and confirm detail panels are unaffected
+- `#live-provenance` ends with `All 10 measured fields are current — most recent publication <date>.`
+- It no longer contains the words `Live as of`
+- **Run the Rate Hike scenario.** Confirm node colours change as before, and the
+  stats panel shows `FOMC Hike Prob ~` with `probability · model estimate`
+- Click 3-4 nodes; detail panels unaffected
 - Repeat at the 640px breakpoint
 
-Then re-run fixture 3 (missing `data.json`) and confirm the strip reads
-`Could not load live data — showing simulated baseline.` in amber.
+Then re-run the missing-`data.json` fixture and confirm `#live-provenance` still
+shows the pre-existing all-simulated message.
 
-- [ ] **Step 8: Run the full test suite**
+- [ ] **Step 9: Run the full test suite**
 
 ```bash
 cd ~/minhthanh0403/claude-projects/claudekit && \
 python3 -m unittest discover -s bullion-live-map/tests -v
 ```
 
-Expected: `Ran 25 tests`, `OK`. Then re-run the Chrome runner: `30/30 passed`.
+Expected: `Ran 33 tests`, `OK`. Then re-run the Chrome runner: `44/44 passed`.
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 cd ~/minhthanh0403/claude-projects/claudekit && \
 git add bullion-live-map/bullion_mk11_constellation.html bullion-live-map/tests/freshness_test.html && \
-git commit -m "Add provenance strip and mark simulated values
+git commit -m "Replace the single fetched_at stamp with per-field freshness
 
-FOMC odds have no free source and are model output, but previously
-rendered identically to measured data. They now carry a persistent ~
-marker and a label. Display only — the values feeding node colouring
-and scenarios are unchanged."
+The status line said 'Live as of <one date>' for ten fields published on
+ten different schedules. It now summarises actual per-field freshness and
+names any field breaching its own cadence. FOMC odds gain a marker where
+their number is displayed, not only in the status line. Display only --
+the values feeding node colouring and scenarios are unchanged."
 ```
 
----
 
 ## Done criteria
 
-- `python3 -m unittest discover -s bullion-live-map/tests -v` → 25 tests, OK
-- The Chrome runner → `30/30 passed`, `RESULT: PASS`
+- `python3 -m unittest discover -s bullion-live-map/tests -v` → 33 tests, OK
+- The Chrome runner → `44/44 passed`, `RESULT: PASS`
 - All three fixtures verified at desktop and 640px
 - Rate Hike scenario still colours nodes correctly after Task 8
 - `preview-card.png` is 1200×630 and the eight OG tags are in `<head>`
-- Eight commits on `main`, unpushed
+- NO live code path emits the string `Live as of` — this means BOTH `#live-provenance`
+  AND the header badge `#live-badge`. An earlier draft named only the former, which
+  left the single-date claim standing in the more visible of the two.
+- Branch `bullion-provenance` unpushed and not yet merged to `main`
 
 ## Follow-ups (not in this plan)
 

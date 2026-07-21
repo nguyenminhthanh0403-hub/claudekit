@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>freshness tests</title></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+const results = [];
+function check(name, actual, expected) {
+  const ok = JSON.stringify(actual) === JSON.stringify(expected);
+  results.push((ok ? 'PASS  ' : 'FAIL  ') + name +
+    (ok ? '' : `\n        expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`));
+}
+
+fetch('../bullion_mk11_constellation.html')
+  .then(r => r.text())
+  .then(html => {
+    const m = html.match(/FRESHNESS-VERDICT-START([\s\S]*?)FRESHNESS-VERDICT-END/);
+    if (!m) throw new Error('marker comments not found in bullion_mk11_constellation.html');
+    // Strip the trailing "// ───" of the opening marker line.
+    const src = m[1].replace(/^[^\n]*\n/, '');
+    // The extracted block ends mid line-comment (the "// ─── " lead-in of the
+    // closing marker, with no trailing newline) because the capture stops
+    // exactly at "FRESHNESS-VERDICT-END". Appending the window.X = X exports
+    // directly onto that would comment them out too, so a newline goes first
+    // to close the comment before the exports run.
+    (0, eval)(src + '\n; window.freshnessVerdict = freshnessVerdict;'
+                  + ' window.CADENCE_TOLERANCE_DAYS = CADENCE_TOLERANCE_DAYS;'
+                  + ' window.FIELD_TOLERANCE_OVERRIDE = FIELD_TOLERANCE_OVERRIDE;');
+
+    const TODAY = '2026-07-20';
+    const WTI = window.FIELD_TOLERANCE_OVERRIDE.wti_px;
+
+    check('daily within tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-14', TODAY), {state:'fresh', ageDays:6});
+    check('daily exactly at tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-13', TODAY), {state:'fresh', ageDays:7});
+    check('daily past tolerance is flagged',
+      freshnessVerdict('daily', '2026-07-12', TODAY), {state:'flagged', ageDays:8});
+    check('wti override keeps 8 days fresh',
+      freshnessVerdict('daily', '2026-07-12', TODAY, WTI), {state:'fresh', ageDays:8});
+    check('wti override exactly at tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-10', TODAY, WTI), {state:'fresh', ageDays:10});
+    check('wti override still flags at 11 days',
+      freshnessVerdict('daily', '2026-07-09', TODAY, WTI), {state:'flagged', ageDays:11});
+    check('monthly within tolerance is fresh',
+      freshnessVerdict('monthly', '2026-06-06', TODAY), {state:'fresh', ageDays:44});
+    check('monthly exactly at tolerance is fresh',
+      freshnessVerdict('monthly', '2026-06-05', TODAY), {state:'fresh', ageDays:45});
+    check('monthly past tolerance is flagged',
+      freshnessVerdict('monthly', '2026-06-04', TODAY), {state:'flagged', ageDays:46});
+    check('real-world CPI is fresh despite old reference period',
+      freshnessVerdict('monthly', '2026-07-14', TODAY), {state:'fresh', ageDays:6});
+    check('fomc cadence is unknown',
+      freshnessVerdict('fomc', '2026-07-14', TODAY), {state:'unknown', ageDays:null});
+    check('missing published date is unknown',
+      freshnessVerdict('daily', null, TODAY), {state:'unknown', ageDays:null});
+    check('unrecognised cadence is unknown',
+      freshnessVerdict('hourly', '2026-07-19', TODAY), {state:'unknown', ageDays:null});
+    check('tolerance table matches spec',
+      [window.CADENCE_TOLERANCE_DAYS.daily, window.CADENCE_TOLERANCE_DAYS.monthly,
+       window.CADENCE_TOLERANCE_DAYS.fomc, WTI], [7, 45, null, 10]);
+
+    // ── normaliseEnvelope: schema branching ──
+    const m2 = html.match(/NORMALISE-ENVELOPE-START([\s\S]*?)NORMALISE-ENVELOPE-END/);
+    if (!m2) { check('normaliseEnvelope present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED: the captured source ends inside the closing
+      // marker line's '// ───' comment, so appended code without a newline is
+      // silently swallowed by it.
+      (0, eval)(m2[1].replace(/^[^\n]*\n/, '') + '\n; window.normaliseEnvelope = normaliseEnvelope;');
+
+      const v2 = { schema: 2, generated_at: '2026-07-20T10:07:14Z',
+        fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
+                             ref_date:'2026-06-01', published:'2026-07-14', value:2.6 } },
+        history: { '2026-06-01': { cpi_yoy: 2.6 } } };
+      const n2 = normaliseEnvelope(v2, '2026-07-20');
+      check('v2 is recognised', n2.schema, 2);
+      check('v2 field carries a freshness state', n2.fields.cpi_yoy.state, 'fresh');
+      check('v2 field carries an age', n2.fields.cpi_yoy.ageDays, 6);
+
+      const v1 = { '2026-06-01': { cpi_yoy: 2.6 }, '2026-07-17': { gold_px: 4018.8 } };
+      const n1 = normaliseEnvelope(v1, '2026-07-20');
+      check('v1 is detected', n1.schema, 1);
+      check('v1 suppresses freshness rather than guessing',
+        n1.fields.gold_px.state, 'unknown');
+      check('v1 still exposes values', n1.fields.gold_px.value, 4018.8);
+      check('v1 history is reconstructed', Object.keys(n1.history).length, 2);
+
+      const v1ord = { '2026-07-10': { gold_px: 3900.0 }, '2026-07-17': { gold_px: 4018.8 } };
+      const n1ord = normaliseEnvelope(v1ord, '2026-07-20');
+      check('v1 later date wins for the same field',
+        n1ord.fields.gold_px.value, 4018.8);
+      check('v1 later date also supplies the reference date',
+        n1ord.fields.gold_px.refDate, '2026-07-17');
+
+      // ── normaliseEnvelope: forward-compat with unknown future schemas ──
+      const v3 = { schema: 3, generated_at: '2026-07-20T10:07:14Z',
+        fields: { cpi_yoy: { class:'measured', cadence:'monthly', source:'FRED CPILFESL',
+                             ref_date:'2026-06-01', published:'2026-07-14', value:2.6 } },
+        history: { '2026-06-01': { cpi_yoy: 2.6 } } };
+      const n3 = normaliseEnvelope(v3, '2026-07-20');
+      check('schema 3 with recognisable v2 shape loads via v2 path', n3.ok, true);
+      check('schema 3 with recognisable v2 shape computes a real state',
+        n3.fields.cpi_yoy.state, 'fresh');
+
+      const v3bad = { schema: 3, somethingElse: {} };
+      const n3bad = normaliseEnvelope(v3bad, '2026-07-20');
+      check('schema 3 without recognisable shape reports not-ok', n3bad.ok, false);
+      check('schema 3 without recognisable shape does not populate fields',
+        Object.keys(n3bad.fields).length, 0);
+
+      const nFail = normaliseEnvelope(null, '2026-07-20');
+      check('null envelope reports not-ok', nFail.ok, false);
+      check('null envelope has no fields', Object.keys(nFail.fields).length, 0);
+    }
+
+    // ── provenanceSubline: what appears under a metric ──
+    const m3 = html.match(/PROVENANCE-SUBLINE-START([\s\S]*?)PROVENANCE-SUBLINE-END/);
+    if (!m3) { check('provenanceSubline present', false, true); }
+    else {
+      // PROV_MON_ABBR must reach the global object too: it is declared `const`
+      // in this block, and Task 8's strip block references it from a separate
+      // eval where block-scoped consts are not visible.
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m3[1].replace(/^[^\n]*\n/, '')
+        + '\n; window.provenanceSublineFor = provenanceSublineFor;'
+        + '  window.PROV_MON_ABBR = PROV_MON_ABBR;'
+        + '  window.PROV_MONTHS = PROV_MONTHS;');
+
+      check('fresh daily field shows nothing',
+        provenanceSublineFor({class:'measured', cadence:'daily', refDate:'2026-07-17',
+                              published:'2026-07-17', state:'fresh', ageDays:0}), null);
+      check('monthly field shows period and publication date',
+        provenanceSublineFor({class:'measured', cadence:'monthly', refDate:'2026-06-01',
+                              published:'2026-07-14', state:'fresh', ageDays:6}),
+        'June · published Jul 14 · monthly');
+      check('simulated field says so',
+        provenanceSublineFor({class:'simulated', cadence:'fomc', refDate:null,
+                              published:null, state:'unknown', ageDays:null}),
+        'model estimate · not market data');
+      check('flagged field explains the fault',
+        provenanceSublineFor({class:'measured', cadence:'daily', refDate:'2026-07-08',
+                              published:'2026-07-08', state:'flagged', ageDays:12}),
+        'Expected daily, last published 12 days ago — the source may be failing.');
+      check('unknown cadence shows nothing',
+        provenanceSublineFor({class:'measured', cadence:'unknown', refDate:'2026-07-17',
+                              published:null, state:'unknown', ageDays:null}), null);
+    }
+
+    // ── provenanceBadgeText: the header badge ──
+    // The badge used to read `Live as of {fetched_at}`, asserting a single
+    // currency date for ten fields with ten different publication schedules —
+    // and fetched_at is when the fetcher RAN, not when anything was published.
+    //
+    // Processed BEFORE provenanceSummaryText below: this block also declares
+    // EXPECTED_MEASURED_FIELDS (Fix 2), which provenanceSummaryText's source
+    // references by bare name. It is exported to window here, same pattern
+    // as PROV_MON_ABBR above, and must run first so that export exists by
+    // the time the summary block's indirect eval needs it.
+    const m5 = html.match(/PROVENANCE-BADGE-START([\s\S]*?)PROVENANCE-BADGE-END/);
+    if (!m5) { check('provenanceBadgeText present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m5[1].replace(/^[^\n]*\n/, '')
+        + '\n; window.provenanceBadgeText = provenanceBadgeText;'
+        + '  window.EXPECTED_MEASURED_FIELDS = EXPECTED_MEASURED_FIELDS;');
+
+      const TEN_FRESH_FIELDS = {
+        us2y:   {class:'measured', state:'fresh', published:'2026-07-19'},
+        us10y:  {class:'measured', state:'fresh', published:'2026-07-19'},
+        vix:    {class:'measured', state:'fresh', published:'2026-07-19'},
+        ffr:    {class:'measured', state:'fresh', published:'2026-07-19'},
+        wti_px: {class:'measured', state:'fresh', published:'2026-07-14'},
+        cpi_yoy:{class:'measured', state:'fresh', published:'2026-07-14'},
+        nfp_mom:{class:'measured', state:'fresh', published:'2026-07-03'},
+        gold_px:{class:'measured', state:'fresh', published:'2026-07-20'},
+        dxy:    {class:'measured', state:'fresh', published:'2026-07-20'},
+        spx:    {class:'measured', state:'fresh', published:'2026-07-20'},
+      };
+      window.TEN_FRESH_FIELDS = TEN_FRESH_FIELDS; // reused by the summary checks below
+
+      check('badge never asserts a currency date',
+        /as of|\d{4}-\d{2}-\d{2}/.test(provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}})),
+        false);
+      // Fix 2: presence is now judged against EXPECTED_MEASURED_FIELDS by
+      // name, not by raw entry count — two measured entries whose names
+      // don't match any of the ten expected fields is not "2 fields
+      // current", it's 0 of the ten expected fields present.
+      check('badge counts healthy fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}}),
+        '🟠 Live · 0 of 10 fields — 10 missing');
+      check('badge surfaces failing fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'flagged'}}}),
+        '🟠 Live · 1 of 2 may be failing');
+      check('badge says freshness unknown on a v1 file',
+        provenanceBadgeText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown'}}}),
+        '🟢 Live · 1 fields · freshness unknown');
+      check('badge falls back to simulated when load failed',
+        provenanceBadgeText({ok:false, fields:{}}), '⚪ Simulated');
+      // Fix 2: a real expected field (gold_px) that is present but
+      // class:'simulated' — never happens for these ten in production, but
+      // proves the rule — must not count toward the present total even
+      // though its key exists in prov.fields.
+      check('badge ignores simulated fields in its count',
+        provenanceBadgeText({ok:true, schema:2, fields:
+          Object.assign({}, TEN_FRESH_FIELDS, {gold_px:{class:'simulated', state:'unknown'}})}),
+        '🟠 Live · 9 of 10 fields — 1 missing');
+
+      // Fix 2, new: all ten expected fields present and healthy — output
+      // format is unchanged from before the fix.
+      check('badge reports all ten fields current when all present',
+        provenanceBadgeText({ok:true, schema:2, fields: TEN_FRESH_FIELDS}),
+        '🟢 Live · 10 fields current');
+      // Fix 2, new: only three of ten survive a partial fetch — this is the
+      // exact defect the fix removes (nine missing fields must not read
+      // green just because the three survivors are individually healthy).
+      check('badge reports a shortfall for a partial fetch',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          us2y: TEN_FRESH_FIELDS.us2y, us10y: TEN_FRESH_FIELDS.us10y,
+          vix: TEN_FRESH_FIELDS.vix}}),
+        '🟠 Live · 3 of 10 fields — 7 missing');
+    }
+
+    // ── provenanceSummaryText ──
+    const m4 = html.match(/PROVENANCE-SUMMARY-START([\s\S]*?)PROVENANCE-SUMMARY-END/);
+    if (!m4) { check('provenanceSummaryText present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceSummaryText = provenanceSummaryText;');
+      const TEN_FRESH_FIELDS = window.TEN_FRESH_FIELDS;
+
+      // Fix 2: same denominator change as the badge — two fields with
+      // unrecognised names is not "all fields present", it's a ten-field
+      // set missing all ten of its expected members.
+      check('all fresh states the newest publication date',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          b:{class:'measured', state:'fresh', published:'2026-07-14'}}}),
+        '10 of 10 measured fields are missing from this data file: us2y, us10y, vix, ffr, wti_px, cpi_yoy, nfp_mom, gold_px, dxy, spx.');
+      check('flagged fields are named',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh', published:'2026-07-17'},
+          vix:{class:'measured', state:'flagged', published:'2026-07-01', ageDays:19}}}),
+        '1 of 2 measured fields may be failing: vix. Most recent publication Jul 17.');
+      check('v1 file says freshness is unknown',
+        provenanceSummaryText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown', published:null}}}),
+        'Publication dates unavailable in this data file — freshness unknown.');
+      check('failed load says so',
+        provenanceSummaryText({ok:false, fields:{}}),
+        'Live data unavailable — every number shown is simulated.');
+
+      // Fix 2, new: all ten present and healthy — unchanged output.
+      check('summary reports all ten fields current when all present',
+        provenanceSummaryText({ok:true, schema:2, fields: TEN_FRESH_FIELDS}),
+        'All 10 measured fields are current — most recent publication Jul 20.');
+      // Fix 2, new: only gold_px survives a partial fetch. The nine absent
+      // fields must be named, not silently folded into "all measured
+      // fields are current" — this is the exact defect the fix removes.
+      check('summary names missing fields on a partial fetch',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          gold_px: TEN_FRESH_FIELDS.gold_px}}),
+        '9 of 10 measured fields are missing from this data file: us2y, us10y, vix, ffr, wti_px, cpi_yoy, nfp_mom, dxy, spx.');
+    }
+  })
+  .catch(e => results.push('FAIL  harness error: ' + e.message))
+  .finally(() => {
+    const failed = results.filter(r => r.startsWith('FAIL')).length;
+    document.getElementById('out').textContent =
+      results.join('\n') + `\n\n${results.length - failed}/${results.length} passed` +
+      (failed ? '\nRESULT: FAIL' : '\nRESULT: PASS');
+  });
+</script>
+</body>
+</html>

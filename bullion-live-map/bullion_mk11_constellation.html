@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <title>Bullion Mk11 — US Financial System Constellation</title>
+<meta name="description" content="An interactive map of how the US financial system actually connects — live Treasury yields, inflation, gold and volatility, with every causal link explained in plain English.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Bullion Mk11 — US Financial System Constellation">
+<meta property="og:description" content="An interactive map of how the US financial system actually connects — live Treasury yields, inflation, gold and volatility, with every causal link explained in plain English.">
+<meta property="og:url" content="https://nguyenminhthanh0403-hub.github.io/claudekit/bullion-live-map/bullion_mk11_constellation.html">
+<meta property="og:image" content="https://nguyenminhthanh0403-hub.github.io/claudekit/bullion-live-map/preview-card.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
 <style>
   :root {
     --bg-deep:    #05060a;
@@ -341,6 +350,12 @@
   .mg-item b { color: var(--gold); font-size: 11.5px; }
   .mg-item .mg-matter { color: var(--text); }
   .mg-item .mg-read { display: block; margin-top: 2px; font-size: 10px; opacity: 0.85; }
+  .prov-sub { display:block; font-size:9.5px; color:var(--text-dim);
+              line-height:1.4; margin-top:2px; letter-spacing:0.02em; }
+  .prov-flag { color:var(--amber); }
+  .prov-dot  { display:inline-block; width:6px; height:6px; border-radius:50%;
+               background:var(--amber); margin-left:5px; vertical-align:middle; }
+  .sim-mark { color:var(--amber); font-weight:600; margin-left:3px; cursor:help; }
 </style>
 </head>
 <body>
@@ -448,15 +463,15 @@
       <div class="drawer-label">Live metrics <span class="drawer-tag" id="metricguide-toggle">what do these mean?</span></div>
       <div class="glossary-view hidden" id="metricguide-box"></div>
       <div class="metrics-grid">
-        <div class="metric-cell"><div class="metric-label">US2Y</div><div class="metric-val" id="m-us2y">&mdash;</div><div class="metric-sub">2-yr Treasury</div></div>
-        <div class="metric-cell"><div class="metric-label">US10Y</div><div class="metric-val" id="m-us10y">&mdash;</div><div class="metric-sub">10-yr Treasury</div></div>
-        <div class="metric-cell"><div class="metric-label">Spread</div><div class="metric-val" id="m-spread">&mdash;</div><div class="metric-sub">10Y&ndash;2Y bps</div></div>
-        <div class="metric-cell"><div class="metric-label">VIX</div><div class="metric-val" id="m-vix">&mdash;</div><div class="metric-sub">Fear index</div></div>
-        <div class="metric-cell"><div class="metric-label">SPX</div><div class="metric-val" id="m-spx">&mdash;</div><div class="metric-sub">S&amp;P 500</div></div>
-        <div class="metric-cell"><div class="metric-label">Core CPI</div><div class="metric-val" id="m-cpi">&mdash;</div><div class="metric-sub">YoY %</div></div>
-        <div class="metric-cell"><div class="metric-label">Gold</div><div class="metric-val" id="m-gold">&mdash;</div><div class="metric-sub">$/oz</div></div>
-        <div class="metric-cell"><div class="metric-label">Dollar</div><div class="metric-val" id="m-dxy">&mdash;</div><div class="metric-sub">DXY index</div></div>
-        <div class="metric-cell"><div class="metric-label">WTI Oil</div><div class="metric-val" id="m-wti">&mdash;</div><div class="metric-sub">$/bbl</div></div>
+        <div class="metric-cell"><div class="metric-label">US2Y</div><div class="metric-val" id="m-us2y">&mdash;</div><div class="metric-sub">2-yr Treasury</div><div class="prov-sub" id="p-us2y"></div></div>
+        <div class="metric-cell"><div class="metric-label">US10Y</div><div class="metric-val" id="m-us10y">&mdash;</div><div class="metric-sub">10-yr Treasury</div><div class="prov-sub" id="p-us10y"></div></div>
+        <div class="metric-cell"><div class="metric-label">Spread</div><div class="metric-val" id="m-spread">&mdash;</div><div class="metric-sub">10Y&ndash;2Y bps</div><div class="prov-sub" id="p-spread"></div></div>
+        <div class="metric-cell"><div class="metric-label">VIX</div><div class="metric-val" id="m-vix">&mdash;</div><div class="metric-sub">Fear index</div><div class="prov-sub" id="p-vix"></div></div>
+        <div class="metric-cell"><div class="metric-label">SPX</div><div class="metric-val" id="m-spx">&mdash;</div><div class="metric-sub">S&amp;P 500</div><div class="prov-sub" id="p-spx"></div></div>
+        <div class="metric-cell"><div class="metric-label">Core CPI</div><div class="metric-val" id="m-cpi">&mdash;</div><div class="metric-sub">YoY %</div><div class="prov-sub" id="p-cpi"></div></div>
+        <div class="metric-cell"><div class="metric-label">Gold</div><div class="metric-val" id="m-gold">&mdash;</div><div class="metric-sub">$/oz</div><div class="prov-sub" id="p-gold"></div></div>
+        <div class="metric-cell"><div class="metric-label">Dollar</div><div class="metric-val" id="m-dxy">&mdash;</div><div class="metric-sub">DXY index</div><div class="prov-sub" id="p-dxy"></div></div>
+        <div class="metric-cell"><div class="metric-label">WTI Oil</div><div class="metric-val" id="m-wti">&mdash;</div><div class="metric-sub">$/bbl</div><div class="prov-sub" id="p-wti"></div></div>
       </div>
       <div class="state-alert normal" id="state-alert" style="margin-top:8px">&#x2713; Stable &mdash; risk-on, normal policy</div>
       <div class="sim-note" id="live-provenance" style="margin-top:6px"></div>
@@ -2577,7 +2592,7 @@ const STATS_VARS = [
   { key:'dxy',   label:'Dollar (DXY)', unit:'index' },
   { key:'gold_px', label:'Gold', unit:'$/oz' },
   { key:'wti_px', label:'WTI Crude', unit:'$/bbl' },
-  { key:'fomc_prob_hike', label:'FOMC Hike Prob', unit:'probability' },
+  { key:'fomc_prob_hike', label:'FOMC Hike Prob', unit:'probability', sim:true },
 ];
 function renderStats(shocked) {
   const rowsEl = document.getElementById('stats-rows');
@@ -2606,7 +2621,8 @@ function renderStats(shocked) {
     const sign = d.pct > 0 ? '+' : '';
     const deltaTxt = dir === 'flat' ? '0.0%' : (sign + d.pct.toFixed(1) + '%');
     return '<div class="stat-row">'
-      + '<div class="stat-label">' + d.label + '<small>' + d.unit + '</small></div>'
+      + '<div class="stat-label">' + d.label + (d.sim ? '<span class="sim-mark" title="Model estimate, not market data — FOMC odds have no free live source">~</span>' : '')
+      + '<small>' + d.unit + (d.sim ? ' · model estimate' : '') + '</small></div>'
       + '<div class="stat-track"><div class="stat-track-mid"></div>'
       +   '<div class="stat-bar ' + dir + '" style="left:' + left + '%;width:' + width + '%"></div></div>'
       + '<div class="stat-delta ' + dir + '">' + deltaTxt + '</div>'
@@ -2636,6 +2652,7 @@ function updateMetrics() {
   else if (s.tightening_bias) { alertEl.className='state-alert tight';    alertEl.textContent='\u2191 Tightening bias \u2014 hawkish signals'; }
   else                        { alertEl.className='state-alert normal';   alertEl.textContent='\u2713 Stable \u2014 risk-on, normal policy'; }
   renderLiveProvenance(s);
+  renderMetricProvenance();
   renderLiveBadge(s);
   renderStats(s);
   updateGraph(s);
@@ -2647,6 +2664,77 @@ function updateMetrics() {
 // blurred together — the same provenance-tier honesty mechanism used
 // everywhere else on this map.
 const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500' };
+
+// Metric cell id suffix -> data.json field name. `spread` is absent because it
+// is computed from us10y and us2y rather than fetched — it is class 'derived'
+// and carries no publication date of its own. `ffr` and `nfp_mom` are fetched
+// but have no cell in the metrics grid.
+const METRIC_CELL_FIELD = {
+  'us2y': 'us2y', 'us10y': 'us10y', 'vix': 'vix', 'spx': 'spx',
+  'cpi': 'cpi_yoy', 'gold': 'gold_px', 'dxy': 'dxy', 'wti': 'wti_px',
+};
+
+function renderMetricProvenance() {
+  // A history date overrides the live source entirely (see currentLiveSource),
+  // and v1-shaped history rows carry no publication dates to derive a
+  // sub-line from. With Live Data toggled off, every value on the grid is
+  // the hardcoded simulated baseline. Either way, a provenance sub-line
+  // computed from window.BULLION_PROVENANCE (today's live fetch) would be
+  // describing a number that is not the one on screen — an invented value
+  // wearing a real publication date. Blank every sub-line and bail rather
+  // than trying to re-derive one.
+  if (selectedHistoryDate || !useLiveData) {
+    for (const suffix of Object.keys(METRIC_CELL_FIELD)) {
+      const el = document.getElementById('p-' + suffix);
+      if (!el) continue;
+      el.textContent = '';
+      el.className = 'prov-sub';
+      const cell = el.parentElement;
+      const labelEl = cell ? cell.querySelector('.metric-label') : null;
+      const dot = labelEl ? labelEl.querySelector('.prov-dot') : null;
+      if (dot) dot.remove();
+    }
+    const spreadEl = document.getElementById('p-spread');
+    if (spreadEl) {
+      spreadEl.textContent = '';
+      spreadEl.className = 'prov-sub';
+    }
+    return;
+  }
+  const prov = window.BULLION_PROVENANCE;
+  for (const [suffix, fieldName] of Object.entries(METRIC_CELL_FIELD)) {
+    const el = document.getElementById('p-' + suffix);
+    if (!el) continue;
+    const field = (prov && prov.fields) ? prov.fields[fieldName] : null;
+    const text = provenanceSublineFor(field);
+    el.textContent = text || '';
+    el.className = 'prov-sub' + (field && field.state === 'flagged' ? ' prov-flag' : '');
+    // Amber dot on the label itself, not just the amber sub-line — this runs
+    // on every metric update, so reuse/remove rather than append, or dots
+    // would accumulate across re-renders.
+    const cell = el.parentElement;
+    const labelEl = cell ? cell.querySelector('.metric-label') : null;
+    if (labelEl) {
+      let dot = labelEl.querySelector('.prov-dot');
+      if (field && field.state === 'flagged') {
+        if (!dot) {
+          dot = document.createElement('span');
+          dot.className = 'prov-dot';
+          labelEl.appendChild(dot);
+        }
+        dot.title = text || '';
+      } else if (dot) {
+        dot.remove();
+      }
+    }
+  }
+  // The spread is derived, so it states that rather than a publication date.
+  const spreadEl = document.getElementById('p-spread');
+  if (spreadEl) {
+    spreadEl.textContent = (prov && prov.schema === 2) ? 'derived from 10Y and 2Y' : '';
+    spreadEl.className = 'prov-sub';
+  }
+}
 const ALWAYS_SIMULATED_LABEL = 'FOMC hike/cut odds';
 
 // Fields actually present in the current live/historical source, including
@@ -2675,8 +2763,9 @@ function renderLiveProvenance(s) {
       : 'Simulated view (live data is available — toggle "Live Data" back on to use it).';
     return;
   }
-  const when = s.fetched_at ? new Date(s.fetched_at + 'T00:00').toLocaleDateString() : 'unknown time';
-  el.textContent = `Live as of ${when}: ${liveNames.join(', ')}. Still simulated: ${ALWAYS_SIMULATED_LABEL}.`;
+  const prov = window.BULLION_PROVENANCE;
+  el.textContent = `Live: ${liveNames.join(', ')}. Still simulated: ${ALWAYS_SIMULATED_LABEL}. `
+                 + provenanceSummaryText(prov);
 }
 
 // Condensed one-line version of the same status, shown in the header so it's
@@ -2690,8 +2779,10 @@ function renderLiveBadge(s) {
   } else if (liveNames.length === 0) {
     el.textContent = '⚪ Simulated';
   } else {
-    const when = s.fetched_at ? new Date(s.fetched_at + 'T00:00').toLocaleDateString() : '';
-    el.textContent = `🟢 Live as of ${when}`;
+    // Deliberately no date here. See provenanceBadgeText: fetched_at is when the
+    // fetcher ran, not when any field was published, so "Live as of <date>" was
+    // asserting a currency the data does not have.
+    el.textContent = provenanceBadgeText(window.BULLION_PROVENANCE);
   }
 }
 
@@ -3242,40 +3333,242 @@ buildGraph();
 buildLegend();
 updateMetrics();
 
+// ─── FRESHNESS-VERDICT-START ────────────────────────────────────────────────
+// Mirrors freshness_verdict() in fetch_bullion_data.py. Judged on a field's
+// PUBLICATION date, never its reference date: June CPI references 2026-06-01
+// but publishes 2026-07-14, so by reference it looks broken and by publication
+// it is on time. tests/freshness_test.html extracts this block by its marker
+// comments and asserts the same cases as the Python suite — renaming or
+// removing the markers breaks that test, which is intended.
+const CADENCE_TOLERANCE_DAYS = { daily: 7, monthly: 45, fomc: null };
+const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
+
+function freshnessVerdict(cadence, published, today, overrideDays) {
+  if (published == null || cadence === 'fomc') return { state: 'unknown', ageDays: null };
+  const tolerance = (overrideDays != null) ? overrideDays : CADENCE_TOLERANCE_DAYS[cadence];
+  if (tolerance == null) return { state: 'unknown', ageDays: null };
+  // Parse as UTC midnight so DST never shifts a day boundary.
+  const ms = Date.parse(today + 'T00:00:00Z') - Date.parse(published + 'T00:00:00Z');
+  if (Number.isNaN(ms)) return { state: 'unknown', ageDays: null };
+  const ageDays = Math.round(ms / 86400000);
+  return { state: ageDays > tolerance ? 'flagged' : 'fresh', ageDays: ageDays };
+}
+// ─── FRESHNESS-VERDICT-END ──────────────────────────────────────────────────
+
+// ─── NORMALISE-ENVELOPE-START ───────────────────────────────────────────────
+// Turns whatever data.json contained into one shape the rest of the map can
+// rely on. GitHub Pages caches aggressively, so a new HTML will meet an old
+// data.json and vice versa — hence the schema branch. A v1 file has no
+// publication dates, so its freshness is reported 'unknown' and the UI shows
+// nothing, rather than inventing dates the file never carried.
+function normaliseEnvelope(raw, todayISO) {
+  const out = { schema: 0, generatedAt: null, fields: {}, history: {}, ok: false, error: null };
+
+  if (!raw || typeof raw !== 'object') {
+    out.error = 'no data';
+    return out;
+  }
+
+  // Branch on shape, not just the version number: a future schema that keeps
+  // the v2 envelope shape ({fields, history}) still loads correctly here,
+  // rather than falling into the v1 path and treating "fields"/"history" as
+  // literal date keys.
+  const hasEnvelopeShape = raw.fields && typeof raw.fields === 'object' &&
+    raw.history && typeof raw.history === 'object';
+
+  if (hasEnvelopeShape) {
+    if (raw.schema !== 2) {
+      console.warn('data.json schema', raw.schema, 'is newer than this page understands; reading as v2');
+    }
+    out.schema = 2;
+    out.generatedAt = raw.generated_at || null;
+    out.history = raw.history || {};
+    out.ok = true;
+    for (const [name, f] of Object.entries(raw.fields || {})) {
+      const verdict = freshnessVerdict(
+        f.cadence, f.published, todayISO, FIELD_TOLERANCE_OVERRIDE[name]);
+      out.fields[name] = {
+        class: f.class, cadence: f.cadence, source: f.source,
+        refDate: f.ref_date, published: f.published, value: f.value,
+        state: verdict.state, ageDays: verdict.ageDays,
+      };
+    }
+    return out;
+  }
+
+  if (raw.schema != null) {
+    // A schema number is present but the envelope shape isn't recognisable.
+    // Fail closed rather than walking it as a v1 date map: rendering nothing
+    // is correct, rendering corrupted values is not.
+    out.error = 'unrecognised data.json schema ' + raw.schema;
+    return out;
+  }
+
+  // v1: a bare {date: {field: value}} map. Reconstruct per-field latest by
+  // walking dates ascending, exactly as the pre-provenance loader did.
+  out.schema = 1;
+  out.history = raw;
+  out.ok = true;
+  const snapshot = {};
+  for (const dt of Object.keys(raw).sort()) {
+    const row = raw[dt];
+    if (row && typeof row === 'object') {
+      for (const [k, v] of Object.entries(row)) snapshot[k] = { value: v, refDate: dt };
+    }
+  }
+  for (const [name, rec] of Object.entries(snapshot)) {
+    out.fields[name] = {
+      class: 'measured', cadence: 'unknown', source: null,
+      refDate: rec.refDate, published: null, value: rec.value,
+      state: 'unknown', ageDays: null,
+    };
+  }
+  return out;
+}
+// ─── NORMALISE-ENVELOPE-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-SUBLINE-START ───────────────────────────────────────────────
+// What appears under a metric's value. Fresh daily fields return null and show
+// nothing: appending "as of today" to eight daily fields would be noise that
+// trains the reader to ignore the line, defeating it on the one field where it
+// matters.
+const PROV_MONTHS = ['January','February','March','April','May','June','July',
+                     'August','September','October','November','December'];
+const PROV_MON_ABBR = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+function provenanceSublineFor(field) {
+  if (!field) return null;
+  if (field.class === 'simulated') return 'model estimate · not market data';
+  if (field.state === 'flagged') {
+    return 'Expected ' + field.cadence + ', last published ' + field.ageDays
+         + ' days ago — the source may be failing.';
+  }
+  if (field.state === 'unknown') return null;
+  if (field.cadence === 'daily') return null;   // fresh and daily: silence
+  if (field.cadence === 'monthly') {
+    const ref = field.refDate ? new Date(field.refDate + 'T00:00:00Z') : null;
+    const pub = field.published ? new Date(field.published + 'T00:00:00Z') : null;
+    if (!ref || !pub) return null;
+    return PROV_MONTHS[ref.getUTCMonth()] + ' · published '
+         + PROV_MON_ABBR[pub.getUTCMonth()] + ' ' + pub.getUTCDate() + ' · monthly';
+  }
+  return null;
+}
+// ─── PROVENANCE-SUBLINE-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-SUMMARY-START ───────────────────────────────────────────────
+// One sentence replacing the old `Live as of {fetched_at}` stamp. That stamp
+// applied a single date to ten fields published on ten different schedules,
+// which is the misrepresentation this plan exists to remove.
+function provenanceSummaryText(prov) {
+  if (!prov || !prov.ok) return 'Live data unavailable — every number shown is simulated.';
+  const entries = Object.entries(prov.fields || {})
+                        .filter(([, f]) => f.class === 'measured');
+  if (!entries.length) return 'Live data unavailable — every number shown is simulated.';
+  if (entries.every(([, f]) => f.state === 'unknown')) {
+    return 'Publication dates unavailable in this data file — freshness unknown.';
+  }
+  const published = entries.map(([, f]) => f.published).filter(Boolean).sort();
+  const newest = published.length ? published[published.length - 1] : null;
+  const newestTxt = newest
+    ? ' Most recent publication ' + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1]
+      + ' ' + Number(newest.slice(8, 10)) + '.'
+    : '';
+  const flagged = entries.filter(([, f]) => f.state === 'flagged').map(([n]) => n);
+  if (flagged.length) {
+    return flagged.length + ' of ' + entries.length + ' measured fields may be failing: '
+         + flagged.join(', ') + '.' + newestTxt;
+  }
+  // A field that failed to fetch is simply absent from prov.fields — it
+  // carries no state to be 'flagged', so silence here reads as health. Name
+  // what didn't survive rather than letting the fields that DID come
+  // through speak for a full set that never arrived.
+  const missing = EXPECTED_MEASURED_FIELDS.filter(name =>
+    !(prov.fields && prov.fields[name] && prov.fields[name].class === 'measured'));
+  if (missing.length) {
+    return missing.length + ' of ' + EXPECTED_MEASURED_FIELDS.length
+         + ' measured fields are missing from this data file: ' + missing.join(', ') + '.';
+  }
+  return 'All ' + entries.length + ' measured fields are current — most recent publication '
+       + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1] + ' ' + Number(newest.slice(8, 10)) + '.';
+}
+// ─── PROVENANCE-SUMMARY-END ─────────────────────────────────────────────────
+
+// ─── PROVENANCE-BADGE-START ─────────────────────────────────────────────────
+// The header badge's compact equivalent. It previously read
+// `Live as of {fetched_at}` — the same single-date claim as the status line,
+// but in the more visible place, and worse: fetched_at is when the FETCHER RAN,
+// not when anything was published. On a day when Core CPI's newest reading
+// describes June, "Live as of Jul 21" is simply false. The badge now reports
+// field counts and health, and never asserts a currency date.
+//
+// The ten measured fields this map expects, mirroring FIELD_META in
+// fetch_bullion_data.py. Without this list, "healthy" could only ever mean
+// "every field that happens to be present in the file is present" — a
+// partial fetch that dropped nine fields still reads 100% healthy against
+// itself. This is the denominator that catches that.
+const EXPECTED_MEASURED_FIELDS = [
+  'us2y', 'us10y', 'vix', 'ffr', 'wti_px', 'cpi_yoy', 'nfp_mom',
+  'gold_px', 'dxy', 'spx'
+];
+function provenanceBadgeText(prov) {
+  if (!prov || !prov.ok) return '⚪ Simulated';
+  const entries = Object.entries(prov.fields || {})
+                        .filter(([, f]) => f.class === 'measured');
+  if (!entries.length) return '⚪ Simulated';
+  const flagged = entries.filter(([, f]) => f.state === 'flagged').length;
+  if (flagged) return '🟠 Live · ' + flagged + ' of ' + entries.length + ' may be failing';
+  if (entries.every(([, f]) => f.state === 'unknown')) {
+    return '🟢 Live · ' + entries.length + ' fields · freshness unknown';
+  }
+  const present = EXPECTED_MEASURED_FIELDS.filter(name =>
+    prov.fields && prov.fields[name] && prov.fields[name].class === 'measured').length;
+  if (present < EXPECTED_MEASURED_FIELDS.length) {
+    const missingCount = EXPECTED_MEASURED_FIELDS.length - present;
+    return '🟠 Live · ' + present + ' of ' + EXPECTED_MEASURED_FIELDS.length
+         + ' fields — ' + missingCount + ' missing';
+  }
+  return '🟢 Live · ' + entries.length + ' fields current';
+}
+// ─── PROVENANCE-BADGE-END ───────────────────────────────────────────────────
+
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.
 fetch('data.json')
   .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
   .then(json => {
-    window.BULLION_LIVE_HISTORY = json;
-    // Sources publish on different lags (daily FRED/Yahoo vs monthly CPI/NFP),
-    // so no single date has every field. Build the "current conditions"
-    // snapshot from each field's most recent value: walk dates ascending and
-    // let later dates overwrite each field, so every field ends at its latest
-    // available reading. This reproduces the retired bullion_live_data.js.
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const prov = normaliseEnvelope(json, todayISO);
+    window.BULLION_PROVENANCE = prov;
+    window.BULLION_LIVE_HISTORY = prov.history;
+
+    // Sources publish on different lags, so no single date has every field.
+    // The snapshot takes each field's latest value; provenance now records
+    // which date each one actually came from instead of stamping them all
+    // with one misleading date.
     const snapshot = {};
-    let latestDateWithData = null;
-    for (const dt of Object.keys(json).sort()) {
-      const row = json[dt];
-      if (Object.keys(row).length) {
-        Object.assign(snapshot, row);
-        latestDateWithData = dt;
-      }
-    }
-    if (latestDateWithData) {
-      snapshot.fetched_at = latestDateWithData;
+    for (const [name, f] of Object.entries(prov.fields)) snapshot[name] = f.value;
+    if (Object.keys(snapshot).length) {
+      // Must stay a bare YYYY-MM-DD: renderLiveProvenance does
+      // `new Date(s.fetched_at + 'T00:00')`, which yields an Invalid Date if
+      // handed the full ISO timestamp that generated_at carries.
+      snapshot.fetched_at = prov.generatedAt ? prov.generatedAt.slice(0, 10) : null;
       window.BULLION_LIVE_DATA = snapshot;
     }
   })
   .catch(err => {
     console.warn('data.json fetch failed, falling back to simulated baseline:', err);
+    window.BULLION_PROVENANCE = {
+      schema: 0, generatedAt: null, fields: {}, history: {},
+      ok: false, error: err.message,
+    };
   })
   .finally(() => {
     setupHistoryDatePicker();
-    // Mirror applyDate(): refreshDriverBases() moves each d.base to the live
-    // value, so the manual-driver rows (first built above with simulated
-    // bases, before this fetch resolved) must be rebuilt or their sliders and
-    // "baseline" labels would disagree with the live model.
+    // refreshDriverBases() moves each d.base to the live value, so the manual
+    // driver rows (first built with simulated bases, before this fetch
+    // resolved) must be rebuilt or their sliders and baseline labels would
+    // disagree with the live model.
     refreshDriverBases();
     buildManualRows();
     syncManualUI();

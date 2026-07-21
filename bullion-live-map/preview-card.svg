@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <rect width="1200" height="630" fill="#05060a"/>
+  <g stroke="#1e2436" stroke-width="1.5" fill="none">
+    <path d="M170 175 L330 120 L470 210 L330 300 Z"/>
+    <path d="M330 120 L520 95 L470 210"/>
+    <path d="M170 175 L240 330 L330 300"/>
+    <path d="M470 210 L610 265 L520 95"/>
+    <path d="M240 330 L400 430 L470 210"/>
+  </g>
+  <g fill="#d4b869">
+    <circle cx="330" cy="120" r="8"/>
+    <circle cx="470" cy="210" r="6"/>
+    <circle cx="170" cy="175" r="5"/>
+  </g>
+  <g fill="#8891a6">
+    <circle cx="330" cy="300" r="4.5"/>
+    <circle cx="520" cy="95" r="4"/>
+    <circle cx="240" cy="330" r="4"/>
+    <circle cx="610" cy="265" r="3.5"/>
+    <circle cx="400" cy="430" r="3.5"/>
+  </g>
+  <text x="700" y="255" font-family="Georgia, 'Times New Roman', serif" font-size="72" fill="#d4b869">Bullion Mk11</text>
+  <text x="702" y="315" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#d8dce6">How the US financial system</text>
+  <text x="702" y="352" font-family="Helvetica, Arial, sans-serif" font-size="27" fill="#d8dce6">actually connects</text>
+  <text x="702" y="415" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="#8891a6">Live yields, inflation, gold and volatility —</text>
+  <text x="702" y="443" font-family="Helvetica, Arial, sans-serif" font-size="19" fill="#8891a6">every causal link explained in plain English.</text>
+  <rect x="702" y="480" width="54" height="3" fill="#d4b869"/>
+</svg>

@@ -186,17 +186,32 @@ and vice versa. The loader branches on the `schema` key:
   exact dishonesty this work removes.
 - `schema > 2` — treat as v1 for safety, log a console warning.
 
-### Failure becomes visible
+### Failure visibility — already handled
 
-The current fetch failure path is a bare `console.warn`
-(line 3269). A user sees simulated numbers under a lit "Live Data" button with
-no indication anything went wrong. This is the same class of defect as the
-staleness problem and is fixed in the same pass:
+**Corrected 2026-07-21.** An earlier draft of this spec claimed the fetch
+failure path was a silent `console.warn` leaving the user with no indication.
+That was wrong, and the claim was made without reading far enough into the file.
 
-- On fetch failure the Live Data button reads **"Simulated — live data
-  unavailable"** and loses its active styling.
-- The provenance strip reads **"Could not load live data — showing simulated
-  baseline."**
+`renderLiveProvenance()` (line ~2662) already writes *"All metrics are
+simulated — data.json not found or failed to load. Run fetch_bullion_data.py
+to pull live data."* to `#live-provenance`, and `renderLiveBadge()` mirrors a
+condensed form into the header. The `console.warn` is a developer aid alongside
+that UI, not instead of it.
+
+No new failure UI is therefore in scope. The implementation must **preserve**
+this behaviour — the loader rewrite is the risk, not the absence of a message.
+
+Two related surfaces already exist and must be extended rather than duplicated:
+
+- `ALWAYS_SIMULATED_LABEL` already names FOMC odds as simulated in the status
+  line. What is missing is a marker where the FOMC number is actually
+  displayed, in the scenario stats panel.
+- `LIVE_FIELD_LABEL` already maps field names to display names and should be
+  reused rather than re-declared.
+
+What remains genuinely broken is the date: `renderLiveProvenance` renders
+`Live as of {s.fetched_at}` — one date applied to ten fields published on ten
+different schedules. That sentence is what this work replaces.
 
 ---
 
@@ -235,17 +250,30 @@ The `METRIC_GUIDE` entry for FOMC Probabilities already discloses this in prose
 ("a hardcoded snapshot, not live"); that prose stays, and the marker makes the
 same fact visible where the number is actually read.
 
-### Provenance strip
+### Provenance summary line
 
-One line near the Live Data button:
+**Revised 2026-07-21** — an earlier draft proposed a new strip element near the
+Live Data button. That would have sat beside `#live-provenance`, which already
+carries exactly this information. The existing element is extended instead.
+
+`renderLiveProvenance` currently ends with:
 
 ```
-Live · 10 fields measured · 1 simulated · updated Jul 17
+Live as of {fetched_at}: US2Y, Core CPI, Gold… Still simulated: FOMC hike/cut odds.
 ```
 
-Clicking opens the **existing** Audit Log, filtered to data provenance. The map
-already has an audit-log surface with confidence tiers; this extends it rather
-than introducing a second, competing explanation of where numbers come from.
+The single `fetched_at` date is the misrepresentation. It becomes:
+
+```
+Live: US2Y, Core CPI, Gold… Still simulated: FOMC hike/cut odds.
+All 10 measured fields are current — most recent publication Jul 17.
+```
+
+and, when a field breaches its cadence:
+
+```
+1 of 10 measured fields may be failing: wti_px. Most recent publication Jul 17.
+```
 
 ### Flagged fields
 
