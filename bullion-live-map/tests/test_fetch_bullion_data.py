@@ -85,7 +85,11 @@ class TestFreshnessVerdict(unittest.TestCase):
         self.assertEqual(FIELD_TOLERANCE_OVERRIDE["wti_px"], 10)
 
 
-from fetch_bullion_data import parse_fred_observations, parse_yahoo_chart
+from fetch_bullion_data import (
+    parse_fred_observations,
+    parse_yahoo_chart,
+    fred_observation_params,
+)
 
 
 class TestParseFredObservations(unittest.TestCase):
@@ -136,6 +140,99 @@ class TestParseFredObservations(unittest.TestCase):
         self.assertEqual(value, 4.21)
         self.assertEqual(ref, "2026-07-16")
         self.assertIsNone(pub)
+
+    def test_multi_vintage_newest_first_keeps_greatest_realtime_start(self):
+        # Same observation date, two vintages, newest row supplied first.
+        payload = {"observations": [
+            {"realtime_start": "2026-07-20", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.25"},
+            {"realtime_start": "2026-07-18", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.20"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.25)
+        self.assertEqual(ref, "2026-07-17")
+        self.assertEqual(pub, "2026-07-20")
+        self.assertEqual(hist["2026-07-17"], 4.25)
+
+    def test_multi_vintage_oldest_first_keeps_greatest_realtime_start(self):
+        # Same two rows as above, supplied oldest-first: result must be
+        # identical, proving resolution is order-independent.
+        payload = {"observations": [
+            {"realtime_start": "2026-07-18", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.20"},
+            {"realtime_start": "2026-07-20", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.25"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.25)
+        self.assertEqual(ref, "2026-07-17")
+        self.assertEqual(pub, "2026-07-20")
+        self.assertEqual(hist["2026-07-17"], 4.25)
+
+    def test_row_with_realtime_start_beats_row_without_for_same_date(self):
+        # A row missing realtime_start must sort as oldest, so a row that
+        # HAS a realtime_start always wins for the same observation date,
+        # regardless of order.
+        payload = {"observations": [
+            {"date": "2026-07-17", "value": "4.20"},
+            {"realtime_start": "2026-07-20", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.25"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.25)
+        self.assertEqual(pub, "2026-07-20")
+
+    def test_single_vintage_per_date_unchanged(self):
+        # Existing single-vintage behaviour: no competing rows per date.
+        payload = {"observations": [
+            {"realtime_start": "2026-07-19", "realtime_end": "9999-12-31",
+             "date": "2026-07-16", "value": "4.10"},
+            {"realtime_start": "2026-07-20", "realtime_end": "9999-12-31",
+             "date": "2026-07-17", "value": "4.21"},
+        ]}
+        value, ref, pub, hist = parse_fred_observations(payload, decimals=2)
+        self.assertEqual(value, 4.21)
+        self.assertEqual(ref, "2026-07-17")
+        self.assertEqual(pub, "2026-07-20")
+        self.assertEqual(hist["2026-07-16"], 4.10)
+        self.assertEqual(len(hist), 2)
+
+
+class TestFredObservationParams(unittest.TestCase):
+    def test_units_set_excludes_realtime_keys(self):
+        params = fred_observation_params(
+            "CPILFESL", "KEY", "pc1", "2026-01-01", "2026-07-20")
+        self.assertNotIn("realtime_start", params)
+        self.assertNotIn("realtime_end", params)
+        self.assertEqual(params["units"], "pc1")
+
+    def test_units_unset_includes_both_realtime_keys(self):
+        params = fred_observation_params(
+            "DGS2", "KEY", None, "2026-01-01", "2026-07-20")
+        self.assertEqual(params["realtime_start"], "2026-01-01")
+        self.assertEqual(params["realtime_end"], "9999-12-31")
+        self.assertNotIn("units", params)
+
+    def test_publication_date_params_always_have_both_realtime_keys_and_no_units(self):
+        import fetch_bullion_data as mod
+        captured = {}
+
+        def fake_http_get_json(url, timeout=15):
+            captured["url"] = url
+            return {"observations": [{"date": "2026-07-01", "realtime_start": "2026-07-05"}]}
+
+        original = mod.http_get_json
+        mod.http_get_json = fake_http_get_json
+        try:
+            mod.fetch_fred_publication_date(
+                "CPILFESL", "KEY", "2026-01-01", "2026-07-20")
+        finally:
+            mod.http_get_json = original
+
+        self.assertIn("realtime_start=", captured["url"])
+        self.assertIn("realtime_end=", captured["url"])
+        self.assertNotIn("units=", captured["url"])
 
 
 class TestParseYahooChart(unittest.TestCase):

@@ -115,18 +115,37 @@ def parse_fred_observations(data, decimals):
     Returns (latest_value, ref_date, published, history). `published` comes
     from the observation's realtime_start, which is the date the reading
     became available — this is what freshness is judged on.
+
+    A realtime RANGE request (see fetch_fred_series) makes FRED return one
+    row PER VINTAGE per observation date, in undocumented server-side order.
+    For each observation date we keep the row with the greatest
+    realtime_start — the current, most-revised value — regardless of the
+    order rows arrive in. A row with no realtime_start sorts as oldest, so
+    any row that HAS one always wins over one that doesn't for the same date.
     """
+    best_realtime_start_by_ref = {}
     history = {}
     published_by_ref = {}
     for obs in data.get("observations", []):
         val = obs.get("value")
         if val is None or val == ".":
             continue
+        ref_date = obs.get("date")
         try:
-            history[obs["date"]] = round(float(val), decimals)
-        except (ValueError, KeyError):
+            parsed_val = round(float(val), decimals)
+        except (ValueError, TypeError):
             continue
-        published_by_ref[obs["date"]] = obs.get("realtime_start")
+        if ref_date is None:
+            continue
+
+        realtime_start = obs.get("realtime_start") or ""
+        current_best = best_realtime_start_by_ref.get(ref_date)
+        if current_best is not None and realtime_start <= current_best:
+            continue  # an earlier (or equal) vintage than the one we already kept
+
+        best_realtime_start_by_ref[ref_date] = realtime_start
+        history[ref_date] = parsed_val
+        published_by_ref[ref_date] = obs.get("realtime_start")
 
     if not history:
         return (None, None, None, {})
@@ -138,6 +157,31 @@ def fred_url(params):
     return "https://api.stlouisfed.org/fred/series/observations?" + "&".join(
         f"{k}={urllib.request.quote(str(v))}" for k, v in params.items()
     )
+
+
+def fred_observation_params(series_id, key, units, start, end):
+    """Pure construction of the params dict for a values request.
+
+    FRED returns HTTP 400 when a realtime RANGE (realtime_start/realtime_end)
+    is combined with any `units` transform other than 'lin' — see
+    fetch_fred_publication_date's docstring. So: `units` set means NO
+    realtime keys; `units` unset means BOTH realtime keys, no `units` key.
+    """
+    params = {
+        "series_id": series_id,
+        "api_key": key,
+        "file_type": "json",
+        "sort_order": "asc",
+        "observation_start": start,
+        "observation_end": end,
+    }
+    if units:
+        params["units"] = units
+    else:
+        # Safe only without a units transform — see fetch_fred_publication_date.
+        params["realtime_start"] = start
+        params["realtime_end"] = "9999-12-31"
+    return params
 
 
 def fetch_fred_publication_date(series_id, key, start, end):
@@ -185,20 +229,7 @@ def fetch_fred_publication_date(series_id, key, start, end):
 
 def fetch_fred_series(series_id, key, units, decimals, start, end):
     """Network wrapper around parse_fred_observations."""
-    params = {
-        "series_id": series_id,
-        "api_key": key,
-        "file_type": "json",
-        "sort_order": "asc",
-        "observation_start": start,
-        "observation_end": end,
-    }
-    if units:
-        params["units"] = units
-    else:
-        # Safe only without a units transform — see fetch_fred_publication_date.
-        params["realtime_start"] = start
-        params["realtime_end"] = "9999-12-31"
+    params = fred_observation_params(series_id, key, units, start, end)
 
     try:
         data = http_get_json(fred_url(params))
