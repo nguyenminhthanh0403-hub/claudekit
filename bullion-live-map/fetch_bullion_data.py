@@ -60,6 +60,53 @@ FIELD_TOLERANCE_OVERRIDE = {
     "wti_px": 10,
 }
 
+SCHEMA_VERSION = 2
+
+# Provenance metadata per field. Every field written to data.json must appear
+# here or it ships without provenance — which is the exact defect this schema
+# exists to remove, so build_envelope raises rather than emitting a bare value.
+FIELD_META = {
+    "us2y":    {"class": "measured", "cadence": "daily",   "source": "FRED DGS2"},
+    "us10y":   {"class": "measured", "cadence": "daily",   "source": "FRED DGS10"},
+    "vix":     {"class": "measured", "cadence": "daily",   "source": "FRED VIXCLS"},
+    "ffr":     {"class": "measured", "cadence": "daily",   "source": "FRED DFF"},
+    "wti_px":  {"class": "measured", "cadence": "daily",   "source": "FRED DCOILWTICO"},
+    "cpi_yoy": {"class": "measured", "cadence": "monthly", "source": "FRED CPILFESL"},
+    "nfp_mom": {"class": "measured", "cadence": "monthly", "source": "FRED PAYEMS"},
+    "gold_px": {"class": "measured", "cadence": "daily",   "source": "Yahoo GC=F"},
+    "dxy":     {"class": "measured", "cadence": "daily",   "source": "Yahoo DX-Y.NYB"},
+    "spx":     {"class": "measured", "cadence": "daily",   "source": "Yahoo ^GSPC"},
+}
+
+
+def build_envelope(latest_out, history_by_date, generated_at):
+    """Assemble the schema v2 data.json envelope.
+
+    `history` passes through untouched — the map's date picker reads it and its
+    shape must not drift.
+    """
+    fields = {}
+    for name, rec in latest_out.items():
+        meta = FIELD_META.get(name)
+        if meta is None:
+            raise KeyError(
+                f"field {name!r} has no FIELD_META entry; add one rather than "
+                f"shipping a value with no provenance")
+        fields[name] = {
+            "class":     meta["class"],
+            "cadence":   meta["cadence"],
+            "source":    meta["source"],
+            "ref_date":  rec["ref_date"],
+            "published": rec["published"],
+            "value":     rec["value"],
+        }
+    return {
+        "schema": SCHEMA_VERSION,
+        "generated_at": generated_at,
+        "fields": fields,
+        "history": history_by_date,
+    }
+
 
 def freshness_verdict(cadence, published, today, override_days=None):
     """Decide whether a field's latest value is fresh, judged on publication.
@@ -326,18 +373,34 @@ def main():
         print("No fields fetched successfully; leaving existing data.json untouched.", file=sys.stderr)
         sys.exit(1)
 
+    generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    envelope = build_envelope(latest_out, history_by_date, generated_at)
+
     with open(DATA_OUT_PATH, "w") as f:
-        json.dump(history_by_date, f, indent=2, sort_keys=True)
+        json.dump(envelope, f, indent=2, sort_keys=True)
         f.write("\n")
 
-    all_fields = [f for _, (f, _, _) in FRED_SERIES.items()] + [f for _, (f, _) in YAHOO_SYMBOLS.items()]
-    latest_date = max(history_by_date)
-    latest_fields = history_by_date[latest_date]
-    missing = [f for f in all_fields if f not in latest_fields]
-    print(f"Wrote {DATA_OUT_PATH} with {len(history_by_date)} dated entries.")
-    print(f"Latest date {latest_date} has {len(latest_fields)} of {len(all_fields)} fields.")
+    print(f"Wrote {DATA_OUT_PATH} (schema {SCHEMA_VERSION}) with "
+          f"{len(history_by_date)} dated entries and {len(envelope['fields'])} fields.")
+
+    # Log every field's publication age so the tolerances above can be revised
+    # against observed behaviour instead of re-guessed.
+    today = datetime.now(timezone.utc).date()
+    print("\nPublication ages (freshness is judged on these, not ref_date):")
+    for name in sorted(envelope["fields"]):
+        fld = envelope["fields"][name]
+        pub = fld["published"]
+        pub_date = datetime.strptime(pub, "%Y-%m-%d").date() if pub else None
+        state, age = freshness_verdict(
+            fld["cadence"], pub_date, today,
+            override_days=FIELD_TOLERANCE_OVERRIDE.get(name))
+        marker = "  FLAGGED" if state == "flagged" else ""
+        age_str = f"{age}d" if age is not None else "n/a"
+        print(f"  {name:10s} ref={fld['ref_date']} pub={pub} age={age_str:>5s} {state}{marker}")
+
+    missing = [f for f in FIELD_META if f not in envelope["fields"]]
     if missing:
-        print(f"Missing from {latest_date} (map will fall back to simulated baseline for these): {', '.join(missing)}")
+        print(f"\nFailed to fetch (map falls back to simulated baseline): {', '.join(missing)}")
     print()
     print(SOURCE_NOTE)
 

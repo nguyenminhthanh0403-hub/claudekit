@@ -259,5 +259,59 @@ class TestParseYahooChart(unittest.TestCase):
         self.assertEqual(hist, {})
 
 
+from fetch_bullion_data import build_envelope, FIELD_META
+
+
+class TestBuildEnvelope(unittest.TestCase):
+    LATEST = {
+        "cpi_yoy": {"value": 2.6, "ref_date": "2026-06-01", "published": "2026-07-14"},
+        "gold_px": {"value": 4018.8, "ref_date": "2026-07-17", "published": "2026-07-17"},
+    }
+    HISTORY = {
+        "2026-07-17": {"gold_px": 4018.8},
+        "2026-06-01": {"cpi_yoy": 2.6},
+    }
+
+    def build(self):
+        return build_envelope(self.LATEST, self.HISTORY, "2026-07-20T10:07:14Z")
+
+    def test_declares_schema_two(self):
+        self.assertEqual(self.build()["schema"], 2)
+
+    def test_history_passes_through_unchanged(self):
+        # The date picker reads this block; its shape must not drift.
+        self.assertEqual(self.build()["history"], self.HISTORY)
+
+    def test_field_carries_full_provenance(self):
+        f = self.build()["fields"]["cpi_yoy"]
+        self.assertEqual(f["class"], "measured")
+        self.assertEqual(f["cadence"], "monthly")
+        self.assertEqual(f["source"], "FRED CPILFESL")
+        self.assertEqual(f["ref_date"], "2026-06-01")
+        self.assertEqual(f["published"], "2026-07-14")
+        self.assertEqual(f["value"], 2.6)
+
+    def test_yahoo_field_is_daily_and_measured(self):
+        f = self.build()["fields"]["gold_px"]
+        self.assertEqual(f["cadence"], "daily")
+        self.assertEqual(f["source"], "Yahoo GC=F")
+
+    def test_omits_fields_that_failed_to_fetch(self):
+        env = build_envelope({"gold_px": self.LATEST["gold_px"]}, self.HISTORY,
+                             "2026-07-20T10:07:14Z")
+        self.assertIn("gold_px", env["fields"])
+        self.assertNotIn("cpi_yoy", env["fields"])
+
+    def test_every_known_field_has_metadata(self):
+        # A field fetched but absent from FIELD_META would ship with no
+        # provenance, which is the bug this whole change exists to prevent.
+        expected = {"us2y", "us10y", "vix", "ffr", "wti_px", "cpi_yoy",
+                    "nfp_mom", "gold_px", "dxy", "spx"}
+        self.assertEqual(set(FIELD_META), expected)
+        for name, meta in FIELD_META.items():
+            self.assertIn(meta["cadence"], {"daily", "monthly", "fomc"})
+            self.assertTrue(meta["source"])
+
+
 if __name__ == "__main__":
     unittest.main()
