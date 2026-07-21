@@ -1,5 +1,6 @@
 import os
 import sys
+import tempfile
 import unittest
 from datetime import date
 
@@ -322,6 +323,90 @@ class TestBuildEnvelope(unittest.TestCase):
         for name, meta in FIELD_META.items():
             self.assertIn(meta["cadence"], {"daily", "monthly", "fomc"})
             self.assertTrue(meta["source"])
+
+
+import fetch_bullion_data as fetch_bullion_data_module
+
+
+class TestMainRefusesIncompleteWrites(unittest.TestCase):
+    """main() does real network I/O, so these drive it by monkeypatching the
+    module's fetch/load functions and DATA_OUT_PATH — never the network, and
+    never the real data.json. Both guards protect the live site from a
+    truncated publish: Fix 3 covers a total outage (nothing fetched at all),
+    Fix 4 covers a partial one (some fields fetched, at least one didn't)."""
+
+    def setUp(self):
+        self.mod = fetch_bullion_data_module
+        self._orig_fetch_fred_series = self.mod.fetch_fred_series
+        self._orig_fetch_yahoo_symbol = self.mod.fetch_yahoo_symbol
+        self._orig_load_key = self.mod.load_key
+        self._orig_data_out_path = self.mod.DATA_OUT_PATH
+
+        fd, self.tmp_path = tempfile.mkstemp(prefix="bullion_test_data_", suffix=".json")
+        os.close(fd)
+        self.known_content = '{"sentinel": "yesterday-complete-file"}'
+        with open(self.tmp_path, "w") as f:
+            f.write(self.known_content)
+
+        self.mod.DATA_OUT_PATH = self.tmp_path
+        self.mod.load_key = lambda: "dummy-key"
+
+    def tearDown(self):
+        self.mod.fetch_fred_series = self._orig_fetch_fred_series
+        self.mod.fetch_yahoo_symbol = self._orig_fetch_yahoo_symbol
+        self.mod.load_key = self._orig_load_key
+        self.mod.DATA_OUT_PATH = self._orig_data_out_path
+        if os.path.exists(self.tmp_path):
+            os.remove(self.tmp_path)
+
+    def _target_file_contents(self):
+        with open(self.tmp_path) as f:
+            return f.read()
+
+    def test_total_outage_exits_without_touching_existing_file(self):
+        # Fix 3: main()'s pre-existing "if not history_by_date" guard, added
+        # for the case where nothing fetches at all. Deleting it left all 33
+        # prior tests passing — nothing drove this path.
+        #
+        # Mocking every fetch to (None, None, None, {}) (a literal outage)
+        # would also leave latest_out empty, which independently trips Fix
+        # 4's "missing fields" guard below it — so that mock can't tell the
+        # two guards apart post-Fix-4; deleting Fix 3 alone wouldn't turn
+        # this test red. Instead every field succeeds with a real latest
+        # value (so Fix 4 sees nothing missing) but an empty per-date
+        # history ({}), so ONLY the history_by_date guard can catch it.
+        self.mod.fetch_fred_series = (
+            lambda series_id, key, units, decimals, start, end:
+                (1.0, "2026-07-17", "2026-07-17", {}))
+        self.mod.fetch_yahoo_symbol = (
+            lambda symbol, decimals, range_="1y":
+                (1.0, "2026-07-17", "2026-07-17", {}))
+
+        with self.assertRaises(SystemExit):
+            self.mod.main()
+
+        self.assertEqual(self._target_file_contents(), self.known_content)
+
+    def test_partial_fetch_exits_without_writing_truncated_file(self):
+        # Fix 4: all but one field (us2y) fetch successfully. Publishing the
+        # other nine behind a green exit code is exactly the defect being
+        # closed, so this must also raise SystemExit and leave the prior
+        # file untouched rather than writing nine of ten fields.
+        def fake_fred(series_id, key, units, decimals, start, end):
+            if series_id == "DGS2":  # -> us2y; the one deliberate failure
+                return (None, None, None, {})
+            return (1.23, "2026-07-17", "2026-07-18", {"2026-07-17": 1.23})
+
+        def fake_yahoo(symbol, decimals, range_="1y"):
+            return (99.9, "2026-07-17", "2026-07-17", {"2026-07-17": 99.9})
+
+        self.mod.fetch_fred_series = fake_fred
+        self.mod.fetch_yahoo_symbol = fake_yahoo
+
+        with self.assertRaises(SystemExit):
+            self.mod.main()
+
+        self.assertEqual(self._target_file_contents(), self.known_content)
 
 
 if __name__ == "__main__":

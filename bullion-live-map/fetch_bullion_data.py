@@ -3,9 +3,11 @@
 
 FRED (official, requires a free key) covers us2y, us10y, cpi_yoy, vix, ffr,
 wti_px, nfp_mom. Yahoo Finance's chart API (unofficial, undocumented, no key
-needed) covers gold_px, dxy, spx. A field that fails to fetch is simply
-omitted; bullion_mk11_constellation.html falls back to its own hardcoded
-baseline for anything missing.
+needed) covers gold_px, dxy, spx. If every field fetches, data.json is
+overwritten with the full set. If even one field fails to fetch, main()
+refuses to write anything and exits non-zero instead, leaving the previous
+(complete) data.json in place — a partial file, once written, is
+indistinguishable from a healthy one to the fields that did come through.
 
 Get a free FRED key at https://fred.stlouisfed.org/docs/api/api_key.html
 then save it with:
@@ -376,15 +378,10 @@ def main():
     generated_at = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     envelope = build_envelope(latest_out, history_by_date, generated_at)
 
-    with open(DATA_OUT_PATH, "w") as f:
-        json.dump(envelope, f, indent=2, sort_keys=True)
-        f.write("\n")
-
-    print(f"Wrote {DATA_OUT_PATH} (schema {SCHEMA_VERSION}) with "
-          f"{len(history_by_date)} dated entries and {len(envelope['fields'])} fields.")
-
     # Log every field's publication age so the tolerances above can be revised
-    # against observed behaviour instead of re-guessed.
+    # against observed behaviour instead of re-guessed. Printed before the
+    # completeness gate below so an operator can see exactly which field(s)
+    # are missing even on a run that aborts without writing.
     today = datetime.now(timezone.utc).date()
     print("\nPublication ages (freshness is judged on these, not ref_date):")
     for name in sorted(envelope["fields"]):
@@ -398,9 +395,25 @@ def main():
         age_str = f"{age}d" if age is not None else "n/a"
         print(f"  {name:10s} ref={fld['ref_date']} pub={pub} age={age_str:>5s} {state}{marker}")
 
+    # A partial fetch must never publish a truncated data.json: the daily
+    # cron commits whatever this writes, so a flaky minute at FRED would
+    # otherwise ship nine real fields and one silently-simulated one behind
+    # a green CI check. Yesterday's complete file, left untouched, is
+    # strictly better than today's truncated one — every run rebuilds the
+    # full rolling year from scratch anyway, so skipping a day loses nothing.
     missing = [f for f in FIELD_META if f not in envelope["fields"]]
     if missing:
-        print(f"\nFailed to fetch (map falls back to simulated baseline): {', '.join(missing)}")
+        print(f"\nFailed to fetch: {', '.join(missing)}", file=sys.stderr)
+        print("Refusing to write a truncated data.json; leaving the existing "
+              "file untouched.", file=sys.stderr)
+        sys.exit(1)
+
+    with open(DATA_OUT_PATH, "w") as f:
+        json.dump(envelope, f, indent=2, sort_keys=True)
+        f.write("\n")
+
+    print(f"\nWrote {DATA_OUT_PATH} (schema {SCHEMA_VERSION}) with "
+          f"{len(history_by_date)} dated entries and {len(envelope['fields'])} fields.")
     print()
     print(SOURCE_NOTE)
 

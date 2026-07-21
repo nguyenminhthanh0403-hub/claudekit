@@ -147,18 +147,100 @@ fetch('../bullion_mk11_constellation.html')
                               published:null, state:'unknown', ageDays:null}), null);
     }
 
+    // ── provenanceBadgeText: the header badge ──
+    // The badge used to read `Live as of {fetched_at}`, asserting a single
+    // currency date for ten fields with ten different publication schedules —
+    // and fetched_at is when the fetcher RAN, not when anything was published.
+    //
+    // Processed BEFORE provenanceSummaryText below: this block also declares
+    // EXPECTED_MEASURED_FIELDS (Fix 2), which provenanceSummaryText's source
+    // references by bare name. It is exported to window here, same pattern
+    // as PROV_MON_ABBR above, and must run first so that export exists by
+    // the time the summary block's indirect eval needs it.
+    const m5 = html.match(/PROVENANCE-BADGE-START([\s\S]*?)PROVENANCE-BADGE-END/);
+    if (!m5) { check('provenanceBadgeText present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
+      (0, eval)(m5[1].replace(/^[^\n]*\n/, '')
+        + '\n; window.provenanceBadgeText = provenanceBadgeText;'
+        + '  window.EXPECTED_MEASURED_FIELDS = EXPECTED_MEASURED_FIELDS;');
+
+      const TEN_FRESH_FIELDS = {
+        us2y:   {class:'measured', state:'fresh', published:'2026-07-19'},
+        us10y:  {class:'measured', state:'fresh', published:'2026-07-19'},
+        vix:    {class:'measured', state:'fresh', published:'2026-07-19'},
+        ffr:    {class:'measured', state:'fresh', published:'2026-07-19'},
+        wti_px: {class:'measured', state:'fresh', published:'2026-07-14'},
+        cpi_yoy:{class:'measured', state:'fresh', published:'2026-07-14'},
+        nfp_mom:{class:'measured', state:'fresh', published:'2026-07-03'},
+        gold_px:{class:'measured', state:'fresh', published:'2026-07-20'},
+        dxy:    {class:'measured', state:'fresh', published:'2026-07-20'},
+        spx:    {class:'measured', state:'fresh', published:'2026-07-20'},
+      };
+      window.TEN_FRESH_FIELDS = TEN_FRESH_FIELDS; // reused by the summary checks below
+
+      check('badge never asserts a currency date',
+        /as of|\d{4}-\d{2}-\d{2}/.test(provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}})),
+        false);
+      // Fix 2: presence is now judged against EXPECTED_MEASURED_FIELDS by
+      // name, not by raw entry count — two measured entries whose names
+      // don't match any of the ten expected fields is not "2 fields
+      // current", it's 0 of the ten expected fields present.
+      check('badge counts healthy fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}}),
+        '🟠 Live · 0 of 10 fields — 10 missing');
+      check('badge surfaces failing fields',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'flagged'}}}),
+        '🟠 Live · 1 of 2 may be failing');
+      check('badge says freshness unknown on a v1 file',
+        provenanceBadgeText({ok:true, schema:1, fields:{
+          a:{class:'measured', state:'unknown'}}}),
+        '🟢 Live · 1 fields · freshness unknown');
+      check('badge falls back to simulated when load failed',
+        provenanceBadgeText({ok:false, fields:{}}), '⚪ Simulated');
+      // Fix 2: a real expected field (gold_px) that is present but
+      // class:'simulated' — never happens for these ten in production, but
+      // proves the rule — must not count toward the present total even
+      // though its key exists in prov.fields.
+      check('badge ignores simulated fields in its count',
+        provenanceBadgeText({ok:true, schema:2, fields:
+          Object.assign({}, TEN_FRESH_FIELDS, {gold_px:{class:'simulated', state:'unknown'}})}),
+        '🟠 Live · 9 of 10 fields — 1 missing');
+
+      // Fix 2, new: all ten expected fields present and healthy — output
+      // format is unchanged from before the fix.
+      check('badge reports all ten fields current when all present',
+        provenanceBadgeText({ok:true, schema:2, fields: TEN_FRESH_FIELDS}),
+        '🟢 Live · 10 fields current');
+      // Fix 2, new: only three of ten survive a partial fetch — this is the
+      // exact defect the fix removes (nine missing fields must not read
+      // green just because the three survivors are individually healthy).
+      check('badge reports a shortfall for a partial fetch',
+        provenanceBadgeText({ok:true, schema:2, fields:{
+          us2y: TEN_FRESH_FIELDS.us2y, us10y: TEN_FRESH_FIELDS.us10y,
+          vix: TEN_FRESH_FIELDS.vix}}),
+        '🟠 Live · 3 of 10 fields — 7 missing');
+    }
+
     // ── provenanceSummaryText ──
     const m4 = html.match(/PROVENANCE-SUMMARY-START([\s\S]*?)PROVENANCE-SUMMARY-END/);
     if (!m4) { check('provenanceSummaryText present', false, true); }
     else {
       // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
       (0, eval)(m4[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceSummaryText = provenanceSummaryText;');
+      const TEN_FRESH_FIELDS = window.TEN_FRESH_FIELDS;
 
+      // Fix 2: same denominator change as the badge — two fields with
+      // unrecognised names is not "all fields present", it's a ten-field
+      // set missing all ten of its expected members.
       check('all fresh states the newest publication date',
         provenanceSummaryText({ok:true, schema:2, fields:{
           a:{class:'measured', state:'fresh', published:'2026-07-17'},
           b:{class:'measured', state:'fresh', published:'2026-07-14'}}}),
-        'All 2 measured fields are current — most recent publication Jul 17.');
+        '10 of 10 measured fields are missing from this data file: us2y, us10y, vix, ffr, wti_px, cpi_yoy, nfp_mom, gold_px, dxy, spx.');
       check('flagged fields are named',
         provenanceSummaryText({ok:true, schema:2, fields:{
           a:{class:'measured', state:'fresh', published:'2026-07-17'},
@@ -171,41 +253,18 @@ fetch('../bullion_mk11_constellation.html')
       check('failed load says so',
         provenanceSummaryText({ok:false, fields:{}}),
         'Live data unavailable — every number shown is simulated.');
-    }
 
-    // ── provenanceBadgeText: the header badge ──
-    // The badge used to read `Live as of {fetched_at}`, asserting a single
-    // currency date for ten fields with ten different publication schedules —
-    // and fetched_at is when the fetcher RAN, not when anything was published.
-    const m5 = html.match(/PROVENANCE-BADGE-START([\s\S]*?)PROVENANCE-BADGE-END/);
-    if (!m5) { check('provenanceBadgeText present', false, true); }
-    else {
-      // The leading '\n' is REQUIRED — see the note in the Task 6 checks.
-      (0, eval)(m5[1].replace(/^[^\n]*\n/, '') + '\n; window.provenanceBadgeText = provenanceBadgeText;');
-
-      check('badge never asserts a currency date',
-        /as of|\d{4}-\d{2}-\d{2}/.test(provenanceBadgeText({ok:true, schema:2, fields:{
-          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}})),
-        false);
-      check('badge counts healthy fields',
-        provenanceBadgeText({ok:true, schema:2, fields:{
-          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}}),
-        '🟢 Live · 2 fields current');
-      check('badge surfaces failing fields',
-        provenanceBadgeText({ok:true, schema:2, fields:{
-          a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'flagged'}}}),
-        '🟠 Live · 1 of 2 may be failing');
-      check('badge says freshness unknown on a v1 file',
-        provenanceBadgeText({ok:true, schema:1, fields:{
-          a:{class:'measured', state:'unknown'}}}),
-        '🟢 Live · 1 fields · freshness unknown');
-      check('badge falls back to simulated when load failed',
-        provenanceBadgeText({ok:false, fields:{}}), '⚪ Simulated');
-      check('badge ignores simulated fields in its count',
-        provenanceBadgeText({ok:true, schema:2, fields:{
-          a:{class:'measured', state:'fresh'},
-          fomc:{class:'simulated', state:'unknown'}}}),
-        '🟢 Live · 1 fields current');
+      // Fix 2, new: all ten present and healthy — unchanged output.
+      check('summary reports all ten fields current when all present',
+        provenanceSummaryText({ok:true, schema:2, fields: TEN_FRESH_FIELDS}),
+        'All 10 measured fields are current — most recent publication Jul 20.');
+      // Fix 2, new: only gold_px survives a partial fetch. The nine absent
+      // fields must be named, not silently folded into "all measured
+      // fields are current" — this is the exact defect the fix removes.
+      check('summary names missing fields on a partial fetch',
+        provenanceSummaryText({ok:true, schema:2, fields:{
+          gold_px: TEN_FRESH_FIELDS.gold_px}}),
+        '9 of 10 measured fields are missing from this data file: us2y, us10y, vix, ffr, wti_px, cpi_yoy, nfp_mom, dxy, spx.');
     }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))

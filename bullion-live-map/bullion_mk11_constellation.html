@@ -2675,6 +2675,32 @@ const METRIC_CELL_FIELD = {
 };
 
 function renderMetricProvenance() {
+  // A history date overrides the live source entirely (see currentLiveSource),
+  // and v1-shaped history rows carry no publication dates to derive a
+  // sub-line from. With Live Data toggled off, every value on the grid is
+  // the hardcoded simulated baseline. Either way, a provenance sub-line
+  // computed from window.BULLION_PROVENANCE (today's live fetch) would be
+  // describing a number that is not the one on screen — an invented value
+  // wearing a real publication date. Blank every sub-line and bail rather
+  // than trying to re-derive one.
+  if (selectedHistoryDate || !useLiveData) {
+    for (const suffix of Object.keys(METRIC_CELL_FIELD)) {
+      const el = document.getElementById('p-' + suffix);
+      if (!el) continue;
+      el.textContent = '';
+      el.className = 'prov-sub';
+      const cell = el.parentElement;
+      const labelEl = cell ? cell.querySelector('.metric-label') : null;
+      const dot = labelEl ? labelEl.querySelector('.prov-dot') : null;
+      if (dot) dot.remove();
+    }
+    const spreadEl = document.getElementById('p-spread');
+    if (spreadEl) {
+      spreadEl.textContent = '';
+      spreadEl.className = 'prov-sub';
+    }
+    return;
+  }
   const prov = window.BULLION_PROVENANCE;
   for (const [suffix, fieldName] of Object.entries(METRIC_CELL_FIELD)) {
     const el = document.getElementById('p-' + suffix);
@@ -3453,6 +3479,16 @@ function provenanceSummaryText(prov) {
     return flagged.length + ' of ' + entries.length + ' measured fields may be failing: '
          + flagged.join(', ') + '.' + newestTxt;
   }
+  // A field that failed to fetch is simply absent from prov.fields — it
+  // carries no state to be 'flagged', so silence here reads as health. Name
+  // what didn't survive rather than letting the fields that DID come
+  // through speak for a full set that never arrived.
+  const missing = EXPECTED_MEASURED_FIELDS.filter(name =>
+    !(prov.fields && prov.fields[name] && prov.fields[name].class === 'measured'));
+  if (missing.length) {
+    return missing.length + ' of ' + EXPECTED_MEASURED_FIELDS.length
+         + ' measured fields are missing from this data file: ' + missing.join(', ') + '.';
+  }
   return 'All ' + entries.length + ' measured fields are current — most recent publication '
        + PROV_MON_ABBR[Number(newest.slice(5, 7)) - 1] + ' ' + Number(newest.slice(8, 10)) + '.';
 }
@@ -3465,6 +3501,16 @@ function provenanceSummaryText(prov) {
 // not when anything was published. On a day when Core CPI's newest reading
 // describes June, "Live as of Jul 21" is simply false. The badge now reports
 // field counts and health, and never asserts a currency date.
+//
+// The ten measured fields this map expects, mirroring FIELD_META in
+// fetch_bullion_data.py. Without this list, "healthy" could only ever mean
+// "every field that happens to be present in the file is present" — a
+// partial fetch that dropped nine fields still reads 100% healthy against
+// itself. This is the denominator that catches that.
+const EXPECTED_MEASURED_FIELDS = [
+  'us2y', 'us10y', 'vix', 'ffr', 'wti_px', 'cpi_yoy', 'nfp_mom',
+  'gold_px', 'dxy', 'spx'
+];
 function provenanceBadgeText(prov) {
   if (!prov || !prov.ok) return '⚪ Simulated';
   const entries = Object.entries(prov.fields || {})
@@ -3474,6 +3520,13 @@ function provenanceBadgeText(prov) {
   if (flagged) return '🟠 Live · ' + flagged + ' of ' + entries.length + ' may be failing';
   if (entries.every(([, f]) => f.state === 'unknown')) {
     return '🟢 Live · ' + entries.length + ' fields · freshness unknown';
+  }
+  const present = EXPECTED_MEASURED_FIELDS.filter(name =>
+    prov.fields && prov.fields[name] && prov.fields[name].class === 'measured').length;
+  if (present < EXPECTED_MEASURED_FIELDS.length) {
+    const missingCount = EXPECTED_MEASURED_FIELDS.length - present;
+    return '🟠 Live · ' + present + ' of ' + EXPECTED_MEASURED_FIELDS.length
+         + ' fields — ' + missingCount + ' missing';
   }
   return '🟢 Live · ' + entries.length + ' fields current';
 }
