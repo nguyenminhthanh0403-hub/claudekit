@@ -3251,6 +3251,28 @@ buildGraph();
 buildLegend();
 updateMetrics();
 
+// ─── FRESHNESS-VERDICT-START ────────────────────────────────────────────────
+// Mirrors freshness_verdict() in fetch_bullion_data.py. Judged on a field's
+// PUBLICATION date, never its reference date: June CPI references 2026-06-01
+// but publishes 2026-07-14, so by reference it looks broken and by publication
+// it is on time. tests/freshness_test.html extracts this block by its marker
+// comments and asserts the same cases as the Python suite — renaming or
+// removing the markers breaks that test, which is intended.
+const CADENCE_TOLERANCE_DAYS = { daily: 7, monthly: 45, fomc: null };
+const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
+
+function freshnessVerdict(cadence, published, today, overrideDays) {
+  if (!published || cadence === 'fomc') return { state: 'unknown', ageDays: null };
+  const tolerance = (overrideDays != null) ? overrideDays : CADENCE_TOLERANCE_DAYS[cadence];
+  if (tolerance == null) return { state: 'unknown', ageDays: null };
+  // Parse as UTC midnight so DST never shifts a day boundary.
+  const ms = Date.parse(today + 'T00:00:00Z') - Date.parse(published + 'T00:00:00Z');
+  if (Number.isNaN(ms)) return { state: 'unknown', ageDays: null };
+  const ageDays = Math.round(ms / 86400000);
+  return { state: ageDays > tolerance ? 'flagged' : 'fresh', ageDays: ageDays };
+}
+// ─── FRESHNESS-VERDICT-END ──────────────────────────────────────────────────
+
 // Live data loads asynchronously after the first paint, so the page is
 // usable immediately on the simulated baseline, then upgrades in place.
 fetch('data.json')

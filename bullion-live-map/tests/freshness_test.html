@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>freshness tests</title></head>
+<body>
+<pre id="out">running…</pre>
+<script>
+const results = [];
+function check(name, actual, expected) {
+  const ok = JSON.stringify(actual) === JSON.stringify(expected);
+  results.push((ok ? 'PASS  ' : 'FAIL  ') + name +
+    (ok ? '' : `\n        expected ${JSON.stringify(expected)}, got ${JSON.stringify(actual)}`));
+}
+
+fetch('../bullion_mk11_constellation.html')
+  .then(r => r.text())
+  .then(html => {
+    const m = html.match(/FRESHNESS-VERDICT-START([\s\S]*?)FRESHNESS-VERDICT-END/);
+    if (!m) throw new Error('marker comments not found in bullion_mk11_constellation.html');
+    // Strip the trailing "// ───" of the opening marker line.
+    const src = m[1].replace(/^[^\n]*\n/, '');
+    // The extracted block ends mid line-comment (the "// ─── " lead-in of the
+    // closing marker, with no trailing newline) because the capture stops
+    // exactly at "FRESHNESS-VERDICT-END". Appending the window.X = X exports
+    // directly onto that would comment them out too, so a newline goes first
+    // to close the comment before the exports run.
+    (0, eval)(src + '\n; window.freshnessVerdict = freshnessVerdict;'
+                  + ' window.CADENCE_TOLERANCE_DAYS = CADENCE_TOLERANCE_DAYS;'
+                  + ' window.FIELD_TOLERANCE_OVERRIDE = FIELD_TOLERANCE_OVERRIDE;');
+
+    const TODAY = '2026-07-20';
+    const WTI = window.FIELD_TOLERANCE_OVERRIDE.wti_px;
+
+    check('daily within tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-14', TODAY), {state:'fresh', ageDays:6});
+    check('daily exactly at tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-13', TODAY), {state:'fresh', ageDays:7});
+    check('daily past tolerance is flagged',
+      freshnessVerdict('daily', '2026-07-12', TODAY), {state:'flagged', ageDays:8});
+    check('wti override keeps 8 days fresh',
+      freshnessVerdict('daily', '2026-07-12', TODAY, WTI), {state:'fresh', ageDays:8});
+    check('wti override still flags at 11 days',
+      freshnessVerdict('daily', '2026-07-09', TODAY, WTI), {state:'flagged', ageDays:11});
+    check('monthly within tolerance is fresh',
+      freshnessVerdict('monthly', '2026-06-06', TODAY), {state:'fresh', ageDays:44});
+    check('monthly past tolerance is flagged',
+      freshnessVerdict('monthly', '2026-06-04', TODAY), {state:'flagged', ageDays:46});
+    check('real-world CPI is fresh despite old reference period',
+      freshnessVerdict('monthly', '2026-07-14', TODAY), {state:'fresh', ageDays:6});
+    check('fomc cadence is unknown',
+      freshnessVerdict('fomc', '2026-07-14', TODAY), {state:'unknown', ageDays:null});
+    check('missing published date is unknown',
+      freshnessVerdict('daily', null, TODAY), {state:'unknown', ageDays:null});
+    check('unrecognised cadence is unknown',
+      freshnessVerdict('hourly', '2026-07-19', TODAY), {state:'unknown', ageDays:null});
+    check('tolerance table matches spec',
+      [window.CADENCE_TOLERANCE_DAYS.daily, window.CADENCE_TOLERANCE_DAYS.monthly,
+       window.CADENCE_TOLERANCE_DAYS.fomc, WTI], [7, 45, null, 10]);
+  })
+  .catch(e => results.push('FAIL  harness error: ' + e.message))
+  .finally(() => {
+    const failed = results.filter(r => r.startsWith('FAIL')).length;
+    document.getElementById('out').textContent =
+      results.join('\n') + `\n\n${results.length - failed}/${results.length} passed` +
+      (failed ? '\nRESULT: FAIL' : '\nRESULT: PASS');
+  });
+</script>
+</body>
+</html>
