@@ -38,10 +38,14 @@ fetch('../bullion_mk11_constellation.html')
       freshnessVerdict('daily', '2026-07-12', TODAY), {state:'flagged', ageDays:8});
     check('wti override keeps 8 days fresh',
       freshnessVerdict('daily', '2026-07-12', TODAY, WTI), {state:'fresh', ageDays:8});
+    check('wti override exactly at tolerance is fresh',
+      freshnessVerdict('daily', '2026-07-10', TODAY, WTI), {state:'fresh', ageDays:10});
     check('wti override still flags at 11 days',
       freshnessVerdict('daily', '2026-07-09', TODAY, WTI), {state:'flagged', ageDays:11});
     check('monthly within tolerance is fresh',
       freshnessVerdict('monthly', '2026-06-06', TODAY), {state:'fresh', ageDays:44});
+    check('monthly exactly at tolerance is fresh',
+      freshnessVerdict('monthly', '2026-06-05', TODAY), {state:'fresh', ageDays:45});
     check('monthly past tolerance is flagged',
       freshnessVerdict('monthly', '2026-06-04', TODAY), {state:'flagged', ageDays:46});
     check('real-world CPI is fresh despite old reference period',

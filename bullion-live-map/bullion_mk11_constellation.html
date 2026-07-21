@@ -3262,7 +3262,7 @@ const CADENCE_TOLERANCE_DAYS = { daily: 7, monthly: 45, fomc: null };
 const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
 
 function freshnessVerdict(cadence, published, today, overrideDays) {
-  if (!published || cadence === 'fomc') return { state: 'unknown', ageDays: null };
+  if (published == null || cadence === 'fomc') return { state: 'unknown', ageDays: null };
   const tolerance = (overrideDays != null) ? overrideDays : CADENCE_TOLERANCE_DAYS[cadence];
   if (tolerance == null) return { state: 'unknown', ageDays: null };
   // Parse as UTC midnight so DST never shifts a day boundary.
