@@ -103,6 +103,20 @@
      on top of the existing "dim everything else" behavior. */
   .node-g.focus-active .glow-ring { stroke-width: 3px; stroke-opacity: 0.95 !important; filter: url(#glow); }
   .node-g.focus-active .core { stroke-width: 2.6px; transform: scale(1.14); filter: url(#glow); }
+  /* Big (hub) nodes breathe with a soft radar-ping halo so the eye is drawn to
+     the clickable anchors first. Only the dedicated .hub-pulse ring animates,
+     so it never fights the core/glow-ring transforms used by focus/expand. */
+  .node-g .hub-pulse { display: none; }
+  .node-g.hub .hub-pulse {
+    display: block; pointer-events: none;
+    transform-box: fill-box; transform-origin: center;
+    animation: hubPulse 3.2s ease-in-out infinite;
+  }
+  .node-g.hub.satellite-hidden .hub-pulse { animation: none; opacity: 0; }
+  @keyframes hubPulse {
+    0%, 100% { transform: scale(1);    opacity: 0.32; }
+    50%      { transform: scale(1.45); opacity: 0;    }
+  }
   path.link-line { transition: opacity 0.32s ease; }
   path.link-line.dimmed { opacity: 0.06; }
   path.link-line.satellite-hidden { opacity: 0; pointer-events: none; }
@@ -426,9 +440,9 @@
       <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
       <button class="btn adv-control" id="expand-all-btn">Expand All</button>
       <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
-      <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
       <button class="btn adv-control" id="reset-view-btn">Reset View</button>
       <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
+      <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
     </div>
   </div>
   <div id="stage">
@@ -1289,7 +1303,16 @@ function buildGraph() {
     .attr('marker-end', d => d.sign>0 ? 'url(#arr-pos)' : d.sign<0 ? 'url(#arr-neg)' : 'url(#arr-amb)');
 
   const node = nodesLayer.selectAll('g.node-g').data(nodesData, d=>d.id).join('g')
-    .attr('class','node-g');
+    .attr('class', d => 'node-g' + (d.isHub ? ' hub' : ''));
+
+  // Soft breathing halo behind hubs (see .hub-pulse CSS). Appended first so it
+  // sits under the core; a staggered delay keeps the hubs from pulsing in lockstep.
+  node.append('circle').attr('class','hub-pulse')
+    .attr('r', d => d.r)
+    .attr('fill', 'none')
+    .attr('stroke', d => GROUP_COLOR[d.group])
+    .attr('stroke-width', d => d.isHub ? 2 : 1)
+    .style('animation-delay', (d,i) => (i % 6) * 0.45 + 's');
 
   node.append('circle').attr('class','glow-ring')
     .attr('r', d => d.r + (d.isHub?5:2))
@@ -1706,6 +1729,14 @@ document.getElementById('live-toggle-btn').addEventListener('click', function() 
   updateMetrics();
 });
 document.getElementById('reset-view-btn').addEventListener('click', () => {
+  // Full graph reset, regardless of what's currently selected or expanded:
+  // drop the sticky selection FIRST (clearFocus() early-returns while one is
+  // set), collapse every hub, close the detail panel, then re-center the zoom.
+  stickyFocusId = null;
+  allExpanded = false;
+  expandedHubs.clear();
+  applyVisibility();   // re-lays out to the collapsed graph and clears the dim/focus state
+  closeDetail();
   svg.transition().duration(400).call(zoomBehavior.transform, d3.zoomIdentity);
 });
 
