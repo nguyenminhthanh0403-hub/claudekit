@@ -189,35 +189,64 @@
   }
 
   /* ── Beginner Mode: a genuinely simplified canvas ───────────────────── */
-  /* Advanced controls are hidden while beginner mode is engaged. */
+  /* In beginner mode the header collapses to a single ⚙ Tools affordance;
+     every analyst control (Controls, Live Data, Expand/Collapse, Audit Log,
+     Reset View) is tagged .adv-control and hidden until Tools is opened. */
   #app.beginner-on .adv-control { display: none !important; }
+  #hint-banner { display: none; }  /* superseded by the guided coach card below */
 
-  #beginner-intro {
+  /* ⚙ Tools glows briefly once the visitor clicks their first dot, signalling
+     that the deeper toolkit is now one click away (progressive disclosure). */
+  #mode-toggle-btn.tools-ready { animation: toolsPulse 2s ease-out 3; }
+  @keyframes toolsPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(212,164,65,0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(212,164,65,0); }
+    100% { box-shadow: 0 0 0 0 rgba(212,164,65,0); }
+  }
+
+  /* Guided first-run coach: one step at a time, dismissible, beginner-mode only.
+     Replaces the old passive hint banner + static intro card with a sequential
+     walkthrough that advances as the visitor actually interacts with the map. */
+  #coach {
     position: fixed; top: 66px; left: 16px; z-index: 6; max-width: 300px;
     background: var(--bg-panel); border: 1px solid var(--gold-dim);
-    border-radius: 12px; padding: 14px 16px;
+    border-radius: 12px; padding: 14px 16px 12px;
     box-shadow: 0 10px 32px rgba(0,0,0,0.5);
     color: var(--text); font-size: 12.5px; line-height: 1.5;
   }
-  #app:not(.beginner-on) #beginner-intro { display: none; }
-  #beginner-intro.dismissed { display: none; }
-  #beginner-intro h3 { margin: 0 0 6px; font-size: 13px; color: var(--gold); font-weight: 600; }
-  #beginner-intro p { margin: 0 0 8px; color: var(--text-dim); }
-  #beginner-intro p:last-of-type { margin-bottom: 0; }
-  #beginner-intro b { color: var(--text); font-weight: 600; }
-  #bi-dismiss {
+  #app:not(.beginner-on) #coach { display: none; }
+  #coach.hidden { display: none; }
+  #coach-steps { display: flex; gap: 5px; margin-bottom: 10px; }
+  .coach-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
+  .coach-dot.on { background: var(--gold); }
+  #coach-title { margin: 0 0 6px; font-size: 13px; color: var(--gold); font-weight: 600; padding-right: 16px; }
+  #coach-body { color: var(--text-dim); }
+  #coach-body b { color: var(--text); font-weight: 600; }
+  #coach-actions { margin-top: 12px; display: flex; justify-content: flex-end; }
+  #coach-next { padding: 5px 12px; font-size: 12px; }
+  #coach-dismiss {
     position: absolute; top: 8px; right: 10px; cursor: pointer;
     background: none; border: none; color: var(--text-dim);
     font-size: 16px; line-height: 1; padding: 2px;
   }
-  #bi-dismiss:hover { color: var(--text); }
+  #coach-dismiss:hover { color: var(--text); }
+  /* Bouncing down-arrow shown on step 1, nudging the eye toward the glowing dots. */
+  #coach.point::after {
+    content: ''; position: absolute; left: 28px; bottom: -9px;
+    border: 9px solid transparent; border-top-color: var(--gold-dim);
+    animation: coachBounce 1.4s ease-in-out infinite;
+  }
+  @keyframes coachBounce {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(4px); }
+  }
 
   @media (max-width: 640px) {
     #header h1 { font-size: 13px; }
     #header .subtitle { display: none; }
     .btn { padding: 5px 8px; font-size: 10px; }
     #legend-box { display: none; }
-    #beginner-intro { max-width: none; left: 8px; right: 8px; top: 58px; font-size: 12px; }
+    #coach { max-width: none; left: 8px; right: 8px; top: 58px; font-size: 12px; }
     /* Bottom sheet on mobile: slides up from the bottom, leaving the graph
        reveal visible in the top portion of the screen. */
     #detail-panel {
@@ -389,35 +418,27 @@
   <div id="header">
     <div>
       <h1>US Financial System — Mk11 Column Constellation</h1>
-      <div class="subtitle" id="node-count-label">30 institutions · 58 relationships · scenarios + AI analysis · simulated data</div>
-      <div class="subtitle" id="live-badge" style="margin-top:2px"></div>
+      <div class="subtitle" id="node-count-label">See how one Fed move ripples through banks, the dollar, gold and inflation.</div>
+      <div class="subtitle adv-control" id="live-badge" style="margin-top:2px"></div>
     </div>
     <div id="header-controls">
       <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
       <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
       <button class="btn adv-control" id="expand-all-btn">Expand All</button>
       <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
-      <button class="btn active" id="mode-toggle-btn" title="Simplified beginner view — plain-language descriptions and a cleaner map. Click to switch to the full analyst tools.">Beginner Mode</button>
-      <button class="btn" id="reset-view-btn">Reset View</button>
+      <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
+      <button class="btn adv-control" id="reset-view-btn">Reset View</button>
       <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
     </div>
   </div>
   <div id="stage">
     <svg id="network-svg"></svg>
-    <div id="hint-banner">Nodes flow left to right as a causal story. Click a glowing hub to reveal and focus its connections. Click empty space to reset.</div>
-    <script>
-      // On touch devices, mention the long-press preview gesture instead of "hover".
-      if (('ontouchstart' in window) || (navigator.maxTouchPoints > 0)) {
-        document.getElementById('hint-banner').textContent =
-          'The map reads top to bottom as a causal story. Tap a glowing hub to reveal and focus its connections. Tap empty space to reset.';
-      }
-    </script>
-    <div id="beginner-intro">
-      <button id="bi-dismiss" title="Hide this" aria-label="Dismiss">&times;</button>
-      <h3>New here? Start with this.</h3>
-      <p>This map shows how the big pieces of the U.S. financial system push on each other — the <b>Fed</b>, banks, the <b>dollar</b>, <b>gold</b>, inflation and more.</p>
-      <p>Each <b>dot</b> is a player. Each <b>line</b> is a cause-and-effect link. <b>Click a glowing dot</b> to read what it is and what it moves.</p>
-      <p>Want live market data, scenario simulations and sources? Click <b>“Beginner Mode”</b> at the top to open the full analyst tools.</p>
+    <div id="coach" class="point">
+      <button id="coach-dismiss" title="Hide this" aria-label="Dismiss">&times;</button>
+      <div id="coach-steps"><span class="coach-dot on"></span><span class="coach-dot"></span><span class="coach-dot"></span></div>
+      <h3 id="coach-title">Start here</h3>
+      <div id="coach-body"></div>
+      <div id="coach-actions"><button class="btn" id="coach-next">Got it &rarr;</button></div>
     </div>
   </div>
 </div>
@@ -1294,6 +1315,7 @@ function buildGraph() {
 
   node.on('click', function(event, d) {
     event.stopPropagation();
+    onFirstInteraction();   // reveal the ⚙ Tools hint + advance the coach on the first real click
     stickyFocusId = d.id;
     if (d.isHub) {
       allExpanded = false;
@@ -1435,7 +1457,8 @@ function applyVisibility() {
   lastVisibleIds = vis;
 
   const anyExpanded = expandedHubs.size > 0;
-  document.getElementById('hint-banner').style.opacity = anyExpanded ? '0' : '1';
+  const hb = document.getElementById('hint-banner');
+  if (hb) hb.style.opacity = anyExpanded ? '0' : '1';   // hint banner retired in favour of #coach; guard the ref
   // Re-assert the sticky focus after any visibility change, so switching
   // modes or expanding hubs never silently wipes the dim state.
   if (stickyFocusId) focusNode(stickyFocusId); else clearFocus();
@@ -1596,7 +1619,9 @@ document.getElementById('collapse-all-btn').addEventListener('click', () => {
 });
 function applyBeginnerMode() {
   const btn = document.getElementById('mode-toggle-btn');
-  btn.textContent = beginnerMode ? 'Beginner Mode' : 'Full Analyst View';
+  // Beginner view hides everything behind one affordance ("⚙ Tools"); the full
+  // analyst view relabels the same button to a "back to simple" toggle.
+  btn.innerHTML = beginnerMode ? '&#9881; Tools' : '&#8249; Simple View';
   btn.classList.toggle('active', beginnerMode);
   document.getElementById('app').classList.toggle('beginner-on', beginnerMode);
   // Entering beginner mode: close the controls drawer so the canvas is actually clean
@@ -1606,15 +1631,65 @@ function applyBeginnerMode() {
   if (openDetailNode && document.getElementById('detail-panel').classList.contains('open')) {
     openDetail(openDetailNode);
   }
+  renderCoach();  // coach only lives in beginner mode; keep it in sync with the toggle
 }
+
+// ── Guided first-run coach ───────────────────────────────────────────────
+// A 3-step sequential walkthrough that replaces the old passive hint banner.
+// Step 1 auto-advances the moment the visitor clicks a dot (a "real" action);
+// the remaining steps advance on the Next button. Dismissed permanently once
+// finished or closed, and it never reappears when toggling modes.
+const COACH = [
+  { title: 'Start here',
+    body: 'This map shows how the big pieces of the U.S. financial system push on each other — the <b>Fed</b>, banks, the <b>dollar</b>, <b>gold</b> and inflation.<br><br><b>Click any glowing dot</b> to see what it is and what it moves.',
+    cta: 'Got it &rarr;', arrow: true },
+  { title: 'That card is the point',
+    body: 'Each dot opens a plain-English card — what the player is and what it pushes on. The <b>lines that just lit up</b> are its cause-and-effect links.',
+    cta: 'One more &rarr;', arrow: false },
+  { title: 'Reading the lines',
+    body: 'A <b style="color:#7bbf8e">green line</b> means one piece pushes the other <b>up</b>; a <b style="color:#e0654f">red line</b> pushes it <b>down</b>; a <b>dashed</b> line means the direction isn’t verified yet. (Full key: bottom-left.)<br><br>Ready for live market data, scenarios and sources? Open <b>&#9881; Tools</b>, top-right.',
+    cta: 'Done', arrow: false },
+];
+let coachStep = 0;
+let coachDone = false;
+let interacted = false;
+function renderCoach() {
+  const card = document.getElementById('coach');
+  if (!card) return;
+  if (coachDone || !beginnerMode) { card.classList.add('hidden'); return; }
+  card.classList.remove('hidden');
+  const s = COACH[coachStep];
+  document.getElementById('coach-title').innerHTML = s.title;
+  document.getElementById('coach-body').innerHTML = s.body;
+  document.getElementById('coach-next').innerHTML = s.cta;
+  card.classList.toggle('point', !!s.arrow);
+  document.querySelectorAll('#coach-steps .coach-dot')
+    .forEach((dot, i) => dot.classList.toggle('on', i === coachStep));
+}
+function coachAdvance() {
+  if (coachStep < COACH.length - 1) { coachStep++; renderCoach(); }
+  else dismissCoach();
+}
+function dismissCoach() {
+  coachDone = true;
+  const card = document.getElementById('coach');
+  if (card) card.classList.add('hidden');
+}
+// First genuine interaction: surface the ⚙ Tools glow and nudge the coach forward.
+function onFirstInteraction() {
+  if (interacted) return;
+  interacted = true;
+  document.getElementById('mode-toggle-btn').classList.add('tools-ready');
+  if (beginnerMode && !coachDone && coachStep === 0) { coachStep = 1; renderCoach(); }
+}
+document.getElementById('coach-next').addEventListener('click', coachAdvance);
+document.getElementById('coach-dismiss').addEventListener('click', dismissCoach);
+
 document.getElementById('mode-toggle-btn').addEventListener('click', function() {
   beginnerMode = !beginnerMode;
   applyBeginnerMode();
 });
-document.getElementById('bi-dismiss').addEventListener('click', function() {
-  document.getElementById('beginner-intro').classList.add('dismissed');
-});
-applyBeginnerMode();  // set initial simplified state on load
+applyBeginnerMode();  // set initial simplified state + render coach step 1 on load
 document.getElementById('live-toggle-btn').addEventListener('click', function() {
   // A picked history date overrides this toggle entirely (see currentLiveSource) —
   // the date picker disables this button while a date is active, but guard here too.
@@ -1701,8 +1776,10 @@ window.addEventListener('orientationchange', () => {
   resizeTimer = setTimeout(() => { recenterGraph(); }, 350);
 });
 
+// Plain-English frame for newcomers; the institution/relationship counts moved
+// to the Audit Log, where a reader who wants that density actually looks.
 document.getElementById('node-count-label').textContent =
-  `${NODES.length} institutions · ${LINKS.length} relationships · fixed causal-column layout · live & simulated data`;
+  'See how one Fed move ripples through banks, the dollar, gold and inflation.';
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -3038,7 +3115,8 @@ function openAuditLog() {
   const html =
     '<div class="audit-wrap">' +
       '<h2>Audit Log</h2>' +
-      '<p class="audit-note">Every causal number on this map, and how much you should trust it. ' +
+      '<p class="audit-note"><b>' + NODES.length + ' institutions · ' + LINKS.length + ' relationships</b> mapped across the U.S. financial system. ' +
+      'Below: every causal number on this map, and how much you should trust it. ' +
       'A polished render makes a guess look exactly like a measured coefficient. This page exists to break that illusion.</p>' +
       bar + conflicts + demotions + superseded + scenNote +
       rows('Causal links (' + LINKS.length + ')', linkRows) +
