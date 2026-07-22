@@ -2113,7 +2113,12 @@ const ELASTICITY = {
     spx_pct:  { v:-0.045,  conf:CONF.DIRECTIONAL, src:'Discount-rate channel. Sign is standard DCF; magnitude (~-4.5% per 100bp) is mine and is REGIME-DEPENDENT \u2014 the same hike in a growth boom can move equities up.' },
     gold_pct: { v:-0.030,  conf:CONF.DIRECTIONAL, src:'Gold pays no coupon, so higher real cash yields raise its opportunity cost. Sign holds against REAL rates; against NOMINAL rates it has broken down repeatedly (2022\u201324). Magnitude is mine.' },
     dxy_add:  { v: 2.20,   conf:CONF.DIRECTIONAL, src:'Rate-differential channel: higher US rates pull capital in. Sign standard; magnitude mine.' },
-    vix_add:  { v: 1.10,   conf:CONF.UNVERIFIED,  src:'' },
+    // vix_add (+1.10) deleted: tried to fit it (audit_fit_elasticities.py) and one year
+    // of data.json could not identify it. Fed funds spanned only 3.62-4.33 and moved one
+    // direction (a cutting cycle), so the levels fit came back wrong-signed (-3.8, t -5.4,
+    // spurious) and the first-difference fit was pure noise (t 0.4, R^2 0.001). A rate->vol
+    // magnitude is not defensible from this sample, so the cell is removed rather than left
+    // asserting a number.
   },
   vix: {
     spx_pct:  { v:-0.0085, conf:CONF.MEASURED,    src:'CBOE: VIX and SPX daily returns correlate about -0.74, the most reliable relationship on this map. Note the causal arrow is ambiguous \u2014 VIX is largely DERIVED from SPX option prices, so this is closer to an identity than a transmission.' },
@@ -2137,7 +2142,7 @@ const ELASTICITY = {
   },
   wti_px: {
     cpi_add:  { v: 0.028,  conf:CONF.MEASURED,    src:'IMF: roughly +0.3pp on HEADLINE CPI per +$10/bbl. CAVEAT: this map\u2019s CPI node is CORE, which strips energy \u2014 so the true core pass-through is much smaller and slower. This coefficient is knowingly generous.' },
-    spx_pct:  { v:-0.0010, conf:CONF.UNVERIFIED,  src:'' },
+    spx_pct:  { v:-0.0009, conf:CONF.DIRECTIONAL, src:'Fitted to data.json (audit_fit_elasticities.py): 244 daily aligned days, SPX same-day return on WTI $ change, slope -0.00088 (about -0.09% per +$1/bbl), r -0.32, t -5.3. Sign robust and magnitude data-backed, but this is a 1-year contemporaneous fit (R^2 ~0.10), not a structural beta.' },
     us10y:    { v: 0.0035, conf:CONF.DIRECTIONAL, src:'Oil feeds breakevens, which lift the long end. Sign standard; magnitude mine.' },
   },
 };
