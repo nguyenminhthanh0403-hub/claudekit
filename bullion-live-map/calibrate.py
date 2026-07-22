@@ -72,3 +72,59 @@ def verdict(hand_sign, fit):
     if abs(fit.get('t', 0)) <= 2:
         return 'directional', f"|t|={abs(fit['t']):.1f} not significant"
     return 'measured', f"sign matches, |t|={abs(fit['t']):.1f}, span={fit['x_span']:.3g}"
+
+
+# Driver field, target cell key, target field, kind, and the current hand value/sign
+# (hand values copied from ELASTICITY for the report; sign is what verdict checks).
+CELLS = [
+    ('ffr','us2y','us2y','level', 0.92),   ('ffr','us10y','us10y','level', 0.42),
+    ('ffr','spx_pct','spx','pct', -0.045), ('ffr','gold_pct','gold_px','pct', -0.030),
+    ('ffr','dxy_add','dxy','level', 2.20),
+    ('vix','spx_pct','spx','pct', -0.0085),('vix','us10y','us10y','level', -0.0090),
+    ('vix','gold_pct','gold_px','pct', 0.0045), ('vix','dxy_add','dxy','level', 0.080),
+    ('dxy','gold_pct','gold_px','pct', -0.0075), ('dxy','wti_pct','wti_px','pct', -0.0055),
+    ('dxy','spx_pct','spx','pct', -0.0020),
+    ('wti_px','spx_pct','spx','pct', -0.0009), ('wti_px','us10y','us10y','level', 0.0035),
+]
+
+
+def fit_cell(hist, train, drv_field, tgt_field, kind):
+    """First-difference fit of the target's daily change on the driver's daily change,
+    over dates in the training set where BOTH are present. pct targets use fractional
+    change; level/add targets use raw change."""
+    dates = [d for d in sorted(hist)
+             if d in train and drv_field in hist[d] and tgt_field in hist[d]]
+    xs = [float(hist[d][drv_field]) for d in dates]
+    ys = [float(hist[d][tgt_field]) for d in dates]
+    dxs, dys = first_diff(dates, xs, ys)
+    if kind == 'pct':
+        dys = [ (ys[i]-ys[i-1]) / ys[i-1] if ys[i-1] else 0.0 for i in range(1, len(ys)) ]
+    return ols(dxs, dys)
+
+
+def main():
+    import sys
+    path = sys.argv[1] if len(sys.argv) > 1 else 'data.json'
+    doc = json.load(open(path))
+    hist = doc['history'] if isinstance(doc, dict) and 'history' in doc else doc
+    train = train_split(list(hist.keys()))
+    lines = [f"Bullion Mk12 calibration — train split {len(train)} days "
+             f"(first 80% of {len(hist)}); first-difference OLS.\n"]
+    for drv, tgtkey, tgtfield, kind, hand in CELLS:
+        fit = fit_cell(hist, train, drv, tgtfield, kind)
+        hand_sign = 1 if hand > 0 else -1
+        if 'error' in fit:
+            lines.append(f"{drv:7s}-> {tgtkey:9s}  FIT FAILED: {fit['error']}")
+            continue
+        tier, why = verdict(hand_sign, fit)
+        lines.append(
+            f"{drv:7s}-> {tgtkey:9s}  n={fit['n']:3d}  span={fit['x_span']:.3g}  "
+            f"slope={fit['slope']:+.5g}  hand={hand:+.4g}  r={fit['r']:+.2f}  "
+            f"t={fit['t']:+.1f}  =>  {tier.upper()} ({why})")
+    report = "\n".join(lines) + "\n"
+    print(report)
+    open('calibration_report.txt', 'w').write(report)
+
+
+if __name__ == '__main__':
+    main()
