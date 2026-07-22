@@ -2267,11 +2267,11 @@ const CONF = { MEASURED:'measured', DIRECTIONAL:'directional', UNVERIFIED:'unver
 //   v = change in target per +1 unit of driver move from baseline.
 const ELASTICITY = {
   ffr: {
-    us2y:     { v: 0.92,   conf:CONF.MEASURED,    src:'FRED FEDFUNDS vs DGS2, corr >0.9. The 2Y is the market\u2019s average expected FFR, so this is near 1-for-1 by construction.' },
-    us10y:    { v: 0.42,   conf:CONF.DIRECTIONAL, src:'Long end moves less than the short end \u2014 robust and well documented. The 0.42 magnitude is my read of typical hiking cycles, not a fitted beta. Check FRED DGS10 vs FEDFUNDS.' },
-    spx_pct:  { v:-0.045,  conf:CONF.DIRECTIONAL, src:'Discount-rate channel. Sign is standard DCF; magnitude (~-4.5% per 100bp) is mine and is REGIME-DEPENDENT \u2014 the same hike in a growth boom can move equities up.' },
-    gold_pct: { v:-0.030,  conf:CONF.DIRECTIONAL, src:'Gold pays no coupon, so higher real cash yields raise its opportunity cost. Sign holds against REAL rates; against NOMINAL rates it has broken down repeatedly (2022\u201324). Magnitude is mine.' },
-    dxy_add:  { v: 2.20,   conf:CONF.DIRECTIONAL, src:'Rate-differential channel: higher US rates pull capital in. Sign standard; magnitude mine.' },
+    us2y:     { v: 0.92,   conf:CONF.MEASURED,    src:'FRED FEDFUNDS vs DGS2, corr >0.9. The 2Y is the market\u2019s average expected FFR, so this is near 1-for-1 by construction. Fit check (calibrate.py): slope -0.0681, t -0.6 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
+    us10y:    { v: 0.42,   conf:CONF.DIRECTIONAL, src:'Long end moves less than the short end \u2014 robust and well documented. The 0.42 magnitude is my read of typical hiking cycles, not a fitted beta. Check FRED DGS10 vs FEDFUNDS. Fit check (calibrate.py): slope -0.1231, t -1.3 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
+    spx_pct:  { v:-0.045,  conf:CONF.DIRECTIONAL, src:'Discount-rate channel. Sign is standard DCF; magnitude (~-4.5% per 100bp) is mine and is REGIME-DEPENDENT \u2014 the same hike in a growth boom can move equities up. Fit check (calibrate.py): slope 0.0075, t 0.4 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
+    gold_pct: { v:-0.030,  conf:CONF.DIRECTIONAL, src:'Gold pays no coupon, so higher real cash yields raise its opportunity cost. Sign holds against REAL rates; against NOMINAL rates it has broken down repeatedly (2022\u201324). Magnitude is mine. Fit check (calibrate.py): slope -0.0114, t -0.3 \u2014 |t|=0.3 not significant, so the hand magnitude is kept.' },
+    dxy_add:  { v: 2.20,   conf:CONF.DIRECTIONAL, src:'Rate-differential channel: higher US rates pull capital in. Sign standard; magnitude mine. Fit check (calibrate.py): slope -0.5426, t -0.6 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
     // vix_add (+1.10) deleted: tried to fit it (audit_fit_elasticities.py) and one year
     // of data.json could not identify it. Fed funds spanned only 3.62-4.33 and moved one
     // direction (a cutting cycle), so the levels fit came back wrong-signed (-3.8, t -5.4,
@@ -2280,10 +2280,10 @@ const ELASTICITY = {
     // asserting a number.
   },
   vix: {
-    spx_pct:  { v:-0.0085, conf:CONF.MEASURED,    src:'CBOE: VIX and SPX daily returns correlate about -0.74, the most reliable relationship on this map. Note the causal arrow is ambiguous \u2014 VIX is largely DERIVED from SPX option prices, so this is closer to an identity than a transmission.' },
-    us10y:    { v:-0.0090, conf:CONF.DIRECTIONAL, src:'Flight-to-quality bid for Treasuries. Sign is reliable in risk-off, but it INVERTS in an inflation shock (2022) when stocks and bonds sell off together. Magnitude mine.' },
-    gold_pct: { v: 0.0045, conf:CONF.DIRECTIONAL, src:'Safe-haven bid. Sign is conventional but gold sold off in the March 2020 dash-for-cash, so this fails in exactly the crises it is meant to describe. Magnitude mine.' },
-    dxy_add:  { v: 0.080,  conf:CONF.DIRECTIONAL, src:'USD is the global funding currency; stress bids it (BIS on dollar funding). Magnitude mine.' },
+    spx_pct:  { v:-0.0085, conf:CONF.MEASURED,    src:'CBOE: VIX and SPX daily returns correlate about -0.74, the most reliable relationship on this map. Note the causal arrow is ambiguous \u2014 VIX is largely DERIVED from SPX option prices, so this is closer to an identity than a transmission. Fit check (calibrate.py, train split): slope -0.0042, t -22.7 \u2014 about half the CBOE-correlation value; the identity-anchored number is kept as primary.' },
+    us10y:    { v:-0.0090, conf:CONF.DIRECTIONAL, src:'Flight-to-quality bid for Treasuries. Sign is reliable in risk-off, but it INVERTS in an inflation shock (2022) when stocks and bonds sell off together. Magnitude mine. Fit check (calibrate.py): slope 0.0013, t 0.8 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
+    gold_pct: { v: 0.0045, conf:CONF.DIRECTIONAL, src:'Safe-haven bid. Sign is conventional but gold sold off in the March 2020 dash-for-cash, so this fails in exactly the crises it is meant to describe. Magnitude mine. Fit check (calibrate.py): slope -0.0009, t -1.2 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
+    dxy_add:  { v: 0.080,  conf:CONF.DIRECTIONAL, src:'USD is the global funding currency; stress bids it (BIS on dollar funding). Magnitude mine. Fit check (calibrate.py): slope 0.0243, t 1.5 \u2014 |t|=1.5 not significant, so the hand magnitude is kept.' },
   },
   cpi_yoy: {
     us2y:     { v: 0.35,   conf:CONF.DIRECTIONAL, src:'Hot inflation raises the expected Fed path, which the 2Y prices. Sign robust; magnitude mine.' },
@@ -2295,14 +2295,14 @@ const ELASTICITY = {
     gold_pct: { v: 0.025,  conf:CONF.DIRECTIONAL, src:'Inflation-hedge demand lifts gold. Sign is conventional but WEAK and regime-dependent - gold fell in real terms through the 2021-22 inflation spike, exactly when it was meant to protect. Magnitude is mine.' },
   },
   dxy: {
-    gold_pct: { v:-0.0075, conf:CONF.MEASURED,    src:'Near-mechanical: gold is quoted in USD, so a stronger dollar lowers the dollar price for an unchanged world price. This is closer to an accounting identity than a behavioural link.' },
-    wti_pct:  { v:-0.0055, conf:CONF.MEASURED,    src:'Same denomination mechanism as gold \u2014 oil is invoiced in USD. See EIA / BIS on dollar invoicing.' },
-    spx_pct:  { v:-0.0020, conf:CONF.DIRECTIONAL, src:'Roughly 40% of S&P 500 revenue is earned abroad (S&P Dow Jones Indices), so a strong dollar shrinks translated revenue. Share is sourced; the elasticity is mine.' },
+    gold_pct: { v:-0.0075, conf:CONF.MEASURED,    src:'Near-mechanical: gold is quoted in USD, so a stronger dollar lowers the dollar price for an unchanged world price. This is closer to an accounting identity than a behavioural link. Fit check (calibrate.py): slope -0.0147, t -4.5 \u2014 about twice the denomination-identity value (the 1-year fit also picks up behavioural dollar effects); the identity number is kept.' },
+    wti_pct:  { v:-0.0055, conf:CONF.MEASURED,    src:'Same denomination mechanism as gold \u2014 oil is invoiced in USD. See EIA / BIS on dollar invoicing. Fit check (calibrate.py): slope +0.0275 (t 4.8) came back POSITIVE over this 1-year sample \u2014 risk-on co-movement swamped the USD-invoicing effect in-sample. The denomination identity is kept; the sign flip is NOT adopted.' },
+    spx_pct:  { v:-0.0045, conf:CONF.MEASURED,    src:'Fitted to data.json (calibrate.py, train split): 201 daily first-difference days, SPX% change on DXY change, slope -0.0045, r -0.21, t -3.1. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
   wti_px: {
     cpi_add:  { v: 0.028,  conf:CONF.MEASURED,    src:'IMF: roughly +0.3pp on HEADLINE CPI per +$10/bbl. CAVEAT: this map\u2019s CPI node is CORE, which strips energy \u2014 so the true core pass-through is much smaller and slower. This coefficient is knowingly generous.' },
-    spx_pct:  { v:-0.0009, conf:CONF.DIRECTIONAL, src:'Fitted to data.json (audit_fit_elasticities.py): 244 daily aligned days, SPX same-day return on WTI $ change, slope -0.00088 (about -0.09% per +$1/bbl), r -0.32, t -5.3. Sign robust and magnitude data-backed, but this is a 1-year contemporaneous fit (R^2 ~0.10), not a structural beta.' },
-    us10y:    { v: 0.0035, conf:CONF.DIRECTIONAL, src:'Oil feeds breakevens, which lift the long end. Sign standard; magnitude mine.' },
+    spx_pct:  { v:-0.0010, conf:CONF.MEASURED,    src:'Fitted to data.json (calibrate.py, train split): 200 daily first-difference days, SPX% change on WTI $ change, slope -0.00095, r -0.35, t -5.2. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+    us10y:    { v: 0.0046, conf:CONF.MEASURED,    src:'Fitted to data.json (calibrate.py, train split): 199 daily first-difference days, US10Y change on WTI $ change, slope 0.0046, r 0.34, t 5.0. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
 };
 
