@@ -2648,10 +2648,10 @@ const SCENARIOS = {
 
   cpi_rise: {
     label:'CPI Rise',
-    drivers:{ cpi_yoy:+1.0 },
+    drivers:{ cpi_yoy:+1.0, ffr:+0.5 },
     exogenous:{},
     fomc:{ hike:0.58, hold:0.38, cut:0.04 },
-    note:'Core CPI +1pp. Derived. Note the model does NOT let this feed back into the FFR \u2014 in reality the Fed would respond, and that loop is unmodelled.' },
+    note:'Core CPI +1pp, plus a +0.5pp bump to the policy-rate driver standing in for the hawkish repricing a hot print provokes \u2014 markets pull forward expected hikes before the Fed moves. That rate channel is what carries the shock onto the map, through the SOURCED ffr\u2192node elasticities, rather than the unsourced direct CPI\u2192node cells removed in the provenance audit. The rate bump is a proxy for expectations, not an actual Fed move; the honest footprint is a duration hit to long-dated tech, with gold\u2019s inflation bid and rate drag roughly cancelling.' },
 
   usd_shock: {
     label:'Dollar Shock',
