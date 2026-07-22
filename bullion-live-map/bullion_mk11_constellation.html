@@ -3225,12 +3225,30 @@ function openAuditLog() {
       elasRows.push({ name: d + ' \u2192 ' + t + ' <i>(node)</i>', val: c.v, conf: c.conf, src: c.src })));
   elasRows.sort((a, b) => a.conf.localeCompare(b.conf));
 
+  const bt = backtestModel();
+  const btPct = x => (100 * x).toFixed(0) + '%';
+  const btRows = bt && bt.fields.length
+    ? bt.fields.map(f =>
+        '<tr><td>' + f.label + '</td><td>' + f.n + '</td><td>' + btPct(f.hitRate) +
+        '</td><td>' + f.r2.toFixed(2) + '</td></tr>').join('')
+    : '<tr><td colspan="4"><i>Not enough held-out history yet.</i></td></tr>';
+  const backtestSection =
+    '<h3>Model accuracy — backtested on the held-out tail' +
+    (bt ? ' (' + (bt.testLen - 1) + ' most-recent days)' : '') + '</h3>' +
+    '<p class="audit-note">Each field’s predicted daily change (all fittable drivers, ' +
+    'summed through the elasticity matrix) vs. what actually happened, on the last 20% of ' +
+    'history the calibration never saw. <b>This is a same-day co-movement test, not a forecast</b> ' +
+    '(no lag modelled). Node colours are NOT graded here — concept nodes have no time series.</p>' +
+    '<table class="audit-table"><tr><th>Field</th><th>Days</th><th>Direction hit-rate</th><th>R² of change</th></tr>' +
+    btRows + '</table>';
+
   const html =
     '<div class="audit-wrap">' +
       '<h2>Audit Log</h2>' +
       '<p class="audit-note"><b>' + NODES.length + ' institutions · ' + LINKS.length + ' relationships</b> mapped across the U.S. financial system. ' +
       'Below: every causal number on this map, and how much you should trust it. ' +
       'A polished render makes a guess look exactly like a measured coefficient. This page exists to break that illusion.</p>' +
+      backtestSection +
       bar + conflicts + demotions + superseded + scenNote +
       rows('Causal links (' + LINKS.length + ')', linkRows) +
       rows('Elasticity coefficients (' + elasRows.length + ')', elasRows) +
