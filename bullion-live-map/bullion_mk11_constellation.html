@@ -3101,6 +3101,66 @@ async function runAIAnalysis() {
   btn.innerHTML='Run AI analysis \u2197';
 }
 
+// ── Mk12 backtest ────────────────────────────────────────────────────────
+// Per target field, predicted daily change = sum over fittable drivers (present
+// both days) of ELASTICITY[driver][cell].v * driver change. Compared to the
+// realised change on the held-out tail (last 20% of loaded history — same split
+// as calibrate.py). CONTEMPORANEOUS same-day test: measures co-movement, NOT
+// forecasting. Node colours are not in scope here (their targets have no series).
+// Driver→cell map per target field, built explicitly from the 14 fittable cells:
+const BACKTEST_MAP = {
+  us2y:    { kind:'level', cells:{ ffr:'us2y' } },
+  us10y:   { kind:'level', cells:{ ffr:'us10y', vix:'us10y', wti_px:'us10y' } },
+  spx:     { kind:'pct',   cells:{ ffr:'spx_pct', vix:'spx_pct', dxy:'spx_pct', wti_px:'spx_pct' } },
+  gold_px: { kind:'pct',   cells:{ ffr:'gold_pct', vix:'gold_pct', dxy:'gold_pct' } },
+  wti_px:  { kind:'pct',   cells:{ dxy:'wti_pct' } },
+  dxy:     { kind:'level', cells:{ ffr:'dxy_add', vix:'dxy_add' } },
+};
+const BACKTEST_LABEL = { us2y:'2Y yield', us10y:'10Y yield', spx:'S&P 500',
+                         gold_px:'Gold', wti_px:'WTI oil', dxy:'Dollar (DXY)' };
+const DRIVER_FIELD = { ffr:'ffr', vix:'vix', dxy:'dxy', wti_px:'wti_px' };
+
+function backtestModel() {
+  const H = window.BULLION_LIVE_HISTORY;
+  if (!H) return null;
+  const dates = Object.keys(H).sort();
+  const cut = Math.floor(0.8 * dates.length);
+  const testDates = dates.slice(cut);
+  const fields = [];
+  Object.entries(BACKTEST_MAP).forEach(([field, spec]) => {
+    let n = 0, hits = 0, ssRes = 0, ssTot = 0, sy = 0, sy2 = 0;
+    const preds = [], acts = [];
+    for (let i = 1; i < testDates.length; i++) {
+      const d0 = testDates[i-1], d1 = testDates[i];
+      const r0 = H[d0], r1 = H[d1];
+      if (!(field in r0) || !(field in r1)) continue;
+      let pred = 0, haveDriver = false;
+      Object.entries(spec.cells).forEach(([drv, cellKey]) => {
+        const f = DRIVER_FIELD[drv];
+        if (f in r0 && f in r1 && ELASTICITY[drv] && ELASTICITY[drv][cellKey]) {
+          pred += ELASTICITY[drv][cellKey].v * (r1[f] - r0[f]);
+          haveDriver = true;
+        }
+      });
+      if (!haveDriver) continue;
+      const act = spec.kind === 'pct'
+        ? (r0[field] ? (r1[field] - r0[field]) / r0[field] : 0)
+        : (r1[field] - r0[field]);
+      preds.push(pred); acts.push(act); n++;
+      if ((pred > 0 && act > 0) || (pred < 0 && act < 0) || (pred === 0 && act === 0)) hits++;
+      sy += act; sy2 += act * act;
+    }
+    if (n >= 3) {
+      const my = sy / n;
+      ssTot = sy2 - n * my * my;
+      for (let j = 0; j < preds.length; j++) ssRes += (acts[j] - preds[j]) ** 2;
+      const r2 = ssTot > 0 ? Math.max(0, 1 - ssRes / ssTot) : 0;
+      fields.push({ field, label: BACKTEST_LABEL[field], n, hitRate: hits / n, r2 });
+    }
+  });
+  return { split: cut, testLen: testDates.length, fields };
+}
+
 // ─── AUDIT LOG ──────────────────────────────────────────────────────────────
 // Mk8 had this. Mk9 dropped it, along with the conf/src fields it read, and folded
 // everything into one prose `stat` string. That made the map look MORE authoritative
