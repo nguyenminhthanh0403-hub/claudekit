@@ -188,11 +188,36 @@
     transition: opacity 0.3s;
   }
 
+  /* ── Beginner Mode: a genuinely simplified canvas ───────────────────── */
+  /* Advanced controls are hidden while beginner mode is engaged. */
+  #app.beginner-on .adv-control { display: none !important; }
+
+  #beginner-intro {
+    position: fixed; top: 66px; left: 16px; z-index: 6; max-width: 300px;
+    background: var(--bg-panel); border: 1px solid var(--gold-dim);
+    border-radius: 12px; padding: 14px 16px;
+    box-shadow: 0 10px 32px rgba(0,0,0,0.5);
+    color: var(--text); font-size: 12.5px; line-height: 1.5;
+  }
+  #app:not(.beginner-on) #beginner-intro { display: none; }
+  #beginner-intro.dismissed { display: none; }
+  #beginner-intro h3 { margin: 0 0 6px; font-size: 13px; color: var(--gold); font-weight: 600; }
+  #beginner-intro p { margin: 0 0 8px; color: var(--text-dim); }
+  #beginner-intro p:last-of-type { margin-bottom: 0; }
+  #beginner-intro b { color: var(--text); font-weight: 600; }
+  #bi-dismiss {
+    position: absolute; top: 8px; right: 10px; cursor: pointer;
+    background: none; border: none; color: var(--text-dim);
+    font-size: 16px; line-height: 1; padding: 2px;
+  }
+  #bi-dismiss:hover { color: var(--text); }
+
   @media (max-width: 640px) {
     #header h1 { font-size: 13px; }
     #header .subtitle { display: none; }
     .btn { padding: 5px 8px; font-size: 10px; }
     #legend-box { display: none; }
+    #beginner-intro { max-width: none; left: 8px; right: 8px; top: 58px; font-size: 12px; }
     /* Bottom sheet on mobile: slides up from the bottom, leaving the graph
        reveal visible in the top portion of the screen. */
     #detail-panel {
@@ -368,13 +393,13 @@
       <div class="subtitle" id="live-badge" style="margin-top:2px"></div>
     </div>
     <div id="header-controls">
-      <button class="btn" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
-      <button class="btn active" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
-      <button class="btn" id="expand-all-btn">Expand All</button>
-      <button class="btn" id="collapse-all-btn">Collapse All</button>
-      <button class="btn" id="mode-toggle-btn">Beginner Mode</button>
+      <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
+      <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
+      <button class="btn adv-control" id="expand-all-btn">Expand All</button>
+      <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
+      <button class="btn active" id="mode-toggle-btn" title="Simplified beginner view — plain-language descriptions and a cleaner map. Click to switch to the full analyst tools.">Beginner Mode</button>
       <button class="btn" id="reset-view-btn">Reset View</button>
-      <button class="btn" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
+      <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
     </div>
   </div>
   <div id="stage">
@@ -387,6 +412,13 @@
           'The map reads top to bottom as a causal story. Tap a glowing hub to reveal and focus its connections. Tap empty space to reset.';
       }
     </script>
+    <div id="beginner-intro">
+      <button id="bi-dismiss" title="Hide this" aria-label="Dismiss">&times;</button>
+      <h3>New here? Start with this.</h3>
+      <p>This map shows how the big pieces of the U.S. financial system push on each other — the <b>Fed</b>, banks, the <b>dollar</b>, <b>gold</b>, inflation and more.</p>
+      <p>Each <b>dot</b> is a player. Each <b>line</b> is a cause-and-effect link. <b>Click a glowing dot</b> to read what it is and what it moves.</p>
+      <p>Want live market data, scenario simulations and sources? Click <b>“Beginner Mode”</b> at the top to open the full analyst tools.</p>
+    </div>
   </div>
 </div>
 
@@ -1090,7 +1122,8 @@ NODES.forEach(n => neighborsOf[n.id] = new Set());
 LINKS.forEach(l => { neighborsOf[l.s].add(l.t); neighborsOf[l.t].add(l.s); });
 
 let expandedHubs = new Set();   // hub ids the user has clicked open
-let expertMode = false;
+let beginnerMode = true;        // simplified canvas + plain-language node text; default for new visitors
+let openDetailNode = null;      // the node whose detail panel is currently open, so it can re-render on mode switch
 let activeLayers = new Set(LAYER_ORDER); // layer filter state
 
 let allExpanded = false; // true only while "Expand All" is active
@@ -1532,9 +1565,10 @@ function arrowGlyphs(l) {
 
 // ── Detail panel ────────────────────────────────────────────────────────
 function openDetail(d) {
+  openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
   document.getElementById('detail-layer').textContent = LAYER_LABELS[d.group] || '';
-  const bullets = (expertMode && d.expert) ? d.expert : d.beginner;
+  const bullets = (!beginnerMode && d.expert) ? d.expert : d.beginner;
   const ul = document.getElementById('detail-bullets');
   ul.innerHTML = (bullets||[]).map(b => `<li>${enrichText(b)}</li>`).join('');
   buildRelationships(d);
@@ -1542,6 +1576,7 @@ function openDetail(d) {
   document.getElementById('app').classList.add('panel-open');
 }
 function closeDetail() {
+  openDetailNode = null;
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('app').classList.remove('panel-open');
 }
@@ -1559,11 +1594,27 @@ document.getElementById('collapse-all-btn').addEventListener('click', () => {
   applyVisibility();
   closeDetail();
 });
+function applyBeginnerMode() {
+  const btn = document.getElementById('mode-toggle-btn');
+  btn.textContent = beginnerMode ? 'Beginner Mode' : 'Full Analyst View';
+  btn.classList.toggle('active', beginnerMode);
+  document.getElementById('app').classList.toggle('beginner-on', beginnerMode);
+  // Entering beginner mode: close the controls drawer so the canvas is actually clean
+  // (its toggle button is hidden, so a left-open drawer would otherwise be stranded).
+  if (beginnerMode) document.getElementById('control-drawer').classList.remove('open');
+  // If a node panel is open, re-render it at the new reading depth (plain vs technical).
+  if (openDetailNode && document.getElementById('detail-panel').classList.contains('open')) {
+    openDetail(openDetailNode);
+  }
+}
 document.getElementById('mode-toggle-btn').addEventListener('click', function() {
-  expertMode = !expertMode;
-  this.textContent = expertMode ? 'Expert Mode' : 'Beginner Mode';
-  this.classList.toggle('active', expertMode);
+  beginnerMode = !beginnerMode;
+  applyBeginnerMode();
 });
+document.getElementById('bi-dismiss').addEventListener('click', function() {
+  document.getElementById('beginner-intro').classList.add('dismissed');
+});
+applyBeginnerMode();  // set initial simplified state on load
 document.getElementById('live-toggle-btn').addEventListener('click', function() {
   // A picked history date overrides this toggle entirely (see currentLiveSource) —
   // the date picker disables this button while a date is active, but guard here too.
@@ -3089,7 +3140,8 @@ document.addEventListener('click', (e) => {
 });
 
 // Keep the expert/beginner toggle in sync so the drawer's descriptions match.
-// (mode-toggle-btn already flips expertMode in the existing Mk5 handler.)
+// (mode-toggle-btn flips beginnerMode via applyBeginnerMode(); node detail text
+//  keys off !beginnerMode in openDetail.)
 
 // ─── METRIC GUIDE (Mk9) ─────────────────────────────────────────────────────
 // The map used to show US2Y, VIX, DXY and so on with no explanation of what any
