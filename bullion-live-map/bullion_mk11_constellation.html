@@ -2952,15 +2952,37 @@ function renderLiveBadge(s) {
   }
 }
 
+// Reveal only the parts of the map a shock actually reaches. A scenario recolours
+// every node whose multiplier clears the recolour cutoff; this opens just the hubs
+// needed to show those nodes — the hit hubs themselves, plus any hub holding an
+// affected satellite — and collapses the rest. Far less motion than exploding the
+// whole graph, and it doubles as a map of where the shock lands. Requires
+// nodeMultipliers to be current (call applyTransmission first).
+function expandAffected() {
+  const CUTOFF = 0.05;   // must match the node-recolour threshold in updateGraph()
+  const affected = new Set();
+  Object.keys(NODE_MAP).forEach(k => {
+    if (Math.abs(nodeMultipliers[k] || 0) > CUTOFF) affected.add(NODE_MAP[k]);
+  });
+  allExpanded = false;
+  expandedHubs.clear();   // recompute the scenario's footprint fresh on every run
+  HUB_IDS.forEach(h => {
+    if (affected.has(h)) { expandedHubs.add(h); return; }   // hit hub: open its branch
+    for (const nb of neighborsOf[h]) {                      // else open it only to
+      if (affected.has(nb) && isSatellite(nb)) { expandedHubs.add(h); break; } // surface an affected satellite
+    }
+  });
+  applyVisibility();
+}
+
 function triggerShock(type) {
   state = buildBaseState(); state.shock = type;
   const ex = document.getElementById('scenario-explain');
   if (ex) ex.textContent = SCENARIO_EXPLAIN[type] || '';
-  // Mk5 hides collapsed nodes; a shock recolors the whole system, so expand
-  // everything first, otherwise the effect on hidden nodes would be invisible.
-  allExpanded = true;
-  HUB_IDS.forEach(id => expandedHubs.add(id));
-  applyVisibility();
+  // Compute this shock's node multipliers first, then reveal only the branches it
+  // reaches (rather than exploding the whole map). updateMetrics recolours after.
+  applyTransmission(state);
+  expandAffected();
   updateMetrics();
   if (SHOCK_WHY[type]) {
     const sorted = Object.fromEntries(Object.entries(nodeMultipliers).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])));
@@ -3390,9 +3412,10 @@ function runManual() {
   if (!manualIsDirty()) { resetState(); syncManualUI(); return; }
   state = buildBaseState();
   state.shock = 'manual';
-  allExpanded = true;
-  HUB_IDS.forEach(id => expandedHubs.add(id));
-  applyVisibility();
+  // Compute the current driver values' multipliers, then reveal only the branches
+  // those changes reach — same affected-only behaviour as the preset scenarios.
+  applyTransmission(state);
+  expandAffected();
   // Validate provenance once, at boot. Demotes any unsourced confidence claim and
   // records every place where LINKS and NODE_ELASTICITY contradict each other.
   validateProvenance();
