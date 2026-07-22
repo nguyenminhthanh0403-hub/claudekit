@@ -2685,9 +2685,9 @@ const SCENARIOS = {
   fiscal_tightening: {
     label:'Fiscal Tightening',
     drivers:{},
-    exogenous:{ Treasury:-0.08, Credit_Markets:-0.08, Tech_Equities:-0.06, Financials:-0.05, SPX:-0.05 },
+    exogenous:{ Treasury:-0.10, Yield_Curve:-0.10, Tech_Equities:-0.05, Financials:-0.06, SPX:-0.04, Credit_Markets:-0.03 },
     unmodelled:true,
-    note:'Entirely asserted. Note it is NOT the mirror of stimulus above \u2014 the asymmetry is unjustified and inherited from Mk9.' },
+    note:'Entirely asserted. Now a deliberate sign-mirror of Fiscal Stimulus \u2014 the Mk9 asymmetry was unjustified, so it is removed rather than dressed up. Real tightening is not perfectly symmetric, but an asserted asymmetry with no basis was worse.' },
 
   trade_war: {
     label:'Trade War',
@@ -2701,7 +2701,7 @@ const SCENARIOS = {
     drivers:{},
     exogenous:{ Banks:0.10, Financials:0.09, Credit_Markets:0.05, Repo:0.04, HF:0.06 },
     unmodelled:true,
-    note:'Entirely asserted, and the weakest claim on the map: the sign assumes deregulation is good for banks, which is exactly what was believed in 2006.' },
+    note:'Entirely asserted, and the SINGLE WEAKEST claim on the map: the positive sign assumes deregulation is good for banks — exactly the 2006 consensus that preceded 2008. Treat as a hypothesis to argue with, not a result.' },
 };
 
 // Currently-active scenario, so the UI can warn when a scenario is unmodelled.
