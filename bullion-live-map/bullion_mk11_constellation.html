@@ -1651,7 +1651,7 @@ window.addEventListener('orientationchange', () => {
 });
 
 document.getElementById('node-count-label').textContent =
-  `${NODES.length} institutions · ${LINKS.length} relationships · fixed causal-column layout · simulated data`;
+  `${NODES.length} institutions · ${LINKS.length} relationships · fixed causal-column layout · live & simulated data`;
 
 
 // ═══════════════════════════════════════════════════════════════════════════
@@ -2124,9 +2124,11 @@ const ELASTICITY = {
   cpi_yoy: {
     us2y:     { v: 0.35,   conf:CONF.DIRECTIONAL, src:'Hot inflation raises the expected Fed path, which the 2Y prices. Sign robust; magnitude mine.' },
     us10y:    { v: 0.22,   conf:CONF.DIRECTIONAL, src:'Long end lifts on inflation expectations, but the term premium muddies it (see NY Fed ACM). Magnitude mine.' },
-    spx_pct:  { v:-0.020,  conf:CONF.UNVERIFIED,  src:'' },
-    gold_pct: { v: 0.025,  conf:CONF.UNVERIFIED,  src:'' },
-    vix_add:  { v: 0.90,   conf:CONF.UNVERIFIED,  src:'' },
+    // spx_pct (-0.020) and vix_add (+0.90) deleted (were unverified, src:''): both
+    // ran THROUGH the Fed - inflation lifts the expected policy path, which
+    // ELASTICITY.ffr already moves onto equities and vol. Keeping them here
+    // double-counted the rate channel.
+    gold_pct: { v: 0.025,  conf:CONF.DIRECTIONAL, src:'Inflation-hedge demand lifts gold. Sign is conventional but WEAK and regime-dependent - gold fell in real terms through the 2021-22 inflation spike, exactly when it was meant to protect. Magnitude is mine.' },
   },
   dxy: {
     gold_pct: { v:-0.0075, conf:CONF.MEASURED,    src:'Near-mechanical: gold is quoted in USD, so a stronger dollar lowers the dollar price for an unchanged world price. This is closer to an accounting identity than a behavioural link.' },
@@ -2158,46 +2160,47 @@ const NODE_ELASTICITY = {
     Tech_Equities:  NE(-0.075, M_, '2022: the Nasdaq-100 fell ~33% as the 2Y rose ~370bp. Long-duration cash flows reprice hardest. Sign and rough scale both survive that episode.'),
     Financials:     NE( 0.030, D_, 'Higher rates widen net interest margins \u2014 EARLY in a cycle. Flips negative late as deposit costs catch up and credit sours. A single sign cannot hold across a whole cycle.'),
     Banks:          NE(-0.055, M_, 'RESOLVED IN Mk10, and the validator is what caught it. Mk9 asserted +0.020 here on the net-interest-margin story, while the LINKS graph flagged ffr\u2192banks as "mixed". Both were wrong. The margin gain is real but small and front-loaded; it is swamped by the mark-to-market loss on the bond book and by deposits fleeing to money market funds. Net sign is NEGATIVE. Roughly $515B of unrealised securities losses (FDIC Q4 2022) and ~$1T of deposit outflow (Fed H.8) against a margin benefit measured in tens of basis points.'),
-    Defensive:      NE( 0.010, U_, ''),
     Credit_Markets: NE(-0.040, D_, 'Higher base rates raise refinancing costs and widen spreads (FRED BAMLH0A0HYM2). Sign robust; magnitude mine.'),
     Yield_Curve:    NE( 0.060, M_, 'Definitional \u2014 the policy rate IS the front end of the curve.'),
     USD:            NE( 0.050, D_, 'Rate-differential channel. Sign standard; magnitude mine.'),
     Gold:           NE(-0.030, D_, 'Opportunity-cost channel; holds against REAL rates, unreliable against nominal.'),
-    Oil:            NE(-0.020, U_, ''),
     EM_FX:          NE(-0.045, D_, 'Higher US rates pull capital out of EM and raise the cost of ~$5.5T in EM dollar debt (IIF). Sign well established; magnitude mine.'),
     MMF:            NE( 0.055, M_, 'Near-mechanical: MMF yields track the policy rate, and MMF assets swelled past $6T during the 2022\u201323 hiking cycle as cash chased that yield (OFR / ICI).'),
-    Repo:           NE( 0.010, U_, ''),
-    Treasury:       NE( 0.030, U_, 'Ambiguous by construction: does "Treasury up" mean higher yields or a bigger issuer? The node conflates the ISSUER with the SECURITY. Sign is not interpretable until that is split.'),
-    Dealers:        NE(-0.010, U_, ''),
-    HF:             NE(-0.020, U_, ''),
+    Repo:           NE( 0.010, M_, 'Near-mechanical: repo rates are pinned inside the Fed\u2019s administered corridor (IORB above, ON RRP below) and move roughly one-for-one with the policy rate.'),
+    // Deleted (were unverified, no source): Defensive (+0.010, likely wrong-signed -
+    // rate-sensitive bond-proxy sectors like utilities FALL when rates rise), Oil
+    // (-0.020, indirect and double-counts the ffr->USD->oil path dxy already carries),
+    // Dealers (-0.010, pure feel), HF (-0.020, pure feel), and Treasury (+0.030,
+    // uninterpretable - the node conflates the ISSUER with the SECURITY, so no single
+    // sign is meaningful until that is split).
   },
   vix: {
     Tech_Equities:  NE(-0.0090, D_, 'High-beta sold first in de-risking. Nasdaq beta to S&P ~1.2\u20131.3, so it amplifies the index move.'),
     Defensive:      NE( 0.0060, D_, 'Rotation into low-beta shelters (utilities, staples, ~0.4\u20130.6 beta). Note: defensives usually fall too, just LESS \u2014 a positive coefficient overstates this as an outright gain.'),
-    Financials:     NE(-0.0030, D_, ''),
+    Financials:     NE(-0.0030, D_, 'Financials are high-beta and credit-spread-sensitive; they sell off when volatility spikes. Sign robust; magnitude mine.'),
     Credit_Markets: NE(-0.0060, D_, 'Spreads widen with equity vol; the two are strongly co-moving in stress.'),
     Gold:           NE( 0.0055, D_, 'Safe-haven bid \u2014 but FAILED in March 2020, when gold was sold for liquidity.'),
     USD:            NE( 0.0028, D_, 'Dollar funding squeeze bids USD in stress (BIS).'),
-    EM_FX:          NE(-0.0050, D_, ''),
+    EM_FX:          NE(-0.0050, D_, 'Risk-off vol spikes unwind EM carry trades and bid the funding currencies, so EM FX weakens (BIS on carry and dollar funding). Sign robust; magnitude mine.'),
     Repo:           NE(-0.0028, D_, 'Stress widens repo spreads and tightens haircuts. Sign right; this is the channel that ACTUALLY carried March 2023, and it is badly under-weighted here.'),
     Yield_Curve:    NE(-0.0020, D_, 'RESOLVED: this cell and ELASTICITY.vix.us10y (negative, sourced, DIRECTIONAL) encoded opposite signs for the same flight-to-quality mechanism. The us10y cell has the stronger claim, so this one is corrected to match rather than left to contradict it. Magnitude is still mine.'),
     SPX:            NE(-0.0080, M_, 'CBOE: VIX/SPX correlate about -0.74. Largely an identity \u2014 VIX is computed FROM SPX options.'),
-    Banks:          NE(-0.0025, D_, ''),
-    HF:             NE(-0.0050, D_, ''),
+    Banks:          NE(-0.0025, D_, 'Same de-risking channel as Financials - banks are high-beta and credit-sensitive in vol spikes. Magnitude mine.'),
+    // Deleted (was directional but unsourced, so validateProvenance demoted it):
+    // HF (-0.0050, pure feel, no defensible source).
   },
   cpi_yoy: {
     Tech_Equities:  NE(-0.045, D_, 'Inflation raises expected policy rates, which hits long-duration equity. Indirect \u2014 it runs THROUGH the Fed, so this double-counts with the ffr row when both are moved.'),
-    Financials:     NE( 0.018, U_, ''),
-    Defensive:      NE( 0.008, U_, ''),
-    Credit_Markets: NE(-0.022, D_, ''),
-    Yield_Curve:    NE( 0.036, D_, ''),
+    // Deleted (unverified, no source): Financials (+0.018), Defensive (+0.008),
+    // Credit_Markets (-0.022), Yield_Curve (+0.036) - plus USD and MMF below. Every
+    // one ran THROUGH the Fed's rate response, which the ffr row already carries, so
+    // keeping them here double-counted the policy reaction. (Tech_Equities and Gold
+    // are kept: both are sourced directional and name their own limits.)
     Gold:           NE( 0.036, D_, 'Inflation-hedge demand. Weaker than folklore suggests: gold was a poor hedge through the 2021\u201322 inflation spike.'),
     // Oil deliberately omitted: oil drives CPI (see wti_px.cpi_add in ELASTICITY),
     // not the reverse. A cpi_yoy\u2192Oil cell here was a backward arrow that
     // double-counted the wti\u2192cpi effect when both drivers moved. Deleted
     // rather than re-signed, per the same call made on wti_px.Geopolitics below.
-    USD:            NE( 0.018, U_, ''),
-    MMF:            NE( 0.020, U_, ''),
   },
   dxy: {
     USD:            NE( 0.0100, M_, 'Definitional \u2014 the DXY node IS the dollar.'),
@@ -2205,15 +2208,14 @@ const NODE_ELASTICITY = {
     Gold:           NE(-0.0060, M_, 'Denomination effect \u2014 gold is priced in USD.'),
     Oil:            NE(-0.0040, M_, 'Denomination effect \u2014 oil is invoiced in USD.'),
     Tech_Equities:  NE(-0.0035, D_, '~40% of S&P revenue is foreign (S&P DJI); tech is the most international sector.'),
-    China:          NE(-0.0040, D_, ''),
-    Credit_Markets: NE(-0.0025, D_, ''),
+    China:          NE(-0.0040, D_, 'A stronger dollar pressures the yuan and raises the cost of servicing Chinese dollar-denominated debt. Sign standard; magnitude mine.'),
+    Credit_Markets: NE(-0.0025, D_, 'The dollar is a barometer of global financial conditions; broad USD strength tightens conditions and widens credit spreads (BIS on the global dollar cycle). Sign robust; magnitude mine.'),
   },
   wti_px: {
     Oil:            NE( 0.0100, M_, 'Definitional \u2014 the Oil node IS WTI.'),
-    Gold:           NE( 0.0022, U_, ''),
-    Defensive:      NE( 0.0012, U_, ''),
-    Tech_Equities:  NE(-0.0012, U_, ''),
-    Credit_Markets: NE(-0.0010, U_, ''),
+    // Deleted (unverified, no source): Gold (+0.0022), Defensive (+0.0012),
+    // Tech_Equities (-0.0012), Credit_Markets (-0.0010). All were weak,
+    // regime-dependent co-moves with no stable source and no fittable series.
     // Geopolitics deliberately omitted: geopolitical conflict drives oil (see
     // the russia→oil and geo→oil LINKS), not the reverse. A wti_px→Geopolitics
     // cell was a backward arrow and has been deleted rather than re-signed.
