@@ -3494,12 +3494,6 @@ function runManual() {
   // those changes reach — same affected-only behaviour as the preset scenarios.
   applyTransmission(state);
   expandAffected();
-  // Validate provenance once, at boot. Demotes any unsourced confidence claim and
-  // records every place where LINKS and NODE_ELASTICITY contradict each other.
-  validateProvenance();
-
-  document.getElementById('audit-log-btn').addEventListener('click', openAuditLog);
-
   updateMetrics();                 // this calls applyTransmission -> applyManual, which sets nodeMultipliers
   syncManualUI();
 
@@ -3601,6 +3595,8 @@ function setupHistoryDatePicker() {
 buildGraph();
 buildLegend();
 updateMetrics();
+validateProvenance();
+document.getElementById('audit-log-btn').addEventListener('click', openAuditLog);
 
 // ─── FRESHNESS-VERDICT-START ────────────────────────────────────────────────
 // Mirrors freshness_verdict() in fetch_bullion_data.py. Judged on a field's
