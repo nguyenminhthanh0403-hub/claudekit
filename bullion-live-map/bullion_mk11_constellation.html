@@ -2958,8 +2958,18 @@ function renderLiveBadge(s) {
 // affected satellite — and collapses the rest. Far less motion than exploding the
 // whole graph, and it doubles as a map of where the shock lands. Requires
 // nodeMultipliers to be current (call applyTransmission first).
+// A node counts as "moved" if its multiplier clears this cutoff. Relative so a
+// single-driver scenario still lights its top nodes: the larger of a small floor
+// and 50% of the scenario's biggest effect.
+function nodeCutoff() {
+  const FLOOR = 0.02, REL = 0.5;
+  let mx = 0;
+  Object.values(nodeMultipliers).forEach(v => { if (Math.abs(v) > mx) mx = Math.abs(v); });
+  return Math.max(FLOOR, REL * mx);
+}
+
 function expandAffected() {
-  const CUTOFF = 0.05;   // must match the node-recolour threshold in updateGraph()
+  const CUTOFF = nodeCutoff();   // shared with updateGraph()'s recolour threshold, so they never disagree
   const affected = new Set();
   Object.keys(NODE_MAP).forEach(k => {
     if (Math.abs(nodeMultipliers[k] || 0) > CUTOFF) affected.add(NODE_MAP[k]);
@@ -3290,22 +3300,23 @@ function updateGraph(s) {
     const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k] === d.id);
     return (k && nodeMultipliers[k] !== undefined) ? nodeMultipliers[k] : null;
   };
+  const cut = nodeCutoff();
   window._mk5Node.select('.core').transition().duration(450)
     .attr('fill', d => {
       const m = multOf(d);
       if (m === null) return GROUP_COLOR[d.group] + (d.isHub ? '33' : '22');
-      if (m > 0.05)  return '#7bbf8e44';
-      if (m < -0.05) return '#e0654f44';
+      if (m > cut)  return '#7bbf8e44';
+      if (m < -cut) return '#e0654f44';
       return GROUP_COLOR[d.group] + (d.isHub ? '33' : '22');
     })
     .attr('stroke', d => {
       const m = multOf(d);
       if (m === null) return GROUP_COLOR[d.group];
-      if (m > 0.05)  return '#7bbf8e';
-      if (m < -0.05) return '#e0654f';
+      if (m > cut)  return '#7bbf8e';
+      if (m < -cut) return '#e0654f';
       return GROUP_COLOR[d.group];
     })
-    .attr('stroke-width', d => { const m = multOf(d)||0; return Math.abs(m) > 0.05 ? 2.6 : (d.isHub ? 1.6 : 1); });
+    .attr('stroke-width', d => { const m = multOf(d)||0; return Math.abs(m) > cut ? 2.6 : (d.isHub ? 1.6 : 1); });
 }
 
 // ─── DRAWER + CONTROL WIRING ────────────────────────────────────────────────
