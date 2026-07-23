@@ -143,6 +143,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
   .side-panel { width: clamp(180px,32vw,260px); }
   #graph-wrap { height: clamp(340px,50vw,560px); }
 }
+.disclaimer-link { font-size: 10px; color: var(--txt-3); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; letter-spacing: 0.02em; }
+.disclaimer-link:hover { color: var(--gold-soft); }
+#disclaimer-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.18s; backdrop-filter: blur(2px); }
+#disclaimer-overlay.visible { opacity: 1; pointer-events: auto; }
+#disclaimer-modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); width: min(440px, 90vw); max-height: 82vh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg-1); border: 1px solid rgba(212,175,106,0.35); border-radius: 12px; box-shadow: 0 12px 40px rgba(0,0,0,0.7); padding: 18px 20px; }
+#disclaimer-modal h3 { font-size: 14px; color: var(--gold-soft); margin: 0 0 2px; letter-spacing: 0.02em; }
+#disclaimer-modal h4 { font-size: 11px; color: var(--gold-soft); text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 5px; }
+#disclaimer-modal p { font-size: 12px; color: var(--txt-2); line-height: 1.6; margin: 0 0 8px; }
+#disclaimer-close { position: absolute; top: 12px; right: 14px; font-size: 22px; line-height: 1; cursor: pointer; color: var(--gold-soft); background: none; border: none; padding: 0 4px; }
 </style>
 
 <div id="app">
@@ -233,6 +242,9 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
           <div id="impacts-list"></div>
         </div>
         <button class="run-btn" id="run-ai-btn" onclick="runAIAnalysis()">Run AI analysis &#x2197;</button>
+        <div style="text-align:center;margin-top:6px">
+          <span class="disclaimer-link" onclick="openDisclaimer()">Disclaimer &amp; privacy</span>
+        </div>
       </div>
     </div>
   </div>
@@ -242,6 +254,17 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helve
   <button id="touch-drawer-close" onclick="closeTouchDrawer()" aria-label="Close">&times;</button>
   <h3 id="touch-drawer-title"></h3>
   <p  id="touch-drawer-body"></p>
+</div>
+
+<div id="disclaimer-overlay" onclick="closeDisclaimer(event)">
+  <div id="disclaimer-modal" role="dialog" aria-modal="true" aria-labelledby="disclaimer-heading">
+    <button id="disclaimer-close" onclick="closeDisclaimer()" aria-label="Close">&times;</button>
+    <h3 id="disclaimer-heading">Disclaimer &amp; privacy</h3>
+    <h4>Educational use only &mdash; not financial advice</h4>
+    <p>This map is a personal learning and teaching tool. Its structure, connections, figures, AI-generated commentary, "system health" scores and impact multipliers are illustrative and may be simplified, outdated, or wrong. Nothing here is investment, financial, legal, or tax advice, a recommendation to buy or sell anything, or a forecast. The author is not a licensed financial adviser. Do your own research and consult a qualified professional before making any financial decision. The tool is provided &ldquo;as is,&rdquo; without warranty of any kind, and the author accepts no liability for any loss arising from its use.</p>
+    <h4>Privacy</h4>
+    <p>This site sets no cookies, uses no analytics, and collects no personal data. If you use the optional AI feature, your Anthropic API key is held only in your browser&rsquo;s session storage (cleared when you close the tab) and is sent directly to Anthropic&rsquo;s API to generate the narrative &mdash; it never reaches any server operated by the author. The page is hosted on GitHub Pages and loads the D3 library from Cloudflare&rsquo;s CDN; those providers may process your IP address to serve the page, under their own privacy policies.</p>
+  </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js" integrity="sha512-M7nHCiNUOwFt6Us3r8alutZLm9qMt4s9951uo8jqO4UwJ1hziseL6O3ndFyigx6+LREfZqnhHxYjKRJ8ZQ69DQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
@@ -1231,6 +1254,15 @@ function openTouchDrawer(title, body) {
   document.getElementById('touch-drawer').classList.add('visible');
 }
 function closeTouchDrawer() { document.getElementById('touch-drawer').classList.remove('visible'); }
+
+// ─── DISCLAIMER / PRIVACY MODAL ───────────────────────────────────────────────
+function openDisclaimer() { document.getElementById('disclaimer-overlay').classList.add('visible'); }
+function closeDisclaimer(e) {
+  // Only close on backdrop click or the × button — not on clicks inside the modal.
+  if (e && e.target && e.target.closest && e.target.closest('#disclaimer-modal')) return;
+  document.getElementById('disclaimer-overlay').classList.remove('visible');
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDisclaimer(); });
 
 // ─── NODE DETAIL PANEL ────────────────────────────────────────────────────────
 // Build a quick lookup: node id → label
