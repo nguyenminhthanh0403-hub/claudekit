@@ -261,6 +261,11 @@ const GROUP_COLOR = {
   cyan:   '#5fc7d4',  // Asset Management (BlackRock, Vanguard, State Street, ETFs)
   orchid: '#cf8fbf',  // Households (Consumers, Consumer Credit)
   stone:  '#a89684',  // Rating Agencies (Moody's, S&P, Fitch)
+  crypto: '#e8973c',  // Crypto & Digital Assets (Stablecoins, Bitcoin, Exchanges)
+  fintech:'#c74fa0',  // Payments / Fintech (Card Networks, Wallets, Lenders)
+  restate:'#b07a55',  // Real Estate (Residential, Commercial, REITs)
+  intl:   '#a0a84f',  // International (Foreign CBs, Foreign Holders, IMF/BIS, Eurodollar)
+  deriv:  '#c05a5a',  // Derivatives (Swaps, CDS, OTC)
 };
 
 const LAYER_LABELS = {
@@ -282,9 +287,14 @@ const LAYER_LABELS = {
   cyan:   'Asset Management',
   orchid: 'Households',
   stone:  'Rating Agencies',
+  crypto: 'Crypto & Digital Assets',
+  fintech:'Payments / Fintech',
+  restate:'Real Estate',
+  intl:   'International',
+  deriv:  'Derivatives',
 };
 
-const GROUP_DEPTH = { purple:3, blue:2, teal:2, coral:1, amber:1, green:2, slate:2, ochre:1, rose:1, silver:2, cobalt:2, violet:2, iron:2, dkblue:2, indigo:3, cyan:2, orchid:2, stone:1 };
+const GROUP_DEPTH = { purple:3, blue:2, teal:2, coral:1, amber:1, green:2, slate:2, ochre:1, rose:1, silver:2, cobalt:2, violet:2, iron:2, dkblue:2, indigo:3, cyan:2, orchid:2, stone:1, crypto:1, fintech:1, restate:2, intl:2, deriv:1 };
 
 // ─── NODES ────────────────────────────────────────────────────────────────────
 // r = BASE radius hint (will be expanded dynamically to fit text — see initGraph).
@@ -703,6 +713,80 @@ const NODES = [
     beginner:'A giant exchange operator that owns the NYSE and runs the world\'s benchmark oil (Brent) and many other futures markets.',
     expert:'Intercontinental Exchange (ICE). Owns NYSE, ICE Futures (Brent crude, softs, rates) and ICE Clear — a vertically integrated exchange-plus-clearing group, and also a major mortgage-technology and fixed-income data provider.',
     breaks:'As owner of NYSE and the Brent complex plus its clearing houses, an ICE failure would simultaneously hit equity listings, global energy price discovery and derivatives settlement — a rare multi-market single point of failure.' },
+
+  // ── Crypto & Digital Assets ───────────────────────────────────────────────
+  { id:'stablecoin', label:'Stablecoins', group:'crypto',
+    beginner:'Digital tokens (like USDC and Tether) pegged 1-for-1 to the dollar. They move money instantly on crypto rails — and to hold the peg, their issuers park billions in US Treasuries.',
+    expert:'Dollar-pegged stablecoins (~$150B+ supply; USDT and USDC dominant), backed largely by short-dated T-bills and repo — making issuers a fast-growing non-traditional holder of US government debt. The GENIUS Act (2025) added a federal reserve/disclosure framework.',
+    breaks:'A large de-peg (TerraUSD 2022; USDC\'s brief SVB scare 2023) triggers fire-sales of reserve T-bills, transmitting crypto stress into money markets. As issuers scale, their bill demand becomes a real rates factor.' },
+  { id:'bitcoin', label:'Bitcoin / Crypto Assets', group:'crypto',
+    beginner:'Bitcoin and other cryptocurrencies — digital assets with no central issuer, held as a speculative store of value, now owned by mainstream investors through ETFs.',
+    expert:'Crypto assets (~$2T+ total market cap). Since spot Bitcoin ETFs launched (Jan 2024) the asset is wired into brokerage and index-fund plumbing. A risk-on asset that correlates with equities in stress; volatile and sentiment-driven.',
+    breaks:'A crypto crash (2022 FTX/Terra) now spills into ETFs and the balance sheets of listed miners and crypto-exposed banks. Contagion runs through exchanges and stablecoins into adjacent markets, though still small vs traditional finance.' },
+  { id:'crypto_ex', label:'Crypto Exchanges', group:'crypto',
+    beginner:'Companies like Coinbase where people buy, sell and store crypto — the on-ramp between regular dollars and the crypto world.',
+    expert:'Crypto exchanges/custodians (Coinbase, Kraken) bridge fiat and crypto, hold customer assets and provide liquidity. FTX\'s 2022 failure exposed the systemic role of exchange solvency and commingled customer funds. Jurisdiction is contested between SEC and CFTC.',
+    breaks:'An exchange collapse (FTX, Nov 2022) freezes withdrawals and cascades into exposed lenders and funds. As the fiat on/off-ramp, exchange banking access is the chokepoint where crypto meets the regulated banking system.' },
+
+  // ── Payments / Fintech ────────────────────────────────────────────────────
+  { id:'card_networks', label:'Card Networks (Visa/MC)', group:'fintech',
+    beginner:'Visa and Mastercard — the rails that carry your card payment from a store to your bank in seconds. Nearly every swipe or tap runs through them.',
+    expert:'Card networks (Visa, Mastercard) process the vast majority of US card payments — hundreds of billions of transactions a year. They set interchange fees (a persistent antitrust and merchant-cost issue) and operate as a near-duopoly clearing layer atop the banking system.',
+    breaks:'A card-network outage halts point-of-sale and e-commerce payments nationwide within minutes. Their duopoly is a systemic payments chokepoint, and interchange economics shape the entire consumer-banking revenue model.' },
+  { id:'wallets', label:'Digital Wallets (PayPal/Zelle)', group:'fintech',
+    beginner:'Apps like PayPal, Venmo, Cash App and Zelle that let you send money from your phone. They sit on top of banks and card networks.',
+    expert:'Digital wallets and P2P rails (PayPal/Venmo, Block\'s Cash App, bank-owned Zelle). They move money over existing card and ACH/RTP rails and hold customer balances — a quasi-deposit outside FDIC coverage. Zelle rides bank rails directly; others intermediate.',
+    breaks:'Wallet outages strand consumer and gig-economy payments. Stored balances sit outside deposit insurance, a latent run risk. Their scale pressures bank payments revenue and blurs the bank/non-bank line for regulators.' },
+  { id:'fintech_lend', label:'Fintech Lenders / BNPL', group:'fintech',
+    beginner:'Online lenders and "buy now, pay later" apps (SoFi, Affirm, Klarna) that offer loans and installment plans outside traditional banks.',
+    expert:'Fintech/BNPL lenders (SoFi, Affirm, Klarna, Upstart) extend consumer credit via algorithmic underwriting, funded largely through ABS and warehouse lines rather than deposits. Mostly outside bank capital rules — a growing, less-visible slice of consumer credit.',
+    breaks:'In a downturn, thinly-capitalised fintech lenders lose funding fast (warehouse lines pulled), cutting off a credit channel millions now rely on. Their loans are securitised, so losses transmit into ABS markets.' },
+
+  // ── Real Estate ───────────────────────────────────────────────────────────
+  { id:'resi_re', label:'Residential Real Estate', group:'restate',
+    beginner:'The US housing market — the homes people buy and the mortgages behind them. It is most families\' biggest asset and a core driver of the economy.',
+    expert:'Residential real estate (~$45T+ value). Home prices (Case-Shiller) drive household wealth, consumption (the wealth effect) and mortgage credit. Highly rate-sensitive: Fed hikes raise mortgage rates and cool prices and transactions with a lag.',
+    breaks:'A housing crash (2007-09) destroys household wealth, triggers mortgage defaults and cascades through MBS into banks — the template systemic event. Frozen transactions choke construction, jobs and consumption.' },
+  { id:'cre', label:'Commercial Real Estate', group:'restate',
+    beginner:'Offices, malls, apartments and warehouses owned as investments. Since remote work, offices especially have been under heavy stress.',
+    expert:'Commercial real estate (~$20T+; offices, multifamily, retail, industrial). Heavily debt-financed with wall-of-maturity refinancing risk. Post-2020 office vacancies and higher rates pressure valuations; loans are concentrated at regional banks (a 2023-24 systemic-watch item).',
+    breaks:'A CRE downturn hits regional banks hardest (heavy CRE loan books), risking a repeat of 2023-style regional-bank stress. Defaults flow into CMBS and the funds and insurers holding them; refinancing at higher rates forces distressed sales.' },
+  { id:'reits', label:'REITs', group:'restate',
+    beginner:'Companies that own income-producing property (malls, apartments, data centers) and trade like stocks, letting ordinary investors own real estate.',
+    expert:'Real Estate Investment Trusts (~$1.3T public market cap). Must distribute 90%+ of income as dividends — a rate-sensitive equity/income hybrid. Provide liquid exposure to otherwise illiquid property and a real-time price signal for the CRE and residential sectors.',
+    breaks:'REIT selloffs are an early, liquid signal of property stress that precedes private-market markdowns. As leveraged property holders, a funding squeeze forces asset sales that depress the underlying real-estate markets.' },
+
+  // ── International ──────────────────────────────────────────────────────────
+  { id:'foreign_cb', label:'Foreign Central Banks', group:'intl',
+    beginner:'Other countries\' central banks — the ECB (Europe), Bank of Japan and People\'s Bank of China. Their rate moves ripple back into US markets and the dollar.',
+    expert:'Major foreign central banks (ECB, BOJ, PBOC). Policy divergence from the Fed drives currency flows and the dollar (DXY); BOJ yield-curve control and PBOC yuan management have global spillovers. They are large holders and managers of dollar reserves.',
+    breaks:'Abrupt shifts (a BOJ exit unwinding the yen carry trade, Aug 2024) transmit volatility straight into US rates and equities. Coordinated tightening or easing amplifies the global financial cycle.' },
+  { id:'foreign_holders', label:'Foreign Holders of Treasuries', group:'intl',
+    beginner:'Foreign governments and investors — like Japan and China — that own a big chunk of US government debt. Their buying and selling moves US interest rates.',
+    expert:'Foreign holders of US Treasuries (~$8T, ~30% of marketable debt; Japan and China the largest official holders). Their demand helps fund US deficits and suppress yields, underpinned by the dollar\'s reserve-currency status. Tracked via TIC data.',
+    breaks:'A sustained foreign selling strike or reserve diversification would raise Treasury yields and US borrowing costs and pressure the dollar. Concentrated official holdings make Treasuries a geopolitical lever as well as a market.' },
+  { id:'imf_bis', label:'IMF / BIS / World Bank', group:'intl',
+    beginner:'Global financial bodies that lend to countries in trouble and set the rules central banks and big banks follow worldwide.',
+    expert:'International financial institutions (IMF, World Bank, BIS). The IMF is the global lender of last resort to sovereigns; the BIS ("central bank of central banks") sets Basel capital standards that shape US bank regulation. They anchor the rules and backstops of the global dollar system.',
+    breaks:'Without the IMF, sovereign crises (Asia 1997, Europe 2010s) lack an orderly backstop, raising contagion into US banks and exports. BIS/Basel rule changes directly reset US bank capital requirements.' },
+  { id:'eurodollar', label:'Eurodollar / FX Swap Lines', group:'intl',
+    beginner:'Dollars held and lent outside the US — a vast offshore dollar market. In crises the Fed lends dollars to foreign central banks (swap lines) to keep it from freezing.',
+    expert:'The eurodollar/offshore-dollar market and Fed FX swap lines. Trillions in dollar funding sits outside US banks; when it seizes (2008, March 2020) the Fed\'s central-bank swap lines supply dollars abroad to prevent a global dollar shortage from crashing back into US markets.',
+    breaks:'An offshore dollar-funding freeze forces foreign banks to dump US assets for dollars, spiking the dollar and cratering markets — exactly what swap lines exist to stop. Here the Fed effectively acts as global lender of last resort.' },
+
+  // ── Derivatives ───────────────────────────────────────────────────────────
+  { id:'irs', label:'Interest Rate Swaps', group:'deriv',
+    beginner:'Contracts that let borrowers and investors swap a floating interest rate for a fixed one (or vice versa) — the main way big players manage interest-rate risk.',
+    expert:'Interest rate swaps — the largest derivatives class (hundreds of trillions notional), now referenced to SOFR. They let banks, corporates and funds hedge or express rate views; centrally cleared post-Dodd-Frank via CCPs. The swap curve is itself a core pricing benchmark.',
+    breaks:'A swap-market seizure removes the primary tool for hedging rate risk, forcing crude balance-sheet adjustments. Concentrated among a few dealers and CCPs, a clearing-member default could cascade through the cleared-swaps system.' },
+  { id:'cds', label:'Credit Default Swaps', group:'deriv',
+    beginner:'Insurance-like contracts that pay out if a borrower defaults. They let investors hedge — or bet on — the risk that a company or country fails to pay.',
+    expert:'Credit default swaps — insurance on debt default and a market-implied gauge of credit risk (sovereign and corporate CDS spreads). Infamous in 2008 when AIG\'s uncleared CDS book required a ~$180B bailout. Now largely cleared, but single-name and sovereign CDS remain a stress signal.',
+    breaks:'The 2008 AIG collapse showed how a concentrated CDS seller failing can threaten every counterparty at once. CDS spreads are an early distress gauge; a disorderly credit event can freeze credit hedging.' },
+  { id:'otc_deriv', label:'OTC Derivatives', group:'deriv',
+    beginner:'The huge, mostly private market where banks and funds trade custom contracts on rates, currencies and more — often away from public exchanges.',
+    expert:'OTC derivatives broadly (rates, FX, equity, commodity; ~$600T+ gross notional globally). Bilateral or cleared, they form a web of exposures concentrated among the largest dealer banks. Post-2008 reforms pushed standardised trades into central clearing and added margin rules.',
+    breaks:'The opaque, interconnected OTC web was the 2008 contagion channel — no one could see counterparty exposure. A major dealer default propagates through the web, and stress-driven margin calls force correlated asset sales (March 2020, UK LDI 2022).' },
 ];
 
 // ─── LINKS ────────────────────────────────────────────────────────────────────
@@ -971,6 +1055,54 @@ const LINKS = [
   {s:'cboe',   t:'equit',  w:1, sign:+1, why:'Cboe\'s options markets let investors hedge equity risk, supporting the willingness to hold stock.'},
   {s:'ice',    t:'nyse',   w:2, sign:+1, why:'ICE owns and operates the NYSE, so ICE\'s stewardship directly governs the exchange\'s functioning.'},
   {s:'ice',    t:'oil',    w:2, sign:+1, why:'ICE runs the Brent crude futures complex, a global benchmark for oil price discovery.'},
+
+  // ── Crypto & Digital Assets connections ───────────────────────────────────
+  {s:'stablecoin', t:'tsy',       w:2, sign:+1, why:'Stablecoin issuers park reserves in short-dated T-bills, so their growth is a rising, non-traditional source of Treasury demand.'},
+  {s:'stablecoin', t:'crypto_ex', w:2, sign:+1, why:'Stablecoins are the dollar settlement medium on exchanges, providing the liquidity that crypto trading runs on.'},
+  {s:'crypto_ex',  t:'bitcoin',   w:2, sign:+1, why:'Exchanges provide the venues and liquidity for crypto trading, so healthy exchanges support crypto asset prices.'},
+  {s:'bitcoin',    t:'etf',       w:2, sign:+1, why:'Spot Bitcoin ETFs pull crypto into the passive-fund complex, so crypto flows now move through the same ETF plumbing as stocks.'},
+  {s:'bitcoin',    t:'vix',       w:1, sign:0,  why:'Crypto acts as a high-beta risk-sentiment gauge; sharp crypto drawdowns often coincide with broader risk-off volatility, but the link is regime-dependent.'},
+  {s:'sec',        t:'crypto_ex', w:1, sign:0,  why:'The SEC contests jurisdiction over crypto exchanges; the regulatory outcome shapes their legality and structure, direction uncertain.'},
+
+  // ── Payments / Fintech connections ────────────────────────────────────────
+  {s:'card_networks', t:'household',       w:2, sign:+1, why:'Card rails are how households actually spend; frictionless payments enable the ~70% of GDP that is consumption.'},
+  {s:'card_networks', t:'consumer_credit', w:2, sign:+1, why:'The card networks are the mechanism through which revolving credit-card borrowing is originated and processed.'},
+  {s:'card_networks', t:'fins',            w:1, sign:+1, why:'Visa and Mastercard are large, high-margin constituents of the financials sector, contributing to its earnings.'},
+  {s:'wallets',       t:'household',       w:2, sign:+1, why:'Digital wallets are a primary consumer and gig-economy payment channel, moving everyday money for households.'},
+  {s:'wallets',       t:'ach',             w:1, sign:+1, why:'Most wallet transfers ultimately settle over the ACH network, so wallet volume rides on the ACH rails.'},
+  {s:'fintech_lend',  t:'consumer_credit', w:2, sign:+1, why:'Fintech and BNPL lenders extend a growing, less-visible slice of household credit outside the traditional banking channel.'},
+  {s:'ffr',           t:'fintech_lend',    w:1, sign:-1, why:'Higher rates raise fintech lenders\' warehouse and ABS funding costs, squeezing thinly-capitalised non-bank credit.'},
+
+  // ── Real Estate connections ───────────────────────────────────────────────
+  {s:'ffr',      t:'resi_re',  w:3, sign:-1, why:'Policy rates set mortgage rates; higher rates cool home prices and freeze transactions with a lag.'},
+  {s:'resi_re',  t:'household', w:3, sign:+1, why:'Housing is most families\' biggest asset, so rising home values lift household wealth and consumption via the wealth effect.'},
+  {s:'resi_re',  t:'mbs',      w:2, sign:+1, why:'Residential mortgages are the raw collateral pooled into the MBS market, so housing activity drives MBS supply.'},
+  {s:'ffr',      t:'cre',      w:2, sign:-1, why:'Higher rates raise cap rates and refinancing costs, directly pressuring commercial-property valuations.'},
+  {s:'cre',      t:'reg_banks',w:3, sign:+1, why:'Regional banks hold outsized CRE loan books, so CRE health supports them while a CRE downturn threatens regional-bank solvency.'},
+  {s:'cre',      t:'credit',   w:2, sign:+1, why:'CRE debt (CMBS and bank loans) is a large credit-market segment; CRE stress widens spreads and impairs credit.'},
+  {s:'reits',    t:'cre',      w:2, sign:+1, why:'Publicly-traded REITs are a real-time, liquid price signal for the private commercial-property market they invest in.'},
+  {s:'reits',    t:'equit',    w:1, sign:+1, why:'REITs trade as a distinct equity sector, so their moves contribute to and reflect broad equity-market sentiment.'},
+
+  // ── International connections ──────────────────────────────────────────────
+  {s:'foreign_cb',      t:'usd',   w:2, sign:-1, why:'When foreign central banks tighten relative to the Fed, their currencies strengthen and the dollar softens.'},
+  {s:'foreign_cb',      t:'yield', w:1, sign:+1, why:'Global rate moves spill into US Treasuries via arbitrage and reserve flows, nudging the US curve.'},
+  {s:'foreign_holders', t:'yield', w:3, sign:-1, why:'Heavy foreign buying of Treasuries suppresses US yields; a pullback lifts them — a major swing factor in long rates.'},
+  {s:'foreign_holders', t:'tsy',   w:3, sign:+1, why:'Foreign official and private demand funds roughly a third of marketable US debt, a core pillar of Treasury demand.'},
+  {s:'foreign_holders', t:'usd',   w:2, sign:+1, why:'Reserve demand for Treasuries requires holding dollars, reinforcing the dollar\'s value and reserve-currency status.'},
+  {s:'imf_bis',         t:'fsb',   w:2, sign:+1, why:'The BIS and IMF set the global standards (Basel, surveillance) that bodies like the FSB coordinate across jurisdictions.'},
+  {s:'imf_bis',         t:'jpm',   w:1, sign:+1, why:'BIS Basel capital standards flow into the rules that determine how much capital G-SIBs like JPMorgan must hold.'},
+  {s:'eurodollar',      t:'usd',   w:2, sign:+1, why:'Offshore demand for dollar funding underpins the dollar; a eurodollar squeeze spikes it as foreign banks scramble for dollars.'},
+  {s:'fed',             t:'eurodollar', w:2, sign:+1, why:'The Fed\'s central-bank swap lines supply dollars into the offshore market, backstopping it in a funding crisis.'},
+
+  // ── Derivatives connections ───────────────────────────────────────────────
+  {s:'sofr',      t:'irs',      w:3, sign:+1, why:'SOFR is the floating reference rate for US interest-rate swaps, so it directly prices the swap market.'},
+  {s:'irs',       t:'yield',    w:1, sign:+1, why:'The swap curve and Treasury curve are tightly linked benchmarks; swap-market pricing feeds back into rate levels.'},
+  {s:'irs',       t:'hedge',    w:2, sign:+1, why:'Hedge funds and asset managers use rate swaps heavily to hedge and lever rate views, a core part of their toolkit.'},
+  {s:'cds',       t:'credit',   w:3, sign:+1, why:'CDS both price and hedge default risk, so a functioning CDS market underpins credit-market liquidity and pricing.'},
+  {s:'cds',       t:'hy_bonds', w:2, sign:+1, why:'CDS are the primary way investors hedge high-yield default risk, tying the two markets\' spreads together.'},
+  {s:'cds',       t:'insur',    w:2, sign:+1, why:'Insurers write CDS protection (AIG in 2008), so a CDS blowup lands directly on insurer balance sheets.'},
+  {s:'otc_deriv', t:'jpm',      w:2, sign:+1, why:'The OTC derivatives book is concentrated among a handful of dealer banks like JPMorgan, making them the market\'s core nodes.'},
+  {s:'otc_deriv', t:'hedge',    w:2, sign:+1, why:'Hedge funds are dominant OTC derivatives users; stress-driven margin calls force the correlated deleveraging seen in past crises.'},
 ];
 
 // ─── BEGINNER NODE INFO ───────────────────────────────────────────────────────
