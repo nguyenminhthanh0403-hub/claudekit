@@ -1342,10 +1342,11 @@ function layoutColumns(portrait) {
     const bandW = (W - left - right) / N_COLS;
     Object.entries(byCol).forEach(([c, arr]) => {
       const x = left + (+c) * bandW + bandW/2;
+      const stagger = arr.length >= 7;   // crowded column: alternate labels above/below
       arr.forEach((n,i) => {
         n.x = x;
         n.y = top + (i + 0.5) * (H - top - bottom) / arr.length;
-        n.labelAbove = false;
+        n.labelAbove = stagger ? (i % 2 === 1) : false;
       });
     });
   }
@@ -1438,7 +1439,10 @@ function buildGraph() {
     .attr('marker-end', d => d.sign>0 ? 'url(#arr-pos)' : d.sign<0 ? 'url(#arr-neg)' : 'url(#arr-amb)');
 
   const node = nodesLayer.selectAll('g.node-g').data(nodesData, d=>d.id).join('g')
-    .attr('class', d => 'node-g' + (d.isHub ? ' hub' : ''));
+    .attr('class', d => 'node-g' + (d.isHub ? ' hub' : ''))
+    .attr('tabindex', 0)
+    .attr('role', 'button')
+    .attr('aria-label', d => d.label);
 
   // Soft breathing halo behind hubs (see .hub-pulse CSS). Appended first so it
   // sits under the core; a staggered delay keeps the hubs from pulsing in lockstep.
@@ -1471,7 +1475,7 @@ function buildGraph() {
     .attr('fill', d => d.isHub ? GROUP_COLOR[d.group] : 'var(--text-dim)')
     .text(d => d.label);
 
-  node.on('click', function(event, d) {
+  function activateNode(event, d) {
     event.stopPropagation();
     onFirstInteraction();   // reveal the ⚙ Tools hint + advance the coach on the first real click
     stickyFocusId = d.id;
@@ -1486,6 +1490,13 @@ function buildGraph() {
     } else {
       focusNode(d.id);
       openDetail(d);
+    }
+  }
+  node.on('click', activateNode);
+  node.on('keydown', function(event, d) {
+    if (event.key === 'Enter' || event.key === ' ' || event.key === 'Spacebar') {
+      event.preventDefault();
+      activateNode(event, d);
     }
   });
 
@@ -1810,6 +1821,7 @@ const COACH = [
 ];
 let coachStep = 0;
 let coachDone = false;
+try { if (sessionStorage.getItem('bullionCoachDone') === '1') coachDone = true; } catch (e) {}
 let interacted = false;
 function renderCoach() {
   const card = document.getElementById('coach');
@@ -1830,6 +1842,7 @@ function coachAdvance() {
 }
 function dismissCoach() {
   coachDone = true;
+  try { sessionStorage.setItem('bullionCoachDone', '1'); } catch (e) {}
   const card = document.getElementById('coach');
   if (card) card.classList.add('hidden');
 }
@@ -3266,7 +3279,7 @@ async function runAIAnalysis() {
 // loaded history — same split as calibrate.py). CONTEMPORANEOUS same-day test:
 // measures co-movement, NOT forecasting. Node colours are not in scope here
 // (their targets have no series).
-// Driver→cell map per target field, built explicitly from the 14 fittable cells:
+// Driver→cell map per target field, built explicitly from the 15 fittable cells:
 const BACKTEST_MAP = {
   us2y:    { kind:'level', cells:{ ffr:'us2y' } },
   us10y:   { kind:'level', cells:{ ffr:'us10y', vix:'us10y', wti_px:'us10y', dxy:'us10y' } },
