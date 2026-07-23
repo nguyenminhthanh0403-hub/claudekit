@@ -1419,12 +1419,31 @@ function initGraph() {
 
   const edges = LINKS.map(l => ({...l, source:l.s, target:l.t}));
 
+  // Concentric layout keyed on GROUP_DEPTH: system core (Fed monetary policy,
+  // depth 3) sits near the middle, peripheral layers (depth 1) on the outer ring.
+  // This turns the 108-node hairball into readable rings instead of a central blob.
+  const depthVals = Object.values(GROUP_DEPTH);
+  const maxDepth  = Math.max(...depthVals);
+  const minDepth  = Math.min(...depthVals);
+  const depthSpan = Math.max(1, maxDepth - minDepth);
+  const RUNIT = Math.min(W, H);                 // ring radii scale to the viewport
+  const ringR = d => {
+    const depth = GROUP_DEPTH[d.group] ?? minDepth;
+    const t = (maxDepth - depth) / depthSpan;   // 0 = core … 1 = periphery
+    return RUNIT * (0.15 + t * 0.63);           // inner ~0.15R … outer ~0.78R
+  };
+
   sim = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(edges).id(d=>d.id)
-      .distance(d => (100 + (3-d.w)*24) * scale).strength(0.4))
-    .force('charge', d3.forceManyBody().strength(-320 * scale))
+      // weaker links so hubs guide, not yank, neighbours into overlap
+      .distance(d => (90 + (3-d.w)*22) * scale).strength(0.16))
+    // stronger short-range repulsion, capped so distant rings stay compact
+    .force('charge', d3.forceManyBody().strength(-460 * scale).distanceMax(560 * scale))
+    // soft radial guidance toward the depth ring — nodes can still deviate to de-crowd
+    .force('radial', d3.forceRadial(ringR, W/2, H/2).strength(0.30))
     .force('center', d3.forceCenter(W/2, H/2))
-    .force('collision', d3.forceCollide(d => d.rx + 10 * scale));
+    // bigger collision padding so pills no longer touch
+    .force('collision', d3.forceCollide(d => d.rx + 16 * scale).strength(0.85));
 
   const link = linksG.selectAll('line').data(edges).join('line')
     .attr('stroke', d => d.sign > 0 ? 'rgba(123,191,142,0.42)' : d.sign < 0 ? 'rgba(224,101,79,0.42)' : 'rgba(224,177,90,0.42)')
