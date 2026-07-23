@@ -295,6 +295,7 @@ const GROUP_COLOR = {
   restate:'#b07a55',  // Real Estate (Residential, Commercial, REITs)
   intl:   '#a0a84f',  // International (Foreign CBs, Foreign Holders, IMF/BIS, Eurodollar)
   deriv:  '#c05a5a',  // Derivatives (Swaps, CDS, OTC)
+  money:  '#e3d29c',  // Money & Deposits (Bank Deposits, M2 money supply)
 };
 
 const LAYER_LABELS = {
@@ -321,9 +322,10 @@ const LAYER_LABELS = {
   restate:'Real Estate',
   intl:   'International',
   deriv:  'Derivatives',
+  money:  'Money & Deposits',
 };
 
-const GROUP_DEPTH = { purple:3, blue:2, teal:2, coral:1, amber:1, green:2, slate:2, ochre:1, rose:1, silver:2, cobalt:2, violet:2, iron:2, dkblue:2, indigo:3, cyan:2, orchid:2, stone:1, crypto:1, fintech:1, restate:2, intl:2, deriv:1 };
+const GROUP_DEPTH = { purple:3, blue:2, teal:2, coral:1, amber:1, green:2, slate:2, ochre:1, rose:1, silver:2, cobalt:2, violet:2, iron:2, dkblue:2, indigo:3, cyan:2, orchid:2, stone:1, crypto:1, fintech:1, restate:2, intl:2, deriv:1, money:2 };
 
 // ─── NODES ────────────────────────────────────────────────────────────────────
 // r = BASE radius hint (will be expanded dynamically to fit text — see initGraph).
@@ -816,6 +818,22 @@ const NODES = [
     beginner:'The huge, mostly private market where banks and funds trade custom contracts on rates, currencies and more — often away from public exchanges.',
     expert:'OTC derivatives broadly (rates, FX, equity, commodity; ~$600T+ gross notional globally). Bilateral or cleared, they form a web of exposures concentrated among the largest dealer banks. Post-2008 reforms pushed standardised trades into central clearing and added margin rules.',
     breaks:'The opaque, interconnected OTC web was the 2008 contagion channel — no one could see counterparty exposure. A major dealer default propagates through the web, and stress-driven margin calls force correlated asset sales (March 2020, UK LDI 2022).' },
+  { id:'deposits', label:'Bank Deposits', group:'money',
+    beginner:'The money in your checking and savings accounts. To a bank it is a debt it owes you; for the economy it is most of the money that exists — and it is created out of nothing when banks make loans.',
+    expert:'Commercial-bank deposits (~$17-18T; FRED: DPSACBW027SBOG) are the dominant component of the money supply and are created endogenously: when a bank makes a loan it simultaneously creates a matching deposit. They are bank liabilities, backstopped by FDIC insurance to $250k. Deposit betas and flows drive bank funding costs and the reserves/RRP split.',
+    breaks:'If depositors flee (a run), banks must dump assets at a loss or fail — exactly what killed SVB and Signature in March 2023. Sudden deposit flight freezes new lending, forces fire sales, and transmits stress across the banking system.' },
+  { id:'m2', label:'Money Supply (M2)', group:'money',
+    beginner:'The total pool of spendable money in the economy — cash plus checking, savings and money-market balances. When it grows far faster than the economy, inflation usually follows.',
+    expert:'M2 (FRED: M2SL, ~$21T) = currency + checkable/demand deposits + savings + small time deposits + retail money-fund shares. It grew ~40% in 2020-22 (QE plus fiscal transfers), then posted its first YoY contraction since 1948 in 2023. The quantity-theory link to prices (MV=PQ) is loose but nonzero; a watched, lagging inflation input.',
+    breaks:'Rapid M2 growth against constrained supply feeds inflation (2021-22); a sharp M2 contraction signals credit and liquidity tightening and recession risk. Misreading money growth is part of why the Fed was late to the 2021 inflation.' },
+  { id:'mortgage', label:'Mortgage Rates (30Y)', group:'teal',
+    beginner:'The interest rate on a typical 30-year home loan — the single most important number for US housing. It roughly tracks the 10-year Treasury yield plus a spread, NOT the Fed\'s policy rate directly.',
+    expert:'The 30-year fixed mortgage rate (FRED: MORTGAGE30US; Freddie Mac PMMS) ≈ 10-yr Treasury yield + a primary-secondary spread (~1.5-3%), priced off the current-coupon MBS market rather than the fed funds rate. It peaked ~7.8% in Oct 2023. This is the dominant transmission channel from rates to household balance sheets and residential investment.',
+    breaks:'Sharp rate spikes freeze home sales via the lock-in effect (owners will not give up a 3% mortgage), crush affordability and refinancing, and stall construction — a direct drag on GDP and household wealth.' },
+  { id:'privcredit', label:'Private Credit', group:'violet',
+    beginner:'Loans made directly by investment funds instead of banks, usually to mid-sized companies that cannot easily borrow from banks or bond markets. It has grown into a multi-trillion-dollar shadow lending industry.',
+    expert:'Direct lending / private credit funds (~$1.6-1.7T AUM; BDCs plus drawdown funds) lend to middle-market and PE-owned firms at floating rates. Largely unregulated, illiquid and marked to model, the sector filled space vacated by post-Dodd-Frank bank retrenchment and overlaps heavily with private equity (sponsor deals) and insurers/pensions as its LPs.',
+    breaks:'Opaque, illiquid and untested through a full default cycle — a wave of middle-market defaults would hit BDCs and their insurer/pension backers with mark-to-model losses that surface slowly, and there is no Fed backstop for the sector.' },
 ];
 
 // ─── LINKS ────────────────────────────────────────────────────────────────────
@@ -1132,6 +1150,30 @@ const LINKS = [
   {s:'cds',       t:'insur',    w:2, sign:+1, why:'Insurers write CDS protection (AIG in 2008), so a CDS blowup lands directly on insurer balance sheets.'},
   {s:'otc_deriv', t:'jpm',      w:2, sign:+1, why:'The OTC derivatives book is concentrated among a handful of dealer banks like JPMorgan, making them the market\'s core nodes.'},
   {s:'otc_deriv', t:'hedge',    w:2, sign:+1, why:'Hedge funds are dominant OTC derivatives users; stress-driven margin calls force the correlated deleveraging seen in past crises.'},
+  // ── Money & Deposits ──
+  {s:'credit',    t:'deposits', w:2, sign:+1, why:'Bank lending literally creates deposits — a new loan credits the borrower\'s account, so credit expansion is money creation.'},
+  {s:'deposits',  t:'reg_banks',w:3, sign:+1, why:'Deposits are banks\' cheapest and largest funding source; a stable deposit base is what lets banks lend and hold assets.'},
+  {s:'deposits',  t:'m2',       w:3, sign:+1, why:'Checkable and savings deposits are the largest component of M2, so deposit growth mechanically expands the money supply.'},
+  {s:'fdic',      t:'deposits', w:2, sign:+1, why:'FDIC insurance (to $250k) makes deposits money-good, preventing runs and keeping the deposit base stable.'},
+  {s:'ffr',       t:'deposits', w:2, sign:-1, why:'When policy rates rise above sticky deposit rates, cash flows out of deposits into higher-yielding money funds and T-bills (deposit disintermediation).'},
+  {s:'qe_qt',     t:'m2',       w:2, sign:+1, why:'QE credits reserves and tends to lift deposits and broad money; QT drains them — the Fed balance sheet is a direct lever on M2.'},
+  {s:'tsy',       t:'m2',       w:1, sign:+1, why:'Deficit spending financed through the banking system injects deposits into private hands, expanding broad money.'},
+  {s:'m2',        t:'cpi',      w:2, sign:+1, why:'Broad-money growth well above output tends to feed inflation with a long, variable lag (loose quantity-theory channel).'},
+  {s:'m2',        t:'gdp',      w:1, sign:+1, why:'Faster money growth generally supports nominal spending and activity, though the link is loose and lagged.'},
+  // ── Mortgage Rates ──
+  {s:'yield',     t:'mortgage', w:3, sign:+1, why:'The 30-yr mortgage is priced off the 10-yr Treasury plus a spread, so long-end yields — not the fed funds rate — set mortgage costs.'},
+  {s:'mbs',       t:'mortgage', w:2, sign:+1, why:'Lenders price loans off where they can sell the resulting MBS; wider MBS spreads push mortgage rates above Treasuries.'},
+  {s:'ffr',       t:'mortgage', w:1, sign:+1, why:'Policy rates reach mortgages only indirectly, via the long end and MBS spreads — a weak, lagged link, not a direct peg.'},
+  {s:'mortgage',  t:'resi_re',  w:3, sign:-1, why:'Higher mortgage rates gut affordability and demand — the primary brake on home prices and sales volume.'},
+  {s:'mortgage',  t:'household',w:2, sign:-1, why:'Mortgage payments are the largest household fixed cost; higher rates cut disposable income and the ability to buy or refinance.'},
+  {s:'mortgage',  t:'gdp',      w:1, sign:-1, why:'Rising mortgage rates stall homebuilding and turnover, dragging residential investment — a volatile GDP component.'},
+  // ── Private Credit ──
+  {s:'pe',        t:'privcredit',w:3, sign:+1, why:'Most private-credit deals fund private-equity buyouts, so PE deal volume directly drives demand for direct lending.'},
+  {s:'privcredit',t:'credit',   w:2, sign:+1, why:'Private credit now rivals bank and bond lending as a source of corporate credit; its expansion loosens overall financial conditions.'},
+  {s:'ffr',       t:'privcredit',w:2, sign:0,  why:'Floating-rate loans mean higher policy rates lift fund yields but also raise borrower default risk — a two-sided effect.'},
+  {s:'insur',     t:'privcredit',w:2, sign:+1, why:'Insurers are among the largest LPs in private-credit funds, chasing yield — their allocations fund the sector\'s growth.'},
+  {s:'pension',   t:'privcredit',w:1, sign:+1, why:'Pension plans allocate to private credit for yield and diversification, adding to the capital flowing into direct lending.'},
+  {s:'reg_banks', t:'privcredit',w:1, sign:-1, why:'As banks retrench from middle-market lending post-Dodd-Frank, private credit expands to fill the gap — bank pullback grows the sector.'},
 ];
 
 // ─── BEGINNER NODE INFO ───────────────────────────────────────────────────────
