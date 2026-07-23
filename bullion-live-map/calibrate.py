@@ -69,8 +69,11 @@ def verdict(hand_sign, fit):
     fit_sign = 1 if fit['slope'] > 0 else -1
     if fit_sign != hand_sign:
         return 'directional', 'fitted sign disagrees with the hand sign'
-    if abs(fit.get('t', 0)) <= 2:
-        return 'directional', f"|t|={abs(fit['t']):.1f} not significant"
+    t = fit.get('t', 0)
+    if t is None or (isinstance(t, float) and math.isnan(t)):
+        return 'directional', "t-stat undefined (NaN), not significant"
+    if abs(t) <= 2:
+        return 'directional', f"|t|={abs(t):.1f} not significant"
     return 'measured', f"sign matches, |t|={abs(fit['t']):.1f}, span={fit['x_span']:.3g}"
 
 

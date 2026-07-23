@@ -30,6 +30,12 @@ class TestVerdict(unittest.TestCase):
         fit = {'slope': -0.9, 't': 5.0, 'x_span': 0.0}
         tier, _ = c.verdict(-1, fit)
         self.assertEqual(tier, 'directional')
+    def test_verdict_nan_t_is_directional(self):
+        from calibrate import verdict
+        fit = {"slope": 0.5, "t": float("nan"), "x_span": 1.0}
+        tier, why = verdict(1, fit)
+        self.assertEqual(tier, "directional")
+        self.assertIn("not significant", why)
 
 if __name__ == '__main__':
     unittest.main()
