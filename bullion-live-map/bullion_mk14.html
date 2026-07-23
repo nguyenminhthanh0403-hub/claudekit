@@ -3332,10 +3332,18 @@ function openAuditLog() {
 
   const bt = backtestModel();
   const btPct = x => (100 * x).toFixed(0) + '%';
+  const ffrDominated = f => {
+    const cells = (BACKTEST_MAP[f.field] || {}).cells || {};
+    const drivers = Object.keys(cells);
+    return drivers.length === 1 && drivers[0] === 'ffr';
+  };
   const btRows = bt && bt.fields.length
     ? bt.fields.map(f =>
         '<tr><td>' + f.label + '</td><td>' + f.n + '</td><td>' + btPct(f.hitRate) +
-        '</td><td>' + f.r2.toFixed(2) + '</td></tr>').join('')
+        '</td><td>' + f.r2.toFixed(2) + '</td></tr>' +
+        ((f.hitRate < 0.15 && ffrDominated(f))
+          ? '<tr><td colspan="4" class="audit-note">Low hit-rate is structural: the Fed funds rate rarely changes day-to-day, so most days have ~0 predicted move. Same-day co-movement, not a forecast.</td></tr>'
+          : '')).join('')
     : '<tr><td colspan="4"><i>Not enough held-out history yet.</i></td></tr>';
   const backtestSection =
     '<h3>Model accuracy — backtested on the held-out tail' +
