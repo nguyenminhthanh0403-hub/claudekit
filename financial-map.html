@@ -1,0 +1,1326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bullion Mk1 — Macro Transmission Map</title>
+</head>
+<body>
+<h2 class="sr-only">Interactive Macroeconomic Transmission Map</h2>
+<style>
+:root{
+  --bg-0:#0e0e10;
+  --bg-1:#16161a;
+  --bg-2:#1d1d22;
+  --bg-3:#26262d;
+  --line:#2e2e36;
+  --gold:#d4af6a;
+  --gold-soft:#c9b489;
+  --gold-dim:#8a7c5c;
+  --gold-bright:#f0d9a8;
+  --txt:#e9e4d8;
+  --txt-2:#a8a294;
+  --txt-3:#6f6a5e;
+  --up:#e0654f;
+  --down:#7bbf8e;
+  --warn:#e0b15a;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background: var(--bg-0); color: var(--txt); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
+#app { display: flex; flex-direction: column; width: 100%; min-height: 100vh; }
+.top-bar { display: flex; align-items: flex-start; justify-content: space-between; padding: clamp(8px,2vw,12px) clamp(10px,3vw,16px); border-bottom: 1px solid var(--line); flex-wrap: wrap; gap: 8px; background: linear-gradient(180deg,var(--bg-1),var(--bg-0)); }
+.top-bar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.top-bar h1 { font-size: clamp(12px,2.5vw,15px); font-weight: 600; letter-spacing:0.04em; color: var(--gold); white-space: nowrap; text-shadow:0 1px 2px rgba(0,0,0,0.6); }
+.badge { font-size: clamp(10px,1.8vw,11px); padding: 2px 9px; border-radius: 20px; font-weight: 500; border: 1px solid; white-space: nowrap; letter-spacing:0.03em; }
+.badge-sim  { background: rgba(224,177,90,0.10); color: var(--warn); border-color: rgba(224,177,90,0.45); }
+.controls { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.btn { font-size: clamp(11px,1.8vw,12px); padding: clamp(4px,1vw,6px) clamp(8px,2vw,12px); border-radius: 6px; border: 1px solid var(--line); background: linear-gradient(180deg,var(--bg-2),var(--bg-1)); color: var(--gold-soft); cursor: pointer; transition: all 0.15s; white-space: nowrap; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.btn:hover, .btn:focus-visible { background: linear-gradient(180deg,var(--bg-3),var(--bg-2)); border-color: rgba(212,175,106,0.5); color: var(--gold-bright); outline: none; box-shadow:0 0 0 1px rgba(212,175,106,0.12),0 2px 6px rgba(0,0,0,0.4); }
+.mode-tag { font-size: clamp(10px,1.8vw,11px); padding: 3px 9px; border-radius: 10px; background: var(--bg-2); color: var(--gold-soft); border: 1px solid var(--line); cursor: pointer; white-space: nowrap; touch-action: manipulation; transition:all .15s; }
+.mode-tag:hover { border-color:rgba(212,175,106,0.5); color:var(--gold-bright); }
+.layout { display: flex; flex: 1; min-height: 0; flex-direction: row; }
+#graph-wrap { flex: 1; position: relative; min-width: 0; border-right: 1px solid var(--line); height: clamp(300px,55vw,640px); background:radial-gradient(ellipse at 50% 40%, #18181d 0%, var(--bg-0) 72%); }
+#graph-wrap svg { width: 100%; height: 100%; display: block; }
+.side-panel { width: clamp(200px,28vw,300px); display: flex; flex-direction: column; overflow: hidden; background:var(--bg-1); }
+.metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--line); border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.metric-cell { background: var(--bg-1); padding: clamp(6px,1.5vw,10px); }
+.metric-label { font-size: clamp(9px,1.5vw,10px); color: var(--gold-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 2px; }
+.metric-val { font-size: clamp(13px,2.2vw,16px); font-weight: 600; color: var(--txt); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.metric-val.up   { color: var(--up); }
+.metric-val.down { color: var(--down); }
+.metric-sub { font-size: clamp(9px,1.4vw,10px); color: var(--txt-3); margin-top: 1px; }
+.ai-panel { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: clamp(8px,2vw,12px); display: flex; flex-direction: column; gap: 10px; }
+.ai-section-label { font-size: clamp(9px,1.5vw,10px); font-weight: 600; color: var(--gold-dim); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+.narrative-box { font-size: clamp(11px,1.8vw,12px); color: var(--txt-2); line-height: 1.6; background: var(--bg-2); border-radius: 6px; padding: clamp(8px,1.5vw,11px); border: 1px solid var(--line); }
+.health-bar-wrap { margin: 2px 0 6px; }
+.health-bar-bg { height: 7px; background: var(--bg-0); border-radius: 4px; overflow: hidden; border: 1px solid var(--line); }
+.health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease, background 0.8s ease; box-shadow:0 0 8px rgba(212,175,106,0.4); }
+.health-score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+.health-score-num { font-size: clamp(16px,2.5vw,20px); font-weight: 600; color:var(--gold); }
+.impact-row { display: flex; justify-content: space-between; align-items: center; font-size: clamp(10px,1.6vw,11px); padding: 4px 0; border-bottom: 1px solid var(--line); }
+.impact-row:last-child { border-bottom: none; }
+.impact-name { color: var(--txt-2); }
+.impact-val { font-variant-numeric: tabular-nums; font-weight: 600; }
+.impact-val.pos { color: var(--up); }
+.impact-val.neg { color: var(--down); }
+.run-btn { display: flex; align-items: center; gap: 6px; justify-content: center; width: 100%; font-size: clamp(11px,1.8vw,12px); padding: clamp(7px,1.5vw,9px); border-radius: 6px; border: 1px solid rgba(212,175,106,0.45); background: linear-gradient(180deg,rgba(212,175,106,0.16),rgba(212,175,106,0.06)); color: var(--gold-bright); cursor: pointer; transition: all 0.15s; margin-top: 4px; touch-action: manipulation; -webkit-tap-highlight-color: transparent; font-weight:500; letter-spacing:0.03em; }
+.run-btn:hover { background: linear-gradient(180deg,rgba(212,175,106,0.26),rgba(212,175,106,0.10)); box-shadow:0 0 12px rgba(212,175,106,0.25); }
+.run-btn:disabled { opacity: 0.5; cursor: default; }
+.node-tooltip { position: absolute; pointer-events: none; background: rgba(22,22,26,0.97); border: 1px solid rgba(212,175,106,0.4); border-radius: 8px; padding: 9px 11px; font-size: clamp(10px,1.6vw,11px); max-width: min(240px,65vw); opacity: 0; transition: opacity 0.15s; box-shadow: 0 4px 18px rgba(0,0,0,0.6); z-index: 20; backdrop-filter:blur(4px); }
+.tt-title { font-weight: 600; font-size: clamp(11px,1.8vw,13px); margin-bottom: 4px; color: var(--gold); }
+.tt-body  { color: var(--txt-2); line-height: 1.5; }
+.tt-layer { font-size: 10px; color: var(--txt-3); margin-top: 3px; text-transform: uppercase; letter-spacing: 0.06em; }
+#touch-drawer { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-1); border-top: 1px solid rgba(212,175,106,0.4); border-radius: 16px 16px 0 0; padding: 16px; z-index: 100; box-shadow: 0 -6px 24px rgba(0,0,0,0.6); max-height: 45vh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+#touch-drawer.visible { display: block; }
+#touch-drawer-close { float: right; font-size: 22px; line-height: 1; cursor: pointer; color: var(--gold-soft); background: none; border: none; padding: 0 4px; }
+#touch-drawer h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; padding-right: 28px; color:var(--gold); }
+#touch-drawer p  { font-size: 13px; color: var(--txt-2); line-height: 1.6; }
+.state-alert { font-size: clamp(10px,1.8vw,11px); padding: 6px 9px; border-radius: 6px; margin-top: 2px; border: 1px solid; line-height: 1.4; }
+.state-alert.risk-off { background: rgba(224,101,79,0.12); color: var(--up); border-color: rgba(224,101,79,0.5); }
+.state-alert.tight    { background: rgba(224,177,90,0.12); color: var(--warn); border-color: rgba(224,177,90,0.5); }
+.state-alert.normal   { background: rgba(123,191,142,0.12); color: var(--down); border-color: rgba(123,191,142,0.5); }
+.spinner { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--line); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.schema-view { padding: 9px 11px; font-size: clamp(9px,1.5vw,11px); font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace; color: var(--gold-soft); background: var(--bg-0); overflow: auto; -webkit-overflow-scrolling: touch; white-space: pre; line-height: 1.6; border-radius: 6px; margin: 4px 0; max-height: 180px; border:1px solid var(--line); }
+.hidden { display: none !important; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px; padding: 6px 0 2px; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 10px; color: var(--txt-3); }
+.legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+/* ── Node detail panel (click) ─────────────────────────────────────────── */
+#detail-panel { position: absolute; top: 10px; right: 10px; width: min(330px, 88vw); max-height: calc(100% - 20px); overflow-y: auto; -webkit-overflow-scrolling: touch; background: rgba(22,22,26,0.98); border: 1px solid rgba(212,175,106,0.35); border-radius: 10px; box-shadow: 0 8px 32px rgba(0,0,0,0.7); z-index: 30; backdrop-filter: blur(6px); opacity: 0; transform: translateY(-6px); pointer-events: none; transition: opacity 0.18s, transform 0.18s; }
+#detail-panel.visible { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.dp-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 12px 14px 8px; border-bottom: 1px solid var(--line); }
+.dp-title { font-size: 15px; font-weight: 600; color: var(--gold); line-height: 1.25; }
+.dp-layer { font-size: 10px; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 3px; }
+.dp-close { font-size: 20px; line-height: 1; cursor: pointer; color: var(--gold-soft); background: none; border: none; padding: 0 2px; flex-shrink: 0; }
+.dp-close:hover { color: var(--gold-bright); }
+.dp-desc { font-size: 12px; color: var(--txt-2); line-height: 1.55; padding: 10px 14px; border-bottom: 1px solid var(--line); }
+.dp-section { padding: 10px 14px; }
+.dp-section + .dp-section { border-top: 1px solid var(--line); }
+.dp-section-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.dp-section-label.incoming { color: var(--gold-dim); }
+.dp-section-label.outgoing { color: var(--gold-dim); }
+.dp-edge { padding: 7px 9px; border-radius: 7px; margin-bottom: 6px; border: 1px solid; line-height: 1.45; }
+.dp-edge:last-child { margin-bottom: 0; }
+.dp-edge.pos { background: rgba(123,191,142,0.07); border-color: rgba(123,191,142,0.28); }
+.dp-edge.neg { background: rgba(224,101,79,0.07);  border-color: rgba(224,101,79,0.28); }
+.dp-edge.amb { background: rgba(224,177,90,0.07);  border-color: rgba(224,177,90,0.28); }
+.dp-edge-top { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.dp-arrow { font-size: 13px; font-weight: 700; flex-shrink: 0; }
+.dp-edge.pos .dp-arrow { color: var(--down); }
+.dp-edge.neg .dp-arrow { color: var(--up); }
+.dp-edge.amb .dp-arrow { color: var(--warn); }
+.dp-edge-name { font-size: 12px; font-weight: 600; color: var(--txt); }
+.dp-edge-strength { margin-left: auto; font-size: 9px; color: var(--txt-3); text-transform: uppercase; letter-spacing: 0.04em; }
+.dp-edge-why { font-size: 11px; color: var(--txt-2); line-height: 1.5; }
+.dp-empty { font-size: 11px; color: var(--txt-3); font-style: italic; }
+.dp-breaks { font-size: 11px; color: var(--txt-2); line-height: 1.55; background: rgba(224,177,90,0.07); border: 1px solid rgba(224,177,90,0.28); border-radius: 6px; padding: 8px 10px; margin-top: 2px; }
+@media (max-width: 640px) {
+  #detail-panel { position: fixed; top: auto; bottom: 0; left: 0; right: 0; width: 100%; max-height: 60vh; border-radius: 14px 14px 0 0; }
+}
+
+@media (max-width: 640px) {
+  .layout { flex-direction: column; }
+  #graph-wrap { border-right: none; border-bottom: 1px solid var(--line); height: 50vw; min-height: 260px; max-height: 420px; }
+  .side-panel { width: 100%; max-height: none; overflow: visible; }
+  .ai-panel { overflow-y: visible; max-height: none; }
+  .controls { display: grid; grid-template-columns: 1fr 1fr; width: 100%; }
+  .mode-tag { grid-column: 1 / -1; text-align: center; }
+  .top-bar { flex-direction: column; }
+  .top-bar-left { width: 100%; }
+  .metrics-grid { grid-template-columns: 1fr 1fr 1fr; }
+}
+@media (min-width: 641px) and (max-width: 900px) {
+  .side-panel { width: clamp(180px,32vw,260px); }
+  #graph-wrap { height: clamp(340px,50vw,560px); }
+}
+</style>
+
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <h1>Bullion Mk1 &mdash; Macro Transmission Map</h1>
+      <span class="badge badge-sim" id="data-badge">&#x2B24; SIMULATED DATA</span>
+    </div>
+    <div class="controls">
+      <span class="mode-tag" id="toggle-mode" onclick="toggleExpertMode()">Beginner mode</span>
+      <button class="btn" onclick="triggerShock('rate_hike')" title="Simulate a +50bps Fed rate hike">Rate Hike</button>
+      <button class="btn" onclick="triggerShock('vix_spike')" title="Simulate VIX spiking above 30">VIX Spike</button>
+      <button class="btn" onclick="triggerShock('cpi_rise')" title="Simulate CPI rising above 3%">CPI Rise</button>
+      <button class="btn" onclick="triggerShock('usd_shock')" title="Simulate DXY spike / dollar surge">USD Shock</button>
+      <button class="btn" onclick="resetState()">Reset</button>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div id="graph-wrap">
+      <svg id="network-svg"></svg>
+      <div class="node-tooltip" id="tooltip">
+        <div class="tt-title" id="tt-title"></div>
+        <div class="tt-body"  id="tt-body"></div>
+        <div class="tt-layer" id="tt-layer"></div>
+      </div>
+      <div id="detail-panel">
+        <div class="dp-header">
+          <div>
+            <div class="dp-title" id="dp-title"></div>
+            <div class="dp-layer" id="dp-layer"></div>
+          </div>
+          <button class="dp-close" onclick="closeDetail()" aria-label="Close">&times;</button>
+        </div>
+        <div class="dp-desc" id="dp-desc"></div>
+        <div class="dp-section">
+          <div class="dp-section-label incoming">&#x25BC; What affects this &mdash; incoming</div>
+          <div id="dp-incoming"></div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-label outgoing">&#x25B2; What this affects &mdash; outgoing</div>
+          <div id="dp-outgoing"></div>
+        </div>
+        <div class="dp-section">
+          <div class="dp-section-label" style="color:var(--warn)">&#9888; If this node disappeared&hellip;</div>
+          <div id="dp-breaks" class="dp-breaks"></div>
+        </div>
+      </div>
+    </div>
+    <div class="side-panel">
+      <div class="metrics-grid">
+        <div class="metric-cell"><div class="metric-label">US2Y</div><div class="metric-val" id="m-us2y">&#x2014;</div><div class="metric-sub">2-yr Treasury</div></div>
+        <div class="metric-cell"><div class="metric-label">US10Y</div><div class="metric-val" id="m-us10y">&#x2014;</div><div class="metric-sub">10-yr Treasury</div></div>
+        <div class="metric-cell"><div class="metric-label">Spread</div><div class="metric-val" id="m-spread">&#x2014;</div><div class="metric-sub">10Y&#x2013;2Y bps</div></div>
+        <div class="metric-cell"><div class="metric-label">VIX</div><div class="metric-val" id="m-vix">&#x2014;</div><div class="metric-sub">Fear index</div></div>
+        <div class="metric-cell"><div class="metric-label">SPX</div><div class="metric-val" id="m-spx">&#x2014;</div><div class="metric-sub">S&amp;P 500</div></div>
+        <div class="metric-cell"><div class="metric-label">Core CPI</div><div class="metric-val" id="m-cpi">&#x2014;</div><div class="metric-sub">YoY %</div></div>
+      </div>
+      <div class="ai-panel">
+        <div>
+          <div class="ai-section-label">Market State</div>
+          <div class="state-alert normal" id="state-alert">Stable &#x2014; risk-on, normal policy</div>
+        </div>
+        <div>
+          <div class="ai-section-label">Layer Legend</div>
+          <div class="legend" id="legend-box"></div>
+        </div>
+        <div>
+          <div class="ai-section-label">MacroMarketState JSON <span class="mode-tag" onclick="toggleSchema()" id="schema-toggle">show</span></div>
+          <div class="schema-view hidden" id="schema-box"></div>
+        </div>
+        <div>
+          <div class="ai-section-label">System health</div>
+          <div class="health-score-row">
+            <span class="health-score-num" id="health-num">&#x2014;</span>
+            <span style="font-size:11px;color:var(--txt-3)" id="health-label">Run AI analysis</span>
+          </div>
+          <div class="health-bar-wrap">
+            <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="ai-section-label">AI narrative</div>
+          <div class="narrative-box" id="narrative-box">Tap "Run AI Analysis" to generate a macro strategist's read on current conditions.</div>
+        </div>
+        <div id="impacts-section" class="hidden">
+          <div class="ai-section-label">Node impact multipliers</div>
+          <div id="impacts-list"></div>
+        </div>
+        <button class="run-btn" id="run-ai-btn" onclick="runAIAnalysis()">Run AI analysis &#x2197;</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="touch-drawer">
+  <button id="touch-drawer-close" onclick="closeTouchDrawer()" aria-label="Close">&times;</button>
+  <h3 id="touch-drawer-title"></h3>
+  <p  id="touch-drawer-body"></p>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script>
+// ─── LAYER PALETTE ────────────────────────────────────────────────────────────
+// Each group = one conceptual layer. Color chosen to maximise contrast vs charcoal bg.
+const GROUP_COLOR = {
+  purple: '#b79be0',  // Monetary Policy (Fed, FOMC, FFR)
+  blue:   '#7fb4e0',  // Fiscal / Sovereign (US Treasury)
+  teal:   '#6fc7a6',  // Domestic Markets (Yield Curve, Credit, Equity)
+  coral:  '#e0926a',  // Equity Sectors (Tech, Fins, Defensives)
+  amber:  '#e0c264',  // Sentiment / Vol (VIX)
+  green:  '#9cc26a',  // Economic Indicators (CPI, NFP)
+  slate:  '#8fb0c8',  // FX / Currency (USD, DXY)
+  ochre:  '#d4a843',  // Commodities (Gold, Oil)
+  rose:   '#c97b8a',  // Geopolitics (China, Russia, Global Trade)
+  silver: '#b8bcc8',  // Regulators (SEC, FDIC, OCC, etc.)
+  cobalt: '#7b9ed9',  // Commercial Banking (Big 4, GSEs, FHLBs)
+  violet: '#9b8fd9',  // Shadow Banking (MMFs, Hedge Funds, Repo)
+  iron:   '#8a9ba8',  // Infrastructure / Plumbing (Fedwire, CHIPS, DTCC)
+  dkblue: '#5a7fbf',  // Gov Institutional (Congress, ESF, OMB)
+  indigo: '#7b7fd9',  // CB Institutional (NY Fed, Discount Window, QE/QT)
+  cyan:   '#5fc7d4',  // Asset Management (BlackRock, Vanguard, State Street, ETFs)
+  orchid: '#cf8fbf',  // Households (Consumers, Consumer Credit)
+  stone:  '#a89684',  // Rating Agencies (Moody's, S&P, Fitch)
+};
+
+const LAYER_LABELS = {
+  purple: 'Monetary Policy',
+  blue:   'Fiscal / Sovereign',
+  teal:   'Domestic Markets',
+  coral:  'Equity Sectors',
+  amber:  'Sentiment / Vol',
+  green:  'Economic Indicators',
+  slate:  'FX / Currency',
+  ochre:  'Commodities',
+  rose:   'Geopolitics',
+  silver: 'Regulators',
+  cobalt: 'Commercial Banking',
+  violet: 'Shadow Banking',
+  iron:   'Infrastructure',
+  dkblue: 'Gov Institutional',
+  indigo: 'CB Institutional',
+  cyan:   'Asset Management',
+  orchid: 'Households',
+  stone:  'Rating Agencies',
+};
+
+const GROUP_DEPTH = { purple:3, blue:2, teal:2, coral:1, amber:1, green:2, slate:2, ochre:1, rose:1, silver:2, cobalt:2, violet:2, iron:2, dkblue:2, indigo:3, cyan:2, orchid:2, stone:1 };
+
+// ─── NODES ────────────────────────────────────────────────────────────────────
+// r = BASE radius hint (will be expanded dynamically to fit text — see initGraph).
+// 'layer' is a display-only string shown in the tooltip badge.
+const NODES = [
+  // ── Monetary Policy ──────────────────────────────────────────────────────
+  { id:'fed',   label:'Federal Reserve',     group:'purple',
+    beginner:'The central bank — controls interest rates and money supply to keep the economy stable.',
+    expert:'Conducts monetary policy via FFR target, QE/QT, and forward guidance. Also acts as lender-of-last-resort. The Fed\'s balance sheet peaked at $8.9T in 2022 (FRED: WALCL).',
+    breaks:'No lender of last resort. Bank runs cascade unchecked. The entire interbank lending market seizes because there is no backstop. The 1907 Panic — which prompted the Fed\'s creation — is the template: credit froze within days.' },
+  { id:'fomc',  label:'FOMC',                group:'purple',
+    beginner:'The committee that votes on interest rate changes 8 times per year.',
+    expert:'Federal Open Market Committee — 12 voting members set the FFR target. CME FedWatch tracks probability distributions across 25bps buckets. Effective since 1936.',
+    breaks:'No coordinated monetary policy decisions. The Fed\'s open market desk would have no mandate. Interest rates would be set ad hoc, creating massive uncertainty for all borrowers and lenders.' },
+  { id:'ffr',   label:'Fed Funds Rate',      group:'purple',
+    beginner:'The main interest rate the Fed controls. Everything else in finance takes cues from this number.',
+    expert:'Overnight interbank lending rate. Target range set by FOMC. Transmitted to economy via yield curve, credit spreads, and mortgage rates. Effective FFR data: FRED/FEDFUNDS.',
+    breaks:'No anchor for short-term borrowing costs. Mortgage rates, credit card rates, and corporate loan rates lose their reference point. The yield curve cannot form without a risk-free short-term anchor.' },
+
+  // ── Fiscal / Sovereign ───────────────────────────────────────────────────
+  { id:'tsy',   label:'US Treasury',         group:'blue',
+    beginner:'The US government borrows money by selling bonds. The interest rate on those bonds ripples everywhere.',
+    expert:'Issues T-Bills (≤1yr), Notes (2–10yr), Bonds (20–30yr). US debt outstanding ~$35T as of 2024. Auctions weekly; primary dealers (Goldman, JPM, etc.) are required buyers.',
+    breaks:'No risk-free benchmark. Every financial instrument in the world is priced as a spread over Treasuries. Without that anchor, global capital markets lose their pricing reference. The dollar\'s reserve currency status collapses.' },
+
+  // ── Domestic Markets ─────────────────────────────────────────────────────
+  { id:'yield', label:'Yield Curve',         group:'teal',
+    beginner:'A chart of government borrowing rates. When short-term rates exceed long-term (inverted), recession risk rises.',
+    expert:'Plots Treasury yields vs maturity. 2Y–10Y inversion has preceded all 8 recessions since 1955 (source: FRED). Current spread tracked via US2Y vs US10Y.',
+    breaks:'No term structure of interest rates. Banks cannot price loans profitably (they borrow short, lend long). Insurance companies cannot price long-dated liabilities. Pension funds lose their liability-matching instrument.' },
+  { id:'credit',label:'Credit Markets',      group:'teal',
+    beginner:'The market where companies borrow money. When it becomes more expensive, businesses invest less.',
+    expert:'IG + HY corporate bonds. OAS (option-adjusted spread) over Treasuries widens during stress. $10T+ outstanding US corporate debt. ICE BofA OAS index on FRED.',
+    breaks:'Corporations cannot refinance existing debt or fund new investment. The 2008 credit freeze showed the consequence: even blue-chip companies struggled to issue commercial paper, forcing Fed emergency interventions.' },
+  { id:'equit', label:'Equity Markets',      group:'teal',
+    beginner:'The stock market. Higher interest rates make stocks less valuable by reducing future profits in today\'s dollars.',
+    expert:'S&P 500 / Nasdaq. Equity risk premium = earnings yield minus risk-free rate. Rising rates compress multiples via DCF denominator effect. ~$45T total US market cap.',
+    breaks:'No mechanism for companies to raise equity capital. Innovation and growth slow dramatically. Pension and retirement savings — mostly held in equities — collapse, triggering a social crisis.' },
+
+  // ── Equity Sectors ───────────────────────────────────────────────────────
+  { id:'tech',  label:'Tech Equities',       group:'coral',
+    beginner:'Tech stocks are hit hardest by rising rates because their profits are far in the future.',
+    expert:'Long-duration assets — most sensitive to discount-rate moves. FAANG+M has ~28% weight in SPX (2024). DCF valuations collapse as the risk-free rate rises.',
+    breaks:'~28% of S&P 500 market cap evaporates. Venture capital dries up as the exit market (IPOs) closes. Innovation funding collapses as private valuations reprice.' },
+  { id:'fins',  label:'Financials',          group:'coral',
+    beginner:'Banks benefit from higher rates if lending rates rise faster than deposit costs.',
+    expert:'NIM (Net Interest Margin) expands when yield curve steepens. Rising 2Y squeezes short-term funding costs. KBW Bank Index ($BKX) is the benchmark. ~$7T sector market cap.',
+    breaks:'No intermediation between savers and borrowers. Credit allocation breaks down. The economy cannot fund investment or growth. Historical analogue: 1933 US banking holiday.' },
+  { id:'defn',  label:'Defensive Equities',  group:'coral',
+    beginner:'Stable companies (utilities, groceries) that investors flock to when markets turn scary.',
+    expert:'Utilities, Staples, Healthcare. Low beta (~0.4 vs SPX). Stable dividends bid up in risk-off as investors rotate from growth. Typically outperform in late cycle.',
+    breaks:'Investors have no safe harbor within equities during stress. Risk-off capital would move entirely to Treasuries and cash, further draining equity market liquidity.' },
+
+  // ── Sentiment / Vol ──────────────────────────────────────────────────────
+  { id:'vix',   label:'VIX',                 group:'amber',
+    beginner:'The "fear index" — measures how nervous options traders are. Above 30 signals panic.',
+    expert:'CBOE Volatility Index — implied 30-day S&P 500 vol. >20 = elevated anxiety, >30 = crisis/risk-off regime. Inverse correlation to SPX (r ≈ −0.74 historically).',
+    breaks:'Markets lose a real-time fear gauge. Portfolio hedging becomes blind — investors can\'t price options without implied vol. The derivatives market that depends on vol pricing ($30T+ notional) loses its reference signal.' },
+
+  // ── Economic Indicators ──────────────────────────────────────────────────
+  { id:'cpi',   label:'Core CPI',            group:'green',
+    beginner:'Inflation rate. When prices rise too fast, the Fed raises rates to cool the economy.',
+    expert:'CPI ex-food & energy. Fed targets 2% PCE (CPI closely correlated). Persistent overshoot → tightening cycle → higher real rates. Source: BLS monthly release.',
+    breaks:'The Fed loses its primary inflation signal. Monetary policy becomes reactive and delayed. Bond market inflation expectations (TIPS breakevens) become the only guide, but they are market-derived, not measured — a dangerous circular dependency.' },
+  { id:'nfp',   label:'Non-Farm Payrolls',   group:'green',
+    beginner:'Monthly jobs report. Too many jobs = inflation risk. Too few = recession risk.',
+    expert:'BLS first-Friday release. Dual mandate: max employment + price stability. Strong NFP + high CPI = hawkish FOMC. ~158M employed as of mid-2024 (BLS: CES0000000001).',
+    breaks:'The Fed\'s employment mandate becomes unmeasurable. Fiscal policy (unemployment benefits, stimulus) loses its trigger signal. Labor market policy is made blind.' },
+
+  // ── FX / Currency ────────────────────────────────────────────────────────
+  { id:'usd',   label:'US Dollar (DXY)',      group:'slate',
+    beginner:'The US dollar\'s strength compared to a basket of foreign currencies. A stronger dollar makes US exports more expensive and imports cheaper.',
+    expert:'DXY = trade-weighted USD index (EUR 57.6%, JPY 13.6%, GBP 11.9%, CAD 9.1%, SEK 4.2%, CHF 3.6%). Strong dollar tightens global financial conditions because ~60% of global FX reserves and 40–50% of global trade invoices are in USD (BIS 2022 Triennial Survey).',
+    breaks:'If the dollar loses reserve currency status: the US loses the "exorbitant privilege" of borrowing in its own currency. Treasury yields would spike as foreign central banks stop accumulating US debt. The US could no longer run large trade deficits without currency collapse.' },
+  { id:'dxy_fx',label:'EM FX / Global FX',   group:'slate',
+    beginner:'Exchange rates between the dollar and currencies of developing countries (Brazil, India, Turkey, etc.). A rising dollar puts stress on countries with dollar-denominated debt.',
+    expert:'EM nations owe ~$5.5T in USD-denominated external debt (IIF 2023). A 10% USD appreciation historically triggers a ~1.5% decline in EM GDP (IMF WP/19/25). Dollar strength → capital flight from EM → EM rate hikes → contagion risk.',
+    breaks:'EM debt crises cascade — countries cannot service dollar debt with weakened local currencies. Contagion to global credit markets (1997 Asian crisis and 1998 Russia/LTCM are historical templates).' },
+
+  // ── Commodities ──────────────────────────────────────────────────────────
+  { id:'gold',  label:'Gold',                group:'ochre',
+    beginner:'Gold is a "safe haven" — people buy it when they fear inflation or market crashes. Its price often moves opposite to the dollar.',
+    expert:'Gold has near-zero correlation to equities over long horizons. Key drivers: real interest rates (inverted), USD (inverted), inflation expectations, and geopolitical risk. ~$13T above-ground gold stock. Central bank gold demand hit 1,037 tonnes in 2023 (WGC). Real rates (TIPS yield) are the primary macro driver.',
+    breaks:'Central banks lose a reserve diversification asset. Countries de-dollarizing (Russia, China, India) would have fewer alternatives. The risk-off signaling function shifts entirely to Treasuries, increasing demand for US debt — a paradox.' },
+  { id:'oil',   label:'Oil Price (WTI)',      group:'ochre',
+    beginner:'Oil prices affect every sector because energy is an input cost for nearly everything. Rising oil directly causes higher inflation.',
+    expert:'WTI crude is the US benchmark; Brent is global. Oil represents ~3.5% weight in US CPI. OPEC+ controls ~40% of global production. A $10/barrel increase in oil historically adds ~0.3–0.4% to headline CPI (IMF). US became the world\'s largest oil producer in 2018 (EIA).',
+    breaks:'Energy price discovery collapses. Airlines, trucking, manufacturing, and agriculture lose input cost visibility. Inflation forecasting becomes impossible. Supply chains that depend on just-in-time logistics using oil-priced transport break down.' },
+
+  // ── Geopolitics ──────────────────────────────────────────────────────────
+  { id:'china', label:'China Economy',       group:'rose',
+    beginner:'China is the world\'s second-largest economy and the US\'s largest trading partner. When China slows down, US exports fall and commodity prices drop.',
+    expert:'China is the #1 holder of US Treasuries (~$780B as of 2024, down from $1.3T peak). China GDP ~$18T (2023 IMF). US-China bilateral trade ~$575B/year. A Chinese growth slowdown historically cuts global commodity prices 5–15%. Taiwan Strait risk = potential supply chain shock to semiconductors (~92% of sub-7nm chips made in Taiwan).',
+    breaks:'The world\'s largest marginal buyer of commodities exits the market — global copper, iron ore, and oil prices collapse. The US Treasury market loses its largest foreign creditor. Global supply chains for semiconductors and consumer goods face a structural crisis.' },
+  { id:'russia',label:'Russia / Sanctions',  group:'rose',
+    beginner:'Russia\'s invasion of Ukraine in 2022 triggered massive sanctions, cutting off energy supplies to Europe and spiking oil and gas prices globally.',
+    expert:'Russia controls ~12% of global oil supply and ~17% of natural gas (IEA 2022). Post-2022 sanctions froze ~$300B of Russian central bank reserves. Russia redirected energy exports to China and India at discounts, creating a "shadow fleet" of ~1,400 tankers outside Western insurance. This rewired global energy trade flows permanently.',
+    breaks:'The sanctions regime established a precedent: sovereign FX reserves can be frozen. This caused all non-Western central banks to accelerate de-dollarization. If sanctions snap back entirely, the precedent is lost and rogue actors face no financial deterrent.' },
+  { id:'geo',   label:'Global Trade / WTO',  group:'rose',
+    beginner:'Rules that govern how countries trade with each other. When trade breaks down (tariffs, sanctions, wars), prices rise everywhere.',
+    expert:'Global goods trade ~$25T/year (WTO 2023). US tariffs on Chinese goods raised from avg 3% to 19% (2018–2024 PIIE). Supply chain disruptions post-COVID added 1.5–2% to global CPI in 2021–22. The "slowbalization" trend: global trade/GDP ratio peaked in 2008 and has been flat since.',
+    breaks:'No rules-based trade order. Countries resort to bilateral deals. Supply chain efficiency collapses as companies near-shore everything. Global inflation structurally rises by 1–3% as specialization gains from trade are lost.' },
+
+  // ── Regulators ───────────────────────────────────────────────────────────
+  { id:'sec',   label:'SEC',                 group:'silver',
+    beginner:'The police force for the stock and bond markets — enforces disclosure rules so investors aren\'t cheated.',
+    expert:'Securities and Exchange Commission. Regulates $110T+ US securities markets. Enforces disclosure (Form 10-K, 8-K), prohibits insider trading (Rule 10b-5), oversees exchanges (NYSE, Nasdaq) and investment advisers. ~4,500 staff, $2.1B budget (FY2024).',
+    breaks:'Without SEC: public companies can hide losses, insider trading becomes legal, and investor confidence collapses. Equity markets shrink to a fraction of current size as retail investors exit. Capital formation for the US economy dries up.' },
+  { id:'fdic',  label:'FDIC',                group:'silver',
+    beginner:'The agency that insures your bank deposits up to $250,000. Its existence prevents bank runs — you don\'t pull your money out if you know it\'s insured.',
+    expert:'Federal Deposit Insurance Corporation. Insures ~$10T in US deposits at ~4,600 FDIC-member banks. $250K per depositor per institution. Also acts as receiver for failed banks. Deposit Insurance Fund: ~$120B (DIF). Created 1933 after 4,000 banks failed in the Great Depression.',
+    breaks:'Without deposit insurance: every hint of bank stress triggers a run. The 1933 US banking collapse — when 40% of US banks failed in 3 years — is the direct analogue. Modern bank runs happen in hours via mobile apps (SVB 2023 moved $42B in one day).' },
+  { id:'occ',   label:'OCC',                 group:'silver',
+    beginner:'The regulator that charters and supervises all national banks (the ones with "National" in their name or "N.A." after it, like Chase N.A.).',
+    expert:'Office of the Comptroller of the Currency. Supervises ~1,100 national banks and federal savings associations holding ~$14T in assets — 65% of all US commercial banking assets. Issues bank charters, sets capital and conduct rules.',
+    breaks:'Without OCC: national bank safety and soundness examinations stop. Capital requirements go unenforced. The largest US banks (all national charters) operate without a prudential regulator, raising systemic risk.' },
+  { id:'cfpb',  label:'CFPB',                group:'silver',
+    beginner:'The consumer watchdog for financial products — makes sure mortgages, credit cards, and student loans are explained honestly and sold fairly.',
+    expert:'Consumer Financial Protection Bureau. Created by Dodd-Frank 2010. Supervises banks with >$10B assets plus non-bank mortgage servicers, payday lenders, and credit bureaus. Handled 4.5M consumer complaints as of 2024. Enforces TILA, RESPA, FCRA.',
+    breaks:'Without CFPB: predatory lending practices resurge. The subprime mortgage mis-selling that caused the 2008 crisis was exactly what the CFPB was designed to stop. Consumer disclosure rules weaken, and borrowers lose informed-consent protections.' },
+  { id:'cftc',  label:'CFTC',                group:'silver',
+    beginner:'The regulator for futures and derivatives markets — oversees the trading of contracts for oil, corn, interest rates, and currencies before they actually settle.',
+    expert:'Commodity Futures Trading Commission. Regulates ~$640T notional derivatives market. Oversees futures exchanges (CME Group), clearinghouses, swap dealers, and large traders. Created 1974. Dodd-Frank gave CFTC authority over OTC swaps post-2010.',
+    breaks:'Without CFTC: the $640T derivatives market operates unpoliced. Naked speculation in commodity markets can manipulate oil, corn, and natural gas prices (the 2008 oil spike to $147 had significant speculative amplification). Clearinghouse oversight disappears.' },
+  { id:'fhfa',  label:'FHFA',                group:'silver',
+    beginner:'The regulator of Fannie Mae and Freddie Mac — the agencies that back most American home loans. It keeps the housing finance system from blowing up.',
+    expert:'Federal Housing Finance Agency. Created 2008 to supervise Fannie Mae, Freddie Mac, and 11 Federal Home Loan Banks. Placed both GSEs into conservatorship in September 2008 when they faced insolvency. Combined assets of Fannie + Freddie: ~$7T.',
+    breaks:'Without FHFA: Fannie/Freddie failures in 2008 would have been unmanaged. The $7T US mortgage market would have lost its guarantee structure. Mortgage rates would have spiked 300+ bps instantly, collapsing housing prices and triggering mass defaults.' },
+  { id:'fsoc',  label:'FSOC',                group:'silver',
+    beginner:'The body that watches for risks that could bring down the whole financial system — not just one bank or market, but everything at once.',
+    expert:'Financial Stability Oversight Council. Created by Dodd-Frank 2010. Chaired by Treasury Secretary. 10 voting members (Fed, OCC, FDIC, SEC, CFTC, FHFA, NCUA, CFPB, FHFA). Can designate non-banks as Systemically Important Financial Institutions (SIFIs). Monitors systemic risk.',
+    breaks:'Without FSOC: no cross-agency coordination on emerging systemic risks. The pre-2008 landscape had no single body with authority to see the whole picture — each regulator watched its silo while the overall system was accumulating catastrophic risk.' },
+  { id:'finra', label:'FINRA',               group:'silver',
+    beginner:'The self-regulatory body for stockbrokers — it writes and enforces rules for the people who buy and sell stocks on your behalf.',
+    expert:'Financial Industry Regulatory Authority. Self-regulatory organization (SRO) authorized by SEC. Oversees 3,400 broker-dealer firms and ~612,000 registered representatives. Operates BrokerCheck database. Conducts ~3,200 disciplinary actions per year. $1.1B annual budget.',
+    breaks:'Without FINRA: broker misconduct goes unsanctioned until SEC catches up (years later). Churning, unauthorized trading, and unsuitable recommendations proliferate. Retail investor protection collapses at the point of transaction.' },
+  { id:'fsb',   label:'FSB (Global)',         group:'silver',
+    beginner:'The global equivalent of FSOC — coordinates financial regulation between the US, Europe, Asia, and other major economies so a crisis in one country doesn\'t immediately spread everywhere.',
+    expert:'Financial Stability Board. Based in Basel, Switzerland. Monitors global financial system; coordinates policies across G20 jurisdictions. Designated global systemically important banks (G-SIBs) — 29 banks with extra capital requirements. Created at 2009 G20 Pittsburgh summit.',
+    breaks:'Without FSB: no global coordination on bank capital standards. Regulatory arbitrage accelerates — banks move risk to jurisdictions with weakest rules. The G-SIB framework that prevents "too big to fail" at the global level dissolves.' },
+
+  // ── Commercial Banking ────────────────────────────────────────────────────
+  { id:'jpm',   label:'JPMorgan Chase',       group:'cobalt',
+    beginner:'The largest US bank — manages money for millions of people and corporations, and is the largest single participant in nearly every financial market.',
+    expert:'$3.9T in assets (Q1 2024). Largest US bank by assets. Largest primary dealer. Largest US credit card issuer. Operates in 100+ countries. Systemically Important Financial Institution (SIFI) with highest G-SIB surcharge. Net revenue ~$158B (2023).',
+    breaks:'A JPMorgan failure would be the largest financial institution collapse in history — larger than Lehman Brothers by a factor of 6. Settlement of US Treasuries, repo, FX, and derivatives would freeze. The Fed would immediately invoke emergency lending powers.' },
+  { id:'bac',   label:'Bank of America',      group:'cobalt',
+    beginner:'The second-largest US bank — one of the main channels through which Fed policy reaches ordinary people via mortgages, car loans, and checking accounts.',
+    expert:'$3.3T in assets (Q1 2024). Second-largest US bank. Largest US retail bank by branches (~3,800). Major primary dealer. ~68M consumer and small business clients. G-SIB designation.',
+    breaks:'BofA failure would disrupt retail banking services for 68M Americans. Its massive mortgage servicing portfolio ($600B+) would require emergency government receivership to prevent homeowner payment chaos.' },
+  { id:'reg_banks', label:'Regional Banks',   group:'cobalt',
+    beginner:'Mid-size banks (US Bancorp, PNC, Truist, etc.) that are the main lenders for small businesses and middle-market companies — the backbone of regional economies.',
+    expert:'$1B–$100B asset tier. ~250 US banks. US Bancorp ($680B), PNC ($560B), Truist ($530B), Citizens ($220B) are the largest. Subject to stress tests above $100B threshold. Key channel for commercial real estate and small business lending (SBA loans).',
+    breaks:'SVB (2023) showed the template: a single regional bank run can spread contagion to peers via social media in hours. Regional bank failures sever small business credit — companies with <$10M revenue have few alternatives.' },
+  { id:'inv_banks', label:'Investment Banks',  group:'cobalt',
+    beginner:'Banks that help companies raise money (by selling stock or bonds) and help buyers and sellers complete large financial deals. They don\'t take deposits.',
+    expert:'Goldman Sachs ($577B assets), Morgan Stanley ($1.2T assets). Primary function: underwriting (IPOs, bond issuance), M&A advisory, market-making, proprietary trading. Combined revenues ~$80B (2023). Both are G-SIBs.',
+    breaks:'Without investment banks: corporations cannot efficiently issue equity or debt. M&A markets freeze. Market-making in bonds and equities deteriorates — bid-ask spreads widen, market liquidity falls. The 2008 conversion of Goldman and Morgan to bank holding companies was a crisis measure to access the Fed\'s backstop.' },
+  { id:'primary_dealers', label:'Primary Dealers', group:'cobalt',
+    beginner:'The 24 banks and broker-dealers that are required to bid at every US Treasury auction — they are the first buyers of US government debt.',
+    expert:'24 firms designated by NY Fed. Required to bid meaningfully at all Treasury auctions and serve as counterparties for the Fed\'s open market operations. Include JPMorgan, Goldman, BofA, Citi, Deutsche, HSBC, etc. Collectively absorb $20T+ in Treasury issuance per year.',
+    breaks:'Without primary dealers: Treasury auctions fail (no guaranteed buyers). The US government cannot fund itself. This has never happened in modern history; the 2011 debt ceiling crisis briefly raised the risk, pushing yields sharply higher.' },
+  { id:'fannie', label:'Fannie Mae',           group:'cobalt',
+    beginner:'A government-backed company that buys mortgages from banks, bundles them into bonds, and sells them to investors — this is why banks can keep making new home loans instead of running out of money.',
+    expert:'Federal National Mortgage Association (FNMA). In conservatorship since 2008. Guarantees ~$4T in mortgage-backed securities. Purchased by banks who need to offload mortgage risk to free up capital for more loans. Combined with Freddie Mac, backs ~70% of US mortgages.',
+    breaks:'Without Fannie: the 30-year fixed-rate mortgage — unique to the US — ceases to exist. Banks could only offer adjustable-rate mortgages tied to their own funding costs. Mortgage rates would rise 1–2%, pricing millions out of homeownership.' },
+  { id:'freddie',label:'Freddie Mac',          group:'cobalt',
+    beginner:'Same role as Fannie Mae — buys mortgages from banks and turns them into bonds that investors worldwide can buy, keeping the mortgage market funded.',
+    expert:'Federal Home Loan Mortgage Corporation (FHLMC). In conservatorship since 2008. Guarantees ~$3T in MBS. Alongside Fannie, underpins US housing finance. Implicit government guarantee enabled both to borrow cheaply until the 2008 bailout made the guarantee explicit ($191B Treasury investment).',
+    breaks:'The Fannie + Freddie 2008 conservatorship cost taxpayers $191B but prevented the collapse of US mortgage finance. Without the conservatorship, the entire housing market would have frozen — 70% of mortgages would have had no secondary market buyer.' },
+  { id:'fhlb',   label:'Fed Home Loan Banks',  group:'cobalt',
+    beginner:'A network of 11 wholesale banks that lend to commercial banks and credit unions, giving them extra funding when they need it — like an emergency piggy bank for banks.',
+    expert:'Federal Home Loan Bank System. 11 regional banks. $1.5T in assets. Provides "advance" loans to member institutions (banks, credit unions, insurers). Funded by FHLB bonds (implicit gov guarantee). Key emergency liquidity source: FHLB advances to SVB surged to $30B in the months before its 2023 failure.',
+    breaks:'Without FHLBs: small and mid-size banks lose a key liquidity backstop. During stress, they must sell assets or cut lending. The SVB crisis showed FHLBs delayed the reckoning but also highlighted that their advances can mask underlying problems.' },
+  { id:'interbank', label:'Interbank Market',  group:'cobalt',
+    beginner:'The invisible daily market where banks lend money to each other overnight to make sure they each have enough cash at the end of each day.',
+    expert:'The federal funds market — overnight unsecured lending between depository institutions. Average daily volume ~$80B. Effective FFR (EFFR) is the volume-weighted rate of these trades (FRED: EFFR). The 2008 LIBOR scandal highlighted how distorted interbank rates can become during stress.',
+    breaks:'In 2008, the interbank market froze — banks stopped lending to each other because no one knew who was holding toxic assets. The Fed had to inject $1T+ in emergency liquidity. Without this market, banks cannot manage daily cash flow, forcing Fed emergency operations.' },
+
+  // ── Shadow Banking ────────────────────────────────────────────────────────
+  { id:'mmf',   label:'Money Market Funds',   group:'violet',
+    beginner:'Investment funds that act like bank accounts — they hold only super-safe, short-term securities and try to always be worth exactly $1 per share.',
+    expert:'$6T+ AUM (ICI 2024). Three types: government (Treasury/agency only), prime (corp commercial paper + repos), tax-exempt. "Breaking the buck" (NAV <$1) triggers runs. Reserve Primary Fund broke the buck Sept 2008, triggering systemic panic. Post-2016 reforms: floating NAV for prime institutional funds.',
+    breaks:'MMF runs are self-fulfilling and rapid. In 2008, the Reserve Primary Fund\'s buck-breaking caused $300B to flee prime MMFs in days, freezing the $1T+ commercial paper market and requiring a US Treasury emergency guarantee. The real economy credit crunch followed immediately.' },
+  { id:'hedge',  label:'Hedge Funds',          group:'violet',
+    beginner:'Private investment funds for wealthy investors that can use complex strategies — including betting that prices will fall — to try to make money in any market condition.',
+    expert:'~$4.3T AUM (HFR 2024). ~30,000 funds globally. Use leverage (borrowed money to amplify returns). Key strategies: macro, long/short equity, credit, quant/systematic. Largest: Bridgewater ($124B), Man Group ($168B), Citadel ($63B). Lightly regulated vs. mutual funds.',
+    breaks:'LTCM (1998) showed the template: a single hedge fund with $125B in assets and $1.25T in derivatives exposure nearly collapsed global fixed income markets. The Fed orchestrated a private bailout. With $4.3T total AUM and heavy leverage, a wave of hedge fund failures would force-sell assets across all markets.' },
+  { id:'repo',   label:'Repo Market',          group:'violet',
+    beginner:'A daily borrowing market where financial firms sell securities (like Treasury bonds) overnight and agree to buy them back the next day at a slightly higher price — effectively using bonds as collateral for overnight cash loans.',
+    expert:'$4–5T daily US repo volume (NY Fed). Critical short-term funding market for banks, broker-dealers, MMFs, and hedge funds. Two types: bilateral (bank-to-bank) and triparty (via Bank of NY Mellon as custodian). Repo rate stress (Sept 2019) required $75B/day Fed interventions.',
+    breaks:'Repo market seizure is the fastest transmission of financial crisis. In 2008, repo markets froze as counterparties refused to accept MBS as collateral. In Sept 2019, repo rates spiked to 10% in hours. Without functioning repo, banks and broker-dealers cannot fund their daily operations — leading to forced asset sales within 24 hours.' },
+  { id:'cp',     label:'Commercial Paper',     group:'violet',
+    beginner:'Short-term IOUs (typically 1–90 days) that large corporations issue to borrow cash for everyday expenses like payroll. It\'s cheaper and faster than bank loans for big companies.',
+    expert:'~$1.2T outstanding (Fed Flow of Funds). Typically unsecured. Issued by corporations, banks, and structured vehicles (ABCP). Major buyers: money market funds (~40% of prime MMF assets). Average maturity ~30 days. During 2008 crisis, new CP issuance collapsed — the Fed created the Commercial Paper Funding Facility (CPFF) as emergency backstop.',
+    breaks:'When CP freezes (2008), even AAA-rated companies like GE and Caterpillar cannot fund payroll. The Fed\'s CPFF purchased $350B in commercial paper to prevent this catastrophe from persisting. A CP freeze = operational shutdown of corporate America within 30–90 days.' },
+  { id:'pe',     label:'Private Equity',       group:'violet',
+    beginner:'Firms that buy companies using a lot of borrowed money, try to improve them, and then sell them for a profit a few years later.',
+    expert:'~$8T AUM globally (Preqin 2024). Largest US firms: Blackstone ($1T), Apollo ($650B), KKR ($550B), Carlyle ($400B). Leveraged buyouts (LBOs) load acquired companies with debt. PE-owned companies employ ~11.7M US workers (AIC). Typically 10-year fund structures.',
+    breaks:'PE as a credit-market amplifier: when credit markets seize, leveraged buyouts collapse. PE firms managing overleveraged portfolio companies face forced sales. The systemic risk is the employment exposure: 11.7M workers at PE-owned companies face restructuring risk in a credit crunch.' },
+  { id:'insur',  label:'Insurance Companies',  group:'violet',
+    beginner:'Companies like MetLife and Prudential that collect monthly premiums and invest them in bonds and stocks, paying out when policyholders die, retire, or have an accident.',
+    expert:'~$10T in assets (NAIC 2023). Largest: Berkshire Hathaway, MetLife, Prudential, New York Life. Hold ~30% of all US corporate bonds. Major buyers of long-duration Treasuries (to match 20–30 year liabilities). State-regulated (no federal insurance regulator). AIG failure in 2008 required $182B government bailout.',
+    breaks:'AIG (2008) demonstrated insurance systemic risk: its financial products division wrote $440B in credit default swaps without adequate capital. When MBS prices fell, AIG\'s CDS losses required a $182B government bailout to prevent global credit derivatives market collapse.' },
+  { id:'pension', label:'Pension Funds',       group:'violet',
+    beginner:'Retirement savings pools that invest workers\' contributions over decades to pay them monthly income in retirement. They are among the largest investors in the world.',
+    expert:'~$32T in US pension assets (Pensions & Investments 2024). Public pension funds (state/local): ~$5.5T. Corporate defined-benefit: ~$3T. Largest: CalPERS ($490B), CalSTRS ($320B), NYCRS ($280B). Major buyers of long-duration bonds (liability-matching) and equities (growth allocation).',
+    breaks:'Pension fund insolvency doesn\'t cause immediate market crises — it creates long-term social crises. Illinois ($200B+ unfunded liability) and other public pension failures require either tax hikes or benefit cuts affecting millions of retirees. The implicit guarantee by state governments creates eventual fiscal crises.' },
+  { id:'broker', label:'Broker-Dealers',       group:'violet',
+    beginner:'The firms that actually execute stock and bond trades on your behalf, and also trade for their own accounts between buyers and sellers to provide market liquidity.',
+    expert:'~800 FINRA-registered broker-dealers. Functions: trade execution, market-making (standing ready to buy/sell), underwriting, prime brokerage (servicing hedge funds). Key firms: Citadel Securities, Virtu Financial, Charles Schwab, Fidelity. Market-makers account for ~50% of daily equity volume.',
+    breaks:'Without market-makers, bid-ask spreads explode. A 2-cent spread on SPY (typical) could become 20 cents. The March 2020 COVID crash temporarily broke Treasury market liquidity as broker-dealers hit risk limits. Bond trading halted for hours. Without market-makers: price discovery freezes.' },
+  { id:'mbs',    label:'MBS Market',           group:'violet',
+    beginner:'Mortgage-Backed Securities — bonds created by bundling thousands of home loans together. Investors buy these bonds and receive the homeowners\' monthly mortgage payments as income.',
+    expert:'~$12T MBS outstanding (SIFMA 2024). Agency MBS (Fannie/Freddie/Ginnie): ~$9T. Non-agency (private label): ~$0.8T. Fed purchased $1.7T in agency MBS during QE programs. MBS spreads over Treasuries (OAS) are the key metric. Mortgage rates = 10Y Treasury + MBS spread (~1.5–2%).',
+    breaks:'In 2008, the non-agency MBS market froze completely — no buyers at any price. This caused mortgage lending to collapse and housing prices to fall 30%. The Fed\'s MBS purchase programs (QE1, QE2, QE3) were specifically designed to restore this market.' },
+  { id:'clo',    label:'CLOs / CDOs',          group:'violet',
+    beginner:'Complex securities created by slicing pools of loans (CLOs = corporate loans, CDOs = various) into tranches — the safest slice gets paid first, the riskiest last. They transfer credit risk from banks to investors.',
+    expert:'~$1T+ US CLO market (S&P 2024). CLOs buy leveraged loans (junk corporate debt) and issue rated tranches. AAA CLO tranche: 0% historical default rate through 2008 crisis. CDOs (pre-2008) were the primary vehicle for subprime MBS concentration and mispricing that caused the financial crisis.',
+    breaks:'CDOs were the mechanism of the 2008 crisis: they allowed subprime mortgage risk to be repackaged as "AAA" rated securities and sold to pension funds, insurance companies, and foreign banks. When the underlying mortgages defaulted, the entire chain of CDO holders suffered losses — the "toxic asset" problem that froze global credit.' },
+
+  // ── Infrastructure ────────────────────────────────────────────────────────
+  { id:'fedwire', label:'Fedwire',             group:'iron',
+    beginner:'The plumbing that moves large sums of money between banks in real time — when banks settle Treasury purchases, interbank loans, or large corporate payments, it happens through Fedwire.',
+    expert:'Operated by the Federal Reserve. Processes ~$4T/day in funds transfers (FRED: FEDWTRANSFER). Also operates Fedwire Securities for settling Treasury, agency, and mortgage-backed securities. Real-time gross settlement (RTGS) — each transaction is final immediately. 9,000+ participants.',
+    breaks:'A Fedwire outage (even 30 minutes) freezes interbank settlement. Treasury auction settlement, repo settlement, and interbank lending all depend on Fedwire. The Sept 11, 2001 attacks physically disrupted settlement infrastructure, requiring the Fed to inject $38B overnight to prevent settlement failures.' },
+  { id:'chips',   label:'CHIPS',               group:'iron',
+    beginner:'Like Fedwire but for international dollar payments — when a Japanese bank needs to pay a Brazilian company in dollars, that transaction likely flows through CHIPS.',
+    expert:'Clearing House Interbank Payments System. Operated by The Clearing House (private, owned by large banks). Processes ~$1.8T/day in primarily cross-border USD payments. ~50 global participants. Bilateral netting (reduces settlement amounts by ~95%) vs. Fedwire\'s RTGS. Final settlement via Fedwire.',
+    breaks:'CHIPS failure paralyzes cross-border USD payments — the primary mechanism for global dollar trade. ~$1.8T/day in international transactions stalls. Foreign banks cannot fund dollar obligations, triggering FX market stress and potential dollar squeeze globally.' },
+  { id:'ach',     label:'ACH Network',         group:'iron',
+    beginner:'The system that processes everyday electronic payments — direct deposit, bill pay, payroll. Every time your employer deposits your salary, it goes through ACH.',
+    expert:'Automated Clearing House. Operated by The Clearing House (EPN) and Nacha/Fedach. Processes ~$80T/year across 30B+ transactions (Nacha 2023). Batch settlement (not real-time like Fedwire). Average transaction: $3,000. Key use: payroll, direct deposit, recurring bills, government benefit payments (Social Security).',
+    breaks:'ACH outage = payroll stops. Employers cannot fund worker salaries; mortgage and rent auto-payments fail; Social Security direct deposits freeze. Even a 24-hour outage would affect 170M+ Americans receiving direct deposit.' },
+  { id:'dtcc',    label:'DTCC',                group:'iron',
+    beginner:'The central clearinghouse that guarantees every stock and bond trade in America is completed — even if one party defaults. Without it, every trade would be a bilateral risk.',
+    expert:'Depository Trust & Clearing Corporation. Systemically Important Financial Market Utility (SIFMU). Processes >$2.5 quadrillion in securities annually. Subsidiaries: NSCC (equities), FICC (fixed income), DTC (custody of $87T in securities). ~40M transactions/day. Mutualized guarantee fund absorbs member defaults.',
+    breaks:'Without DTCC: the 2008 Lehman default would have caused mass settlement fails across all equity and bond trades. DTCC\'s guarantee fund absorbed Lehman\'s open positions without a single trade failing. A DTCC failure = complete US equity and bond market shutdown. This is perhaps the single most critical piece of financial infrastructure.' },
+  { id:'cme_clr', label:'CME Clearing',        group:'iron',
+    beginner:'The entity that stands between every buyer and seller of futures contracts (oil, corn, interest rates, currency) and guarantees both sides will be paid — even if one party goes bankrupt.',
+    expert:'CME Clearing is the central counterparty (CCP) for CME Group exchanges. Clears $1B+ notional in futures/options daily. Operates in interest rate futures (98% of US market), FX futures, commodity futures. Handles ~4.5M contracts/day. Mutualized default fund + variation margin calls protect solvency.',
+    breaks:'CME Clearing failure = derivatives market collapse. All open positions (hedges for airlines, farmers, banks) simultaneously lose their counterparty guarantee. The real economy loses its ability to hedge — airlines can\'t lock in fuel costs, farmers can\'t lock in crop prices, banks can\'t hedge interest rate risk.' },
+  { id:'swift',   label:'SWIFT',               group:'iron',
+    beginner:'The global messaging network that banks use to send payment instructions to each other across countries — like email, but specifically for telling other banks to move money.',
+    expert:'Society for Worldwide Interbank Financial Telecommunication. Based in Belgium. 11,000+ institutions in 200+ countries. Processes 40M+ messages/day. Carries payment instructions (not funds themselves). Russia\'s exclusion from SWIFT (Feb 2022) was among the most impactful financial sanctions in history.',
+    breaks:'SWIFT exclusion is a financial "nuclear option." Russia\'s disconnection disrupted $300B in central bank reserves and severed international trade payment flows. A broader SWIFT failure or cyber attack would freeze global cross-border payments — about 50% of world trade depends on SWIFT-mediated instructions.' },
+  { id:'fednow',  label:'FedNow',              group:'iron',
+    beginner:'The US Federal Reserve\'s new instant payment system (launched 2023) — lets you send money that arrives in seconds, 24/7/365, instead of waiting for ACH batch settlement.',
+    expert:'Launched July 2023. Real-time gross settlement. $500K transaction limit (as of 2024). 700+ participating banks. Direct competitor to private RTP (Real-Time Payments, operated by The Clearing House). Aims to replace slow ACH for time-sensitive payments. $25 trillion annual target processing volume by 2030 (Fed forecast).',
+    breaks:'FedNow is new infrastructure still building adoption. Its failure today would be inconvenient but not systemic — ACH and Fedwire remain as fallbacks. Its importance grows over time as real-time payment expectations become baseline.' },
+
+  // ── Gov Institutional ─────────────────────────────────────────────────────
+  { id:'congress', label:'Congress (Fiscal)',  group:'dkblue',
+    beginner:'The branch of government that controls how much money the US government can borrow (the debt ceiling) and how it is spent (the budget). When Congress can\'t agree on the debt ceiling, the entire US government faces default risk.',
+    expert:'Budget authority via the Appropriations process. Debt ceiling: a legislated cap on total Treasury debt outstanding (~$36.1T current). Treasury uses "extraordinary measures" to avoid default between ceiling breaches. 2023 debt ceiling crisis was resolved June 2023 after 5-month standoff. Tax legislation (Ways & Means / Finance committees) shapes fiscal policy.',
+    breaks:'US government default: if Congress fails to raise the debt ceiling, Treasury cannot pay interest on existing debt. Moody\'s (2023) and S&P (2011) downgraded US credit partly over debt ceiling political risk. A technical default would immediately spike global interest rates as the "risk-free" asset ceases to be risk-free.' },
+  { id:'esf',     label:'Exchange Stabilization Fund', group:'dkblue',
+    beginner:'A secret Treasury fund that allows the US government to intervene in currency markets or provide emergency financial bailouts without needing Congressional approval — the Treasury\'s emergency financial weapon.',
+    expert:'Treasury\'s off-balance-sheet fund. ~$200B in assets. Can buy/sell foreign currencies, gold, Special Drawing Rights (SDRs). Used to: guarantee MMFs in 2008 (up to $50B), extend Mexico emergency loan 1994 ($20B), backstop repo market. Operates without Congressional authorization, giving Treasury Secretary direct emergency power.',
+    breaks:'The ESF\'s 2008 MMF guarantee stopped the systemic run that began when Reserve Primary Fund broke the buck. Without the ESF guarantee, the MMF run would have drained $3T+ in prime MMFs in days, freezing the commercial paper market and triggering a depression-level credit contraction.' },
+  { id:'omb',     label:'OMB',                 group:'dkblue',
+    beginner:'The White House\'s budget office — it coordinates all federal spending plans and tells the Treasury how much money the government needs to borrow each year.',
+    expert:'Office of Management and Budget. Executive Office of the President. Prepares the President\'s annual budget proposal ($6.9T FY2024 request). Coordinates agency spending. Provides deficit/surplus projections. Works with Treasury on debt issuance calendar. OMB projections heavily influence bond market expectations for future Treasury supply.',
+    breaks:'Without OMB coordination: Treasury auction sizes become unpredictable, the bond market loses forward supply visibility, and bid-to-cover ratios at auctions deteriorate. Fiscal policy loses central coordination, with agencies spending inconsistently.' },
+  { id:'exec',    label:'Executive Branch',    group:'dkblue',
+    beginner:'The President and Cabinet set the priorities that drive fiscal and regulatory policy — from appointing Fed governors to negotiating trade deals, the Executive Branch shapes the environment in which financial markets operate.',
+    expert:'The President nominates 7 Federal Reserve Board Governors (including Chair) subject to Senate confirmation. Appoints Treasury Secretary, SEC Chair, CFTC Chair. Sets trade policy (tariffs, sanctions — Executive Orders). Signs or vetoes tax and spending legislation. Executive financial policy transmitted via Treasury and regulatory agencies.',
+    breaks:'Executive paralysis (e.g., prolonged government shutdown) stops non-essential agency operations including SEC enforcement. Prolonged inability to appoint Fed governors (as occurred 2017–2018) leaves the world\'s most important central bank understaffed.' },
+
+  // ── CB Institutional ──────────────────────────────────────────────────────
+  { id:'nyfed',  label:'NY Federal Reserve',  group:'indigo',
+    beginner:'The most important of the 12 regional Federal Reserve banks — it executes all of the Fed\'s market operations and is the Fed\'s eyes and ears in the financial markets of New York.',
+    expert:'Federal Reserve Bank of New York. Always has a permanent vote on the FOMC. Executes all open market operations (buys/sells Treasuries to hit FFR target). Operates Fedwire. Supervises largest banks (JPMorgan, Citigroup, Goldman, Morgan Stanley all under NY Fed supervision). $4T+ balance sheet. Run by NY Fed President (currently John Williams).',
+    breaks:'Without NY Fed: open market operations cease — the Fed cannot implement monetary policy in financial markets. Treasury auction settlement, repo market operations, and large bank supervision all depend on NY Fed as the operational arm of the Federal Reserve System.' },
+  { id:'disc_win', label:'Discount Window',   group:'indigo',
+    beginner:'The Fed\'s emergency lending window — when a bank is running out of cash and can\'t borrow elsewhere, it can borrow from the Fed here at a penalty interest rate, using its loan assets as collateral.',
+    expert:'Federal Reserve\'s primary credit facility. Rate = fed funds rate + 0.10% (currently ~5.35%). Any solvent bank can borrow. Stigma problem: using the discount window signals distress, so banks avoid it even in crisis. Fed introduced Bank Term Funding Program (BTFP) in 2023 as a stigma-free alternative. Collateral: most bank assets accepted.',
+    breaks:'Without the discount window: illiquid-but-solvent banks have no last-resort. The 2023 SVB crisis demonstrated the counterpart: SVB\'s inability to pledge enough collateral (its underwater bond portfolio) meant it could not borrow what it needed, accelerating its failure.' },
+  { id:'omo',    label:'Open Market Ops',     group:'indigo',
+    beginner:'The daily mechanism by which the Fed adjusts the money supply — it buys or sells Treasury securities to push short-term interest rates toward its target.',
+    expert:'NY Fed Trading Desk executes OMOs daily. Temporary (repos/reverse repos) and permanent (outright purchases/sales). Standing Repo Facility (SRF): overnight repo at FFR upper bound — prevents rates from spiking above target. Reverse Repo Facility (RRP): drains excess liquidity — peaked at $2.6T in Dec 2022 (FRED: WLRRAL).',
+    breaks:'Without OMOs: the fed funds rate drifts away from the FOMC\'s target. The Fed loses its primary monetary policy transmission mechanism. Interest rate targeting becomes impossible — the "price of money" is unanchored.' },
+  { id:'qe_qt',  label:'QE / QT (Fed BS)',    group:'indigo',
+    beginner:'Quantitative Easing (QE) = the Fed buying bonds to inject money into the economy when cutting rates isn\'t enough. Quantitative Tightening (QT) = the reverse — selling bonds to drain money out.',
+    expert:'QE programs: QE1 ($1.75T, 2008–10), QE2 ($600B, 2010–11), QE3 ($1.7T, 2012–14), COVID QE ($4.2T, 2020–22). Fed balance sheet peak: $8.9T (April 2022, FRED: WALCL). Currently ~$7.3T (QT ongoing). Operates via NY Fed purchasing agency MBS and Treasuries. Lowers long-term rates by removing duration risk from market.',
+    breaks:'QE proved effective but created long-term problems: $8.9T balance sheet must be unwound without market disruption. QT too fast (2018 attempt) caused repo market stress in Sept 2019. The balance sheet is now so large that the Fed\'s exit is itself a systemic risk — "quantitative tightening" can spike long-term rates.' },
+  { id:'fed_lend', label:'Fed Lending Facilities', group:'indigo',
+    beginner:'Emergency programs the Fed creates during crises to lend money to specific markets that are freezing — like a targeted fire hose for financial market fires.',
+    expert:'Emergency facilities invoked under Section 13(3) of the Federal Reserve Act. 2008: PDCF (broker-dealers), TALF (ABS), CPFF (commercial paper), MMIFF (money market funds). 2020: PMCCF/SMCCF (corporate bonds), MSLP (Main Street), MLF (municipal). BTFP 2023 (bank term funding). Requires Treasury Secretary approval. Each facility signals the Fed\'s commitment to backstop that market.',
+    breaks:'Without 13(3) emergency authority: the Fed cannot intervene in non-bank markets. The 2008 crisis required the Fed to lend to broker-dealers (Bear Stearns, Lehman) and guarantee money market funds — powers that did not exist before and required improvisation under extreme time pressure.' },
+
+  // ── Monetary plumbing (SOFR / Reserves / RRP / TGA) ───────────────────────
+  { id:'sofr', label:'SOFR', group:'purple',
+    beginner:'The main US interest-rate benchmark — the average cost of borrowing cash overnight using Treasuries as collateral. It replaced LIBOR, and trillions in loans and derivatives are priced off it.',
+    expert:'Secured Overnight Financing Rate. Published daily by the NY Fed from ~$2T of tri-party Treasury repo (FRED: SOFR). Reference rate for $300T+ of derivatives after the 2023 LIBOR cessation. The Fed steers it inside the FFR target range using IORB and the RRP floor.',
+    breaks:'Floating-rate loans, interest-rate swaps and futures lose their benchmark — the 2021-23 LIBOR transition showed every floating contract must otherwise be renegotiated. A SOFR spike (Sept 2019, hit 5%+) signals the funding plumbing is jammed. Systemic.' },
+  { id:'reserves', label:'Bank Reserves + IORB', group:'indigo',
+    beginner:'The money commercial banks park at the Fed. The Fed pays interest on it (IORB), and that rate is now its main lever for steering all short-term rates.',
+    expert:'Reserve balances held by banks at the Fed (FRED: WRESBAL), ~$3T in the "ample reserves" regime. Since 2008 the Fed sets rates administratively via Interest on Reserve Balances — banks will not lend below what they earn risk-free at the Fed, so IORB is a soft floor for fed funds/SOFR. QE creates reserves; QT drains them.',
+    breaks:'If reserves fall below the lowest comfortable level the plumbing seizes: Sept 2019 QT drained reserves too far and SOFR jumped ~300bps overnight, forcing the Fed to restart repo ops. Too few reserves = banks cannot settle and fund. Systemic.' },
+  { id:'rrp', label:'Reverse Repo (RRP)', group:'indigo',
+    beginner:'An overnight parking spot where money-market funds lend cash to the Fed and get it back the next day with interest. It sets a floor under short-term rates and soaks up excess cash.',
+    expert:'Overnight Reverse Repo Facility (FRED: RRPONTSYD). The Fed sells Treasuries overnight to eligible counterparties — mainly MMFs — at the RRP administered rate, a hard floor for money-market rates. Peaked ~$2.5T in 2022-23, then drained toward zero by 2024-25 as T-bill supply rose, releasing liquidity back into markets.',
+    breaks:'Without RRP a flood of MMF cash would push repo and T-bill rates below the Fed target, breaking rate control on the floor side. Its drain/refill is a major swing factor in system liquidity — the emptying financed Treasury issuance without draining bank reserves.' },
+  { id:'tga', label:'Treasury General Account', group:'dkblue',
+    beginner:'The federal government\'s checking account at the Fed. Tax inflows raise the balance; spending lowers it — and those swings move cash in and out of the whole banking system.',
+    expert:'Treasury General Account (FRED: WTREGEN), typically $500B-$800B. As a Fed liability, a rising TGA drains bank reserves; a falling TGA (deficit spending or a debt-ceiling drawdown) injects them. Post-debt-ceiling rebuilds soak up hundreds of billions via bill issuance.',
+    breaks:'TGA swings are a stealth liquidity lever most retail investors ignore. A rapid rebuild (post-2023 debt-ceiling deal) can tighten funding as fast as QT; mismanagement could drain reserves into a repo squeeze. The reserves/RRP/TGA trio must be watched together.' },
+
+  // ── Asset Management (Big Three + ETF complex) ────────────────────────────
+  { id:'blackrock', label:'BlackRock', group:'cyan',
+    beginner:'The world\'s largest money manager — it invests over $10 trillion for pensions, governments and ordinary savers, mostly through index funds and its iShares ETFs.',
+    expert:'~$10-11T AUM (largest globally). Dominant in ETFs via iShares and in fixed income. Its Aladdin risk platform runs analytics for $20T+ of industry assets. A top-3 shareholder in most S&P 500 firms.',
+    breaks:'Concentrated ownership means a few managers cast swing votes on corporate boards. An Aladdin outage or a forced BlackRock deleveraging would ripple across the funds and pensions that depend on it. Its ETF creation/redemption is a primary channel for market liquidity.' },
+  { id:'vanguard', label:'Vanguard', group:'cyan',
+    beginner:'The pioneer of low-cost index funds, owned by its own fund investors. It manages ~$9 trillion, mostly passive funds that quietly own big slices of nearly every US company.',
+    expert:'~$9-10T AUM. Its mutual-ownership structure (funds own the firm) drives ultra-low fees that forced industry-wide fee compression. With BlackRock and State Street forms the "Big Three" holding ~20%+ of the average S&P 500 company.',
+    breaks:'Passive-flow dominance means index inclusion/exclusion moves prices mechanically, detached from fundamentals. Common ownership across competitors raises antitrust and governance questions. A mass redemption wave would force selling across the whole index at once.' },
+  { id:'statestreet', label:'State Street', group:'cyan',
+    beginner:'The third "Big Three" index-fund giant and creator of the first US ETF (SPY). It also safeguards trillions in assets as a custodian bank.',
+    expert:'~$4T AUM plus ~$40T+ under custody. Launched SPY (1993), the largest/most-traded ETF. Its dual role as SSGA (manager) and State Street Bank (a G-SIB custodian) makes it systemically important on both the fund and plumbing sides.',
+    breaks:'As a top custodian, a State Street failure would freeze settlement and asset servicing for thousands of funds. As a Big Three member it shares the common-ownership concentration risk. SPY is a core hedging/liquidity instrument for the whole equity market.' },
+  { id:'etf', label:'ETF / Index Fund Complex', group:'cyan',
+    beginner:'Funds that hold a basket of stocks or bonds but trade like a single share. Most US investing now flows through these passive vehicles rather than stock-pickers.',
+    expert:'US ETF/index-fund assets exceed $10T — over half of all fund assets. Authorized Participants arbitrage ETF price vs NAV via creation/redemption, tying ETF liquidity to underlying-market liquidity. Passive flows are price-insensitive, amplifying momentum and index-inclusion effects.',
+    breaks:'In stress, ETF-NAV dislocations (March 2020 bond ETFs at steep discounts) signal underlying illiquidity. If AP arbitrage breaks, ETFs stop tracking their index. Passive concentration means selling begets correlated selling across all index members.' },
+
+  // ── Households (consumer sector + credit) ─────────────────────────────────
+  { id:'household', label:'Households / Consumers', group:'orchid',
+    beginner:'You and every other consumer. Households supply the deposits banks lend out, take the mortgages and loans, and do ~70% of all US spending — the ultimate source and destination of the money on this map.',
+    expert:'US household net worth ~$160T (FRED: TNWBSHNO); consumption ~68% of GDP (PCE). Households are the system\'s core funding base (deposits) and its largest borrowers (mortgages, consumer credit). The saving rate and balance-sheet health drive credit demand and the business cycle.',
+    breaks:'A household deleveraging shock (2008) collapses consumption, defaults cascade into banks and MBS, and a demand-driven recession follows. Deposit flight (2023 regional-bank runs) drains the funding base banks rely on. Confidence is self-reinforcing in both directions.' },
+  { id:'consumer_credit', label:'Consumer Credit', group:'orchid',
+    beginner:'The mortgages, credit cards, auto loans and student loans households borrow. Cheap, easy credit lifts spending; when it tightens, the economy slows.',
+    expert:'US consumer credit ~$5T revolving+nonrevolving (FRED: TOTALSL) plus ~$12T mortgage debt. Transmits Fed policy to the real economy: hikes raise card/auto/mortgage costs with a lag. Delinquency trends (cards, auto) are an early stress gauge.',
+    breaks:'A consumer-credit crunch cuts household spending power, deepening downturns. Rising delinquencies feed losses back to banks, card issuers and ABS holders. Subprime mortgage credit was the 2008 detonator.' },
+
+  // ── Rating Agencies ───────────────────────────────────────────────────────
+  { id:'rating', label:'Credit Rating Agencies', group:'stone',
+    beginner:'Firms like Moody\'s, S&P and Fitch that grade how likely a borrower is to repay. Their letter grades (AAA down to junk) decide who can borrow and how cheaply.',
+    expert:'The Big Three NRSROs (Moody\'s, S&P Global, Fitch) rate ~95% of outstanding debt. Ratings drive regulatory capital charges, index eligibility and mandate constraints (many funds may hold only investment-grade). SEC-overseen post-Dodd-Frank. Issuer-paid — a structural conflict of interest.',
+    breaks:'Downgrades force mechanical selling by mandate-constrained funds (fallen-angel cascades). Inflated AAA ratings on subprime MBS were central to 2008. A US sovereign downgrade (S&P 2011, Fitch 2023) reprices the global risk-free benchmark.' },
+];
+
+// ─── LINKS ────────────────────────────────────────────────────────────────────
+// w    = transmission strength (1=weak, 3=strong) — controls line thickness
+// sign = directional effect when the SOURCE rises:
+//          +1 = pushes target UP / strengthens it
+//          -1 = pushes target DOWN / weakens it
+//           0 = direction depends on context (ambiguous / regime-dependent)
+// why  = plain-language mechanism shown in the click panel
+const LINKS = [
+  // ── Monetary policy spine ─────────────────────────────────────────────────
+  {s:'fed',   t:'fomc',   w:3, sign:+1, why:'The Fed Board chairs and dominates the FOMC, setting the agenda and policy direction for the committee\'s votes.'},
+  {s:'fomc',  t:'ffr',    w:3, sign:+1, why:'The FOMC directly votes the Fed Funds Rate target range up or down 8 times a year.'},
+  {s:'ffr',   t:'yield',  w:3, sign:+1, why:'A higher policy rate lifts the entire yield curve, especially the short end (2Y), because all borrowing is priced off the risk-free rate.'},
+  {s:'ffr',   t:'credit', w:2, sign:-1, why:'Higher base rates raise corporate borrowing costs and widen credit spreads as default risk rises — bad for credit market prices.'},
+  {s:'fed',   t:'cpi',    w:1, sign:-1, why:'The Fed\'s entire purpose is to cool inflation; tighter policy reduces CPI over a 12–18 month lag.'},
+
+  // ── Sovereign / fiscal ────────────────────────────────────────────────────
+  {s:'tsy',   t:'yield',  w:2, sign:+1, why:'Treasury sets supply. Heavier bond issuance (more debt) pushes yields up because buyers demand higher returns to absorb the extra supply.'},
+
+  // ── Markets ───────────────────────────────────────────────────────────────
+  {s:'yield', t:'credit', w:2, sign:-1, why:'Rising Treasury yields raise the baseline that corporate bonds are priced against, pushing credit prices down.'},
+  {s:'yield', t:'equit',  w:2, sign:-1, why:'Higher yields raise the discount rate in stock valuations (DCF), compressing equity multiples — stocks fall.'},
+  {s:'yield', t:'fins',   w:2, sign:+1, why:'A steeper curve widens bank Net Interest Margins (borrow short, lend long), which is good for financial stocks.'},
+  {s:'credit',t:'equit',  w:1, sign:+1, why:'Healthy credit markets (tight spreads) signal confidence and easy corporate funding, supporting equities.'},
+
+  // ── Sectors ───────────────────────────────────────────────────────────────
+  {s:'equit', t:'tech',   w:2, sign:+1, why:'Tech is a high-beta component of the broad equity market; it amplifies overall market direction.'},
+  {s:'equit', t:'fins',   w:2, sign:+1, why:'Financials move with the broad market, though with their own rate sensitivity.'},
+  {s:'equit', t:'defn',   w:2, sign:+1, why:'Defensives participate in market rallies but with lower beta (they lag on the way up and cushion on the way down).'},
+  {s:'ffr',   t:'tech',   w:2, sign:-1, why:'Tech earnings are far in the future; a higher discount rate hits long-duration assets hardest, so rate hikes punish tech most.'},
+
+  // ── Sentiment ─────────────────────────────────────────────────────────────
+  {s:'vix',   t:'equit',  w:2, sign:-1, why:'VIX is the "fear gauge." Rising fear means investors sell stocks — VIX and the S&P 500 move inversely (r ≈ −0.74).'},
+  {s:'vix',   t:'defn',   w:1, sign:+1, why:'When fear rises, capital rotates INTO defensive stocks (utilities, staples) as a shelter, lifting them relative to the market.'},
+
+  // ── Economic indicators → FOMC ────────────────────────────────────────────
+  {s:'cpi',   t:'fomc',   w:2, sign:+1, why:'High inflation forces the FOMC toward a hawkish (rate-hiking) stance — strong CPI raises the odds of a hike.'},
+  {s:'nfp',   t:'fomc',   w:2, sign:+1, why:'A hot jobs report signals an overheating economy, pushing the FOMC toward tightening.'},
+
+  // ── FX / Dollar ───────────────────────────────────────────────────────────
+  {s:'ffr',   t:'usd',    w:2, sign:+1, why:'Higher US rates attract global capital seeking yield, increasing demand for dollars — the dollar strengthens.'},
+  {s:'usd',   t:'dxy_fx', w:2, sign:-1, why:'A strong dollar weakens emerging-market currencies and makes their dollar-denominated debt more expensive — EM FX falls.'},
+  {s:'usd',   t:'gold',   w:2, sign:-1, why:'Gold is priced in dollars and pays no yield. A stronger dollar makes gold more expensive abroad and less attractive vs. yield-bearing dollars — gold falls.'},
+  {s:'usd',   t:'oil',    w:1, sign:-1, why:'Crude is priced in dollars globally. A stronger dollar makes oil pricier for non-US buyers, dampening demand — oil tends to fall.'},
+  {s:'usd',   t:'equit',  w:1, sign:-1, why:'~40% of S&P 500 revenue is foreign. A strong dollar shrinks that revenue when converted back to dollars — a headwind for stocks.'},
+  {s:'dxy_fx',t:'credit', w:1, sign:-1, why:'EM currency stress triggers global de-risking, which widens credit spreads worldwide — bad for credit.'},
+
+  // ── Commodities ───────────────────────────────────────────────────────────
+  {s:'oil',   t:'cpi',    w:3, sign:+1, why:'Oil is the single largest non-housing CPI input. A $10/bbl rise adds ~0.3–0.4% to headline CPI (IMF) — oil up means inflation up.'},
+  {s:'gold',  t:'vix',    w:1, sign:+1, why:'Both are risk-off barometers. When gold is bid up on fear, it usually coincides with rising volatility.'},
+  {s:'oil',   t:'equit',  w:1, sign:-1, why:'High oil acts as a tax on consumers and raises input costs, squeezing corporate margins — a drag on most equities.'},
+  {s:'gold',  t:'tsy',    w:1, sign:+1, why:'Gold and Treasuries are both flight-to-safety assets; demand for one often accompanies demand for the other.'},
+
+  // ── Geopolitics ───────────────────────────────────────────────────────────
+  {s:'russia',t:'oil',    w:3, sign:+1, why:'Russia supplies ~12% of global oil. Sanctions or supply cuts remove barrels from the market, spiking prices — disruption pushes oil up.'},
+  {s:'russia',t:'gold',   w:1, sign:+1, why:'Geopolitical conflict drives safe-haven demand for gold; Russia is also the world\'s 2nd-largest gold producer.'},
+  {s:'china', t:'equit',  w:2, sign:-1, why:'US-China trade tension raises supply-chain costs and tariff risk, squeezing the margins of S&P multinationals — a drag on US equities.'},
+  {s:'china', t:'tsy',    w:2, sign:-1, why:'China holds ~$780B of US Treasuries. If China sells (de-risking or retaliation), Treasury prices fall and yields rise.'},
+  {s:'china', t:'oil',    w:2, sign:+1, why:'China is the world\'s largest oil importer. Stronger Chinese growth raises global oil demand and prices.'},
+  {s:'geo',   t:'oil',    w:2, sign:+1, why:'Trade disruptions and shipping-route conflicts constrain oil supply, pushing prices up.'},
+  {s:'geo',   t:'cpi',    w:2, sign:+1, why:'Tariffs and supply-chain breakdowns raise the cost of imported goods, feeding directly into US inflation.'},
+  {s:'geo',   t:'credit', w:1, sign:-1, why:'Trade-policy uncertainty makes lenders cautious, widening credit spreads — a drag on credit markets.'},
+  {s:'russia',t:'geo',    w:2, sign:+1, why:'Russia sanctions rewired global trade rules and energy flows, intensifying overall trade-regime disruption.'},
+  {s:'china', t:'geo',    w:2, sign:+1, why:'US-China policy effectively sets the global trade regime; escalation raises systemic trade tension.'},
+
+  // ── Regulator → Regulated ────────────────────────────────────────────────
+  {s:'sec',    t:'equit',       w:3, sign:+1, why:'SEC disclosure rules (10-K, 10-Q) and insider trading enforcement make equity markets trustworthy — enforcement quality directly affects market participation.'},
+  {s:'sec',    t:'credit',      w:2, sign:+1, why:'SEC regulates bond issuance (registration statements) and trading. Post-2008 reforms increased transparency in OTC bond markets via TRACE.'},
+  {s:'fdic',   t:'reg_banks',   w:3, sign:+1, why:'FDIC deposit insurance eliminates the incentive for retail depositors to run — the existence of insurance is what makes bank deposits stable.'},
+  {s:'fdic',   t:'interbank',   w:2, sign:+1, why:'FDIC guarantees prevent deposit flight that would force banks to call interbank loans to raise cash, stabilizing the overnight lending market.'},
+  {s:'occ',    t:'jpm',         w:2, sign:+1, why:'OCC supervises JPMorgan Chase as a national bank (N.A. charter) — capital adequacy exams and stress tests constrain risk-taking.'},
+  {s:'occ',    t:'bac',         w:2, sign:+1, why:'Bank of America N.A. is an OCC-chartered national bank subject to regular safety and soundness examination.'},
+  {s:'cftc',   t:'cme_clr',     w:3, sign:+1, why:'CFTC regulates CME Clearing as a Derivatives Clearing Organization (DCO) — sets margin requirements, default fund adequacy, and stress testing standards.'},
+  {s:'cftc',   t:'repo',        w:1, sign:+1, why:'CFTC has oversight over repo transactions involving securities that are also futures-related (e.g., Treasury repo) — partial jurisdiction with the Fed.'},
+  {s:'fhfa',   t:'fannie',      w:3, sign:+1, why:'FHFA is the conservator and regulator of Fannie Mae — sets capital requirements, mortgage guarantee fees (g-fees), and conforming loan limits.'},
+  {s:'fhfa',   t:'freddie',     w:3, sign:+1, why:'FHFA is the conservator and regulator of Freddie Mac — same authority as Fannie Mae since Sept 2008 conservatorship.'},
+  {s:'fhfa',   t:'fhlb',        w:2, sign:+1, why:'FHFA also regulates the 11 Federal Home Loan Banks — sets capital requirements and mission compliance for the FHLBs.'},
+  {s:'fsoc',   t:'fsb',         w:2, sign:+1, why:'FSOC coordinates US input to the FSB — US designations of systemically important entities feed into global FSB frameworks (G-SIBs, G-SIIs).'},
+  {s:'fsoc',   t:'mmf',         w:2, sign:+1, why:'FSOC has authority to designate non-bank financial companies as systemically important — MMFs were near-designated post-2008, driving SEC reform.'},
+  {s:'finra',  t:'broker',      w:3, sign:+1, why:'FINRA is the self-regulatory organization for broker-dealers — licenses representatives, conducts exams, and enforces rules on suitability and disclosure.'},
+  {s:'fsb',    t:'jpm',         w:2, sign:+1, why:'FSB designates JPMorgan as a G-SIB (Global Systemically Important Bank) requiring the highest additional capital buffer (~3.5% extra CET1).'},
+  {s:'fed',    t:'jpm',         w:2, sign:+1, why:'Fed supervises JPMorgan Chase as a Bank Holding Company (BHC) — conducts annual stress tests (CCAR) and sets consolidated capital requirements.'},
+  {s:'fed',    t:'bac',         w:2, sign:+1, why:'Fed supervises Bank of America as a BHC — same stress testing and capital framework as JPMorgan.'},
+  {s:'fed',    t:'inv_banks',   w:2, sign:+1, why:'Goldman Sachs and Morgan Stanley converted to BHCs in 2008 to access Fed emergency lending — now subject to Fed supervision and stress tests.'},
+
+  // ── CB Institutional connections ──────────────────────────────────────────
+  {s:'fed',    t:'nyfed',       w:3, sign:+1, why:'The NY Fed is the operational arm of the Federal Reserve — it executes all open market operations, manages the Fed\'s portfolio, and supervises the largest banks.'},
+  {s:'fomc',   t:'omo',         w:3, sign:+1, why:'FOMC sets the FFR target and approves the framework for open market operations — NY Fed\'s trading desk then executes to hit that target daily.'},
+  {s:'nyfed',  t:'omo',         w:3, sign:+1, why:'NY Fed Trading Desk executes all open market operations — daily repo/reverse repo operations to maintain the FFR within the FOMC\'s target range.'},
+  {s:'omo',    t:'tsy',         w:2, sign:+1, why:'Open market operations involve buying and selling Treasuries — the Fed\'s primary market operations directly affect Treasury market liquidity and pricing.'},
+  {s:'omo',    t:'ffr',         w:3, sign:+1, why:'OMOs are the direct mechanism for hitting the FFR target — if the effective rate drifts above target, the Fed injects reserves via repo.'},
+  {s:'fed',    t:'disc_win',    w:3, sign:+1, why:'The Fed sets the discount rate (primary credit rate = FFR upper bound + 0.10%) and policies governing discount window access.'},
+  {s:'disc_win',t:'reg_banks',  w:2, sign:+1, why:'Regional and community banks can borrow from the discount window against eligible collateral — the backstop that prevents illiquid-but-solvent banks from failing.'},
+  {s:'disc_win',t:'interbank',  w:2, sign:+1, why:'Discount window availability sets a ceiling on interbank lending rates — banks will borrow from the Fed rather than pay more than the discount rate in the market.'},
+  {s:'fed',    t:'qe_qt',       w:3, sign:+1, why:'The FOMC authorizes QE and QT programs — the Fed Board and FOMC set the pace and targets for balance sheet expansion or contraction.'},
+  {s:'qe_qt',  t:'tsy',         w:3, sign:+1, why:'QE purchases of Treasuries directly lower long-term yields by removing duration from the market and signaling prolonged low rates.'},
+  {s:'qe_qt',  t:'mbs',         w:3, sign:+1, why:'Fed purchased $1.7T in agency MBS during QE programs — directly compressed MBS spreads and lowered mortgage rates by ~1.5%.'},
+  {s:'qe_qt',  t:'credit',      w:2, sign:+1, why:'QE compresses risk-free rates, pushing investors into corporate bonds (the "portfolio rebalancing channel") — tightening credit spreads.'},
+  {s:'fed',    t:'fed_lend',    w:3, sign:+1, why:'Fed Board of Governors approves emergency lending facilities under Section 13(3) with Treasury Secretary concurrence — the ultimate financial crisis backstop.'},
+  {s:'fed_lend',t:'credit',     w:2, sign:+1, why:'PMCCF/SMCCF (2020) purchased corporate bonds directly — when the Fed announced these facilities, IG and HY spreads collapsed by 200-400bps within days.'},
+  {s:'fed_lend',t:'mmf',        w:3, sign:+1, why:'MMIFF (2008) and MMLF (2020) provided liquidity to money market funds during runs — both programs stopped systemic MMF outflows within days of announcement.'},
+  {s:'fed_lend',t:'cp',         w:3, sign:+1, why:'CPFF (2008) purchased commercial paper directly — the Fed became the buyer of last resort for corporate short-term debt, preventing payroll freezes.'},
+
+  // ── Commercial Banking connections ────────────────────────────────────────
+  {s:'jpm',    t:'primary_dealers', w:3, sign:+1, why:'JPMorgan is the largest primary dealer — required to bid at every Treasury auction and serve as Fed counterparty for open market operations.'},
+  {s:'bac',    t:'primary_dealers', w:3, sign:+1, why:'Bank of America is a major primary dealer, absorbing significant Treasury issuance at each auction.'},
+  {s:'inv_banks',t:'primary_dealers', w:3, sign:+1, why:'Goldman Sachs, Morgan Stanley, and other investment banks are primary dealers — their underwriting expertise is essential for pricing and distributing Treasury debt.'},
+  {s:'primary_dealers',t:'tsy', w:3, sign:+1, why:'Primary dealers are required buyers at every Treasury auction — they underwrite US government debt, ensuring even unpopular auctions clear at market prices.'},
+  {s:'primary_dealers',t:'repo',w:2, sign:+1, why:'Primary dealers use repo financing to fund their inventory of Treasuries — they buy at auction and finance the position via repo until sold to end investors.'},
+  {s:'fannie', t:'mbs',         w:3, sign:+1, why:'Fannie Mae issues and guarantees MBS — it purchases conforming mortgages from banks, pools them, and sells the resulting securities to investors worldwide.'},
+  {s:'freddie',t:'mbs',         w:3, sign:+1, why:'Freddie Mac issues Participation Certificates (PCs) and MBS — same mechanism as Fannie, providing a secondary market for conforming mortgages.'},
+  {s:'mbs',    t:'yield',        w:2, sign:+1, why:'MBS spreads over Treasuries are a critical component of mortgage rates — when MBS spreads widen, mortgage rates rise even if Treasury yields are flat.'},
+  {s:'mbs',    t:'credit',       w:2, sign:+1, why:'Agency MBS is the largest non-Treasury fixed-income market — MBS spread moves significantly affect total credit market conditions.'},
+  {s:'fhlb',   t:'reg_banks',    w:2, sign:+1, why:'FHLBs provide "advances" (collateralized loans) to member banks — a key source of stable funding for community and regional banks beyond deposits.'},
+  {s:'fhlb',   t:'interbank',    w:1, sign:+1, why:'FHLB advances provide an alternative to interbank borrowing — when interbank markets stress, banks can substitute FHLB advances, reducing contagion.'},
+  {s:'interbank',t:'ffr',        w:3, sign:+1, why:'The federal funds market IS the overnight interbank lending market — the effective FFR is the average rate paid in these transactions.'},
+  {s:'reg_banks',t:'interbank',  w:2, sign:+1, why:'Regional banks are active borrowers and lenders in the interbank market — they fund their loan books and manage daily liquidity requirements there.'},
+  {s:'inv_banks',t:'equit',      w:2, sign:+1, why:'Investment banks underwrite IPOs and secondary offerings — they price and distribute new equity to investors, making the primary equity market function.'},
+  {s:'inv_banks',t:'credit',     w:2, sign:+1, why:'Investment banks underwrite corporate bond issuance and act as market-makers in secondary trading — essential for corporate bond market liquidity.'},
+  {s:'broker', t:'equit',        w:3, sign:+1, why:'Broker-dealers are the market-makers and execution agents for equity trading — without them, equity bid-ask spreads would widen dramatically.'},
+  {s:'broker', t:'credit',       w:2, sign:+1, why:'Bond market-making is dominated by broker-dealers — they hold inventory and quote two-sided markets, providing liquidity for corporate and Treasury bonds.'},
+  {s:'broker', t:'repo',         w:2, sign:+1, why:'Broker-dealers are major repo borrowers — they use repo to fund their bond inventory, making repo market health critical to bond market liquidity.'},
+  {s:'jpm',    t:'interbank',    w:3, sign:+1, why:'JPMorgan is the largest participant in the interbank market — it actively lends excess reserves to other banks, making it the Fed\'s key liquidity channel.'},
+
+  // ── Shadow Banking connections ────────────────────────────────────────────
+  {s:'mmf',    t:'cp',           w:3, sign:+1, why:'Money market funds are the largest buyers of commercial paper (~40% of prime MMF assets) — their health directly determines corporate short-term funding availability.'},
+  {s:'mmf',    t:'tsy',          w:3, sign:+1, why:'Government MMFs hold only T-bills and agency securities — they are among the largest holders of short-term Treasuries, absorbing ~30% of T-bill issuance.'},
+  {s:'mmf',    t:'repo',         w:2, sign:+1, why:'Prime MMFs participate in repo as cash lenders — they earn a return on excess cash by lending to banks and dealers via overnight repo.'},
+  {s:'cp',     t:'jpm',          w:2, sign:+1, why:'JPMorgan issues commercial paper as a low-cost short-term funding source — the CP market is cheaper than the discount window for large banks.'},
+  {s:'cp',     t:'inv_banks',    w:2, sign:+1, why:'Investment banks issue commercial paper to fund daily operations — Goldman and Morgan Stanley issued significant CP before 2008, creating rollover risk.'},
+  {s:'repo',   t:'reg_banks',    w:2, sign:+1, why:'Regional banks use repo to manage short-term liquidity — they pledge Treasury and agency securities for overnight cash, supplementing deposit funding.'},
+  {s:'repo',   t:'jpm',          w:2, sign:+1, why:'JPMorgan is the largest tri-party repo agent (via JPM custody) and a major bilateral repo participant — repo is central to its balance sheet management.'},
+  {s:'repo',   t:'hedge',        w:2, sign:-1, why:'Hedge funds borrow via repo to lever their positions — when repo rates spike or collateral is rejected, hedge fund leverage collapses, forcing asset sales.'},
+  {s:'hedge',  t:'equit',        w:2, sign:-1, why:'Hedge fund deleveraging in stress events (LTCM 1998, 2008, March 2020) forces simultaneous selling of equities, amplifying market declines.'},
+  {s:'hedge',  t:'credit',       w:2, sign:-1, why:'Credit-focused hedge funds are major buyers of HY bonds and leveraged loans — their forced selling in stress widens credit spreads sharply.'},
+  {s:'pe',     t:'credit',       w:2, sign:-1, why:'Private equity LBOs require cheap credit — PE deal volume rises and falls with HY credit spreads. When credit tightens, LBO activity stops.'},
+  {s:'insur',  t:'tsy',          w:2, sign:+1, why:'Life insurance companies hold $2T+ in Treasuries to match long-duration liabilities (annuities, life policies) — they are major buyers of 20–30yr bonds.'},
+  {s:'insur',  t:'credit',       w:2, sign:+1, why:'Insurance companies hold ~30% of all US IG corporate bonds — they are structural buyers seeking yield above Treasuries, tightening credit spreads.'},
+  {s:'pension', t:'equit',       w:2, sign:+1, why:'US pension funds hold ~$12T in equities — they are long-term structural buyers who rebalance by selling equities after rallies and buying after crashes.'},
+  {s:'pension', t:'tsy',         w:2, sign:+1, why:'Pension funds hold $4T+ in fixed income, primarily Treasuries and IG bonds — they are structural buyers of long-duration bonds for liability-matching.'},
+  {s:'clo',    t:'credit',       w:2, sign:-1, why:'CLOs buy ~70% of all US leveraged loans — when CLO issuance dries up, the leveraged loan market freezes and corporate HY credit spreads spike.'},
+  {s:'mbs',    t:'fannie',       w:2, sign:+1, why:'Agency MBS performance directly affects Fannie Mae\'s guarantee fee income and credit exposure — rising defaults on underlying mortgages stress Fannie\'s guarantee book.'},
+
+  // ── Infrastructure connections ─────────────────────────────────────────────
+  {s:'dtcc',   t:'equit',        w:3, sign:+1, why:'DTCC\'s NSCC clears all US equity trades — it interposes itself as the central counterparty, guaranteeing settlement even if one party defaults.'},
+  {s:'dtcc',   t:'credit',       w:2, sign:+1, why:'DTCC\'s FICC clears all US Treasury and agency securities trades — it is the backbone of the $25T Treasury market\'s settlement infrastructure.'},
+  {s:'dtcc',   t:'mbs',          w:2, sign:+1, why:'DTCC settles agency MBS trades via FICC\'s Mortgage-Backed Securities Division — ensuring the $9T agency MBS market settles efficiently.'},
+  {s:'fedwire',t:'interbank',    w:3, sign:+1, why:'Fedwire Funds is the settlement layer for all interbank payments — banks settle fed funds trades, repo transactions, and large corporate payments via Fedwire.'},
+  {s:'fedwire',t:'tsy',          w:3, sign:+1, why:'Fedwire Securities settles all Treasury security purchases — every Treasury auction clears through Fedwire Securities, with same-day finality.'},
+  {s:'fedwire',t:'primary_dealers', w:2, sign:+1, why:'Primary dealers settle their Treasury auction purchases via Fedwire Securities — the operational link between auctions and market distribution.'},
+  {s:'chips',  t:'usd',          w:2, sign:+1, why:'CHIPS processes 95% of cross-border USD payments — its smooth operation is what makes the dollar the practical global settlement currency.'},
+  {s:'chips',  t:'jpm',          w:2, sign:+1, why:'JPMorgan is the largest CHIPS participant, processing a significant share of cross-border dollar payments — JPM is central to USD global plumbing.'},
+  {s:'ach',    t:'reg_banks',    w:2, sign:+1, why:'ACH is processed by banks — regional and community banks receive direct deposits, process payroll, and settle recurring payments for their customers.'},
+  {s:'cme_clr',t:'credit',       w:2, sign:+1, why:'CME Clearing clears credit default swaps and interest rate derivatives — its mutualized guarantee prevents individual dealer defaults from cascading through credit markets.'},
+  {s:'swift',  t:'usd',          w:2, sign:+1, why:'SWIFT carries the payment instructions that move dollars across borders — it is the messaging backbone of dollar hegemony in global trade.'},
+  {s:'swift',  t:'chips',        w:3, sign:+1, why:'SWIFT messages trigger CHIPS settlements for cross-border payments — SWIFT is the instruction layer; CHIPS is the settlement layer.'},
+  {s:'fednow', t:'ach',          w:1, sign:+1, why:'FedNow is designed to eventually replace ACH for time-sensitive payments — currently complementary, with ACH remaining for batch transactions.'},
+
+  // ── Gov Institutional connections ─────────────────────────────────────────
+  {s:'congress',t:'tsy',         w:3, sign:-1, why:'Congress controls the debt ceiling — when it fails to raise it, Treasury cannot issue new debt, risking technical default and immediately raising borrowing costs.'},
+  {s:'congress',t:'fed',         w:1, sign:0,  why:'Congress created the Federal Reserve and can legislate changes to its mandate — but the Fed has operational independence. Congressional oversight is political, not directive.'},
+  {s:'exec',   t:'fed',          w:2, sign:0,  why:'The President nominates all Fed Governors and the Chair — but cannot direct monetary policy decisions. Political pressure on the Fed is real but structurally constrained.'},
+  {s:'exec',   t:'tsy',          w:3, sign:+1, why:'The Treasury Secretary is a Cabinet member who executes the President\'s fiscal priorities — coordinating debt issuance, tax policy, and financial sanctions.'},
+  {s:'exec',   t:'usd',          w:1, sign:0,  why:'Trade policy (tariffs, sanctions) directly affects the dollar\'s exchange rate and reserve currency role — the Executive Branch is the primary lever here.'},
+  {s:'esf',    t:'usd',          w:2, sign:+1, why:'The ESF can intervene directly in FX markets (buying/selling foreign currencies) to stabilize the dollar — used in 1994-95 peso crisis and during 1985 Plaza Accord.'},
+  {s:'esf',    t:'mmf',          w:3, sign:+1, why:'ESF guaranteed MMF deposits up to $50B in September 2008 — this single announcement stopped the systemic MMF run that followed Reserve Primary Fund\'s buck-breaking.'},
+  {s:'esf',    t:'tsy',          w:2, sign:+1, why:'ESF assets include SDRs and foreign currencies — it coordinates with Treasury on sovereign debt management and international financial support operations.'},
+  {s:'omb',    t:'congress',     w:2, sign:+1, why:'OMB prepares the President\'s budget proposal, which initiates the Congressional appropriations process — setting the fiscal policy framework Congress then negotiates.'},
+
+  // ── Monetary plumbing connections ─────────────────────────────────────────
+  {s:'ffr',      t:'sofr',      w:3, sign:+1, why:'The Fed sets the FFR target range and uses IORB and RRP to keep SOFR inside it, so SOFR tracks the policy rate roughly one-for-one.'},
+  {s:'repo',     t:'sofr',      w:3, sign:+1, why:'SOFR is literally the volume-weighted median of overnight Treasury repo rates, so the repo market\'s cost of funding IS SOFR by construction.'},
+  {s:'sofr',     t:'yield',     w:2, sign:+1, why:'SOFR is the risk-free overnight anchor the whole curve is built on; a higher overnight rate lifts the front end and, via expectations, the rest.'},
+  {s:'sofr',     t:'credit',    w:2, sign:+1, why:'Most floating-rate corporate loans and swaps now reset off SOFR, so a higher SOFR directly raises borrowers\' interest costs.'},
+  {s:'qe_qt',    t:'reserves',  w:3, sign:+1, why:'QE credits bank reserves when the Fed buys assets; QT destroys them as the balance sheet shrinks — reserves are the direct liability counterpart.'},
+  {s:'reserves', t:'ffr',       w:2, sign:+1, why:'IORB is the administered floor for fed funds; raising the rate paid on reserves lifts where the effective fed funds rate trades.'},
+  {s:'reserves', t:'sofr',      w:2, sign:-1, why:'Ample reserves mean banks are flush and repo funding is cheap, pushing SOFR down; scarce reserves force SOFR up.'},
+  {s:'reserves', t:'interbank', w:2, sign:+1, why:'Reserves are the settlement asset banks lend each other overnight; more reserves lubricate the interbank/fed funds market.'},
+  {s:'nyfed',    t:'rrp',       w:3, sign:+1, why:'The NY Fed open-market desk operates the facility daily and sets the RRP administered rate.'},
+  {s:'mmf',      t:'rrp',       w:3, sign:+1, why:'Money-market funds are the dominant RRP users; when they hold excess cash with nowhere safer to put it, RRP balances swell.'},
+  {s:'rrp',      t:'repo',      w:2, sign:+1, why:'The RRP rate competes for the same cash as private repo, so it acts as a hard floor propping up repo and T-bill rates.'},
+  {s:'rrp',      t:'reserves',  w:2, sign:-1, why:'Cash sitting at the RRP is drained out of bank reserves — the two are competing liabilities on the Fed\'s balance sheet, so RRP up means reserves down.'},
+  {s:'tsy',      t:'tga',       w:3, sign:+1, why:'Treasury owns and manages the account; tax receipts and debt issuance fill it, spending draws it down.'},
+  {s:'tga',      t:'reserves',  w:2, sign:-1, why:'A rising TGA drains bank reserves roughly one-for-one — both are Fed liabilities, so cash moving into Treasury\'s account leaves the banking system.'},
+  {s:'tga',      t:'repo',      w:1, sign:+1, why:'A TGA rebuild pulls cash out of markets, tightening repo funding and nudging overnight rates up.'},
+  {s:'congress', t:'tga',       w:1, sign:0,  why:'Debt-ceiling politics force Treasury to draw the TGA down to near-zero, then rebuild it in a rush once resolved — the timing swings liquidity, direction regime-dependent.'},
+
+  // ── Asset Management connections ──────────────────────────────────────────
+  {s:'blackrock',   t:'etf',    w:3, sign:+1, why:'iShares is the largest ETF franchise on earth, so BlackRock directly drives the size and flows of the passive ETF complex.'},
+  {s:'blackrock',   t:'equit',  w:2, sign:+1, why:'As a top-3 shareholder in most large US firms, BlackRock\'s allocation flows are a primary source of equity demand and liquidity.'},
+  {s:'blackrock',   t:'credit', w:2, sign:+1, why:'One of the largest fixed-income managers, BlackRock is a major buyer across corporate and Treasury debt, supporting credit-market liquidity.'},
+  {s:'vanguard',    t:'etf',    w:2, sign:+1, why:'Vanguard\'s index funds and ETFs are a core pillar of the passive complex, second only to iShares in scale.'},
+  {s:'vanguard',    t:'equit',  w:2, sign:+1, why:'Vanguard\'s passive funds hold big stakes in nearly every S&P 500 company, so its steady inflows are structural equity demand.'},
+  {s:'statestreet', t:'etf',    w:2, sign:+1, why:'State Street created and runs SPY, the flagship and most-traded ETF, anchoring the whole ETF ecosystem.'},
+  {s:'statestreet', t:'dtcc',   w:1, sign:+1, why:'As a G-SIB custodian State Street plugs trillions in assets into central settlement, reinforcing the clearing infrastructure.'},
+  {s:'pension',     t:'blackrock', w:1, sign:+1, why:'Pension funds allocate large mandates to BlackRock and peers, so pension asset growth feeds the big managers\' AUM.'},
+  {s:'etf',         t:'equit',  w:3, sign:+1, why:'ETF creation/redemption is a primary channel of equity liquidity; passive inflows are mechanical, price-insensitive demand.'},
+  {s:'etf',         t:'tech',   w:2, sign:+1, why:'Cap-weighted index flows buy the biggest companies most, so passive inflows disproportionately lift mega-cap tech.'},
+  {s:'etf',         t:'vix',    w:1, sign:0,  why:'Passive concentration can dampen volatility in calm markets but amplify correlated selling in stress — the effect is regime-dependent.'},
+
+  // ── Households connections ────────────────────────────────────────────────
+  {s:'household', t:'jpm',             w:2, sign:+1, why:'Household deposits are the cheap, sticky funding base big banks lend against — more deposits mean more lending capacity.'},
+  {s:'household', t:'reg_banks',       w:2, sign:+1, why:'Regional banks are especially deposit-funded; household deposit flight (2023) is what triggered their liquidity crises.'},
+  {s:'household', t:'equit',           w:2, sign:+1, why:'Household savings flow into equities via 401(k)s and brokerage accounts, a major source of structural buying demand.'},
+  {s:'household', t:'cpi',             w:2, sign:+1, why:'Consumer demand is the core driver of demand-pull inflation; strong household spending pushes prices up.'},
+  {s:'household', t:'consumer_credit', w:3, sign:+1, why:'Households are the borrowers; their appetite for mortgages and loans directly drives consumer-credit volume.'},
+  {s:'ffr',       t:'consumer_credit', w:2, sign:-1, why:'Higher policy rates raise card, auto and mortgage costs with a lag, choking off household borrowing demand.'},
+  {s:'consumer_credit', t:'cpi',       w:1, sign:+1, why:'Credit-fuelled consumption adds to demand-side inflation when borrowing is cheap and plentiful.'},
+  {s:'consumer_credit', t:'mbs',       w:1, sign:+1, why:'Household mortgage borrowing is the raw material securitised into the MBS market.'},
+
+  // ── Rating Agencies connections ───────────────────────────────────────────
+  {s:'rating', t:'credit', w:3, sign:+1, why:'Ratings set borrowing costs and market access; functioning ratings underpin credit pricing, while downgrades force selling and widen spreads.'},
+  {s:'rating', t:'tsy',    w:2, sign:+1, why:'The US sovereign rating anchors the global risk-free benchmark; a downgrade (S&P 2011, Fitch 2023) reprices Treasuries.'},
+  {s:'rating', t:'mbs',    w:2, sign:+1, why:'Agency ratings decide which MBS tranches count as AAA; inflated ratings enabled the 2008 subprime-MBS boom.'},
+  {s:'rating', t:'clo',    w:2, sign:+1, why:'CLO tranching depends entirely on agency ratings to certify the senior AAA slice that most investors are allowed to buy.'},
+  {s:'sec',    t:'rating', w:1, sign:+1, why:'The SEC oversees the NRSROs post-Dodd-Frank, and tighter oversight is meant to improve rating integrity.'},
+];
+
+// ─── BEGINNER NODE INFO ───────────────────────────────────────────────────────
+// Shorter version shown in beginner mode tooltip
+const NODE_INFO = {};
+NODES.forEach(n => { NODE_INFO[n.id] = n.beginner; });
+
+// ─── STATE MACHINE ────────────────────────────────────────────────────────────
+let expertMode = false;
+let state = buildBaseState();
+let nodeMultipliers = {};
+let sim, isTouchDevice = false;
+
+function buildBaseState() {
+  return {
+    us2y:4.42, us10y:4.28, vix:16.8, spx:5312, cpi_yoy:2.4, nfp_mom:186,
+    fomc_prob_hike:0.08, fomc_prob_hold:0.78, fomc_prob_cut:0.14,
+    dxy:104.2, gold_px:2340, wti_px:78.4,
+    risk_off:false, tightening_bias:false, shock:null
+  };
+}
+
+function spread(s) { return ((s.us10y - s.us2y) * 100).toFixed(0); }
+
+function applyTransmission(s) {
+  const ns = Object.assign({}, s);
+  if (s.shock === 'rate_hike') {
+    ns.us2y  = +(s.us2y+0.48).toFixed(2);
+    ns.us10y = +(s.us10y+0.22).toFixed(2);
+    ns.spx   = Math.round(s.spx*0.968);
+    ns.vix   = +(s.vix*1.35).toFixed(1);
+    ns.dxy   = +(s.dxy+3.5).toFixed(1);
+    ns.gold_px = Math.round(s.gold_px*0.97);
+    ns.fomc_prob_hike=0.72; ns.fomc_prob_hold=0.24; ns.fomc_prob_cut=0.04;
+    nodeMultipliers = {Tech_Equities:-0.14,Financials:0.06,Defensive:0.03,Credit_Markets:-0.08,Yield_Curve:0.12,USD:0.10,Gold:-0.06,Oil:-0.04,EM_FX:-0.08};
+  } else if (s.shock === 'vix_spike') {
+    ns.vix   = 34.2;
+    ns.spx   = Math.round(s.spx*0.935);
+    ns.us10y = +(s.us10y-0.18).toFixed(2);
+    ns.gold_px = Math.round(s.gold_px*1.04);
+    ns.risk_off = true;
+    nodeMultipliers = {Tech_Equities:-0.18,Defensive:0.14,Financials:-0.06,Credit_Markets:-0.12,Yield_Curve:0.04,Gold:0.12,USD:0.06,EM_FX:-0.10};
+  } else if (s.shock === 'cpi_rise') {
+    ns.cpi_yoy = 3.4;
+    ns.us2y    = +(s.us2y+0.28).toFixed(2);
+    ns.gold_px = Math.round(s.gold_px*1.02);
+    ns.wti_px  = +(s.wti_px+6).toFixed(1);
+    ns.fomc_prob_hike=0.58; ns.fomc_prob_hold=0.38; ns.fomc_prob_cut=0.04;
+    ns.tightening_bias = true;
+    nodeMultipliers = {Tech_Equities:-0.10,Financials:0.04,Defensive:0.02,Credit_Markets:-0.05,Yield_Curve:0.08,Gold:0.08,Oil:0.06,USD:0.04};
+  } else if (s.shock === 'usd_shock') {
+    ns.dxy     = +(s.dxy+8).toFixed(1);
+    ns.gold_px = Math.round(s.gold_px*0.94);
+    ns.wti_px  = +(s.wti_px-6).toFixed(1);
+    ns.spx     = Math.round(s.spx*0.978);  // multinational revenue headwind
+    ns.vix     = +(s.vix*1.15).toFixed(1);
+    ns.tightening_bias = true;
+    nodeMultipliers = {USD:0.20,EM_FX:-0.18,Gold:-0.12,Oil:-0.08,Tech_Equities:-0.07,China:-0.08,Credit_Markets:-0.05};
+  } else { nodeMultipliers = {}; }
+  ns.risk_off = ns.vix > 30;
+  ns.tightening_bias = ns.cpi_yoy > 2.8 || ns.us2y > 4.8;
+  return ns;
+}
+
+function buildMacroState(s) {
+  return {
+    yield_curve:{ us2y:s.us2y, us10y:s.us10y, spread_bps:parseFloat(spread(s)) },
+    monetary_policy:{ fomc_prob_hike:s.fomc_prob_hike, fomc_prob_hold:s.fomc_prob_hold, fomc_prob_cut:s.fomc_prob_cut },
+    volatility_sentiment:{ vix:s.vix, risk_off:s.risk_off, spx:s.spx },
+    economic_indicators:{ core_cpi_yoy:s.cpi_yoy, nfp_mom:s.nfp_mom },
+    fx_commodities:{ dxy:s.dxy, gold_px:s.gold_px, wti_px:s.wti_px },
+    derived_state:{ tightening_bias:s.tightening_bias, inversion:s.us2y>s.us10y },
+  };
+}
+
+function updateMetrics() {
+  const s = applyTransmission(state);
+  const sp = spread(s), spNum = parseFloat(sp);
+  document.getElementById('m-us2y').textContent  = s.us2y.toFixed(2)+'%';
+  document.getElementById('m-us10y').textContent = s.us10y.toFixed(2)+'%';
+  const spEl = document.getElementById('m-spread');
+  spEl.textContent = (spNum>=0?'+':'')+sp+' bps';
+  spEl.className   = 'metric-val '+(spNum<0?'up':'down');
+  document.getElementById('m-vix').textContent = s.vix.toFixed(1);
+  document.getElementById('m-vix').className   = 'metric-val '+(s.vix>20?'up':'');
+  document.getElementById('m-spx').textContent = '$'+s.spx.toLocaleString();
+  document.getElementById('m-cpi').textContent = s.cpi_yoy.toFixed(1)+'%';
+  document.getElementById('m-cpi').className   = 'metric-val '+(s.cpi_yoy>2.8?'up':'');
+  const alertEl = document.getElementById('state-alert');
+  if (s.risk_off)             { alertEl.className='state-alert risk-off'; alertEl.textContent='⚠ Risk-Off regime — VIX > 30'; }
+  else if (s.tightening_bias) { alertEl.className='state-alert tight';    alertEl.textContent='↑ Tightening bias — hawkish signals'; }
+  else                        { alertEl.className='state-alert normal';   alertEl.textContent='✓ Stable — risk-on, normal policy'; }
+  document.getElementById('schema-box').textContent = JSON.stringify(buildMacroState(s),null,2);
+  updateGraph(s);
+}
+
+function triggerShock(type) { state=buildBaseState(); state.shock=type; updateMetrics(); }
+function resetState()       { state=buildBaseState(); nodeMultipliers={}; updateMetrics(); clearAI(); }
+function toggleExpertMode() {
+  expertMode = !expertMode;
+  document.getElementById('toggle-mode').textContent = expertMode ? 'Expert mode' : 'Beginner mode';
+  if (window._graphLinkSel) {
+    window._graphLinkSel.style('display', l => (!expertMode && l.w < 2) ? 'none' : null);
+  }
+}
+function toggleSchema() {
+  const box=document.getElementById('schema-box'), tog=document.getElementById('schema-toggle');
+  tog.textContent = box.classList.toggle('hidden')?'show':'hide';
+}
+function clearAI() {
+  document.getElementById('health-num').textContent   = '—';
+  document.getElementById('health-label').textContent = 'Run AI analysis';
+  document.getElementById('health-bar').style.width   = '0%';
+  document.getElementById('narrative-box').textContent= 'Tap "Run AI Analysis" to generate a macro strategist\'s read on current conditions.';
+  document.getElementById('impacts-section').classList.add('hidden');
+}
+function openTouchDrawer(title, body) {
+  document.getElementById('touch-drawer-title').textContent = title;
+  document.getElementById('touch-drawer-body').textContent  = body;
+  document.getElementById('touch-drawer').classList.add('visible');
+}
+function closeTouchDrawer() { document.getElementById('touch-drawer').classList.remove('visible'); }
+
+// ─── NODE DETAIL PANEL ────────────────────────────────────────────────────────
+// Build a quick lookup: node id → label
+const ID_TO_LABEL = {};
+NODES.forEach(n => { ID_TO_LABEL[n.id] = n.label; });
+
+function strengthWord(w) { return w >= 3 ? 'Strong' : w === 2 ? 'Moderate' : 'Weak'; }
+
+function edgeCardHTML(otherId, sign, w, why, direction) {
+  // direction 'in'  => otherId affects the clicked node (show "OtherNode →")
+  // direction 'out' => clicked node affects otherId   (show "→ OtherNode")
+  const cls = sign > 0 ? 'pos' : sign < 0 ? 'neg' : 'amb';
+  const arrow = sign > 0 ? '▲' : sign < 0 ? '▼' : '◆';
+  const effect = sign > 0 ? 'raises' : sign < 0 ? 'lowers' : 'shifts';
+  const name = ID_TO_LABEL[otherId] || otherId;
+  // Phrase the relationship in plain English depending on direction
+  let lead;
+  if (direction === 'in') {
+    lead = `When <b>${name}</b> rises, it ${effect} this`;
+  } else {
+    lead = `This ${effect} <b>${name}</b> when it rises`;
+  }
+  return `<div class="dp-edge ${cls}">
+    <div class="dp-edge-top">
+      <span class="dp-arrow">${arrow}</span>
+      <span class="dp-edge-name">${name}</span>
+      <span class="dp-edge-strength">${strengthWord(w)}</span>
+    </div>
+    <div class="dp-edge-why">${lead}. ${why}</div>
+  </div>`;
+}
+
+function openDetail(d) {
+  document.getElementById('dp-title').textContent = d.label;
+  document.getElementById('dp-layer').textContent = LAYER_LABELS[d.group] || '';
+  document.getElementById('dp-desc').textContent  = expertMode && d.expert ? d.expert : (NODE_INFO[d.id] || '');
+
+  // Incoming = links where this node is the TARGET (something affects it)
+  const incoming = LINKS.filter(l => l.t === d.id)
+    .sort((a,b) => b.w - a.w)
+    .map(l => edgeCardHTML(l.s, l.sign, l.w, l.why, 'in'));
+  // Outgoing = links where this node is the SOURCE (it affects something)
+  const outgoing = LINKS.filter(l => l.s === d.id)
+    .sort((a,b) => b.w - a.w)
+    .map(l => edgeCardHTML(l.t, l.sign, l.w, l.why, 'out'));
+
+  document.getElementById('dp-incoming').innerHTML = incoming.length
+    ? incoming.join('') : '<div class="dp-empty">Nothing in this map drives it directly — it\'s an upstream source node.</div>';
+  document.getElementById('dp-outgoing').innerHTML = outgoing.length
+    ? outgoing.join('') : '<div class="dp-empty">It doesn\'t drive anything downstream — it\'s a terminal node.</div>';
+  document.getElementById('dp-breaks').textContent = d.breaks || 'No specific failure mode documented yet.';
+
+  document.getElementById('detail-panel').classList.add('visible');
+  highlightNeighbors(d.id);
+}
+
+function closeDetail() {
+  document.getElementById('detail-panel').classList.remove('visible');
+  highlightNeighbors(null);
+}
+
+// Dim everything except the selected node and its direct connections
+function highlightNeighbors(id) {
+  if (!window._graphNodeSel || !window._graphLinkSel) return;
+  if (id === null) {
+    window._graphNodeSel.style('opacity', 1);
+    window._graphLinkSel.style('opacity', 0.7).attr('stroke-width', l => l.w * 0.7);
+    return;
+  }
+  const connected = new Set([id]);
+  LINKS.forEach(l => { if (l.s === id) connected.add(l.t); if (l.t === id) connected.add(l.s); });
+  window._graphNodeSel.style('opacity', n => connected.has(n.id) ? 1 : 0.16);
+  window._graphLinkSel
+    .style('opacity', l => (l.s === id || l.t === id) ? 0.95 : 0.06)
+    .attr('stroke-width', l => (l.s === id || l.t === id) ? l.w * 1.3 : l.w * 0.7);
+}
+
+// ─── AI ANALYSIS ─────────────────────────────────────────────────────────────
+function getApiKey() {
+  let key = sessionStorage.getItem('anthropic_key');
+  if (!key) {
+    key = prompt('Enter your Anthropic API key (stored in session memory only — never saved to disk):');
+    if (key) sessionStorage.setItem('anthropic_key', key.trim());
+  }
+  return key;
+}
+
+async function runAIAnalysis() {
+  const btn = document.getElementById('run-ai-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  const s=applyTransmission(state), ms=buildMacroState(s);
+  const systemPrompt = `You are a senior macro strategist at a top-tier Wall Street firm. You receive a MacroMarketState JSON representing current US financial and global macro conditions — including FX, commodities, and geopolitical context.\n\nOutput ONLY a strict JSON object with EXACTLY these fields:\n\n{\n  "market_narrative": "Exactly 3 sentences. Institutional-grade language. Describe monetary regime, risk appetite, commodity/FX dynamics, and any geopolitical transmission.",\n  "system_health_score": <integer 1-100 where 100 = perfect stability, 50 = moderate stress, <30 = crisis>,\n  "node_impact_multipliers": {\n    "Tech_Equities": <float -1 to 1>,\n    "Financials": <float -1 to 1>,\n    "Defensive": <float -1 to 1>,\n    "Credit_Markets": <float -1 to 1>,\n    "Yield_Curve": <float -1 to 1>,\n    "Fed_Reserve": <float -1 to 1>,\n    "SPX": <float -1 to 1>,\n    "USD": <float -1 to 1>,\n    "Gold": <float -1 to 1>,\n    "Oil": <float -1 to 1>,\n    "EM_FX": <float -1 to 1>,\n    "China": <float -1 to 1>\n  }\n}\n\nPositive multiplier = bullish/stabilising. Negative = bearish/destabilising.\nOutput ONLY valid JSON. No preamble, no commentary, no markdown fences.`;
+  try {
+    const apiKey = getApiKey();
+    if (!apiKey) { btn.disabled=false; btn.innerHTML='Run AI analysis ↗'; return; }
+    const resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:[{role:'user',content:`Current MacroMarketState:\n${JSON.stringify(ms,null,2)}\n\nAnalyze and return structured JSON.`}]})});
+    const data=await resp.json();
+    const raw=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
+    const parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    document.getElementById('narrative-box').textContent = parsed.market_narrative||'No narrative returned.';
+    const score=Math.round(parsed.system_health_score||50);
+    document.getElementById('health-num').textContent   = score;
+    document.getElementById('health-label').textContent = score>70?'Healthy':score>45?'Moderate stress':'Elevated stress';
+    const barColor = score>70?'#9cc26a':score>45?'#e0b15a':'#e0654f';
+    document.getElementById('health-bar').style.width      = score+'%';
+    document.getElementById('health-bar').style.background = barColor;
+    nodeMultipliers = parsed.node_impact_multipliers||{};
+    document.getElementById('impacts-list').innerHTML = Object.entries(nodeMultipliers).map(([k,v])=>{
+      const sign=v>=0?'+':'', cls=v>=0?'pos':'neg';
+      return `<div class="impact-row"><span class="impact-name">${k.replace(/_/g,' ')}</span><span class="impact-val ${cls}">${sign}${(v*100).toFixed(0)}%</span></div>`;
+    }).join('');
+    document.getElementById('impacts-section').classList.remove('hidden');
+    updateGraph(applyTransmission(state));
+  } catch(e) {
+    document.getElementById('narrative-box').textContent='AI analysis unavailable — check console. State machine and visualisation remain fully functional.';
+    console.error('AI error:',e);
+  }
+  btn.disabled=false;
+  btn.innerHTML='Run AI analysis ↗';
+}
+
+// ─── GRAPH ────────────────────────────────────────────────────────────────────
+function shade(hex, pct) {
+  const n=parseInt(hex.slice(1),16), r=(n>>16)+pct, g=((n>>8)&0xff)+pct, b=(n&0xff)+pct;
+  return '#'+[r,g,b].map(v=>Math.min(255,Math.max(0,v)).toString(16).padStart(2,'0')).join('');
+}
+
+// Map AI multiplier keys → node IDs
+const NODE_MAP = {
+  Tech_Equities:'tech', Financials:'fins', Defensive:'defn',
+  Credit_Markets:'credit', Yield_Curve:'yield', Fed_Reserve:'fed',
+  SPX:'equit', USD:'usd', Gold:'gold', Oil:'oil', EM_FX:'dxy_fx', China:'china'
+};
+
+function initGraph() {
+  isTouchDevice = ('ontouchstart' in window)||(navigator.maxTouchPoints>0);
+  const wrap = document.getElementById('graph-wrap');
+  const W = wrap.clientWidth||640, H = wrap.clientHeight||480;
+  const svg = d3.select('#network-svg');
+  svg.attr('viewBox',`0 0 ${W} ${H}`);
+
+  // Arrow markers — one per sign so arrowheads match link color
+  const defs = svg.append('defs');
+  const arrowDefs = [
+    {id:'arr-pos', color:'rgba(123,191,142,0.7)'},
+    {id:'arr-neg', color:'rgba(224,101,79,0.7)'},
+    {id:'arr-amb', color:'rgba(224,177,90,0.7)'},
+  ];
+  arrowDefs.forEach(a => {
+    defs.append('marker').attr('id',a.id).attr('viewBox','0 0 10 10').attr('refX',8).attr('refY',5)
+      .attr('markerWidth',5).attr('markerHeight',5).attr('orient','auto-start-reverse')
+      .append('path').attr('d','M2 2L8 5L2 8').attr('fill','none').attr('stroke',a.color)
+      .attr('stroke-width',1.5).attr('stroke-linecap','round').attr('stroke-linejoin','round');
+  });
+
+  // Glow filter for highlighted nodes
+  const glow = defs.append('filter').attr('id','glow');
+  glow.append('feGaussianBlur').attr('stdDeviation','3').attr('result','coloredBlur');
+  const merge = glow.append('feMerge');
+  merge.append('feMergeNode').attr('in','coloredBlur');
+  merge.append('feMergeNode').attr('in','SourceGraphic');
+
+  const g = svg.append('g').attr('id','root');
+  svg.call(d3.zoom().scaleExtent([0.2,4]).on('zoom',e=>g.attr('transform',e.transform)));
+
+  const linksG = g.append('g');
+  const nodesG = g.append('g');
+
+  const scale = Math.min(1, W/640);
+  const FONT_SIZE = Math.max(9, 10 * scale);   // px — all text uses this size
+  const PAD_X = 10 * scale;                     // horizontal padding inside pill
+  const PAD_Y = 6  * scale;                     // vertical padding
+
+  // Measure text width to size nodes properly — use a hidden SVG text element
+  const measurer = svg.append('text')
+    .attr('font-size', FONT_SIZE)
+    .attr('visibility','hidden');
+
+  // Each node gets a computed width/height based on its label
+  const nodes = NODES.map(n => {
+    const lines = wrapLabel(n.label);
+    const maxW  = Math.max(...lines.map(l => {
+      measurer.text(l);
+      return measurer.node().getComputedTextLength() || l.length * FONT_SIZE * 0.55;
+    }));
+    const rx = maxW / 2 + PAD_X;
+    const ry = (lines.length * FONT_SIZE * 1.25) / 2 + PAD_Y;
+    return { ...n, lines, rx: Math.max(rx, 28*scale), ry: Math.max(ry, 16*scale), r: Math.max(rx, 28*scale) };
+  });
+  measurer.remove();
+
+  const edges = LINKS.map(l => ({...l, source:l.s, target:l.t}));
+
+  sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(edges).id(d=>d.id)
+      .distance(d => (100 + (3-d.w)*24) * scale).strength(0.4))
+    .force('charge', d3.forceManyBody().strength(-320 * scale))
+    .force('center', d3.forceCenter(W/2, H/2))
+    .force('collision', d3.forceCollide(d => d.rx + 10 * scale));
+
+  const link = linksG.selectAll('line').data(edges).join('line')
+    .attr('stroke', d => d.sign > 0 ? 'rgba(123,191,142,0.42)' : d.sign < 0 ? 'rgba(224,101,79,0.42)' : 'rgba(224,177,90,0.42)')
+    .attr('stroke-opacity', 0.7)
+    .attr('stroke-width', d => d.w * 0.7)
+    .attr('marker-end', d => d.sign > 0 ? 'url(#arr-pos)' : d.sign < 0 ? 'url(#arr-neg)' : 'url(#arr-amb)');
+
+  const node = nodesG.selectAll('g').data(nodes).join('g')
+    .attr('class','node-g').style('cursor','pointer');
+
+  // Pill background
+  node.append('ellipse')
+    .attr('class','sphere')
+    .attr('rx', d => d.rx).attr('ry', d => d.ry)
+    .attr('fill', d => GROUP_COLOR[d.group]+'18')
+    .attr('stroke', d => shade(GROUP_COLOR[d.group], 40))
+    .attr('stroke-width', 1.2);
+
+  // Label text — one or two lines
+  node.each(function(d) {
+    const el = d3.select(this);
+    const lineH = FONT_SIZE * 1.25;
+    const totalH = (d.lines.length - 1) * lineH;
+    d.lines.forEach((line, i) => {
+      el.append('text')
+        .text(line)
+        .attr('text-anchor', 'middle')
+        .attr('dominant-baseline', 'middle')
+        .attr('y', -totalH/2 + i * lineH)
+        .attr('font-size', FONT_SIZE)
+        .attr('fill', GROUP_COLOR[d.group])
+        .attr('pointer-events', 'none');
+    });
+  });
+
+  // Interaction: hover tooltip (desktop only) + click opens detail panel (all devices)
+  if (!isTouchDevice) {
+    node.on('mouseover', function(event, d) {
+      const tt = document.getElementById('tooltip');
+      document.getElementById('tt-title').textContent = d.label;
+      document.getElementById('tt-body').textContent  = expertMode && d.expert ? d.expert : (NODE_INFO[d.id]||'');
+      document.getElementById('tt-layer').textContent = LAYER_LABELS[d.group] || '';
+      tt.style.opacity = '1';
+    }).on('mousemove', function(event) {
+      const rect = document.getElementById('graph-wrap').getBoundingClientRect();
+      const tt   = document.getElementById('tooltip');
+      let x = event.clientX-rect.left+14, y = event.clientY-rect.top+14;
+      if(x+250>rect.width)  x -= 258;
+      if(y+130>rect.height) y -= 138;
+      tt.style.left=x+'px'; tt.style.top=y+'px';
+    }).on('mouseout', function() { document.getElementById('tooltip').style.opacity='0'; });
+  }
+
+  // Click → open detail panel (both desktop and touch)
+  node.on('click', function(event, d) {
+    event.stopPropagation();
+    document.getElementById('tooltip').style.opacity = '0';
+    openDetail(d);
+  });
+  svg.on('click', () => closeDetail());
+
+  node.call(d3.drag()
+    .on('start', (e,d) => { if(!e.active) sim.alphaTarget(0.3).restart(); d.fx=d.x; d.fy=d.y; })
+    .on('drag',  (e,d) => { d.fx=e.x; d.fy=e.y; })
+    .on('end',   (e,d) => { if(!e.active) sim.alphaTarget(0); d.fx=null; d.fy=null; })
+  );
+
+  sim.on('tick', () => {
+    link
+      .attr('x1', d=>d.source.x).attr('y1', d=>d.source.y)
+      .attr('x2', d=>d.target.x).attr('y2', d=>d.target.y);
+    node.attr('transform', d=>`translate(${d.x},${d.y})`);
+  });
+
+  window._graphNodeSel = node;
+  window._graphLinkSel = link;
+
+  // Build legend
+  const legendEl = document.getElementById('legend-box');
+  const layerHTML = Object.entries(LAYER_LABELS).map(([grp,label])=>
+    `<div class="legend-item"><div class="legend-dot" style="background:${GROUP_COLOR[grp]}"></div>${label}</div>`
+  ).join('');
+  const signHTML = `
+    <div class="legend-item" style="width:100%;margin-top:4px;color:var(--gold-dim);font-weight:600">Link effect:</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#7bbf8e"></div>raises / strengthens</div>
+    <div class="legend-item"><div class="legend-dot" style="background:#e0654f"></div>lowers / weakens</div>`;
+  legendEl.innerHTML = layerHTML + signHTML;
+}
+
+// Wrap long labels into at most 2 lines at a word boundary
+function wrapLabel(label) {
+  const words = label.split(' ');
+  if (words.length <= 2) return [label];
+  const mid = Math.ceil(words.length / 2);
+  return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')];
+}
+
+function updateGraph(s) {
+  if (!window._graphNodeSel) return;
+  window._graphNodeSel.select('.sphere').transition().duration(500)
+    .attr('rx', d => {
+      const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k]===d.id);
+      const m = k && nodeMultipliers[k] !== undefined ? nodeMultipliers[k] : 0;
+      return Math.max(14, d.rx * (1 + Math.abs(m) * 0.5));
+    })
+    .attr('ry', d => {
+      const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k]===d.id);
+      const m = k && nodeMultipliers[k] !== undefined ? nodeMultipliers[k] : 0;
+      return Math.max(10, d.ry * (1 + Math.abs(m) * 0.5));
+    })
+    .attr('fill', d => {
+      const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k]===d.id);
+      const m = k && nodeMultipliers[k] !== undefined ? nodeMultipliers[k] : null;
+      if (m === null) return GROUP_COLOR[d.group]+'18';
+      if (m > 0.05)  return '#6fc7a6'+'33';
+      if (m < -0.05) return '#e0926a'+'33';
+      return GROUP_COLOR[d.group]+'18';
+    })
+    .attr('stroke', d => {
+      const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k]===d.id);
+      const m = k && nodeMultipliers[k] !== undefined ? nodeMultipliers[k] : null;
+      if (m === null) return shade(GROUP_COLOR[d.group], 40);
+      if (m > 0.05)  return '#6fc7a6';
+      if (m < -0.05) return '#e0926a';
+      return shade(GROUP_COLOR[d.group], 40);
+    })
+    .attr('stroke-width', d => {
+      const k = Object.keys(NODE_MAP).find(k => NODE_MAP[k]===d.id);
+      const m = k && nodeMultipliers[k] !== undefined ? nodeMultipliers[k] : 0;
+      return Math.abs(m) > 0.05 ? 2.5 : 1.2;
+    });
+
+  if (s.risk_off) {
+    window._graphNodeSel.filter(d=>d.id==='vix').select('.sphere')
+      .attr('stroke','#e0654f').attr('stroke-width',3);
+  }
+}
+
+// ─── RESIZE ───────────────────────────────────────────────────────────────────
+let resizeTimer;
+const ro = new ResizeObserver(() => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    const svg = document.getElementById('network-svg');
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    if (sim) sim.stop();
+    initGraph(); updateMetrics();
+  }, 250);
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  initGraph();
+  updateMetrics();
+  ro.observe(document.getElementById('graph-wrap'));
+});
+</script>
+</body>
+</html>
