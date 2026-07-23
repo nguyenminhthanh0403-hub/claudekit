@@ -14,3 +14,7 @@ dxy    -> wti_pct    n=200  span=2.37  slope=+0.027462  hand=-0.0055  r=+0.32  t
 dxy    -> spx_pct    n=201  span=2.37  slope=-0.0045135  hand=-0.002  r=-0.21  t=-3.1  =>  MEASURED (sign matches, |t|=3.1, span=2.37)
 wti_px -> spx_pct    n=200  span=29.7  slope=-0.00095337  hand=-0.0009  r=-0.35  t=-5.2  =>  MEASURED (sign matches, |t|=5.2, span=29.7)
 wti_px -> us10y      n=199  span=29.7  slope=+0.0046048  hand=+0.0035  r=+0.34  t=+5.0  =>  MEASURED (sign matches, |t|=5.0, span=29.7)
+us10y  -> spx_pct    n=199  span=0.28  slope=-0.027024  hand=-0.01  r=-0.14  t=-1.9  =>  DIRECTIONAL (|t|=1.9 not significant)
+us2y   -> spx_pct    n=199  span=0.37  slope=-0.012077  hand=-0.008  r=-0.07  t=-1.0  =>  DIRECTIONAL (|t|=1.0 not significant)
+dxy    -> us10y      n=199  span=2.37  slope=+0.044932  hand=+0.02  r=+0.42  t=+6.6  =>  MEASURED (sign matches, |t|=6.6, span=2.37)
+vix    -> wti_pct    n=200  span=11.1  slope=+0.0057724  hand=-0.004  r=+0.29  t=+4.3  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)

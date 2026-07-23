@@ -88,6 +88,8 @@ CELLS = [
     ('dxy','gold_pct','gold_px','pct', -0.0075), ('dxy','wti_pct','wti_px','pct', -0.0055),
     ('dxy','spx_pct','spx','pct', -0.0020),
     ('wti_px','spx_pct','spx','pct', -0.0009), ('wti_px','us10y','us10y','level', 0.0035),
+    ('us10y','spx_pct','spx','pct', -0.010), ('us2y','spx_pct','spx','pct', -0.008),
+    ('dxy','us10y','us10y','level', 0.02), ('vix','wti_pct','wti_px','pct', -0.004),
 ]
 
 

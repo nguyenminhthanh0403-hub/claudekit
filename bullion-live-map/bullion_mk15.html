@@ -2433,6 +2433,7 @@ const ELASTICITY = {
     gold_pct: { v:-0.0075, conf:CONF.MEASURED,    src:'Near-mechanical: gold is quoted in USD, so a stronger dollar lowers the dollar price for an unchanged world price. This is closer to an accounting identity than a behavioural link. Fit check (calibrate.py): slope -0.0147, t -4.5 \u2014 about twice the denomination-identity value (the 1-year fit also picks up behavioural dollar effects); the identity number is kept.' },
     wti_pct:  { v:-0.0055, conf:CONF.MEASURED,    src:'Same denomination mechanism as gold \u2014 oil is invoiced in USD. See EIA / BIS on dollar invoicing. Fit check (calibrate.py): slope +0.0275 (t 4.8) came back POSITIVE over this 1-year sample \u2014 risk-on co-movement swamped the USD-invoicing effect in-sample. The denomination identity is kept; the sign flip is NOT adopted.' },
     spx_pct:  { v:-0.0045, conf:CONF.MEASURED,    src:'~40% of S&P 500 revenue is earned abroad, so a stronger dollar trims it. Fitted to data.json (train split): 201 daily first-difference days, SPX% change on DXY change, slope -0.0045, r -0.21, t -3.1. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+    us10y:    { v: 0.045,   conf:CONF.MEASURED,    src:'Dollar strength and long US yields co-move through the rate-differential channel: rising US yields draw in capital and lift the dollar. Fitted to data.json (train split): 199 daily first-difference days, US10Y change on DXY change, slope +0.045, r +0.42, t +6.6. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
   wti_px: {
     cpi_add:  { v: 0.028,  conf:CONF.MEASURED,    src:'IMF: roughly +0.3pp on HEADLINE CPI per +$10/bbl. CAVEAT: this map\u2019s CPI node is CORE, which strips energy \u2014 so the true core pass-through is much smaller and slower. This coefficient is knowingly generous.' },
@@ -3268,7 +3269,7 @@ async function runAIAnalysis() {
 // Driver→cell map per target field, built explicitly from the 14 fittable cells:
 const BACKTEST_MAP = {
   us2y:    { kind:'level', cells:{ ffr:'us2y' } },
-  us10y:   { kind:'level', cells:{ ffr:'us10y', vix:'us10y', wti_px:'us10y' } },
+  us10y:   { kind:'level', cells:{ ffr:'us10y', vix:'us10y', wti_px:'us10y', dxy:'us10y' } },
   spx:     { kind:'pct',   cells:{ ffr:'spx_pct', vix:'spx_pct', dxy:'spx_pct', wti_px:'spx_pct' } },
   gold_px: { kind:'pct',   cells:{ ffr:'gold_pct', vix:'gold_pct', dxy:'gold_pct' } },
   wti_px:  { kind:'pct',   cells:{ dxy:'wti_pct' } },
