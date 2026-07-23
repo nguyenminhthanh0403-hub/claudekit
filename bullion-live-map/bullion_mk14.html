@@ -3201,11 +3201,14 @@ async function runAIAnalysis() {
 }
 
 // ── Mk12 backtest ────────────────────────────────────────────────────────
-// Per target field, predicted daily change = sum over fittable drivers (present
-// both days) of ELASTICITY[driver][cell].v * driver change. Compared to the
-// realised change on the held-out tail (last 20% of loaded history — same split
-// as calibrate.py). CONTEMPORANEOUS same-day test: measures co-movement, NOT
-// forecasting. Node colours are not in scope here (their targets have no series).
+// Per target field, first build the present-date list for that field (dates on
+// which it has data), then diff consecutive PRESENT days — bridging weekends —
+// mirroring calibrate.py's fit_cell. Predicted change = sum over fittable
+// drivers (present both paired days) of ELASTICITY[driver][cell].v * driver
+// change. Compared to the realised change on the held-out tail (last 20% of
+// loaded history — same split as calibrate.py). CONTEMPORANEOUS same-day test:
+// measures co-movement, NOT forecasting. Node colours are not in scope here
+// (their targets have no series).
 // Driver→cell map per target field, built explicitly from the 14 fittable cells:
 const BACKTEST_MAP = {
   us2y:    { kind:'level', cells:{ ffr:'us2y' } },
@@ -3229,10 +3232,13 @@ function backtestModel() {
   Object.entries(BACKTEST_MAP).forEach(([field, spec]) => {
     let n = 0, hits = 0, ssRes = 0, ssTot = 0, sy = 0, sy2 = 0;
     const preds = [], acts = [];
-    for (let i = 1; i < testDates.length; i++) {
-      const d0 = testDates[i-1], d1 = testDates[i];
+    // Mirror calibrate.py fit_cell: build the present-date list for THIS field
+    // first, then diff consecutive PRESENT days (bridges weekends), instead of
+    // walking all calendar days and dropping weekend-straddling changes.
+    const present = testDates.filter(d => field in H[d]);
+    for (let i = 1; i < present.length; i++) {
+      const d0 = present[i-1], d1 = present[i];
       const r0 = H[d0], r1 = H[d1];
-      if (!(field in r0) || !(field in r1)) continue;
       let pred = 0, haveDriver = false;
       Object.entries(spec.cells).forEach(([drv, cellKey]) => {
         const f = DRIVER_FIELD[drv];
