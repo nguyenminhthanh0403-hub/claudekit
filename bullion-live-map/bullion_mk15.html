@@ -971,6 +971,47 @@ const NODES = [
       'Largely unregulated, illiquid and marked to model, the sector filled space left by post-crisis bank retrenchment.',
       'Its main backers are insurers and pensions, and it is untested through a full default cycle.',
       'Source: IMF GFSR, industry estimates.'] },
+  // ── Breadth additions (Mk15) ──────────────────────────────────────────────
+  { id:'tbills', label:'T-Bills', group:'sovereign',
+    beginner:[
+      'Short-term US government IOUs that mature in a year or less.',
+      'The safest, most liquid dollar asset — the base of the money market.'],
+    expert:[
+      'Treasury bills (<=1yr) are the collateral and cash-management backbone of money markets; ~$6T outstanding.',
+      'Bill supply swings with the deficit and the debt ceiling and drives money-fund allocation between bills and the Fed.',
+      'Source: US Treasury, SIFMA.'] },
+  { id:'options', label:'Listed Options', group:'capmkt',
+    beginner:[
+      'Exchange-traded contracts to buy or sell stocks at a set price.',
+      'Used to hedge or speculate; their pricing is where the VIX comes from.'],
+    expert:[
+      'Listed equity/index options clear through the OCC; dealer hedging (gamma) can amplify or dampen index moves.',
+      'The VIX is computed from S&P 500 option prices, so options ARE the volatility signal.',
+      'Source: OCC, Cboe.'] },
+  { id:'etf', label:'ETFs / Index Funds', group:'shadow',
+    beginner:[
+      'Baskets of stocks or bonds you can trade like a single share.',
+      'Most new investing money flows through them, shaping which assets rise.'],
+    expert:[
+      'Passive vehicles now hold a majority of US equity fund assets; creation/redemption ties ETF prices to the underlying.',
+      'Concentrated flows move whole indices and can propagate stress in illiquid underlyings (e.g. HY bond ETFs).',
+      'Source: ICI, Fed Financial Stability Report.'] },
+  { id:'energy', label:'Energy Sector', group:'sectors',
+    beginner:[
+      'Oil and gas company stocks.',
+      'They rise and fall mostly with the price of oil.'],
+    expert:[
+      'Energy equities are the primary equity-market conduit for oil-price moves and a partial inflation hedge.',
+      'Roughly 4% of the S&P 500 by weight but a major swing factor in earnings during oil shocks.',
+      'Source: S&P Dow Jones Indices, EIA.'] },
+  { id:'house', label:'Households', group:'sectors',
+    beginner:[
+      'You and every other consumer.',
+      'Household spending is about two-thirds of the whole economy.'],
+    expert:[
+      'Household balance sheets link mortgage rates, credit and equity/house wealth to consumption (~68% of GDP).',
+      'Debt-service ratios and confidence transmit financial conditions into real demand.',
+      'Source: BEA, Fed Z.1, NY Fed Household Debt report.'] },
 ];
 
 // ─── PLUMBING LAYER (new in Mk10) ───────────────────────────────────────────
@@ -1159,6 +1200,20 @@ const LINKS = [
   {s:'ffr', t:'privcredit', w:2, sign:0, conf:'directional', why:'Floating-rate loans mean higher policy rates lift fund yields but also raise borrower default risk: a two-sided effect.', stat:'Conditional sign. Source: IMF GFSR 2024.'},
   {s:'banks', t:'privcredit', w:1, sign:-1, conf:'directional', why:'As banks retrench from middle-market lending after Dodd-Frank, private credit expands to fill the gap, so bank pullback grows the sector.', stat:'The sector grew as banks\' leveraged-lending share fell. Source: IMF GFSR.'},
   {s:'hf', t:'privcredit', w:1, sign:1, conf:'directional', why:'Private credit sits inside the same asset-management complex; funds and their investors channel capital into direct lending in search of yield.', stat:'Directional; magnitude unquantified. Source: industry estimates.'},
+
+  // ── Breadth links (Mk15) ──────────────────────────────────────────────────
+  {s:'tsy', t:'tbills', w:3, sign:1, conf:'measured', why:'The Treasury issues bills to fund the deficit and manage cash; issuance sets bill supply.', stat:'~$6T bills outstanding. Source: US Treasury, SIFMA.'},
+  {s:'tbills', t:'mmf', w:3, sign:1, conf:'directional', why:'Money-market funds hold bills as their core asset, so bill supply drives fund allocation and yields.', stat:'Bills are the largest MMF holding. Source: ICI, OFR.'},
+  {s:'ffr', t:'tbills', w:3, sign:1, conf:'measured', why:'Bill yields track the Fed funds rate almost one-for-one at the front end.', stat:'T-bill yields ~= policy rate. Source: FRED DTB3 vs FEDFUNDS.'},
+  {s:'vix', t:'options', w:3, sign:1, conf:'measured', why:'The VIX is derived from S&P 500 option prices, so option-implied vol IS the fear gauge.', stat:'VIX = 30-day implied vol from SPX options. Source: Cboe.'},
+  {s:'options', t:'equit', w:2, sign:0, conf:'directional', why:'Dealer option hedging (gamma) can amplify or dampen index moves depending on positioning.', stat:'Conditional sign. Source: OCC, dealer-gamma research.'},
+  {s:'equit', t:'etf', w:3, sign:1, conf:'directional', why:'ETFs hold the equity market; index levels drive ETF NAVs via creation/redemption.', stat:'Passive holds a majority of equity fund assets. Source: ICI.'},
+  {s:'etf', t:'equit', w:2, sign:1, conf:'directional', why:'Concentrated passive flows move whole indices, feeding back into prices.', stat:'Directional; flow-driven. Source: Fed FSR.'},
+  {s:'oil', t:'energy', w:3, sign:1, conf:'measured', why:'Energy company earnings and stocks move with the oil price.', stat:'Energy equities strongly correlated with WTI. Source: S&P DJI, EIA.'},
+  {s:'energy', t:'equit', w:1, sign:1, conf:'directional', why:'Energy is an S&P sector, so its swings show up in the index during oil shocks.', stat:'~4% index weight, larger earnings swing. Source: S&P DJI.'},
+  {s:'mortgage', t:'house', w:2, sign:-1, conf:'directional', why:'Higher mortgage rates cut household affordability and housing wealth.', stat:'Mortgage debt is the largest household liability. Source: NY Fed.'},
+  {s:'credit', t:'house', w:2, sign:1, conf:'directional', why:'Looser credit conditions expand consumer borrowing capacity and spending.', stat:'Consumer credit tracks financial conditions. Source: Fed G.19.'},
+  {s:'house', t:'equit', w:1, sign:1, conf:'directional', why:'Consumption is ~two-thirds of GDP, so household demand supports corporate earnings and equities.', stat:'PCE ~68% of GDP. Source: BEA.'},
 ];
 
 // ─── MERGE PLUMBING INTO THE GRAPH ──────────────────────────────────────────
@@ -1200,6 +1255,7 @@ const COLUMN_OF = {
   yield:5, credit:5, equit:5, mbs:5, usd:5, gold:5, vix:5, mortgage:5,
   tech:6, fins:6, defn:6, dxy_fx:6,
   m2:2,
+  tbills:2, options:5, etf:5, energy:6, house:6,
 };
 const COLUMN_TITLES = ['Global Shocks','Data & Inputs','Policy & Fiscal','Oversight',
                        'Plumbing','Markets','Sectors & FX'];
