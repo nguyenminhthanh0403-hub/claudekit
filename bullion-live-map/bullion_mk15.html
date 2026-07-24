@@ -1260,6 +1260,12 @@ const COLUMN_OF = {
 const COLUMN_TITLES = ['Global Shocks','Data & Inputs','Policy & Fiscal','Oversight',
                        'Plumbing','Markets','Sectors & FX'];
 
+// Portrait (phone) band geometry, shared by the node layout AND the row titles so
+// the two never drift apart. Each band reserves a `titleGap` header strip at its
+// top for the row title; nodes are packed into the space below it, so a row's
+// title can never sit under its own bubbles. Keep these in sync in both places.
+const PORTRAIT_BAND = { top: 74, bottom: 20, left: 20, right: 16, titleGap: 26 };
+
 // One-sentence plain-language summary for every premade scenario.
 const SCENARIO_EXPLAIN = {
   rate_hike:        'The Fed raises its policy rate 50bps, making all borrowing costlier and hitting long-duration assets like tech hardest.',
@@ -1326,12 +1332,21 @@ function layoutColumns(portrait) {
   Object.values(byCol).forEach(arr => arr.sort((a,b) => a.id < b.id ? -1 : 1));
   if (portrait) {
     // Phone portrait: columns become horizontal rows, story reads top → bottom.
-    const top = 70, bottom = 24, left = 16, right = 16;
+    // The row's nodes sit in the lower part of each band, below the header strip
+    // (titleGap) that the row title occupies — so nodes never cover the title.
+    const { top, bottom, left, right, titleGap } = PORTRAIT_BAND;
     const bandH = (H - top - bottom) / N_COLS;
     Object.entries(byCol).forEach(([c, arr]) => {
-      const y = top + (+c) * bandH + bandH/2;
+      const bandTop = top + (+c) * bandH;
+      const y = bandTop + titleGap + (bandH - titleGap) / 2; // centered under the title strip
+      const slot = (W - left - right) / arr.length;
+      // Crowded rows (e.g. Markets has 10 slots) would pack hubs closer than
+      // their radius and make the circles intersect. Cap every bubble in the
+      // row to half its slot minus a gap so neighbours can never overlap.
+      const maxR = Math.max(6, slot / 2 - 3);
       arr.forEach((n,i) => {
-        n.x = left + (i + 0.5) * (W - left - right) / arr.length;
+        n.r = Math.min(n.r, maxR);
+        n.x = left + (i + 0.5) * slot;
         n.y = y;
         // Stagger labels in crowded rows so they don't collide.
         n.labelAbove = (i % 2 === 1);
@@ -1394,7 +1409,12 @@ function buildGraph() {
   nodesData = NODES.map(n => {
     const d = degree[n.id] || 1;
     const isHub = HUB_IDS.has(n.id);
-    const r = isHub ? Math.min(30, 13 + d*1.6) : 10;
+    // Portrait bands are only ~1/7 of the screen tall, so the desktop hub sizes
+    // (up to r=30) let a hub's label bleed into the neighbouring band's title
+    // strip. Use smaller bubbles on phones to keep every column title clear.
+    const r = portrait
+      ? (isHub ? Math.min(19, 11 + d*0.9) : 8)
+      : (isHub ? Math.min(30, 13 + d*1.6) : 10);
     return { ...n, degree:d, isHub, r, col: (COLUMN_OF[n.id] !== undefined ? COLUMN_OF[n.id] : 5) };
   });
   const nodesDataById = {};
@@ -1412,9 +1432,13 @@ function buildGraph() {
   COLUMN_TITLES.forEach((t,i) => {
     const N_COLS = COLUMN_TITLES.length;
     if (portrait) {
-      const bandH = (H - 60) / N_COLS;
+      // Sit in the header strip at the top of each band — the same geometry the
+      // node layout reserves via PORTRAIT_BAND.titleGap — so titles never overlap
+      // their row's bubbles.
+      const { top, bottom, left } = PORTRAIT_BAND;
+      const bandH = (H - top - bottom) / N_COLS;
       titlesLayer.append('text').attr('class','col-title')
-        .attr('x', 8).attr('y', 60 + i*bandH + 12)
+        .attr('x', left).attr('y', top + i*bandH + 15)
         .attr('font-size', 9).attr('fill','var(--text-dim)').attr('opacity',0.7)
         .attr('font-weight',700).attr('letter-spacing','0.08em')
         .text(t.toUpperCase());
@@ -1583,6 +1607,41 @@ function buildGraph() {
   window._mk5Node = node;
   window._mk5Link = linkSel;
   window._mk5NodesData = nodesData;
+
+  // ── Initial framing + pan bounds ─────────────────────────────────────
+  // Two jobs here:
+  //  1) On open, frame the map so every starting node (the hubs) is visible
+  //     and centred — no hunting, no dead space — matching the "everything
+  //     on screen at once" look.
+  //  2) Clamp panning to the map's own content so it can never be dragged
+  //     (or, on phones, flicked) off into empty black void. d3's constrain
+  //     centres the content automatically whenever it's smaller than the
+  //     viewport, so this also stops zoom-out from stranding the map.
+  const boundsOf = (list) => {
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    list.forEach(n => {
+      const padX = n.r + 46;                    // sideways room for the node's label
+      const padY = n.r + (n.isHub ? 22 : 16);   // above/below room for the label
+      x0 = Math.min(x0, n.x - padX); x1 = Math.max(x1, n.x + padX);
+      y0 = Math.min(y0, n.y - padY); y1 = Math.max(y1, n.y + padY);
+    });
+    return { x0, y0, x1, y1 };
+  };
+  // Pan limit = the full layout (all slots), so satellites revealed later stay reachable.
+  const content = boundsOf(nodesData);
+  zoomBehavior.translateExtent([[content.x0, content.y0], [content.x1, content.y1]]);
+  // Initial fit: frame whatever is visible on open (the hubs). Only auto-fit on
+  // phones — the desktop column layout is already sized to fill its width.
+  if (portrait) {
+    const initIds = visibleNodeIds();
+    const framed = nodesData.filter(n => initIds.has(n.id));
+    const fb = boundsOf(framed.length ? framed : nodesData);
+    const bw = Math.max(1, fb.x1 - fb.x0), bh = Math.max(1, fb.y1 - fb.y0);
+    const fitScale = Math.max(0.4, Math.min(2.2, Math.min(W / bw, H / bh)));
+    const cx = (fb.x0 + fb.x1) / 2, cy = (fb.y0 + fb.y1) / 2;
+    const initT = d3.zoomIdentity.translate(W / 2 - fitScale * cx, H / 2 - fitScale * cy).scale(fitScale);
+    svg.call(zoomBehavior.transform, initT);
+  }
 
   applyVisibility();
   applyLayerFilter();
