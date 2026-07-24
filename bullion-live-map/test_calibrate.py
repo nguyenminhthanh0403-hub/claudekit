@@ -30,6 +30,27 @@ class TestVerdict(unittest.TestCase):
         fit = {'slope': -0.9, 't': 5.0, 'x_span': 0.0}
         tier, _ = c.verdict(-1, fit)
         self.assertEqual(tier, 'directional')
+    def test_verdict_nan_t_is_directional(self):
+        from calibrate import verdict
+        fit = {"slope": 0.5, "t": float("nan"), "x_span": 1.0}
+        tier, why = verdict(1, fit)
+        self.assertEqual(tier, "directional")
+        self.assertIn("not significant", why)
+    def test_dxy_us10y_is_measured(self):
+        # controller-adopted Mk15 cell: sign matches hand +1, |t|>2, regressor varied
+        fit = {'slope': 0.0449, 't': 6.6, 'x_span': 2.37}
+        tier, _ = c.verdict(1, fit)
+        self.assertEqual(tier, 'measured')
+    def test_us10y_spx_candidate_is_directional(self):
+        # rejected: |t|<2
+        fit = {'slope': -0.027, 't': -1.9, 'x_span': 0.28}
+        tier, _ = c.verdict(-1, fit)
+        self.assertEqual(tier, 'directional')
+    def test_vix_wti_candidate_signflip_is_directional(self):
+        # rejected: fitted sign (+) disagrees with hand sign (-)
+        fit = {'slope': 0.0058, 't': 4.3, 'x_span': 11.1}
+        tier, _ = c.verdict(-1, fit)
+        self.assertEqual(tier, 'directional')
 
 if __name__ == '__main__':
     unittest.main()
