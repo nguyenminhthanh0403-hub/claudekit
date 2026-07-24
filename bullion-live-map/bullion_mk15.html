@@ -1264,7 +1264,19 @@ const COLUMN_TITLES = ['Global Shocks','Data & Inputs','Policy & Fiscal','Oversi
 // the two never drift apart. Each band reserves a `titleGap` header strip at its
 // top for the row title; nodes are packed into the space below it, so a row's
 // title can never sit under its own bubbles. Keep these in sync in both places.
-const PORTRAIT_BAND = { top: 74, bottom: 20, left: 20, right: 16, titleGap: 26 };
+// `maxBand` caps the row height: mobile in-app browsers (Instagram, etc.) often
+// report an over-tall viewport, and without a cap the rows would stretch far past
+// the screen. The whole 7-row stack is then centred vertically in whatever height
+// we actually have, so the map stays compact and framed instead of stretched.
+const PORTRAIT_BAND = { top: 74, bottom: 20, left: 20, right: 16, titleGap: 26, maxBand: 118 };
+function portraitBandGeom() {
+  const { top, bottom, maxBand } = PORTRAIT_BAND;
+  const N = COLUMN_TITLES.length;
+  const bandH = Math.min((H - top - bottom) / N, maxBand);
+  const stackH = N * bandH;
+  const y0 = Math.max(top, (H - stackH) / 2);   // centre the compact stack in the viewport
+  return { bandH, y0, N };
+}
 
 // One-sentence plain-language summary for every premade scenario.
 const SCENARIO_EXPLAIN = {
@@ -1334,10 +1346,10 @@ function layoutColumns(portrait) {
     // Phone portrait: columns become horizontal rows, story reads top → bottom.
     // The row's nodes sit in the lower part of each band, below the header strip
     // (titleGap) that the row title occupies — so nodes never cover the title.
-    const { top, bottom, left, right, titleGap } = PORTRAIT_BAND;
-    const bandH = (H - top - bottom) / N_COLS;
+    const { left, right, titleGap } = PORTRAIT_BAND;
+    const { bandH, y0 } = portraitBandGeom();
     Object.entries(byCol).forEach(([c, arr]) => {
-      const bandTop = top + (+c) * bandH;
+      const bandTop = y0 + (+c) * bandH;
       const y = bandTop + titleGap + (bandH - titleGap) / 2; // centered under the title strip
       const slot = (W - left - right) / arr.length;
       // Crowded rows (e.g. Markets has 10 slots) would pack hubs closer than
@@ -1433,12 +1445,12 @@ function buildGraph() {
     const N_COLS = COLUMN_TITLES.length;
     if (portrait) {
       // Sit in the header strip at the top of each band — the same geometry the
-      // node layout reserves via PORTRAIT_BAND.titleGap — so titles never overlap
-      // their row's bubbles.
-      const { top, bottom, left } = PORTRAIT_BAND;
-      const bandH = (H - top - bottom) / N_COLS;
+      // node layout reserves via portraitBandGeom() — so titles never overlap
+      // their row's bubbles and never drift from the rows.
+      const { left } = PORTRAIT_BAND;
+      const { bandH, y0 } = portraitBandGeom();
       titlesLayer.append('text').attr('class','col-title')
-        .attr('x', left).attr('y', top + i*bandH + 15)
+        .attr('x', left).attr('y', y0 + i*bandH + 15)
         .attr('font-size', 9).attr('fill','var(--text-dim)').attr('opacity',0.7)
         .attr('font-weight',700).attr('letter-spacing','0.08em')
         .text(t.toUpperCase());
@@ -1986,7 +1998,21 @@ function applyLayerFilter() {
 // whole graph into visible chaos on every window resize (and on some
 // mobile browsers, on scroll/toolbar-hide too). Instead, shift the existing
 // layout by the size delta and nudge the simulation gently.
+// Pin the app to the *actually visible* viewport height. Mobile in-app browsers
+// (Instagram/Facebook webviews, and some mobile Safari/Chrome states) don't honour
+// `height:100dvh` / `position:fixed` reliably, so the #stage can balloon far past
+// the screen — which both stretched the portrait rows and let the page scroll off
+// into empty void. Setting an explicit pixel height from visualViewport (the real
+// visible area, excluding browser chrome) keeps the stage exactly one screen tall.
+function fitAppToViewport() {
+  const vv = window.visualViewport;
+  const vh = (vv && vv.height) || window.innerHeight || document.documentElement.clientHeight;
+  const app = document.getElementById('app');
+  if (app && vh) app.style.height = Math.round(vh) + 'px';
+}
+
 function recenterGraph() {
+  fitAppToViewport();
   const rect = stageEl.getBoundingClientRect();
   const newW = rect.width || window.innerWidth || 360;
   const newH = rect.height || window.innerHeight || 600;
@@ -2013,6 +2039,13 @@ window.addEventListener('orientationchange', () => {
   clearTimeout(resizeTimer);
   resizeTimer = setTimeout(() => { recenterGraph(); }, 350);
 });
+// visualViewport fires on mobile browser-chrome show/hide (URL bar) and pinch —
+// the moments when a webview's reported height changes without a window 'resize'.
+if (window.visualViewport) {
+  const onVV = () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(() => { recenterGraph(); }, 200); };
+  window.visualViewport.addEventListener('resize', onVV);
+  window.visualViewport.addEventListener('scroll', onVV);
+}
 
 // Plain-English frame for newcomers; the institution/relationship counts moved
 // to the Audit Log, where a reader who wants that density actually looks.
@@ -3835,6 +3868,7 @@ function setupHistoryDatePicker() {
   clearBtn.addEventListener('click', () => { input.value = ''; applyDate(null); });
 }
 
+fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout measures it
 buildGraph();
 buildLegend();
 updateMetrics();
