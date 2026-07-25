@@ -1269,6 +1269,12 @@ const COLUMN_TITLES = ['Global Shocks','Data & Inputs','Policy & Fiscal','Oversi
 // the screen. The whole 7-row stack is then centred vertically in whatever height
 // we actually have, so the map stays compact and framed instead of stretched.
 const PORTRAIT_BAND = { top: 74, bottom: 20, left: 20, right: 16, titleGap: 26, maxBand: 118 };
+// Minimum height each portrait band needs to hold its title strip, a full-size hub
+// bubble, and the bubble's label without any of them colliding. If the real viewport
+// is too short to give all 7 bands this much (in-app browsers like Instagram leave a
+// thin strip between their toolbars), we lay the map out at this fixed size anyway and
+// let the SVG viewBox scale the whole thing down to fit — see buildGraph().
+const PORTRAIT_MIN_BAND = 92;
 function portraitBandGeom() {
   const { top, bottom, maxBand } = PORTRAIT_BAND;
   const N = COLUMN_TITLES.length;
@@ -1369,11 +1375,20 @@ function layoutColumns(portrait) {
     const bandW = (W - left - right) / N_COLS;
     Object.entries(byCol).forEach(([c, arr]) => {
       const x = left + (+c) * bandW + bandW/2;
-      const stagger = arr.length >= 7;   // crowded column: alternate labels above/below
+      const slot = (H - top - bottom) / arr.length;
+      // A crowded column (e.g. Markets = 10 nodes) packs its vertical slots tighter
+      // than a full-size hub, so the green Capital-Markets bubbles (Equity Markets +
+      // Credit Markets) touched and their labels collided in the gap between them.
+      // Clamp every bubble to half its slot so stacked circles keep a gap, and stagger
+      // adjacent labels to OPPOSITE outer sides (even → above, odd → below) so two
+      // stacked hubs point their labels away from each other instead of into the gap.
+      const maxR = Math.max(8, slot / 2 - 8);
+      const stagger = arr.length >= 7;
       arr.forEach((n,i) => {
+        n.r = Math.min(n.r, maxR);
         n.x = x;
-        n.y = top + (i + 0.5) * (H - top - bottom) / arr.length;
-        n.labelAbove = stagger ? (i % 2 === 1) : false;
+        n.y = top + (i + 0.5) * slot;
+        n.labelAbove = stagger ? (i % 2 === 0) : false;
       });
     });
   }
@@ -1383,6 +1398,19 @@ function buildGraph() {
   const rect = stageEl.getBoundingClientRect();
   W = rect.width || window.innerWidth || 360;
   H = rect.height || window.innerHeight || 600;
+  const portrait = W < 560;
+  // Short-viewport guard (the real fix for phones/in-app browsers). Mobile in-app
+  // browsers — Instagram, Facebook, etc. — leave only a short visible strip, so the
+  // 7 portrait bands would compress until node bubbles and their labels ride up over
+  // the row titles. Instead of packing the bands into whatever short height we're
+  // given, lay the portrait map out at a fixed *minimum* virtual height and let the
+  // SVG viewBox scale that whole map down to fit. Titles and nodes share the SVG
+  // coordinate space, so scaling keeps their spacing exactly — they can never
+  // overlap — and it no longer depends on visualViewport reporting an exact height.
+  if (portrait) {
+    const requiredH = PORTRAIT_BAND.top + COLUMN_TITLES.length * PORTRAIT_MIN_BAND + PORTRAIT_BAND.bottom;
+    if (H < requiredH) H = requiredH;
+  }
   svg.attr('viewBox', `0 0 ${W} ${H}`);
   svg.selectAll('*').remove();
 
@@ -1416,8 +1444,8 @@ function buildGraph() {
   // its causal-pipeline column, so the map opens identically every time
   // and the bubbles stay put. On narrow (portrait phone) screens the
   // pipeline rotates 90°: columns become rows and the story reads
-  // top → bottom instead of left → right.
-  const portrait = W < 560;
+  // top → bottom instead of left → right.  (`portrait` and the short-viewport
+  // height guard were computed at the top of buildGraph.)
   nodesData = NODES.map(n => {
     const d = degree[n.id] || 1;
     const isHub = HUB_IDS.has(n.id);
@@ -1642,8 +1670,11 @@ function buildGraph() {
   // Pan limit = the full layout (all slots), so satellites revealed later stay reachable.
   const content = boundsOf(nodesData);
   zoomBehavior.translateExtent([[content.x0, content.y0], [content.x1, content.y1]]);
-  // Initial fit: frame whatever is visible on open (the hubs). Only auto-fit on
-  // phones — the desktop column layout is already sized to fill its width.
+  // Initial fit: frame whatever is visible on open (the hubs), centred and with room
+  // for their labels. Only auto-fit on phones — the desktop column layout already
+  // fills its width. This runs in the viewBox coordinate space, so it composes
+  // cleanly with the short-viewport viewBox scaling above (it just recentres the
+  // content and pulls edge labels fully into view).
   if (portrait) {
     const initIds = visibleNodeIds();
     const framed = nodesData.filter(n => initIds.has(n.id));
