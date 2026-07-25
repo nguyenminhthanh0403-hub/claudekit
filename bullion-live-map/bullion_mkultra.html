@@ -1456,6 +1456,15 @@ const Renderer = (function () {
   let rafId = null, idleTimer = null, frameCount = 0;
   const cbActivate = [], cbHover = [], cbLeave = [], cbBackground = [];
 
+  // Orb translucency (mk15 parity): mk15's cores are a ~13–20%-alpha fill over
+  // a bright rim, so nodes read as see-through bubbles rather than solid balls.
+  // Focus lifts the selected node to full opacity + an emissive/scale highlight
+  // so a clicked node visibly pops out from its (still-translucent) neighbors.
+  const NODE_BASE_OPACITY = 0.4;   // resting / neighbour orbs
+  const NODE_DIM_OPACITY  = 0.12;  // dimmed (not in focus set)
+  const HIGHLIGHT_SCALE   = 1.35;  // selected orb grows this much
+  let camTween = null;             // in-flight "redirect the globe to a node" camera move
+
   // Declutter (Phase 5): the set of node ids currently allowed to show a
   // label — hubs are always in it; focus()/clearFocus() (already called on
   // every hover/click/deselect) add or reset the focused node + its
@@ -1661,12 +1670,19 @@ const Renderer = (function () {
     stageLabelEls = COLUMN_TITLES.map(title => {
       const el = document.createElement('div');
       el.textContent = title.toUpperCase();
+      // Readability fix: the old 9px muted-grey / 60%-opacity text vanished
+      // against the starfield + orbs. Now a solid dark pill chip with a subtle
+      // gold border and brighter, larger text so each band title stays legible
+      // wherever it projects on the sphere.
       Object.assign(el.style, {
         position: 'absolute', transform: 'translate(-50%, -50%)', whiteSpace: 'nowrap',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '9px', fontWeight: '700', letterSpacing: '0.08em',
-        color: 'var(--text-dim)', opacity: '0.6', textShadow: '0 1px 3px rgba(0,0,0,0.8)',
-        display: 'none',
+        fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em',
+        color: 'var(--gold)', opacity: '1',
+        padding: '3px 9px', borderRadius: '999px',
+        background: 'rgba(8,10,18,0.82)', border: '1px solid rgba(212,184,105,0.35)',
+        boxShadow: '0 1px 6px rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)',
+        pointerEvents: 'none', display: 'none',
       });
       labelContainer.appendChild(el);
       return el;
@@ -1768,6 +1784,34 @@ const Renderer = (function () {
       tw.mesh.position.lerpVectors(tw.fromPos, tw.toPos, e);
       if (t >= 1) { tw.mesh.position.copy(tw.toPos); activeTweens.splice(i, 1); }
     }
+  }
+
+  // "Redirect the globe to a node": orbit the camera (keeping its current
+  // distance, target stays the origin) so the node's slot swings round to face
+  // front-and-centre. Used when the user taps a related node in the detail
+  // panel — the map visibly turns to the node they picked instead of leaving
+  // them to hunt for it on the sphere.
+  function focusCameraOn(id) {
+    const mesh = meshById[id];
+    if (!mesh || !camera || !controls) return;
+    const dist = camera.position.length() || (SPHERE_R * 3.1);
+    // home = the node's true sphere slot (a reveal-burst may be mid-flight);
+    // its position vector doubles as the outward surface normal, so aiming the
+    // camera down that direction puts the node dead-centre on the near face.
+    const dir = mesh.userData.home.clone().normalize();
+    camTween = { fromPos: camera.position.clone(), toPos: dir.multiplyScalar(dist), start: null, duration: 800 };
+    controls.autoRotate = false;             // don't fight the redirect...
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => { controls.autoRotate = true; }, 3500); // ...resume idle spin after
+  }
+  function easeInOutCubic(t) { return t < 0.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+  function updateCamTween(time) {
+    if (!camTween || !camera || !controls) return;
+    if (camTween.start === null) camTween.start = time;
+    const t = Math.min(1, (time - camTween.start) / camTween.duration);
+    camera.position.lerpVectors(camTween.fromPos, camTween.toPos, easeInOutCubic(t));
+    controls.target.set(0, 0, 0);
+    if (t >= 1) camTween = null;
   }
 
   function startColorTween(mesh, fromColor, toColor, duration) {
@@ -1956,6 +2000,7 @@ const Renderer = (function () {
 
   function renderLoop(time) {
     rafId = requestAnimationFrame(renderLoop);
+    updateCamTween(time);       // must run before controls.update() reads camera.position
     if (controls) controls.update();
     updateHubPulse(time);
     updateTweens(time);
@@ -2036,7 +2081,8 @@ const Renderer = (function () {
         roughness: 0.55,
         metalness: 0.1,
         transparent: true,
-        opacity: 1,
+        opacity: NODE_BASE_OPACITY, // translucent bubble, mk15-style (see NODE_BASE_OPACITY)
+        depthWrite: false,          // avoid see-through orbs z-fighting/occluding the ones behind
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(d.x, d.y, d.z);
@@ -2140,10 +2186,23 @@ const Renderer = (function () {
     const keep = new Set([id, ...(neighborsOf[id] || [])]);
     labelEligible = new Set([...HUB_IDS, ...keep]); // declutter: hubs + focused node + its neighbors
     meshList.forEach(m => {
+      const sel = m.userData.id === id;      // the actual clicked/hovered node
       const dim = !keep.has(m.userData.id);
-      m.material.opacity = dim ? 0.15 : 1;
+      // Selected orb goes fully opaque; neighbours stay translucent (base);
+      // everything else dims. This is what makes a clicked node visibly pop.
+      m.material.opacity = dim ? NODE_DIM_OPACITY : (sel ? 1 : NODE_BASE_OPACITY);
       m.userData.focusDim = dim; // read by updateHubPulse() to also fade a dimmed hub's emissive/glow
-      m.userData.glowBaseOpacity = dim ? 0.1 : (m.userData.id === id ? 0.85 : 0.5);
+      m.userData.glowBaseOpacity = dim ? 0.1 : (sel ? 0.85 : 0.5);
+      // Highlight the selected node with an emissive lift + scale-up. Hubs keep
+      // their own pulse-driven emissive (updateHubPulse owns it), so only touch
+      // emissive on non-hubs; scale applies to both and reads clearly either way.
+      if (sel) {
+        if (!m.userData.isHub) { m.material.emissive.copy(m.material.color); m.material.emissiveIntensity = 0.75; }
+        m.scale.setScalar(HIGHLIGHT_SCALE);
+      } else {
+        if (!m.userData.isHub) { m.material.emissive.setHex(0x000000); m.material.emissiveIntensity = 0; }
+        m.scale.setScalar(1);
+      }
     });
     // Only links that directly terminate on the focused node stay at full
     // opacity, matching Mk15's `_mk5Link.classed('dimmed', ...)` rule.
@@ -2155,9 +2214,11 @@ const Renderer = (function () {
     if (!ready) return;
     labelEligible = new Set(HUB_IDS);
     meshList.forEach(m => {
-      m.material.opacity = 1;
+      m.material.opacity = NODE_BASE_OPACITY; // back to resting translucency
       m.userData.focusDim = false;
       m.userData.glowBaseOpacity = 0.5;
+      m.scale.setScalar(1);
+      if (!m.userData.isHub) { m.material.emissive.setHex(0x000000); m.material.emissiveIntensity = 0; }
     });
     linkObjs.forEach(lo => { lo.mat.opacity = 0.55; });
   }
@@ -2202,7 +2263,7 @@ const Renderer = (function () {
 
   return {
     build, redraw, setVisibility, focus, clearFocus: clearFocusImpl,
-    setLayerFilter, recolor, resetView,
+    setLayerFilter, recolor, resetView, focusCameraOn,
     nodeById: id => nodesDataIndex[id],
     nodes: () => nodesData,
     onNodeActivate: fn => cbActivate.push(fn),
@@ -2337,7 +2398,12 @@ function navigateTo(fromNode, toId) {
   if (fromNode.isHub) expandedHubs.add(fromNode.id);
   if (targetNode.isHub) expandedHubs.add(targetNode.id);
   if (!fromNode.isHub && !targetNode.isHub) allExpanded = true;
+  // Make the picked node the sticky focus so applyVisibility() re-asserts focus
+  // ON it — that highlights the target (emissive + scale) instead of leaving the
+  // dim state on the node we came from.
+  stickyFocusId = toId;
   applyVisibility();
+  Renderer.focusCameraOn(toId); // swing the globe round to the node the user picked
   openDetail(targetNode);
 }
 
