@@ -52,5 +52,15 @@ class TestVerdict(unittest.TestCase):
         tier, _ = c.verdict(-1, fit)
         self.assertEqual(tier, 'directional')
 
+class TestMk17Cells(unittest.TestCase):
+    MK17_TARGETS = {'mortgage_30y','xlk','xlf','xle','xlp','hy_oas','sofr','tbill_3m'}
+    def test_mk17_cells_present_and_wellformed(self):
+        tgt_fields = {tgtfield for (_d, _k, tgtfield, _kind, _hand) in c.CELLS}
+        self.assertTrue(self.MK17_TARGETS.issubset(tgt_fields),
+                        f"missing Mk17 target cells: {self.MK17_TARGETS - tgt_fields}")
+        for (drv, key, tgtfield, kind, hand) in c.CELLS:
+            self.assertIn(kind, ('level','pct','add'), f"{key} bad kind {kind}")
+            self.assertIsInstance(hand, (int, float))
+
 if __name__ == '__main__':
     unittest.main()

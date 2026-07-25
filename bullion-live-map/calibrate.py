@@ -90,6 +90,16 @@ CELLS = [
     ('wti_px','spx_pct','spx','pct', -0.0009), ('wti_px','us10y','us10y','level', 0.0035),
     ('us10y','spx_pct','spx','pct', -0.010), ('us2y','spx_pct','spx','pct', -0.008),
     ('dxy','us10y','us10y','level', 0.02), ('vix','wti_pct','wti_px','pct', -0.004),
+    # Mk17 candidates — (driver, target-cell-key, target-field, kind, hand)
+    ('us10y','mortgage_lvl','mortgage_30y','level', 0.90),  # mortgages track the 10Y
+    ('ffr','sofr_lvl','sofr','level', 1.00),                # SOFR ≈ policy rate
+    ('ffr','tbill_lvl','tbill_3m','level', 0.98),           # 3M bill tracks policy
+    ('vix','hy_oas_lvl','hy_oas','level', 0.020),           # stress widens HY spread
+    ('spx','xlk_pct','xlk','pct', 1.10),                    # tech beta > 1
+    ('spx','xlf_pct','xlf','pct', 1.00),                    # financials ≈ market
+    ('spx','xle_pct','xle','pct', 0.90),                    # energy < market beta
+    ('spx','xlp_pct','xlp','pct', 0.55),                    # staples defensive, low beta
+    ('wti_px','xle_pct','xle','pct', 0.010),                # energy sector tracks oil
 ]
 
 
