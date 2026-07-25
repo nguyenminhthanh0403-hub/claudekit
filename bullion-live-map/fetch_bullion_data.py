@@ -34,6 +34,16 @@ FRED_SERIES = {
     "DFF":        ("ffr",     None,  2),
     "DCOILWTICO": ("wti_px",  None,  2),
     "PAYEMS":     ("nfp_mom", "chg", 0),
+    # Mk17 breadth
+    "NFCI":         ("nfci",         None, 2),
+    "M2SL":         ("m2",           None, 1),
+    "MORTGAGE30US": ("mortgage_30y", None, 2),
+    "BAMLH0A0HYM2": ("hy_oas",       None, 2),
+    "BAMLC0A0CM":   ("ig_oas",       None, 2),
+    "SOFR":         ("sofr",         None, 2),
+    "DTB3":         ("tbill_3m",     None, 2),
+    "WALCL":        ("fed_bs",       None, 1),
+    "RRPONTSYD":    ("rrp",          None, 1),
 }
 
 # Yahoo Finance chart API. Unofficial/undocumented — no key, but could change
@@ -42,6 +52,11 @@ YAHOO_SYMBOLS = {
     "GC=F":      ("gold_px", 2),
     "DX-Y.NYB":  ("dxy",     2),
     "^GSPC":     ("spx",     2),
+    # Mk17 sector ETFs
+    "XLK":       ("xlk", 2),
+    "XLF":       ("xlf", 2),
+    "XLE":       ("xle", 2),
+    "XLP":       ("xlp", 2),
 }
 
 # Cadence tolerances, in days, applied to a field's PUBLICATION date — never
@@ -51,6 +66,8 @@ YAHOO_SYMBOLS = {
 # series ran 3-4 days, wti_px 5, CPI 6, PAYEMS 18.
 CADENCE_TOLERANCE_DAYS = {
     "daily":   7,    # observed 3-4d; absorbs a three-day weekend plus a holiday
+    "weekly":  10,   # NFCI (Wed), WALCL/H.4.1 (Thu), Freddie PMMS (Thu) post ~7d
+                     # apart; 10 = 7 + slack for a holiday or a one-week slip.
     "monthly": 45,   # observed 6d and 18d; silent for 45d means genuinely broken
     "fomc":    None, # simulated, never judged
 }
@@ -78,6 +95,20 @@ FIELD_META = {
     "gold_px": {"class": "measured", "cadence": "daily",   "source": "Yahoo GC=F"},
     "dxy":     {"class": "measured", "cadence": "daily",   "source": "Yahoo DX-Y.NYB"},
     "spx":     {"class": "measured", "cadence": "daily",   "source": "Yahoo ^GSPC"},
+    # Mk17 breadth
+    "nfci":         {"class": "measured", "cadence": "weekly",  "source": "FRED NFCI"},
+    "m2":           {"class": "measured", "cadence": "monthly", "source": "FRED M2SL"},
+    "mortgage_30y": {"class": "measured", "cadence": "weekly",  "source": "FRED MORTGAGE30US"},
+    "hy_oas":       {"class": "measured", "cadence": "daily",   "source": "FRED BAMLH0A0HYM2"},
+    "ig_oas":       {"class": "measured", "cadence": "daily",   "source": "FRED BAMLC0A0CM"},
+    "sofr":         {"class": "measured", "cadence": "daily",   "source": "FRED SOFR"},
+    "tbill_3m":     {"class": "measured", "cadence": "daily",   "source": "FRED DTB3"},
+    "fed_bs":       {"class": "measured", "cadence": "weekly",  "source": "FRED WALCL"},
+    "rrp":          {"class": "measured", "cadence": "daily",   "source": "FRED RRPONTSYD"},
+    "xlk":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLK"},
+    "xlf":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLF"},
+    "xle":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLE"},
+    "xlp":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLP"},
 }
 
 
@@ -130,8 +161,12 @@ SOURCE_NOTE = (
     "us2y/us10y/vix/ffr/wti_px: FRED daily series (DGS2, DGS10, VIXCLS, DFF, "
     "DCOILWTICO), official supported API. cpi_yoy: FRED CPILFESL, percent "
     "change from year ago. nfp_mom: FRED PAYEMS, month-over-month change "
-    "(thousands). gold_px/dxy/spx: Yahoo Finance chart API (GC=F, DX-Y.NYB, "
-    "^GSPC) — unofficial and undocumented, unlike FRED; could change or "
+    "(thousands). Mk17 adds FRED NFCI (financial conditions, weekly), M2SL "
+    "(money supply, monthly), MORTGAGE30US (30Y mortgage, weekly), "
+    "BAMLH0A0HYM2/BAMLC0A0CM (HY/IG credit OAS), SOFR, DTB3 (3M bill), WALCL "
+    "(Fed balance sheet, weekly) and RRPONTSYD (overnight RRP). "
+    "gold_px/dxy/spx and the Mk17 sector ETFs XLK/XLF/XLE/XLP: Yahoo Finance "
+    "chart API — unofficial and undocumented, unlike FRED; could change or "
     "rate-limit without notice. FOMC hike/cut odds have no free source and "
     "remain simulated."
 )
