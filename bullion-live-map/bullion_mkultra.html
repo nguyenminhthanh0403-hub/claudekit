@@ -102,6 +102,37 @@
   #network-svg { width: 100%; height: 100%; display: block; cursor: grab; }
   #network-svg:active { cursor: grabbing; }
 
+  /* View tabs: a small segmented control in the header */
+  #view-tabs { display: flex; margin-right: 4px; }
+  #view-tabs .tab { border-radius: 0; }
+  #view-tabs .tab:first-child { border-radius: 6px 0 0 6px; }
+  #view-tabs .tab:last-child { border-radius: 0 6px 6px 0; border-left: none; }
+
+  /* 2D Overview board: 7 stage columns of node cards */
+  #board-view {
+    flex: 1 1 auto; overflow: auto; padding: 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  /* The id-specificity display:flex above overrides the UA [hidden] rule, so
+     the hidden attribute alone won't hide the board — re-assert it here. */
+  #board-view[hidden] { display: none; }
+  .board-col { flex: 1 0 150px; min-width: 150px; max-width: 240px; display: flex; flex-direction: column; gap: 8px; }
+  .board-col-head {
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; color: var(--gold);
+    text-align: center; padding: 5px 8px; border-radius: 999px; text-transform: uppercase;
+    background: rgba(8,10,18,0.82); border: 1px solid rgba(212,184,105,0.35);
+    position: sticky; top: 0; z-index: 1;
+  }
+  .board-card {
+    display: block; width: 100%; text-align: left;
+    background: var(--bg-panel2); color: var(--text);
+    border: 1px solid var(--border); border-left-width: 4px;
+    border-radius: 6px; padding: 7px 9px; font-size: 12px; cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .board-card:hover { background: #182034; border-color: #2a3352; }
+  .board-card.hub { font-weight: 700; }
+
   .node-g { cursor: pointer; transition: opacity 0.32s ease; }
   .node-g text { pointer-events: none; user-select: none; }
   .node-g .core, .node-g .glow-ring { transition: opacity 0.32s ease, transform 0.32s cubic-bezier(0.34,1.4,0.64,1), stroke-width 0.22s ease, stroke-opacity 0.22s ease; transform-box: fill-box; transform-origin: center; }
@@ -470,6 +501,10 @@
       <div class="subtitle adv-control" id="live-badge" style="margin-top:2px"></div>
     </div>
     <div id="header-controls">
+      <div id="view-tabs" role="tablist" aria-label="View">
+        <button class="btn tab active" id="tab-3d" role="tab" aria-selected="true">&#9673; 3D Map</button>
+        <button class="btn tab" id="tab-board" role="tab" aria-selected="false">&#9638; Overview</button>
+      </div>
       <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
       <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
       <button class="btn adv-control" id="expand-all-btn">Expand All</button>
@@ -489,6 +524,7 @@
       <div id="coach-actions"><button class="btn" id="coach-next">Got it &rarr;</button></div>
     </div>
   </div>
+  <div id="board-view" role="tabpanel" aria-label="Overview board" hidden></div>
 </div>
 
 <div id="detail-panel">
@@ -2286,6 +2322,7 @@ async function buildGraph() {
 
   applyVisibility();
   applyLayerFilter();
+  buildBoard(); // populate the 2D Overview tab from the same nodesData
 }
 
 function applyVisibility() {
@@ -2458,6 +2495,52 @@ function closeDetail() {
   document.getElementById('app').classList.remove('panel-open');
 }
 document.getElementById('detail-close').addEventListener('click', closeDetail);
+
+// ── 2D Overview board ─────────────────────────────────────────────────────
+// A calm, plain-English kanban of the whole system: one column per causal
+// stage (COLUMN_TITLES, left→right), node cards tinted by their layer-group
+// colour, hubs first + bold. Clicking a card opens the SAME detail panel the
+// 3D map uses, so the board is just a second way to browse the same content.
+function buildBoard() {
+  const view = document.getElementById('board-view');
+  view.innerHTML = '';
+  COLUMN_TITLES.forEach((title, ci) => {
+    const col = document.createElement('div');
+    col.className = 'board-col';
+    const head = document.createElement('div');
+    head.className = 'board-col-head';
+    head.textContent = title;
+    col.appendChild(head);
+    // Hubs first (isHub true→1), then the rest in NODES order. Array.sort is
+    // stable in modern engines, so equal-isHub cards keep their source order.
+    const inCol = nodesData.filter(n => n.col === ci).sort((a, b) => (b.isHub === true) - (a.isHub === true));
+    inCol.forEach(n => {
+      const card = document.createElement('button');
+      card.className = 'board-card' + (n.isHub ? ' hub' : '');
+      card.style.borderLeftColor = GROUP_COLOR[n.group] || '#8891a6';
+      card.textContent = n.label;
+      card.setAttribute('aria-label', n.label);
+      card.addEventListener('click', () => openDetail(n));
+      col.appendChild(card);
+    });
+    view.appendChild(col);
+  });
+}
+
+function showView(which) {
+  const is3d = which !== 'board';
+  document.getElementById('stage').style.display = is3d ? '' : 'none';
+  document.getElementById('board-view').hidden = is3d;
+  const t3 = document.getElementById('tab-3d'), tb = document.getElementById('tab-board');
+  t3.classList.toggle('active', is3d);  t3.setAttribute('aria-selected', String(is3d));
+  tb.classList.toggle('active', !is3d); tb.setAttribute('aria-selected', String(!is3d));
+  // The 3D canvas sizes itself from #stage; while hidden it can read 0 width,
+  // so re-fit it the moment we come back to the map (redraw() no-ops if the
+  // scene isn't ready yet).
+  if (is3d) Renderer.redraw();
+}
+document.getElementById('tab-3d').addEventListener('click', () => showView('3d'));
+document.getElementById('tab-board').addEventListener('click', () => showView('board'));
 
 // ── Header controls ─────────────────────────────────────────────────────
 document.getElementById('expand-all-btn').addEventListener('click', () => {
