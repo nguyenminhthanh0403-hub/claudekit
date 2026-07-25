@@ -318,10 +318,13 @@ class TestBuildEnvelope(unittest.TestCase):
         # A field fetched but absent from FIELD_META would ship with no
         # provenance, which is the bug this whole change exists to prevent.
         expected = {"us2y", "us10y", "vix", "ffr", "wti_px", "cpi_yoy",
-                    "nfp_mom", "gold_px", "dxy", "spx"}
+                    "nfp_mom", "gold_px", "dxy", "spx",
+                    "nfci", "m2", "mortgage_30y", "hy_oas", "ig_oas",
+                    "sofr", "tbill_3m", "fed_bs", "rrp",
+                    "xlk", "xlf", "xle", "xlp"}
         self.assertEqual(set(FIELD_META), expected)
         for name, meta in FIELD_META.items():
-            self.assertIn(meta["cadence"], {"daily", "monthly", "fomc"})
+            self.assertIn(meta["cadence"], {"daily", "weekly", "monthly", "fomc"})
             self.assertTrue(meta["source"])
 
 

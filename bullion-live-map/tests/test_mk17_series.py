@@ -1,5 +1,10 @@
 import datetime as dt
+import os
+import sys
 import unittest
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+
 import fetch_bullion_data as f
 
 NEW_FRED = {"NFCI","M2SL","MORTGAGE30US","BAMLH0A0HYM2","BAMLC0A0CM",
