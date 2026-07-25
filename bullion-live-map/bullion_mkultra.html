@@ -152,6 +152,7 @@
   }
   #detail-title { font-size: 17px; font-weight: 700; color: var(--gold); line-height: 1.3; }
   #detail-layer { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  #detail-layer .detail-stage { color: var(--gold-dim); font-weight: 600; }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -1470,7 +1471,7 @@ const Renderer = (function () {
   // every hover/click/deselect) add or reset the focused node + its
   // neighbors, so no separate hover-tracking is needed here.
   let labelEligible = new Set(HUB_IDS);
-  let labelContainer = null, labelEls = {}, stageLabelEls = [];
+  let labelContainer = null, labelEls = {};
 
   // In-flight animations (Phase 6): reveal-burst position tweens (new
   // satellites flying out from their parent hub) and scenario-shock color
@@ -1666,29 +1667,6 @@ const Renderer = (function () {
   // out of view as the user orbits), each anchor is placed on the
   // camera-facing meridian every frame, just outside the sphere surface, so
   // it stays readable near "the front" of its band regardless of rotation.
-  function buildStageLabels() {
-    stageLabelEls = COLUMN_TITLES.map(title => {
-      const el = document.createElement('div');
-      el.textContent = title.toUpperCase();
-      // Readability fix: the old 9px muted-grey / 60%-opacity text vanished
-      // against the starfield + orbs. Now a solid dark pill chip with a subtle
-      // gold border and brighter, larger text so each band title stays legible
-      // wherever it projects on the sphere.
-      Object.assign(el.style, {
-        position: 'absolute', transform: 'translate(-50%, -50%)', whiteSpace: 'nowrap',
-        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-        fontSize: '11px', fontWeight: '700', letterSpacing: '0.1em',
-        color: 'var(--gold)', opacity: '1',
-        padding: '3px 9px', borderRadius: '999px',
-        background: 'rgba(8,10,18,0.82)', border: '1px solid rgba(212,184,105,0.35)',
-        boxShadow: '0 1px 6px rgba(0,0,0,0.6)', backdropFilter: 'blur(2px)',
-        pointerEvents: 'none', display: 'none',
-      });
-      labelContainer.appendChild(el);
-      return el;
-    });
-  }
-
   // Projects a world point to CSS pixel coordinates within the canvas, or
   // null if the point is behind the camera plane or far outside the frustum
   // (both are cheap rejects before the label's `display` is touched).
@@ -1725,36 +1703,6 @@ const Renderer = (function () {
       if (!proj) { el.style.display = 'none'; return; }
       el.style.left = proj.x + 'px';
       el.style.top = (proj.y + (m.userData.isHub ? 15 : 10)) + 'px';
-      el.style.display = 'block';
-    });
-    updateStageLabels(w, h);
-  }
-
-  function updateStageLabels(w, h) {
-    if (!stageLabelEls.length) return;
-    const nCols = COLUMN_TITLES.length;
-    const camTheta = Math.atan2(camera.position.z, camera.position.x);
-    stageLabelEls.forEach((el, i) => {
-      const phi = nCols > 1 ? (i / (nCols - 1)) * Math.PI : Math.PI / 2;
-      const p = Math.max(0.12, Math.min(Math.PI - 0.12, phi));
-      // Push the pole-most bands (0 and last) out a bit further than the
-      // rest: a camera at eye level foreshortens latitude bands near either
-      // pole, so the outermost band otherwise reads as almost stacked on its
-      // neighbor even though their `phi` step is identical to every other
-      // adjacent pair.
-      const poleCloseness = Math.max(0, 1 - Math.min(p, Math.PI - p) / 0.45);
-      const r = SPHERE_R * (1.2 + poleCloseness * 0.22);
-      const pos = new THREE.Vector3(
-        r * Math.sin(p) * Math.cos(camTheta), r * Math.cos(p), r * Math.sin(p) * Math.sin(camTheta)
-      );
-      const proj = projectToScreen(pos, w, h);
-      if (!proj) { el.style.display = 'none'; return; }
-      // Alternate a small left/right stagger too, so ANY two bands that end
-      // up close together after projection (poles or otherwise) don't sit
-      // directly on top of one another.
-      const sideOffset = (i % 2 === 0) ? -14 : 14;
-      el.style.left = (proj.x + sideOffset) + 'px';
-      el.style.top = proj.y + 'px';
       el.style.display = 'block';
     });
   }
@@ -1899,7 +1847,7 @@ const Renderer = (function () {
     if (a11yContainer && a11yContainer.parentNode) a11yContainer.parentNode.removeChild(a11yContainer);
     a11yContainer = null; a11yButtons = {};
     if (labelContainer && labelContainer.parentNode) labelContainer.parentNode.removeChild(labelContainer);
-    labelContainer = null; labelEls = {}; stageLabelEls = [];
+    labelContainer = null; labelEls = {};
     labelEligible = new Set(HUB_IDS);
     activeTweens = []; activeColorTweens = []; frameCount = 0;
     meshById = {}; meshList = []; baseVisible = {}; layerVis = {};
@@ -2116,7 +2064,6 @@ const Renderer = (function () {
     buildLinkObjects();
     buildA11yList(nodesArr);
     buildLabels(nodesArr);
-    buildStageLabels();
 
     canvas.addEventListener('pointermove', onPointerMove);
     canvas.addEventListener('pointerdown', onPointerDown);
@@ -2492,7 +2439,12 @@ function arrowGlyphs(l) {
 function openDetail(d) {
   openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
-  document.getElementById('detail-layer').textContent = LAYER_LABELS[d.group] || '';
+  // Group = what kind of thing it is; stage = where it sits in the causal flow
+  // (the classification that used to float on the 3D globe, now shown here).
+  const _group = LAYER_LABELS[d.group] || '';
+  const _stage = COLUMN_TITLES[d.col] || '';
+  document.getElementById('detail-layer').innerHTML =
+    _group + (_stage ? ' <span class="detail-stage">· ' + _stage + '</span>' : '');
   const bullets = (!beginnerMode && d.expert) ? d.expert : d.beginner;
   const ul = document.getElementById('detail-bullets');
   ul.innerHTML = (bullets||[]).map(b => `<li>${enrichText(b)}</li>`).join('');
