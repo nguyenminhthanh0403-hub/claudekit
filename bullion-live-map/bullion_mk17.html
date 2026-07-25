@@ -591,6 +591,19 @@
         <div class="metric-cell"><div class="metric-label">Gold</div><div class="metric-val" id="m-gold">&mdash;</div><div class="metric-sub">$/oz</div><div class="prov-sub" id="p-gold"></div></div>
         <div class="metric-cell"><div class="metric-label">Dollar</div><div class="metric-val" id="m-dxy">&mdash;</div><div class="metric-sub">DXY index</div><div class="prov-sub" id="p-dxy"></div></div>
         <div class="metric-cell"><div class="metric-label">WTI Oil</div><div class="metric-val" id="m-wti">&mdash;</div><div class="metric-sub">$/bbl</div><div class="prov-sub" id="p-wti"></div></div>
+        <div class="metric-cell"><div class="metric-label">NFCI</div><div class="metric-val" id="m-nfci">&mdash;</div><div class="metric-sub">Fin. conditions</div><div class="prov-sub" id="p-nfci"></div></div>
+        <div class="metric-cell"><div class="metric-label">HY OAS</div><div class="metric-val" id="m-hy_oas">&mdash;</div><div class="metric-sub">High-yield spread %</div><div class="prov-sub" id="p-hy_oas"></div></div>
+        <div class="metric-cell"><div class="metric-label">IG OAS</div><div class="metric-val" id="m-ig_oas">&mdash;</div><div class="metric-sub">Inv-grade spread %</div><div class="prov-sub" id="p-ig_oas"></div></div>
+        <div class="metric-cell"><div class="metric-label">SOFR</div><div class="metric-val" id="m-sofr">&mdash;</div><div class="metric-sub">Repo rate %</div><div class="prov-sub" id="p-sofr"></div></div>
+        <div class="metric-cell"><div class="metric-label">RRP</div><div class="metric-val" id="m-rrp">&mdash;</div><div class="metric-sub">O/N reverse repo $bn</div><div class="prov-sub" id="p-rrp"></div></div>
+        <div class="metric-cell"><div class="metric-label">3M Bill</div><div class="metric-val" id="m-tbill_3m">&mdash;</div><div class="metric-sub">Secondary %</div><div class="prov-sub" id="p-tbill_3m"></div></div>
+        <div class="metric-cell"><div class="metric-label">30Y Mortgage</div><div class="metric-val" id="m-mortgage_30y">&mdash;</div><div class="metric-sub">Freddie PMMS %</div><div class="prov-sub" id="p-mortgage_30y"></div></div>
+        <div class="metric-cell"><div class="metric-label">M2</div><div class="metric-val" id="m-m2">&mdash;</div><div class="metric-sub">Money supply $bn</div><div class="prov-sub" id="p-m2"></div></div>
+        <div class="metric-cell"><div class="metric-label">Fed B/S</div><div class="metric-val" id="m-fed_bs">&mdash;</div><div class="metric-sub">Total assets $bn</div><div class="prov-sub" id="p-fed_bs"></div></div>
+        <div class="metric-cell"><div class="metric-label">Tech (XLK)</div><div class="metric-val" id="m-xlk">&mdash;</div><div class="metric-sub">Sector ETF $</div><div class="prov-sub" id="p-xlk"></div></div>
+        <div class="metric-cell"><div class="metric-label">Financials (XLF)</div><div class="metric-val" id="m-xlf">&mdash;</div><div class="metric-sub">Sector ETF $</div><div class="prov-sub" id="p-xlf"></div></div>
+        <div class="metric-cell"><div class="metric-label">Energy (XLE)</div><div class="metric-val" id="m-xle">&mdash;</div><div class="metric-sub">Sector ETF $</div><div class="prov-sub" id="p-xle"></div></div>
+        <div class="metric-cell"><div class="metric-label">Staples (XLP)</div><div class="metric-val" id="m-xlp">&mdash;</div><div class="metric-sub">Sector ETF $</div><div class="prov-sub" id="p-xlp"></div></div>
       </div>
       <div class="state-alert normal" id="state-alert" style="margin-top:8px">&#x2713; Stable &mdash; risk-on, normal policy</div>
       <div class="sim-note" id="live-provenance" style="margin-top:6px"></div>
@@ -2508,7 +2521,7 @@ const SHOCK_WHY = {
 // else on the map (fomc_prob_*) has no live source wired up yet — CME
 // FedWatch odds have no free API — and stays simulated regardless.
 // Must be declared before `state` below, since buildBaseState() reads it.
-const LIVE_OVERRIDABLE = ['us2y', 'us10y', 'vix', 'cpi_yoy', 'wti_px', 'nfp_mom', 'gold_px', 'dxy', 'spx'];
+const LIVE_OVERRIDABLE = ['us2y', 'us10y', 'vix', 'cpi_yoy', 'wti_px', 'nfp_mom', 'gold_px', 'dxy', 'spx', 'nfci', 'hy_oas', 'ig_oas', 'sofr', 'rrp', 'tbill_3m', 'mortgage_30y', 'm2', 'fed_bs', 'xlk', 'xlf', 'xle', 'xlp'];
 
 // useLiveData: user-facing sim/live toggle (see live-toggle-btn). Default true
 // — live-when-available, matching the behavior before this toggle existed.
@@ -2539,6 +2552,8 @@ function buildBaseState() {
     us2y:4.42, us10y:4.28, vix:16.8, spx:5312, cpi_yoy:2.4, nfp_mom:186,
     fomc_prob_hike:0.08, fomc_prob_hold:0.78, fomc_prob_cut:0.14,
     dxy:104.2, gold_px:2340, wti_px:78.4,
+    nfci:-0.35, hy_oas:3.20, ig_oas:0.90, sofr:5.30, rrp:450, tbill_3m:5.20,
+    mortgage_30y:6.80, m2:20900, fed_bs:7200, xlk:210, xlf:42, xle:92, xlp:78,
     risk_off:false, tightening_bias:false, shock:null
   };
   const live = currentLiveSource();
@@ -3169,6 +3184,24 @@ function updateMetrics() {
   document.getElementById('m-gold').textContent = '$'+Math.round(s.gold_px).toLocaleString();
   document.getElementById('m-dxy').textContent  = (+s.dxy).toFixed(1);
   document.getElementById('m-wti').textContent  = '$'+(+s.wti_px).toFixed(1);
+  // Mk17 live cells. `s` carries every live/baseline field (see buildBaseState).
+  const MK17_FMT = {
+    nfci:        v => (v>=0?'+':'') + (+v).toFixed(2),
+    hy_oas:      v => (+v).toFixed(2)+'%',
+    ig_oas:      v => (+v).toFixed(2)+'%',
+    sofr:        v => (+v).toFixed(2)+'%',
+    rrp:         v => '$'+Math.round(+v).toLocaleString()+'bn',
+    tbill_3m:    v => (+v).toFixed(2)+'%',
+    mortgage_30y:v => (+v).toFixed(2)+'%',
+    m2:          v => '$'+Math.round(+v).toLocaleString()+'bn',
+    fed_bs:      v => '$'+Math.round(+v).toLocaleString()+'bn',
+    xlk: v=>'$'+(+v).toFixed(2), xlf: v=>'$'+(+v).toFixed(2),
+    xle: v=>'$'+(+v).toFixed(2), xlp: v=>'$'+(+v).toFixed(2),
+  };
+  for (const [field, fmt] of Object.entries(MK17_FMT)) {
+    const el = document.getElementById('m-' + field);
+    if (el) el.textContent = (typeof s[field] === 'number') ? fmt(s[field]) : '—';
+  }
   const alertEl = document.getElementById('state-alert');
   if (s.risk_off)             { alertEl.className='state-alert risk-off'; alertEl.textContent='\u26A0 Risk-Off regime \u2014 VIX > 30'; }
   else if (s.tightening_bias) { alertEl.className='state-alert tight';    alertEl.textContent='\u2191 Tightening bias \u2014 hawkish signals'; }
@@ -3185,7 +3218,7 @@ function updateMetrics() {
 // badge (renderLiveBadge below), so live and fake numbers are never silently
 // blurred together — the same provenance-tier honesty mechanism used
 // everywhere else on this map.
-const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500' };
+const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500', nfci:'NFCI', hy_oas:'HY OAS', ig_oas:'IG OAS', sofr:'SOFR', rrp:'RRP', tbill_3m:'3M Bill', mortgage_30y:'30Y Mortgage', m2:'M2', fed_bs:'Fed B/S', xlk:'Tech (XLK)', xlf:'Financials (XLF)', xle:'Energy (XLE)', xlp:'Staples (XLP)' };
 
 // Metric cell id suffix -> data.json field name. `spread` is absent because it
 // is computed from us10y and us2y rather than fetched — it is class 'derived'
@@ -3194,6 +3227,10 @@ const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core 
 const METRIC_CELL_FIELD = {
   'us2y': 'us2y', 'us10y': 'us10y', 'vix': 'vix', 'spx': 'spx',
   'cpi': 'cpi_yoy', 'gold': 'gold_px', 'dxy': 'dxy', 'wti': 'wti_px',
+  // Mk17
+  'nfci':'nfci', 'hy_oas':'hy_oas', 'ig_oas':'ig_oas', 'sofr':'sofr',
+  'rrp':'rrp', 'tbill_3m':'tbill_3m', 'mortgage_30y':'mortgage_30y',
+  'm2':'m2', 'fed_bs':'fed_bs', 'xlk':'xlk', 'xlf':'xlf', 'xle':'xle', 'xlp':'xlp',
 };
 
 function renderMetricProvenance() {
