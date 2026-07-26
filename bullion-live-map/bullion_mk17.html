@@ -2663,12 +2663,14 @@ const ELASTICITY = {
     // spurious) and the first-difference fit was pure noise (t 0.4, R^2 0.001). A rate->vol
     // magnitude is not defensible from this sample, so the cell is removed rather than left
     // asserting a number.
+    sofr_lvl: { v: 0.93216, conf: CONF.MEASURED, src: 'SOFR is pinned inside the Fed corridor (IORB above, ON RRP below) and moves ~1:1 with the policy rate. Fitted to data.json (train split): 197 daily first-difference days, SOFR change on Fed Funds change, slope +0.932, r +0.58, t +10.0. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
   vix: {
     spx_pct:  { v:-0.0085, conf:CONF.MEASURED,    src:'CBOE: VIX and SPX daily returns correlate about -0.74, the most reliable relationship on this map. Note the causal arrow is ambiguous \u2014 VIX is largely DERIVED from SPX option prices, so this is closer to an identity than a transmission. Fit check (train split): slope -0.0042, t -22.7 \u2014 about half the CBOE-correlation value; the identity-anchored number is kept as primary.' },
     us10y:    { v:-0.0090, conf:CONF.DIRECTIONAL, src:'Flight-to-quality bid for Treasuries. Sign is reliable in risk-off, but it INVERTS in an inflation shock (2022) when stocks and bonds sell off together. Magnitude mine. Fit check (calibrate.py): slope 0.0013, t 0.8 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
     gold_pct: { v: 0.0045, conf:CONF.DIRECTIONAL, src:'Safe-haven bid. Sign is conventional but gold sold off in the March 2020 dash-for-cash, so this fails in exactly the crises it is meant to describe. Magnitude mine. Fit check (calibrate.py): slope -0.0009, t -1.2 \u2014 fitted sign disagrees with the hand sign, so the hand magnitude is kept.' },
     dxy_add:  { v: 0.080,  conf:CONF.DIRECTIONAL, src:'USD is the global funding currency; stress bids it (BIS on dollar funding). Magnitude mine. Fit check (calibrate.py): slope 0.0243, t 1.5 \u2014 |t|=1.5 not significant, so the hand magnitude is kept.' },
+    hy_oas_lvl: { v: 0.022803, conf: CONF.MEASURED, src: 'Equity vol and high-yield credit spreads co-move strongly in stress. Fitted to data.json (train split): 203 daily first-difference days, HY OAS change on VIX change, slope +0.0228, r +0.59, t +10.4. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
   cpi_yoy: {
     us2y:     { v: 0.35,   conf:CONF.DIRECTIONAL, src:'Hot inflation raises the expected Fed path, which the 2Y prices. Sign robust; magnitude mine.' },
@@ -2689,6 +2691,14 @@ const ELASTICITY = {
     cpi_add:  { v: 0.028,  conf:CONF.MEASURED,    src:'IMF: roughly +0.3pp on HEADLINE CPI per +$10/bbl. CAVEAT: this map\u2019s CPI node is CORE, which strips energy \u2014 so the true core pass-through is much smaller and slower. This coefficient is knowingly generous.' },
     spx_pct:  { v:-0.0010, conf:CONF.MEASURED,    src:'Pricier oil taxes consumers and corporate margins, so higher crude tends to weigh on equities. Fitted to data.json (train split): 200 daily first-difference days, SPX% change on WTI $ change, slope -0.00095, r -0.35, t -5.2. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
     us10y:    { v: 0.0046, conf:CONF.MEASURED,    src:'Rising oil feeds inflation expectations, lifting the 10-year yield. Fitted to data.json (train split): 199 daily first-difference days, US10Y change on WTI $ change, slope 0.0046, r 0.34, t 5.0. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+    xle_pct:  { v: 0.0022172, conf: CONF.MEASURED, src: 'The energy-sector ETF (XLE) tracks crude. Fitted to data.json (train split): 198 daily first-difference days, XLE % change on WTI $ change, slope +0.00222, r +0.50, t +8.1. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+  },
+  us10y: {
+    mortgage_lvl: { v: 0.28924, conf: CONF.MEASURED, src: 'The 30-year fixed mortgage rate is priced off the 10-year Treasury benchmark. Fitted to data.json (train split): 40 first-difference days, 30Y mortgage change on US10Y change, slope +0.289, r +0.36, t +2.4. Weekly Freddie PMMS vs daily 10Y, so n is small. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+  },
+  spx: {
+    xlk_pct: { v: 0.00023099, conf: CONF.MEASURED, src: 'The tech-sector ETF (XLK) tracks the S&P at high beta. Fitted to data.json (train split): 199 daily first-difference days, XLK % change on SPX point change, slope +0.000231, r +0.90, t +28.3. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
+    xlf_pct: { v: 0.00011311, conf: CONF.MEASURED, src: 'The financials-sector ETF (XLF) tracks the S&P. Fitted to data.json (train split): 199 daily first-difference days, XLF % change on SPX point change, slope +0.000113, r +0.65, t +11.9. Out-of-sample accuracy in the Audit Log backtest. 1-year contemporaneous fit, not a structural beta.' },
   },
 };
 
@@ -3567,10 +3577,21 @@ const BACKTEST_MAP = {
   gold_px: { kind:'pct',   cells:{ ffr:'gold_pct', vix:'gold_pct', dxy:'gold_pct' } },
   wti_px:  { kind:'pct',   cells:{ dxy:'wti_pct' } },
   dxy:     { kind:'level', cells:{ ffr:'dxy_add', vix:'dxy_add' } },
+  mortgage_30y: { kind:'level', cells:{ us10y:'mortgage_lvl' } },
+  sofr:         { kind:'level', cells:{ ffr:'sofr_lvl' } },
+  hy_oas:       { kind:'level', cells:{ vix:'hy_oas_lvl' } },
+  xlk:          { kind:'pct',   cells:{ spx:'xlk_pct' } },
+  xlf:          { kind:'pct',   cells:{ spx:'xlf_pct' } },
+  xle:          { kind:'pct',   cells:{ wti_px:'xle_pct' } },
 };
 const BACKTEST_LABEL = { us2y:'2Y yield', us10y:'10Y yield', spx:'S&P 500',
-                         gold_px:'Gold', wti_px:'WTI oil', dxy:'Dollar (DXY)' };
-const DRIVER_FIELD = { ffr:'ffr', vix:'vix', dxy:'dxy', wti_px:'wti_px' };
+                         gold_px:'Gold', wti_px:'WTI oil', dxy:'Dollar (DXY)',
+                         mortgage_30y:'30Y Mortgage', sofr:'SOFR', hy_oas:'HY OAS',
+                         xlk:'Tech (XLK)', xlf:'Financials (XLF)', xle:'Energy (XLE)' };
+// us10y and spx are added here as DRIVERS (they were previously targets only),
+// needed so backtestModel() can resolve ELASTICITY.us10y.* and ELASTICITY.spx.*
+// cells against the live history fields of the same name.
+const DRIVER_FIELD = { ffr:'ffr', vix:'vix', dxy:'dxy', wti_px:'wti_px', us10y:'us10y', spx:'spx' };
 
 function backtestModel() {
   const H = window.BULLION_LIVE_HISTORY;
