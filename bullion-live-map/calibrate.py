@@ -123,7 +123,7 @@ def main():
     doc = json.load(open(path))
     hist = doc['history'] if isinstance(doc, dict) and 'history' in doc else doc
     train = train_split(list(hist.keys()))
-    lines = [f"Bullion Mk12 calibration — train split {len(train)} days "
+    lines = [f"Bullion Mk17 calibration — train split {len(train)} days "
              f"(first 80% of {len(hist)}); first-difference OLS.\n"]
     for drv, tgtkey, tgtfield, kind, hand in CELLS:
         fit = fit_cell(hist, train, drv, tgtfield, kind)

@@ -1,4 +1,4 @@
-Bullion Mk12 calibration — train split 292 days (first 80% of 366); first-difference OLS.
+Bullion Mk17 calibration — train split 292 days (first 80% of 366); first-difference OLS.
 
 ffr    -> us2y       n=198  span=0.26  slope=-0.068622  hand=+0.92  r=-0.05  t=-0.6  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
 ffr    -> us10y      n=198  span=0.26  slope=-0.12333  hand=+0.42  r=-0.10  t=-1.3  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
