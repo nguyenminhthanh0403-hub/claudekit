@@ -458,6 +458,8 @@
   .mg-item .mg-read { display: block; margin-top: 2px; font-size: 10px; opacity: 0.85; }
   .prov-sub { display:block; font-size:9.5px; color:var(--text-dim);
               line-height:1.4; margin-top:2px; letter-spacing:0.02em; }
+  .detail-live { margin:8px 0 2px; font-size:12px; color:var(--text-dim); }
+  .detail-live b { color:var(--text); font-weight:600; }
   .prov-flag { color:var(--amber); }
   .prov-dot  { display:inline-block; width:6px; height:6px; border-radius:50%;
                background:var(--amber); margin-left:5px; vertical-align:middle; }
@@ -520,6 +522,7 @@
   <div id="detail-body">
     <div class="section-label">Overview</div>
     <ul id="detail-bullets"></ul>
+    <div class="detail-live" id="detail-live"></div>
     <div class="section-label">Causal Relationships</div>
     <div class="rel-summary" id="rel-summary"></div>
     <div id="rel-list"></div>
@@ -1916,6 +1919,18 @@ function openDetail(d) {
   const ul = document.getElementById('detail-bullets');
   ul.innerHTML = (bullets||[]).map(b => `<li>${enrichText(b)}</li>`).join('');
   buildRelationships(d);
+  // Live reading(s) for this node, if any (Mk17). Uses the current transmission
+  // state so it tracks the active scenario/live data, and shows nothing when the
+  // node has no bound field or the value is absent.
+  const liveHost = document.getElementById('detail-live');
+  if (liveHost) {
+    const fields = NODE_LIVE_FIELD[d.id] || [];
+    const s = applyTransmission(state);
+    const parts = fields
+      .filter(f => typeof s[f] === 'number' && MK17_FMT[f])
+      .map(f => `${LIVE_FIELD_LABEL[f] || f}: <b>${MK17_FMT[f](s[f])}</b>`);
+    liveHost.innerHTML = parts.length ? ('Live reading &mdash; ' + parts.join(' &nbsp;·&nbsp; ')) : '';
+  }
   document.getElementById('detail-panel').classList.add('open');
   document.getElementById('app').classList.add('panel-open');
 }
@@ -3168,6 +3183,35 @@ function renderStats(shocked) {
 }
 
 // ─── METRICS + SHOCK TRIGGERS ───────────────────────────────────────────────
+// Mk17 live-field formatters. Module-scope so both updateMetrics() (grid cells)
+// and openDetail() (detail-panel live readout) share the same formatting.
+const MK17_FMT = {
+  us2y:v=>(+v).toFixed(2)+'%', us10y:v=>(+v).toFixed(2)+'%', vix:v=>(+v).toFixed(1),
+  spx:v=>'$'+Math.round(+v).toLocaleString(), cpi_yoy:v=>(+v).toFixed(1)+'%',
+  gold_px:v=>'$'+Math.round(+v).toLocaleString(), dxy:v=>(+v).toFixed(1),
+  wti_px:v=>'$'+(+v).toFixed(1), ffr:v=>(+v).toFixed(2)+'%', nfp_mom:v=>Math.round(+v)+'k',
+  nfci:v=>(v>=0?'+':'')+(+v).toFixed(2), hy_oas:v=>(+v).toFixed(2)+'%',
+  ig_oas:v=>(+v).toFixed(2)+'%', sofr:v=>(+v).toFixed(2)+'%',
+  rrp:v=>'$'+Math.round(+v).toLocaleString()+'bn', tbill_3m:v=>(+v).toFixed(2)+'%',
+  mortgage_30y:v=>(+v).toFixed(2)+'%', m2:v=>'$'+Math.round(+v).toLocaleString()+'bn',
+  fed_bs:v=>'$'+Math.round(+v).toLocaleString()+'bn',
+  xlk:v=>'$'+(+v).toFixed(2), xlf:v=>'$'+(+v).toFixed(2),
+  xle:v=>'$'+(+v).toFixed(2), xlp:v=>'$'+(+v).toFixed(2),
+};
+// The 13 Mk17 metric-grid cell fields updateMetrics() sets generically via the
+// loop below. NOT Object.keys(MK17_FMT) — MK17_FMT now also carries formatters
+// for the original driver fields (us2y, us10y, vix, spx, dxy, …) so openDetail()
+// can format them too, but those grid cells already get bespoke formatting +
+// className logic earlier in updateMetrics() and must not be re-set here.
+const MK17_CELL_FIELDS = ['nfci','hy_oas','ig_oas','sofr','rrp','tbill_3m','mortgage_30y','m2','fed_bs','xlk','xlf','xle','xlp'];
+// Node id -> live data.json field(s) shown in the detail panel. NFCI attaches to
+// the vix node (both are market-stress readings) — it does NOT add a graph edge.
+const NODE_LIVE_FIELD = {
+  vix: ['vix', 'nfci'], credit: ['hy_oas', 'ig_oas'], repo: ['sofr', 'rrp'],
+  mortgage: ['mortgage_30y'], m2: ['m2'], fed: ['fed_bs'], tbills: ['tbill_3m'],
+  tech: ['xlk'], fins: ['xlf'], energy: ['xle'], defn: ['xlp'],
+  yield: ['us10y', 'us2y'], equit: ['spx'], gold: ['gold_px'], usd: ['dxy'], oil: ['wti_px'],
+};
 function updateMetrics() {
   const s = applyTransmission(state);
   const sp = spread(s), spNum = parseFloat(sp);
@@ -3185,20 +3229,12 @@ function updateMetrics() {
   document.getElementById('m-dxy').textContent  = (+s.dxy).toFixed(1);
   document.getElementById('m-wti').textContent  = '$'+(+s.wti_px).toFixed(1);
   // Mk17 live cells. `s` carries every live/baseline field (see buildBaseState).
-  const MK17_FMT = {
-    nfci:        v => (v>=0?'+':'') + (+v).toFixed(2),
-    hy_oas:      v => (+v).toFixed(2)+'%',
-    ig_oas:      v => (+v).toFixed(2)+'%',
-    sofr:        v => (+v).toFixed(2)+'%',
-    rrp:         v => '$'+Math.round(+v).toLocaleString()+'bn',
-    tbill_3m:    v => (+v).toFixed(2)+'%',
-    mortgage_30y:v => (+v).toFixed(2)+'%',
-    m2:          v => '$'+Math.round(+v).toLocaleString()+'bn',
-    fed_bs:      v => '$'+Math.round(+v).toLocaleString()+'bn',
-    xlk: v=>'$'+(+v).toFixed(2), xlf: v=>'$'+(+v).toFixed(2),
-    xle: v=>'$'+(+v).toFixed(2), xlp: v=>'$'+(+v).toFixed(2),
-  };
-  for (const [field, fmt] of Object.entries(MK17_FMT)) {
+  // Iterate the fixed 13-field cell list (NOT Object.entries(MK17_FMT) — that
+  // object now also holds formatters for the original driver fields, which
+  // already have bespoke formatting/className logic set above and must not be
+  // re-set here).
+  for (const field of MK17_CELL_FIELDS) {
+    const fmt = MK17_FMT[field];
     const el = document.getElementById('m-' + field);
     if (el) el.textContent = (typeof s[field] === 'number') ? fmt(s[field]) : '—';
   }
