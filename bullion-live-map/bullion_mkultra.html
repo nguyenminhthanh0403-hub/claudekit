@@ -920,7 +920,8 @@ const NODES = [
     expert:[
       'BLS first-Friday release, central to the Fed dual mandate.',
       'Strong payrolls plus high CPI push the FOMC hawkish.',
-      'Roughly 158M employed as of mid-2024 (BLS: CES0000000001).'] },
+      'Roughly 158M employed as of mid-2024 — a level figure typed in by hand, not refreshed daily.',
+      'Source: BLS Current Employment Statistics (series CES0000000001).'] },
 
   // ── Sentiment / Volatility ───────────────────────────────────────────────
   { id:'vix', label:'VIX', group:'sentiment',
@@ -928,9 +929,10 @@ const NODES = [
       "The 'fear index', measuring how nervous options traders are.",
       'Above 30 signals panic and a rush out of stocks.'],
     expert:[
-      'CBOE Volatility Index, the implied 30-day volatility of the S&P 500.',
+      'Cboe Volatility Index, the implied 30-day volatility of the S&P 500.',
       'Above 20 is elevated anxiety, above 30 marks a crisis or risk-off regime.',
-      'Inverse correlation to the S&P near -0.74 historically (CBOE).'] },
+      'Inverse correlation to the S&P near -0.74 in long samples. The -0.74 is a long-run figure with no window stated here; the daily-change relationship on this map is fitted separately and shown on the vix-to-equities link.',
+      'Source: Cboe (index methodology and historical series).'] },
 
   // ── FX / Currency ────────────────────────────────────────────────────────
   { id:'usd', label:'US Dollar (DXY)', group:'fx',
@@ -938,17 +940,19 @@ const NODES = [
       'The dollar measured against a basket of major foreign currencies.',
       'A stronger dollar makes US exports pricier and imports cheaper.'],
     expert:[
-      'DXY is trade-weighted (EUR 57.6%, JPY 13.6%, GBP 11.9%, others).',
+      'DXY is trade-weighted against six currencies (EUR 57.6%, JPY 13.6%, GBP 11.9%, CAD, SEK, CHF). The weights are fixed by the index rules, not re-estimated.',
       'A strong dollar tightens global financial conditions.',
-      'Roughly 60% of FX reserves and 40 to 50% of trade invoices are in USD (BIS 2022).'] },
+      'Roughly 60% of FX reserves and 40 to 50% of trade invoices were in USD as of 2022.',
+      'Source: ICE (DXY index weights); BIS and IMF COFER (reserve and invoicing shares, 2022).'] },
   { id:'dxy_fx', label:'EM FX / Global FX', group:'fx',
     beginner:[
       'Exchange rates between the dollar and developing-country currencies.',
       'A rising dollar stresses countries with dollar-denominated debt.'],
     expert:[
-      'EM nations owe roughly $5.5T in USD external debt (IIF 2023).',
-      'A 10% USD appreciation historically cuts EM GDP about 1.5% (IMF WP/19/25).',
-      'Dollar strength drives capital flight, EM rate hikes, and contagion risk.'] },
+      'EM nations owed roughly $5.5T in USD external debt as of 2023.',
+      'A 10% USD appreciation historically cuts EM GDP about 1.5%.',
+      'Dollar strength drives capital flight, EM rate hikes, and contagion risk.',
+      'Source: IIF Global Debt Monitor (2023); IMF WP/19/25 (the 1.5% elasticity).'] },
 
   // ── Commodities ──────────────────────────────────────────────────────────
   { id:'gold', label:'Gold', group:'commodity',
@@ -956,9 +960,10 @@ const NODES = [
       "A 'safe haven' asset bought when people fear inflation or crashes.",
       'Its price often moves opposite to the dollar.'],
     expert:[
-      'Near-zero long-run correlation to equities.',
+      'Near-zero long-run correlation to equities, which is the basis of the diversification case.',
       'Key drivers: real rates (inverse), USD (inverse), inflation expectations, geopolitics.',
-      'Central-bank gold demand hit 1,037 tonnes in 2023 (WGC). Real rates (TIPS) dominate.'] },
+      'Central-bank gold demand hit 1,037 tonnes in 2023. Real rates (TIPS) dominate.',
+      'Source: World Gold Council (correlation studies and demand trends); the dollar link on this map is fitted separately.'] },
   { id:'oil', label:'Oil Price (WTI)', group:'commodity',
     beginner:[
       'Energy is an input cost for nearly everything.',
@@ -974,25 +979,28 @@ const NODES = [
       "The world's second-largest economy and a top US trading partner.",
       'When China slows, US exports fall and commodity prices drop.'],
     expert:[
-      'Holds roughly $780B of US Treasuries as of 2024 (down from a $1.3T peak).',
-      'GDP near $18T (2023 IMF), bilateral US trade near $575B/year.',
-      'Taiwan Strait risk threatens semiconductors (~92% of sub-7nm chips made in Taiwan).'] },
+      'Held roughly $780B of US Treasuries as of 2024, down from a $1.3T peak.',
+      'GDP near $18T as of 2023, bilateral US trade near $575B/year.',
+      'Taiwan Strait risk threatens semiconductors: Taiwan makes the large majority of leading-edge (sub-7nm) chips. The often-quoted ~92% share is an industry estimate, not an official statistic.',
+      'Source: US Treasury TIC (holdings, monthly); IMF WEO (GDP, 2023); the chip-share figure has no single official dataset.'] },
   { id:'russia', label:'Russia / Sanctions', group:'geo',
     beginner:[
       "Russia's 2022 invasion of Ukraine triggered massive sanctions.",
       'That cut energy supplies to Europe and spiked oil and gas prices globally.'],
     expert:[
-      'Controls roughly 12% of global oil and 17% of natural gas (IEA 2022).',
-      'Post-2022 sanctions froze about $300B of Russian central-bank reserves.',
-      'Redirected energy to China and India via a shadow tanker fleet, rewiring trade flows.'] },
+      'Controlled roughly 12% of global oil and 17% of natural gas supply as of 2022.',
+      'Post-2022 sanctions immobilised about $300B of Russian central-bank reserves, per the statements of the freezing governments.',
+      'Redirected energy to China and India via a shadow tanker fleet, rewiring trade flows.',
+      'Source: IEA (supply shares, 2022); EU and G7 official statements (the reserve figure); IEA oil market reports (redirected flows).'] },
   { id:'geo', label:'Global Trade / WTO', group:'geo',
     beginner:[
       'The rules that govern how countries trade with each other.',
       'When trade breaks down through tariffs or wars, prices rise everywhere.'],
     expert:[
-      'Global goods trade is roughly $25T/year (WTO 2023).',
-      'US tariffs on Chinese goods rose from about 3% to 19%, 2018 to 2024 (PIIE).',
-      'Post-COVID supply-chain breaks added 1.5 to 2% to global CPI in 2021 to 2022.'] },
+      'Global goods trade was roughly $25T/year as of 2023.',
+      'US tariffs on Chinese goods rose from about 3% to 19% between 2018 and 2024.',
+      'Post-COVID supply-chain breaks are estimated to have added 1.5 to 2% to global CPI in 2021 to 2022 — a modelled range from central-bank research, not a measured series.',
+      'Source: WTO (trade volume, 2023); PIIE tariff tracker (tariff rates); IMF and ECB research (the CPI contribution estimate).'] },
   // ── Money & credit additions (Mk13) ──────────────────────────────────────
   { id:'deposits', label:'Bank Deposits', group:'commercial',
     beginner:[
@@ -3834,6 +3842,9 @@ const NODE_LIVE_FIELD = {
   mortgage: ['mortgage_30y'], m2: ['m2'], fed: ['fed_bs'], tbills: ['tbill_3m'],
   tech: ['xlk'], fins: ['xlf'], energy: ['xle'], defn: ['xlp'],
   yield: ['us10y', 'us2y'], equit: ['spx'], gold: ['gold_px'], usd: ['dxy'], oil: ['wti_px'],
+  // Beyond mk17's map: these three bind to fields data.json already carries, so
+  // the node shows a current reading next to its dated hand-typed figure.
+  nfp: ['nfp_mom'], cpi: ['cpi_yoy'], ffr: ['ffr'],
 };
 
 // Metric cell id suffix -> data.json field name. `spread` is absent because it
