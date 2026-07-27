@@ -430,6 +430,14 @@
   /* ── Mk8 additions ── */
   .rel-arrows { margin-left: auto; margin-right: 6px; font-weight: 700; font-size: 11px; letter-spacing: -1px; flex-shrink: 0; }
   .rel-row-top .rel-strength { margin-left: 0; }
+  /* Evidence tiers. These colours previously existed ONLY inside the audit
+     log's injected CSS string, so nothing outside that modal could use them. */
+  .tier.measured    { color: #7bbf8e; }
+  .tier.directional { color: #d9a441; }
+  .tier.unverified  { color: #e0654f; }
+  .tier-badge { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 1px 5px; margin-right: 4px; border-radius: 3px;
+    border: 1px solid currentColor; opacity: 0.9; vertical-align: 1px; cursor: help; }
   .audit-badge { display: inline-block; font-size: 9px; font-weight: 700; text-transform: uppercase;
                  letter-spacing: 0.05em; color: var(--warn, #e0b15a); border: 1px dashed var(--warn, #e0b15a);
                  border-radius: 3px; padding: 0 4px; margin-right: 4px; }
@@ -1618,12 +1626,23 @@ const Renderer = (function () {
 
       const color = new THREE.Color(SIGN_COLOR[String(l.sign)] || '#8891a6');
       const tubeR = Math.max(0.35, (l.w || 1) * 0.45); // width by `w` (1-3)
+      // Three independent channels, so none of them collides:
+      //   colour     = sign      (amplifies / dampens / conditional)
+      //   radius     = strength  (`w`, 1-3)
+      //   opacity    = evidence  (measured brightest, directional softer)
+      //   dashed     = evidence  (unverified only)
+      // `baseOpacity` has to travel with the link object: clearFocus used to
+      // restore a hardcoded 0.55, which would flatten all three tiers into one
+      // after the first focus/clear cycle.
+      const baseOpacity = l.conf === CONF.MEASURED ? 0.72
+                        : l.conf === CONF.UNVERIFIED ? 0.40
+                        : 0.50;
       // One shared material per link (not per mesh) so focus-dim can adjust
       // every dash segment + the arrowhead in one write to `.opacity`.
-      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.55 });
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: baseOpacity });
       const group = new THREE.Group();
 
-      if (l.aud === false) {
+      if (l.conf === CONF.UNVERIFIED) {
         // Dashed: alternate solid/gap sub-tubes along the same curve rather
         // than a true LineMaterial dash (which needs the Line2/LineGeometry/
         // LineMaterial addons + a resize-tracked `resolution` uniform) —
@@ -1649,7 +1668,7 @@ const Renderer = (function () {
       group.add(cone);
 
       scene.add(group);
-      linkObjs.push({ group, mat, source: l.s, target: l.t, sourceGroup: s.group, targetGroup: t.group, index: idx });
+      linkObjs.push({ group, mat, baseOpacity, source: l.s, target: l.t, sourceGroup: s.group, targetGroup: t.group, index: idx });
       linkBaseVisible[idx] = true;
       linkLayerVis[idx] = true;
     });
@@ -2216,7 +2235,9 @@ const Renderer = (function () {
       m.scale.setScalar(1);
       if (!m.userData.isHub) { m.material.emissive.setHex(0x000000); m.material.emissiveIntensity = 0; }
     });
-    linkObjs.forEach(lo => { lo.mat.opacity = 0.55; });
+    // Back to each link's OWN resting opacity, not a shared constant, or the
+    // evidence tiers would all collapse to the same weight after one focus.
+    linkObjs.forEach(lo => { lo.mat.opacity = lo.baseOpacity != null ? lo.baseOpacity : 0.55; });
   }
 
   function setLayerFilter(activeLayersSet) {
@@ -2451,6 +2472,11 @@ function buildRelationships(d) {
         '</div>' +
         '<div class="rel-detail">' +
           (r.l.aud === false ? '<span class="audit-badge" title="' + (r.l.note || '').replace(/"/g,'&quot;') + '">&#9888; sign unverified</span> ' : '') +
+          // How much this particular claim is actually backed. Same vocabulary
+          // the audit log uses, shown where the claim is read rather than only
+          // in a panel the reader has to go looking for.
+          (r.l.conf ? '<span class="tier-badge tier ' + r.l.conf + '" title="' +
+                      TIER_TITLE[r.l.conf] + '">' + r.l.conf + '</span> ' : '') +
           '<span class="rel-lead" style="color:' + color + '">' + word + '.</span> ' +
           '<span class="rel-lead">' + enrichText(lead) + '.</span> ' +
           enrichText(r.l.why) +
@@ -2704,7 +2730,12 @@ function buildLegend() {
        <div class="legend-item static"><span class="legend-line" style="background:#7bbf8e"></span>Amplifies</div>
        <div class="legend-item static"><span class="legend-line" style="background:#e0654f"></span>Dampens</div>
        <div class="legend-item static"><span class="legend-line" style="background:#e0b15a"></span>Conditional</div>
-       <div class="legend-item static"><span class="legend-line" style="background:repeating-linear-gradient(90deg,var(--text-dim) 0 4px,transparent 4px 8px)"></span>Dashed = sign unverified</div>
+     </div>
+     <div class="legend-causal">
+       <div class="legend-causal-title">Evidence</div>
+       <div class="legend-item static"><span class="legend-line" style="background:var(--text-dim);opacity:0.95"></span>Measured &mdash; fitted on live data</div>
+       <div class="legend-item static"><span class="legend-line" style="background:var(--text-dim);opacity:0.55"></span>Directional &mdash; sourced mechanism</div>
+       <div class="legend-item static"><span class="legend-line" style="background:repeating-linear-gradient(90deg,var(--text-dim) 0 4px,transparent 4px 8px);opacity:0.55"></span>Dashed = unverified</div>
      </div>
      <div class="legend-causal-title">Layers (tap to filter)</div>`;
   el.innerHTML = causalKey + LAYER_ORDER.map(g =>
@@ -3237,6 +3268,12 @@ refreshDriverBases();
 // source in `src`. An empty src forces the tier down to 'unverified' at load time
 // (see validateProvenance below) — you cannot lie to the audit log by accident.
 const CONF = { MEASURED:'measured', DIRECTIONAL:'directional', UNVERIFIED:'unverified' };
+// Plain-English gloss for the tier badges, so the word is not jargon on hover.
+const TIER_TITLE = {
+  measured: 'Fitted against live data.json history — the slope and t-statistic are in the source line.',
+  directional: 'The mechanism is sourced, but no magnitude is claimed from data here.',
+  unverified: 'No source names a measurement for this claim. The sign may be wrong.',
+};
 
 // ELASTICITIES: [driver][target] = { v, conf, src }
 //   v = change in target per +1 unit of driver move from baseline.
