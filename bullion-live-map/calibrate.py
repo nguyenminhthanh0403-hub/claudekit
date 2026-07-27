@@ -3,6 +3,7 @@ Python 3.9, stdlib only."""
 
 import json
 import math
+import re
 
 
 def ols(xs, ys):
@@ -117,14 +118,196 @@ def fit_cell(hist, train, drv_field, tgt_field, kind):
     return ols(dxs, dys)
 
 
+# ─── LINK PASS ──────────────────────────────────────────────────────────────
+# Every causal claim on the map is encoded twice: as a LINKS row (a sign, drawn
+# as an arrow) and — for the subset the scenario engine models — as an
+# ELASTICITY cell (a coefficient, fitted by CELLS above). Only the cells were
+# ever calibrated, so 57 of the 86 links carried no confidence tier and the
+# audit log filed them all as guesswork. This pass fits every link whose two
+# endpoints both bind to a live data.json field, so those tiers can be earned.
+#
+# Threshold is |t| > 2, the same rule `verdict` applies to cells, plus a
+# minimum sample: MIN_LINK_N. Monthly series (cpi_yoy, m2, nfp_mom) yield only
+# 3-9 usable daily first differences over a year, and a t-stat on 8 points is
+# not evidence of anything. Weekly series (WALCL, MORTGAGE30US, NFCI) give ~40,
+# which clears the floor.
+MIN_LINK_N = 30
+
+# node id -> data.json field. The first block is Mk17's NODE_LIVE_FIELD (primary
+# field only, where a node carries two); the second is driver/alias nodes that
+# bind to a field without appearing in that map.
+NODE_FIELD = {
+    'vix': 'vix', 'credit': 'hy_oas', 'repo': 'sofr', 'mortgage': 'mortgage_30y',
+    'm2': 'm2', 'fed': 'fed_bs', 'tbills': 'tbill_3m', 'tech': 'xlk',
+    'fins': 'xlf', 'energy': 'xle', 'defn': 'xlp', 'yield': 'us10y',
+    'equit': 'spx', 'gold': 'gold_px', 'usd': 'dxy', 'oil': 'wti_px',
+    'ffr': 'ffr', 'fomc': 'ffr', 'cpi': 'cpi_yoy', 'nfp': 'nfp_mom',
+    'dxy_fx': 'dxy', 'tsy': 'us10y',
+}
+
+# Prices and index levels move in percentages; rates, spreads and diffusion
+# indices move in points. dxy stays 'level' to match the existing dxy_add cell.
+PCT_FIELDS = {'spx', 'gold_px', 'wti_px', 'xlk', 'xlf', 'xle', 'xlp', 'm2', 'fed_bs'}
+
+
+def field_kind(field):
+    """'pct' for price/level series, 'level' for rates and spreads."""
+    return 'pct' if field in PCT_FIELDS else 'level'
+
+
+def parse_links(html):
+    """Extract [{'s','t','sign','conf'}] from a map file's LINKS array.
+
+    A brace-depth scan rather than one big regex: link rows carry prose with
+    commas and escaped apostrophes, which a naive pattern splits in the wrong
+    place. `conf` is normalised to a bare lowercase tier, so both the quoted
+    literals ("conf:'measured'") and the constants ("conf:CONF.MEASURED")
+    used in the map read the same way here.
+    """
+    start = html.index('const LINKS = [') + len('const LINKS = [')
+    depth, i = 1, start
+    while depth:
+        if html[i] == '[':
+            depth += 1
+        elif html[i] == ']':
+            depth -= 1
+        i += 1
+    body = html[start:i - 1]
+
+    rows, depth, cur = [], 0, ''
+    for ch in body:
+        if ch == '{':
+            depth += 1
+        if depth:
+            cur += ch
+        if ch == '}':
+            depth -= 1
+            if not depth:
+                rows.append(cur)
+                cur = ''
+
+    out = []
+    for r in rows:
+        s = re.search(r"s:'([^']+)'", r)
+        t = re.search(r"t:'([^']+)'", r)
+        if not (s and t):
+            continue
+        sign = re.search(r"sign:\s*(-?\d+)", r)
+        conf = re.search(r"conf:\s*'?([A-Za-z_.]+)'?", r)
+        out.append({
+            's': s.group(1), 't': t.group(1),
+            'sign': int(sign.group(1)) if sign else None,
+            'conf': conf.group(1).split('.')[-1].lower() if conf else None,
+        })
+    return out
+
+
+def link_candidates(links, node_field=None):
+    """The subset of links that can be fitted: both endpoints bind to a field.
+
+    Pairs whose two nodes resolve to the SAME field are dropped — fomc->ffr,
+    tsy->yield and usd->dxy_fx would each regress a series on itself and
+    "fit" perfectly while proving nothing.
+    """
+    nf = NODE_FIELD if node_field is None else node_field
+    out = []
+    for l in links:
+        sf, tf = nf.get(l['s']), nf.get(l['t'])
+        if not sf or not tf or sf == tf:
+            continue
+        out.append(dict(l, s_field=sf, t_field=tf, kind=field_kind(tf)))
+    return out
+
+
+def link_verdict(hand_sign, fit):
+    """(tier, action, why) for one fitted link.
+
+    Implements the approved conflict policy: data wins where the data is
+    strong, the hand sign is kept and flagged where it is weak. `action` is
+    one of:
+      ''         nothing to do
+      'flip'     adopt the fitted sign — the arrow on the map points the wrong way
+      'conflict' signs disagree but the fit is too weak to act on; record it
+      'review'   hand says sign:0 ("no stable sign") yet the data shows one.
+                 A human decides; this pass does not rewrite conditional links.
+
+    An insignificant fit is NOT evidence the relationship is false — most of
+    these claims are structural and simply have no daily-frequency signal — so
+    it returns 'directional', never 'unverified'. The tier floor for an
+    unsourced claim is applied in the map's own validateProvenance().
+    """
+    if 'error' in fit or fit.get('x_span', 0) == 0:
+        return 'directional', '', 'regressor did not vary'
+    n = fit.get('n', 0)
+    if n < MIN_LINK_N:
+        return 'directional', '', (
+            f'only n={n} usable daily changes (< {MIN_LINK_N}) — the series is '
+            'too coarse for a daily fit')
+    t = fit.get('t')
+    undefined = t is None or (isinstance(t, float) and math.isnan(t))
+    strong = (not undefined) and abs(t) > 2
+    fit_sign = 1 if fit['slope'] > 0 else -1
+
+    if hand_sign == 0:
+        if strong:
+            return 'directional', 'review', (
+                'hand says conditional (sign:0) but the data shows a stable '
+                f"{'positive' if fit_sign > 0 else 'negative'} daily sign, |t|={abs(t):.1f}")
+        return 'directional', '', 'conditional by hand; no significant daily signal'
+
+    if not strong:
+        why = 't-stat undefined (NaN)' if undefined else f'|t|={abs(t):.1f} not significant'
+        if fit_sign != hand_sign:
+            return 'directional', 'conflict', f'fitted sign disagrees but {why}'
+        return 'directional', '', f'tested, {why}'
+
+    if fit_sign != hand_sign:
+        return 'measured', 'flip', (
+            f'data contradicts the hand sign at |t|={abs(t):.1f}: '
+            f"fitted slope={fit['slope']:+.4g}")
+    return 'measured', '', f'sign matches, |t|={abs(t):.1f}'
+
+
+def link_report(hist, train, links):
+    """Fit every candidate link and return (lines, rows) for the report."""
+    cands = link_candidates(links)
+    lines = [f'\n=== LINKS === {len(links)} links; {len(cands)} with both endpoints '
+             f'in data.json (same-field pairs excluded); |t| > 2 = measured\n']
+    rows = []
+    for l in cands:
+        fit = fit_cell(hist, train, l['s_field'], l['t_field'], l['kind'])
+        if 'error' in fit:
+            lines.append(f"{l['s']:9s}-> {l['t']:11s} FIT FAILED: {fit['error']}")
+            continue
+        tier, action, why = link_verdict(l['sign'], fit)
+        rows.append(dict(l, fit=fit, tier=tier, action=action, why=why))
+        flag = f'  [{action.upper()}]' if action else ''
+        lines.append(
+            f"{l['s']:9s}-> {l['t']:11s} {l['s_field']:>12s}->{l['t_field']:<13s} "
+            f"n={fit['n']:3d} slope={fit['slope']:+.5g} t={fit['t']:+.1f} "
+            f"hand={l['sign']:+d} was={l['conf'] or '-':11s} => {tier.upper()}"
+            f" ({why}){flag}")
+
+    acts = {}
+    for r in rows:
+        acts[r['action'] or 'clean'] = acts.get(r['action'] or 'clean', 0) + 1
+    tiers = {}
+    for r in rows:
+        tiers[r['tier']] = tiers.get(r['tier'], 0) + 1
+    lines.append(f"\nfitted: {dict(sorted(tiers.items()))}   actions: {dict(sorted(acts.items()))}")
+    return lines, rows
+
+
 def main():
     import sys
     path = sys.argv[1] if len(sys.argv) > 1 else 'data.json'
+    html_path = sys.argv[2] if len(sys.argv) > 2 else 'bullion_mkultra.html'
     doc = json.load(open(path))
     hist = doc['history'] if isinstance(doc, dict) and 'history' in doc else doc
     train = train_split(list(hist.keys()))
-    lines = [f"Bullion Mk17 calibration — train split {len(train)} days "
-             f"(first 80% of {len(hist)}); first-difference OLS.\n"]
+    lines = [f"Bullion calibration — train split {len(train)} days "
+             f"(first 80% of {len(hist)}); first-difference OLS.\n"
+             "=== ELASTICITY CELLS ===\n"]
     for drv, tgtkey, tgtfield, kind, hand in CELLS:
         fit = fit_cell(hist, train, drv, tgtfield, kind)
         hand_sign = 1 if hand > 0 else -1
@@ -136,6 +319,14 @@ def main():
             f"{drv:7s}-> {tgtkey:9s}  n={fit['n']:3d}  span={fit['x_span']:.3g}  "
             f"slope={fit['slope']:+.5g}  hand={hand:+.4g}  r={fit['r']:+.2f}  "
             f"t={fit['t']:+.1f}  =>  {tier.upper()} ({why})")
+
+    try:
+        links = parse_links(open(html_path).read())
+    except (IOError, OSError, ValueError) as e:
+        lines.append(f"\n=== LINKS === skipped: could not read {html_path} ({e})")
+    else:
+        lines.extend(link_report(hist, train, links)[0])
+
     report = "\n".join(lines) + "\n"
     print(report)
     open('calibration_report.txt', 'w').write(report)
