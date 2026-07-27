@@ -1087,60 +1087,60 @@ const NODES = [
 // signs, which is why the mixed flag can finally be justified rather than fudged.
 const PLUMBING_LINKS = [
   // Deposit flight: the actual March 2023 transmission channel.
-  {s:'ffr', t:'mmf', w:3, sign:1, conf:'measured',
+  {s:'ffr', t:'mmf', w:3, sign:1, conf:'directional',
    why:'When the policy rate rises, money market funds pass it straight through to savers while bank deposits lag badly. Cash walks out of banks and into MMFs.',
    stat:'MMF assets grew past $6T during the 2022\u201323 hiking cycle while bank deposits fell. Source: OFR money market fund monitor, ICI.'},
-  {s:'mmf', t:'banks', w:3, sign:-1, conf:'measured',
+  {s:'mmf', t:'banks', w:3, sign:-1, conf:'directional',
    why:'Every dollar that moves into a money market fund is a dollar of deposit funding a bank no longer has. This is deposit flight, and it is what actually killed SVB.',
    stat:'US banks lost roughly $1T of deposits across 2022\u201323 as cash chased MMF yields. Source: FDIC Quarterly Banking Profile, Federal Reserve H.8.'},
-  {s:'ffr', t:'banks', w:3, sign:-1, conf:'measured',
+  {s:'ffr', t:'banks', w:3, sign:-1, conf:'directional',
    why:'Higher rates mark down the long bonds banks bought when rates were near zero. The loss is invisible while the bonds are held to maturity, and instantly real the moment a deposit run forces a sale.',
    stat:'US banks carried roughly $515B of UNREALISED losses on securities in Q4 2022. Source: FDIC Quarterly Banking Profile. This is the mechanism, not a correlation.'},
 
   // Funding markets.
-  {s:'mmf', t:'repo', w:3, sign:1, conf:'measured',
+  {s:'mmf', t:'repo', w:3, sign:1, conf:'directional',
    why:'Money market funds are the largest cash lenders in repo. When they swell, they park the cash in repo and at the Fed rather than lending it to banks.',
    stat:'MMFs were the dominant counterparty in the Fed\u2019s reverse repo facility, which peaked above $2.5T in 2022\u201323. Source: NY Fed.'},
-  {s:'repo', t:'dealers', w:3, sign:1, conf:'measured',
+  {s:'repo', t:'dealers', w:3, sign:1, conf:'directional',
    why:'Repo is how dealers finance their inventory. If repo funding dries up or haircuts rise, dealers cannot hold bonds, and market liquidity evaporates.',
    stat:'Structural. Dealers fund the bulk of their Treasury inventory in repo. Source: NY Fed primary dealer statistics, OFR.'},
-  {s:'repo', t:'hf', w:2, sign:1, conf:'measured',
+  {s:'repo', t:'hf', w:2, sign:1, conf:'directional',
    why:'Hedge funds run leveraged basis trades financed in repo. A rise in haircuts forces deleveraging, which is precisely what broke the Treasury market in March 2020.',
    stat:'The cash-futures basis trade is repo-financed and has been flagged as a systemic vulnerability. Source: BIS, OFR, Fed FSR.'},
   {s:'vix', t:'repo', w:2, sign:-1, conf:'directional',
    why:'Stress widens repo spreads and raises haircuts, so the same collateral finances less. Funding tightens exactly when it is needed most.',
-   stat:'Sign is well established; magnitude is unquantified here.'},
+   stat:'Sign is well established; magnitude is unquantified here. Tested over 197 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.3 - too weak to act on (logged as a conflict).'},
 
   // Backstops. These are what stop the cascade, and their absence in Mk9 meant the
   // map could depict a crisis but not its resolution.
-  {s:'fdic', t:'banks', w:3, sign:1, conf:'measured',
+  {s:'fdic', t:'banks', w:3, sign:1, conf:'directional',
    why:'Deposit insurance is what stops a run. It only works up to the limit, which is why UNINSURED deposits are the ones that flee.',
    stat:'FDIC insures $250k per depositor per bank. SVB was roughly 94% uninsured, which is why its run was so fast. Source: FDIC.'},
   {s:'fed', t:'repo', w:3, sign:1, conf:'measured',
    why:'The Fed sets a floor under repo through its standing facilities, lending against collateral when private cash will not.',
-   stat:'The Standing Repo Facility and reverse repo facility bracket the effective rate. Source: NY Fed.'},
+   stat:'The Standing Repo Facility and reverse repo facility bracket the effective rate. Source: NY Fed. Fitted over 40 usable daily changes in the train split: slope=+2.23e-06, |t|=2.6.'},
 
   // Mortgage / agency channel.
-  {s:'gse', t:'mbs', w:3, sign:1, conf:'measured',
+  {s:'gse', t:'mbs', w:3, sign:1, conf:'directional',
    why:'Fannie and Freddie guarantee and securitise the mortgages that become agency MBS. Without the guarantee the market would not exist at its current size.',
    stat:'GSEs backstop the bulk of a roughly $12T US mortgage market. Source: FHFA, SIFMA.'},
-  {s:'yield', t:'mbs', w:3, sign:-1, conf:'measured',
+  {s:'yield', t:'mbs', w:3, sign:-1, conf:'directional',
    why:'MBS prices fall as yields rise, and they fall FASTER than plain bonds because rising rates also stop prepayment, stretching the bond\u2019s duration exactly when you least want it.',
    stat:'This is negative convexity, and it is the reason bank MBS books were hit harder than their Treasury books in 2022. Source: SIFMA, Fed FSR.'},
-  {s:'mbs', t:'banks', w:2, sign:1, conf:'measured',
+  {s:'mbs', t:'banks', w:2, sign:1, conf:'directional',
    why:'Banks hold agency MBS as high-quality liquid assets. When those marks fall, so does the bank\u2019s capacity to absorb a run.',
    stat:'MBS were a large share of the securities portfolios that generated the 2022\u201323 unrealised losses. Source: FDIC.'},
-  {s:'fed', t:'mbs', w:2, sign:1, conf:'measured',
+  {s:'fed', t:'mbs', w:2, sign:1, conf:'directional',
    why:'The Fed bought agency MBS outright in QE and is now letting them run off, which removes the single largest price-insensitive buyer.',
    stat:'Fed MBS holdings peaked near $2.7T. Source: Federal Reserve H.4.1.'},
 
   // Who stands behind the backstops. Without these edges the GSE and FDIC nodes
   // hang off the graph with a single outbound arrow, which reads as "minor" when
   // in fact both are load-bearing sovereign guarantees.
-  {s:'tsy', t:'gse', w:3, sign:1, conf:'measured',
+  {s:'tsy', t:'gse', w:3, sign:1, conf:'directional',
    why:'Fannie and Freddie have been in federal conservatorship since 2008, with Treasury committed to keeping their net worth positive. Agency MBS trade as near-government paper because of that promise, not because the GSEs are strong.',
    stat:'Senior Preferred Stock Purchase Agreements, in force since September 2008. Source: FHFA, US Treasury.'},
-  {s:'banks', t:'fdic', w:2, sign:-1, conf:'measured',
+  {s:'banks', t:'fdic', w:2, sign:-1, conf:'directional',
    why:'Banks fund deposit insurance themselves through assessments. When banks fail, the insurance fund pays out and is depleted, and the surviving banks are billed to refill it.',
    stat:'The 2023 failures cost the Deposit Insurance Fund roughly $20B and triggered a special assessment on large banks. Source: FDIC.'},
 
@@ -1152,119 +1152,119 @@ const PLUMBING_LINKS = [
 
 const LINKS = [
   // ── Monetary policy spine ─────────────────────────────────────────────────
-  {s:'fed', t:'fomc', w:3, sign:1, conf:'measured', why:'The Fed Board chairs and dominates the FOMC, setting the agenda for the committee votes.', stat:'Structural control link, not a measured correlation. Source: Federal Reserve Act.'},
-  {s:'fomc', t:'ffr', w:3, sign:1, why:'The FOMC directly votes the Fed Funds target range up or down eight times a year.', stat:'Definitional link. The FOMC vote IS the rate.'},
-  {s:'ffr', t:'yield', w:3, sign:1, why:'A higher policy rate lifts the whole curve, especially the short end, since all borrowing is priced off the risk-free rate.', stat:'The 2Y tracks the expected policy path, correlation above 0.9 (FRED: FEDFUNDS vs DGS2).'},
-  {s:'ffr', t:'credit', w:2, sign:-1, why:'Higher base rates raise corporate borrowing costs and widen spreads as default risk rises.', stat:'HY spreads widen with hikes, correlation strengthens in tightening cycles (FRED: BAMLH0A0HYM2).'},
-  {s:'fed', t:'cpi', w:1, sign:-1, why:'The Fed exists to cool inflation. Tighter policy reduces CPI over time.', stat:'Effect runs on a 12 to 18 month lag, so it is not a same-period correlation (Fed research).'},
+  {s:'fed', t:'fomc', w:3, sign:1, conf:'directional', why:'The Fed Board chairs and dominates the FOMC, setting the agenda for the committee votes.', stat:'Structural control link, not a measured correlation. Source: Federal Reserve Act. Tested over 40 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.0 - too weak to act on (logged as a conflict).'},
+  {s:'fomc', t:'ffr', w:3, sign:1, conf:'directional', why:'The FOMC directly votes the Fed Funds target range up or down eight times a year.', stat:'Definitional link. The FOMC vote IS the rate. Definitional, not measured: the FOMC vote sets the target rate.'},
+  {s:'ffr', t:'yield', w:3, sign:1, conf:'directional', why:'A higher policy rate lifts the whole curve, especially the short end, since all borrowing is priced off the risk-free rate.', stat:'The 2Y tracks the expected policy path, correlation above 0.9 (FRED: FEDFUNDS vs DGS2). Tested over 198 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=1.3 - too weak to act on (logged as a conflict).'},
+  {s:'ffr', t:'credit', w:2, sign:-1, conf:'directional', why:'Higher base rates raise corporate borrowing costs and widen spreads as default risk rises.', stat:'HY spreads widen with hikes, correlation strengthens in tightening cycles (FRED: BAMLH0A0HYM2). Tested over 208 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.2 - too weak to act on (logged as a conflict).'},
+  {s:'fed', t:'cpi', w:1, sign:-1, conf:'directional', why:'The Fed exists to cool inflation. Tighter policy reduces CPI over time.', stat:'Effect runs on a 12 to 18 month lag, so it is not a same-period correlation (Fed research).'},
 
   // ── Sovereign / fiscal ────────────────────────────────────────────────────
-  {s:'tsy', t:'yield', w:2, sign:1, why:'Treasury sets bond supply. Heavier issuance pushes yields up as buyers demand more to absorb it.', stat:'Supply matters at the margin via the term premium (NY Fed ACM model).'},
-  {s:'tsy', t:'dealers', w:2, sign:1, why:'Every new bond flows through the primary dealers who are required to bid.', stat:'Structural link. 25 dealers are mandated auction bidders (NY Fed).'},
+  {s:'tsy', t:'yield', w:2, sign:1, conf:'directional', why:'Treasury sets bond supply. Heavier issuance pushes yields up as buyers demand more to absorb it.', stat:'Supply matters at the margin via the term premium (NY Fed ACM model).'},
+  {s:'tsy', t:'dealers', w:2, sign:1, conf:'directional', why:'Every new bond flows through the primary dealers who are required to bid.', stat:'Structural link. 25 dealers are mandated auction bidders (NY Fed).'},
 
   // ── Commercial banking ────────────────────────────────────────────────────
-  {s:'fed', t:'dealers', w:2, sign:1, why:'The Fed executes QE and QT by buying and selling with the primary dealers.', stat:'Structural link. Dealers are the Fed open-market counterparties (NY Fed).'},
-  {s:'fed', t:'banks', w:1, sign:1, why:'The Fed is lender of last resort through the discount window and emergency facilities.', stat:'Structural backstop. The 2023 BTFP facility stopped the regional-bank run (Federal Reserve).'},
-  {s:'ffr', t:'banks', w:1, sign:0, why:'Higher rates lift what banks earn on loans but also what they must pay on deposits.', stat:'Bank NIM vs FFR is positive early in hikes, negative late as deposit costs catch up. No stable sign.'},
-  {s:'dealers', t:'yield', w:2, sign:-1, why:'Dealer balance-sheet capacity absorbs Treasury supply. When capacity is scarce, yields rise.', stat:'Post-2008 leverage rules (SLR) constrain absorption, lifting yields in stress (BIS).'},
-  {s:'banks', t:'credit', w:2, sign:1, why:'Bank lending standards decide how much credit reaches the economy.', stat:'Tightening loan standards precede credit contraction (Fed Senior Loan Officer Survey).'},
-  {s:'banks', t:'fins', w:3, sign:1, why:'Banks are the core of the financials sector, so bank health drives the sector.', stat:'The KBW Bank Index is bank-dominated. Near 1-for-1 co-movement.'},
+  {s:'fed', t:'dealers', w:2, sign:1, conf:'directional', why:'The Fed executes QE and QT by buying and selling with the primary dealers.', stat:'Structural link. Dealers are the Fed open-market counterparties (NY Fed).'},
+  {s:'fed', t:'banks', w:1, sign:1, conf:'directional', why:'The Fed is lender of last resort through the discount window and emergency facilities.', stat:'Structural backstop. The 2023 BTFP facility stopped the regional-bank run (Federal Reserve).'},
+  {s:'ffr', t:'banks', w:1, sign:0, conf:'unverified', why:'Higher rates lift what banks earn on loans but also what they must pay on deposits.', stat:'Bank NIM vs FFR is positive early in hikes, negative late as deposit costs catch up. No stable sign.'},
+  {s:'dealers', t:'yield', w:2, sign:-1, conf:'directional', why:'Dealer balance-sheet capacity absorbs Treasury supply. When capacity is scarce, yields rise.', stat:'Post-2008 leverage rules (SLR) constrain absorption, lifting yields in stress (BIS).'},
+  {s:'banks', t:'credit', w:2, sign:1, conf:'directional', why:'Bank lending standards decide how much credit reaches the economy.', stat:'Tightening loan standards precede credit contraction (Fed Senior Loan Officer Survey).'},
+  {s:'banks', t:'fins', w:3, sign:1, conf:'directional', why:'Banks are the core of the financials sector, so bank health drives the sector.', stat:'The KBW Bank Index is bank-dominated. Near 1-for-1 co-movement. True by index construction, not a measured correlation: the KBW Bank Index is bank-dominated.'},
 
   // ── Shadow / non-bank ─────────────────────────────────────────────────────
-  {s:'fed', t:'repo', w:2, sign:-1, why:'The Fed standing repo and reverse-repo facilities cap how far funding rates can spike.', stat:'Structural backstop. RRP absorbed over $2.5T of cash in 2022 (FRED: RRPONTSYD).'},
-  {s:'repo', t:'banks', w:2, sign:1, why:'Repo is a core source of short-term funding for banks and dealers.', stat:'A 2019 repo seizure forced Fed intervention to keep banks funded (NY Fed).'},
-  {s:'repo', t:'hf', w:2, sign:1, why:'Cheap repo leverage funds hedge-fund positions like the Treasury basis trade.', stat:'The basis trade is a flagged systemic risk built on repo leverage (BIS, Fed).'},
-  {s:'mmf', t:'repo', w:2, sign:1, why:'Money market funds are the largest cash lenders into the repo market.', stat:'MMFs are the dominant repo cash providers (OFR).'},
-  {s:'mmf', t:'tsy', w:2, sign:1, why:'Money funds are major buyers of short-term Treasury bills.', stat:'MMFs hold a large share of the T-bill market (ICI, Treasury).'},
-  {s:'ffr', t:'mmf', w:2, sign:1, why:'Money-fund yields rise almost immediately when the policy rate rises.', stat:'MMF yields track the Fed Funds Rate near 1-for-1 (ICI, FRED).'},
-  {s:'hf', t:'yield', w:1, sign:0, why:'Leveraged basis trades amplify Treasury moves in whichever direction they unwind.', stat:'Sign is regime-dependent. Deleveraging worsened the March 2020 dislocation (Fed, BIS).'},
-  {s:'gse', t:'mbs', w:3, sign:1, why:'Fannie Mae and Freddie Mac guarantee and issue most agency mortgage bonds.', stat:'GSEs back roughly $7T of agency MBS (FHFA, SIFMA).'},
+  {s:'fed', t:'repo', w:2, sign:-1, conf:'measured', why:'The Fed standing repo and reverse-repo facilities cap how far funding rates can spike.', stat:'Structural backstop. RRP absorbed over $2.5T of cash in 2022 (FRED: RRPONTSYD). Fitted over 40 usable daily changes in the train split: slope=+2.23e-06, |t|=2.6.'},
+  {s:'repo', t:'banks', w:2, sign:1, conf:'directional', why:'Repo is a core source of short-term funding for banks and dealers.', stat:'A 2019 repo seizure forced Fed intervention to keep banks funded (NY Fed).'},
+  {s:'repo', t:'hf', w:2, sign:1, conf:'directional', why:'Cheap repo leverage funds hedge-fund positions like the Treasury basis trade.', stat:'The basis trade is a flagged systemic risk built on repo leverage (BIS, Fed).'},
+  {s:'mmf', t:'repo', w:2, sign:1, conf:'directional', why:'Money market funds are the largest cash lenders into the repo market.', stat:'MMFs are the dominant repo cash providers (OFR).'},
+  {s:'mmf', t:'tsy', w:2, sign:1, conf:'directional', why:'Money funds are major buyers of short-term Treasury bills.', stat:'MMFs hold a large share of the T-bill market (ICI, Treasury).'},
+  {s:'ffr', t:'mmf', w:2, sign:1, conf:'directional', why:'Money-fund yields rise almost immediately when the policy rate rises.', stat:'MMF yields track the Fed Funds Rate near 1-for-1 (ICI, FRED).'},
+  {s:'hf', t:'yield', w:1, sign:0, conf:'directional', why:'Leveraged basis trades amplify Treasury moves in whichever direction they unwind.', stat:'Sign is regime-dependent. Deleveraging worsened the March 2020 dislocation (Fed, BIS).'},
+  {s:'gse', t:'mbs', w:3, sign:1, conf:'directional', why:'Fannie Mae and Freddie Mac guarantee and issue most agency mortgage bonds.', stat:'GSEs back roughly $7T of agency MBS (FHFA, SIFMA).'},
 
   // ── Regulators ────────────────────────────────────────────────────────────
-  {s:'fdic', t:'banks', w:2, sign:1, why:'Deposit insurance stops runs by promising depositors they will be repaid.', stat:'Structural link. $250k insurance plus 2023 backstops halted the SVB run (FDIC).'},
-  {s:'sec', t:'equit', w:2, sign:1, why:'Mandatory disclosure and anti-fraud enforcement underpin trust in the stock market.', stat:'Structural link. Disclosure supports equity-market integrity (SEC).'},
-  {s:'sec', t:'credit', w:1, sign:1, why:'The same disclosure rules make the corporate-bond market transparent.', stat:'Structural link (SEC).'},
-  {s:'cftc', t:'oil', w:1, sign:1, why:'The CFTC oversees the futures exchanges where oil prices are actually set.', stat:'Structural link. Oil is discovered in CFTC-regulated futures (CME).'},
+  {s:'fdic', t:'banks', w:2, sign:1, conf:'directional', why:'Deposit insurance stops runs by promising depositors they will be repaid.', stat:'Structural link. $250k insurance plus 2023 backstops halted the SVB run (FDIC).'},
+  {s:'sec', t:'equit', w:2, sign:1, conf:'directional', why:'Mandatory disclosure and anti-fraud enforcement underpin trust in the stock market.', stat:'Structural link. Disclosure supports equity-market integrity (SEC).'},
+  {s:'sec', t:'credit', w:1, sign:1, conf:'directional', why:'The same disclosure rules make the corporate-bond market transparent.', stat:'Structural link (SEC).'},
+  {s:'cftc', t:'oil', w:1, sign:1, conf:'directional', why:'The CFTC oversees the futures exchanges where oil prices are actually set.', stat:'Structural link. Oil is discovered in CFTC-regulated futures (CME).'},
 
   // ── Capital markets ───────────────────────────────────────────────────────
-  {s:'yield', t:'credit', w:2, sign:-1, why:'Rising Treasury yields raise the baseline that corporate bonds are priced against.', stat:'Corporate yields = Treasury yield + spread. Structural pricing baseline.'},
-  {s:'yield', t:'equit', w:2, sign:-1, why:'Higher yields raise the discount rate in stock valuations, compressing multiples.', stat:'Regime-dependent. Strongly negative in the 2022 rate shock, often positive in growth booms. No stable coefficient.'},
-  {s:'yield', t:'fins', w:2, sign:1, why:'A steeper curve widens bank net interest margins (borrow short, lend long).', stat:'Bank stocks track curve steepness loosely (FRED: T10Y2Y vs $BKX).'},
-  {s:'yield', t:'mbs', w:2, sign:-1, why:'Higher long-term yields raise mortgage rates and cut the value of mortgage bonds.', stat:'Mortgage rates track the 10Y plus a spread (SIFMA, FRED).'},
-  {s:'credit', t:'equit', w:1, sign:1, why:'Tight credit spreads signal confidence and easy corporate funding, which supports stocks.', stat:'HY spreads and the S&P move inversely, roughly -0.7. Tighter spreads lift equities (FRED).'},
+  {s:'yield', t:'credit', w:2, sign:-1, conf:'measured', why:'Rising Treasury yields raise the baseline that corporate bonds are priced against.', stat:'Corporate yields = Treasury yield + spread. Structural pricing baseline. Fitted over 198 usable daily changes in the train split: slope=-0.3013, |t|=2.8.'},
+  {s:'yield', t:'equit', w:2, sign:-1, conf:'measured', why:'Higher yields raise the discount rate in stock valuations, compressing multiples.', stat:'Regime-dependent. Strongly negative in the 2022 rate shock, often positive in growth booms. No stable coefficient. Fitted over 197 usable daily changes in the train split: slope=-0.02869, |t|=2.0.'},
+  {s:'yield', t:'fins', w:2, sign:1, conf:'directional', why:'A steeper curve widens bank net interest margins (borrow short, lend long).', stat:'Bank stocks track curve steepness loosely (FRED: T10Y2Y vs $BKX). Tested over 197 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.4 - too weak to act on (logged as a conflict).'},
+  {s:'yield', t:'mbs', w:2, sign:-1, conf:'directional', why:'Higher long-term yields raise mortgage rates and cut the value of mortgage bonds.', stat:'Mortgage rates track the 10Y plus a spread (SIFMA, FRED).'},
+  {s:'credit', t:'equit', w:1, sign:-1, conf:'measured', why:'Tight credit spreads signal confidence and easy corporate funding, which supports stocks.', stat:'HY spreads and the S&P move inversely, roughly -0.7. Tighter spreads lift equities (FRED). Fitted over 199 usable daily changes in the train split: slope=-0.08569, |t|=12.5. The sign shown is the fitted one; the earlier hand sign was +1.'},
 
   // ── Equity sectors ────────────────────────────────────────────────────────
-  {s:'equit', t:'tech', w:2, sign:1, why:'Tech is a high-beta slice of the broad market and amplifies its direction.', stat:'Nasdaq-100 beta to the S&P is roughly 1.2 to 1.3.'},
-  {s:'equit', t:'fins', w:2, sign:1, why:'Financials move with the broad market plus their own rate sensitivity.', stat:'Financials beta to the S&P is roughly 1.1.'},
-  {s:'equit', t:'defn', w:2, sign:1, why:'Defensives rise in rallies but with lower beta, lagging up and cushioning down.', stat:'Defensive beta is roughly 0.4 to 0.6 vs the S&P.'},
-  {s:'ffr', t:'tech', w:2, sign:-1, why:'Tech earnings sit far in the future, so a higher discount rate hits them hardest.', stat:'2022: the Nasdaq fell about 33% as the 2Y rose roughly 370bps.'},
+  {s:'equit', t:'tech', w:2, sign:1, conf:'measured', why:'Tech is a high-beta slice of the broad market and amplifies its direction.', stat:'Nasdaq-100 beta to the S&P is roughly 1.2 to 1.3. Fitted over 199 usable daily changes in the train split: slope=+0.000231, |t|=28.3.'},
+  {s:'equit', t:'fins', w:2, sign:1, conf:'measured', why:'Financials move with the broad market plus their own rate sensitivity.', stat:'Financials beta to the S&P is roughly 1.1. Fitted over 199 usable daily changes in the train split: slope=+0.0001131, |t|=11.9.'},
+  {s:'equit', t:'defn', w:2, sign:1, conf:'directional', why:'Defensives rise in rallies but with lower beta, lagging up and cushioning down.', stat:'Defensive beta is roughly 0.4 to 0.6 vs the S&P. Tested over 199 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.8). The mechanism is sourced; the magnitude is not measured here.'},
+  {s:'ffr', t:'tech', w:2, sign:-1, conf:'directional', why:'Tech earnings sit far in the future, so a higher discount rate hits them hardest.', stat:'2022: the Nasdaq fell about 33% as the 2Y rose roughly 370bps. Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.3 - too weak to act on (logged as a conflict).'},
 
   // ── Sentiment ─────────────────────────────────────────────────────────────
-  {s:'vix', t:'equit', w:2, sign:-1, why:'The fear gauge rising means investors are selling stocks.', stat:'VIX and S&P daily returns correlate roughly -0.74 (CBOE).'},
-  {s:'vix', t:'defn', w:1, sign:1, why:'When fear rises, money rotates into defensive shelters like utilities and staples.', stat:'Relative defensive outperformance in risk-off episodes (sector rotation research).'},
+  {s:'vix', t:'equit', w:2, sign:-1, conf:'measured', why:'The fear gauge rising means investors are selling stocks.', stat:'VIX and S&P daily returns correlate roughly -0.74 (CBOE). Fitted over 199 usable daily changes in the train split: slope=-0.004172, |t|=22.2.'},
+  {s:'vix', t:'defn', w:1, sign:-1, conf:'measured', why:'When fear rises, money rotates toward defensive sectors like utilities and staples - so they fall LESS than the market, but in absolute terms they still fall.', stat:'Relative defensive outperformance in risk-off episodes, not absolute gains (sector rotation research). Fitted over 199 usable daily changes in the train split: slope=-0.0007325, |t|=2.0. The sign shown is the fitted one; the earlier hand sign was +1.'},
 
   // ── Economic data → policy ────────────────────────────────────────────────
-  {s:'cpi', t:'fomc', w:2, sign:1, why:'High inflation pushes the FOMC toward a hawkish, rate-hiking stance.', stat:'The 2021 to 2023 CPI overshoot drove 525bps of hikes (Federal Reserve).'},
-  {s:'nfp', t:'fomc', w:2, sign:1, why:'A hot jobs report signals an overheating economy and pushes the FOMC to tighten.', stat:'Payroll surprises move hike odds via the dual mandate (BLS, CME FedWatch).'},
+  {s:'cpi', t:'fomc', w:2, sign:1, conf:'directional', why:'High inflation pushes the FOMC toward a hawkish, rate-hiking stance.', stat:'The 2021 to 2023 CPI overshoot drove 525bps of hikes (Federal Reserve). Not fittable at daily frequency: only 8 usable daily changes (the series is monthly).'},
+  {s:'nfp', t:'fomc', w:2, sign:1, conf:'directional', why:'A hot jobs report signals an overheating economy and pushes the FOMC to tighten.', stat:'Payroll surprises move hike odds via the dual mandate (BLS, CME FedWatch). Not fittable at daily frequency: only 9 usable daily changes (the series is monthly).'},
 
   // ── FX / dollar ───────────────────────────────────────────────────────────
-  {s:'ffr', t:'usd', w:2, sign:1, why:'Higher US rates attract global capital seeking yield, raising demand for dollars.', stat:'DXY rose about 19% in 2022 alongside the hiking cycle (ICE).'},
-  {s:'usd', t:'dxy_fx', w:2, sign:-1, why:'A strong dollar weakens EM currencies and makes their dollar debt costlier.', stat:'A 10% USD rise historically cuts EM GDP about 1.5% (IMF WP/19/25).'},
-  {s:'usd', t:'gold', w:2, sign:-1, why:'Gold is priced in dollars and pays no yield, so a stronger dollar makes it less attractive.', stat:'Long-run USD/gold correlation is roughly -0.4 to -0.6 (WGC).'},
-  {s:'usd', t:'oil', w:1, sign:-1, aud:false, note:'Approximate correlation cited without a checked time window.', why:'Crude is priced in dollars, so a stronger dollar makes it pricier for foreign buyers.', stat:'Weaker inverse link, roughly -0.3, window unverified (EIA).'},
-  {s:'usd', t:'equit', w:1, sign:-1, why:'Roughly 40% of S&P revenue is foreign, so a strong dollar shrinks it once converted back.', stat:'A recurring EPS headwind in earnings seasons (FactSet).'},
-  {s:'dxy_fx', t:'credit', w:1, sign:1, aud:false, note:'Sign derived from mechanism reasoning, not verified against measured spread data.', why:'Stronger EM currencies ease dollar-debt burdens and global risk appetite, which supports credit conditions.', stat:'Spillover concentrated in risk-off episodes. Unverified sign.'},
+  {s:'ffr', t:'usd', w:2, sign:1, conf:'directional', why:'Higher US rates attract global capital seeking yield, raising demand for dollars.', stat:'DXY rose about 19% in 2022 alongside the hiking cycle (ICE). Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.6 - too weak to act on (logged as a conflict).'},
+  {s:'usd', t:'dxy_fx', w:2, sign:-1, conf:'directional', why:'A strong dollar weakens EM currencies and makes their dollar debt costlier.', stat:'A 10% USD rise historically cuts EM GDP about 1.5% (IMF WP/19/25).'},
+  {s:'usd', t:'gold', w:2, sign:-1, conf:'measured', why:'Gold is priced in dollars and pays no yield, so a stronger dollar makes it less attractive.', stat:'Long-run USD/gold correlation is roughly -0.4 to -0.6 (WGC). Fitted over 199 usable daily changes in the train split: slope=-0.01465, |t|=4.4.'},
+  {s:'usd', t:'oil', w:1, sign:1, conf:'measured', note:'The sign here is the fitted one and disagrees with the pricing mechanism in `why`. Over this window the dollar and crude rose together.', why:'Crude is priced in dollars, so a stronger dollar makes it pricier for foreign buyers - which argues for an inverse link.', stat:'Long-run studies find a weak inverse link, roughly -0.3 (EIA). Fitted over 198 usable daily changes in the train split: slope=+0.02732, |t|=4.7. The sign shown is the fitted one; the earlier hand sign was -1. The textbook dollar-pricing channel is negative, so this window reads as a demand-led regime rather than a refutation.'},
+  {s:'usd', t:'equit', w:1, sign:-1, conf:'measured', why:'Roughly 40% of S&P revenue is foreign, so a strong dollar shrinks it once converted back.', stat:'A recurring EPS headwind in earnings seasons (FactSet). Fitted over 199 usable daily changes in the train split: slope=-0.004636, |t|=3.2.'},
+  {s:'dxy_fx', t:'credit', w:1, sign:1, conf:'directional', note:'Sign derived from mechanism reasoning. Tested against measured spread data and no daily-frequency relationship was found, so the magnitude stays unclaimed.', why:'Stronger EM currencies ease dollar-debt burdens and global risk appetite, which supports credit conditions.', stat:'Spillover concentrated in risk-off episodes. Tested over 199 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.4). The mechanism is sourced; the magnitude is not measured here.'},
 
   // ── Commodities ───────────────────────────────────────────────────────────
-  {s:'oil', t:'cpi', w:3, sign:1, why:'Oil is the single largest non-housing input into inflation.', stat:'A $10/bbl rise adds roughly 0.3 to 0.4% to headline CPI (IMF).'},
-  {s:'vix', t:'gold', w:1, sign:1, why:'Spiking fear drives safe-haven demand into gold.', stat:'Regime-dependent co-movement, strongest in risk-off episodes (WGC).'},
-  {s:'oil', t:'equit', w:1, sign:-1, aud:false, note:'Oil-equity correlation flips sign across regimes. Demand-led oil rallies often coincide with rising stocks.', why:'High oil is a tax on consumers and raises input costs, squeezing margins.', stat:'Effect concentrated at high price levels. Sign is regime-dependent and unverified (energy shock research).'},
-  {s:'gold', t:'tsy', w:1, sign:1, aud:false, note:'Causal direction from gold to Treasuries is asserted, not measured. Both may simply respond to the same fear shock.', why:'Gold and Treasuries are both flight-to-safety assets bid together in stress.', stat:'Weak co-movement overall, stronger in risk-off. Unverified causal direction.'},
+  {s:'oil', t:'cpi', w:3, sign:1, conf:'directional', why:'Oil is the single largest non-housing input into inflation.', stat:'A $10/bbl rise adds roughly 0.3 to 0.4% to headline CPI (IMF). Not fittable at daily frequency: only 3 usable daily changes (the series is monthly).'},
+  {s:'vix', t:'gold', w:1, sign:1, conf:'directional', why:'Spiking fear drives safe-haven demand into gold.', stat:'Regime-dependent co-movement, strongest in risk-off episodes (WGC). Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=1.2 - too weak to act on (logged as a conflict).'},
+  {s:'oil', t:'equit', w:1, sign:-1, conf:'measured', note:'Oil-equity correlation flips sign across regimes. Demand-led oil rallies often coincide with rising stocks.', why:'High oil is a tax on consumers and raises input costs, squeezing margins.', stat:'Effect concentrated at high price levels. Sign is regime-dependent (energy shock research), but the inverse sign shown here held over the fitted window. Fitted over 198 usable daily changes in the train split: slope=-0.0009408, |t|=5.1.'},
+  {s:'gold', t:'tsy', w:1, sign:1, conf:'directional', note:'Causal direction from gold to Treasuries is asserted, not measured. Both may simply respond to the same fear shock.', why:'Gold and Treasuries are both flight-to-safety assets bid together in stress.', stat:'Weak co-movement overall, stronger in risk-off. Unverified causal direction. Tested over 197 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=1.7 - too weak to act on (logged as a conflict).'},
 
   // ── Geopolitics ───────────────────────────────────────────────────────────
-  {s:'russia', t:'oil', w:3, sign:1, why:'Russia supplies about 12% of global oil, so sanctions or cuts remove barrels and spike prices.', stat:'The 2022 invasion pushed Brent above $120/bbl (IEA, EIA).'},
-  {s:'russia', t:'gold', w:1, sign:1, why:'Conflict drives safe-haven demand for gold.', stat:'Geopolitical premium in gold during 2022 (WGC).'},
-  {s:'china', t:'equit', w:2, sign:0, why:'China strength cuts both ways. Growth lifts multinational revenue, while tension and tariffs squeeze margins.', stat:'No stable sign. Tariff escalation pressured S&P multinationals in 2018 to 2019, while China demand supported earnings in expansions (PIIE, FactSet).'},
-  {s:'china', t:'tsy', w:2, sign:-1, aud:false, note:'Holdings decline is documented, but the price impact of China selling on Treasuries is contested in the literature.', why:'China holds about $780B of Treasuries. If it sells, Treasury prices fall and yields rise.', stat:'China holdings fell from a $1.3T peak to ~$780B (US Treasury TIC data). Price impact unverified.'},
-  {s:'china', t:'oil', w:2, sign:1, why:'China is the largest crude importer, so stronger growth lifts global oil demand.', stat:'China drives a large share of marginal oil demand (EIA, IEA).'},
-  {s:'geo', t:'oil', w:2, sign:1, why:'Trade and shipping-route disruptions constrain oil supply and lift prices.', stat:'Route disruptions add a risk premium to crude (IEA).'},
-  {s:'geo', t:'cpi', w:2, sign:1, why:'Tariffs and supply-chain breaks raise import costs, feeding directly into inflation.', stat:'Post-COVID disruptions added 1.5 to 2% to global CPI, 2021 to 2022 (IMF, PIIE).'},
-  {s:'geo', t:'credit', w:1, sign:-1, aud:false, note:'No named dataset behind the uncertainty-premium claim.', why:'Trade-policy uncertainty makes lenders cautious and widens spreads.', stat:'Uncertainty premium in spreads during trade escalations. No sourced measurement.'},
-  {s:'russia', t:'geo', w:2, sign:1, why:'Russia sanctions rewired trade rules and energy flows, intensifying overall disruption.', stat:'Structural regime shift in global trade (WTO, IEA).'},
-  {s:'china', t:'geo', w:2, sign:1, why:'US-China policy effectively sets the global trade regime, so escalation raises systemic tension.', stat:'Structural driver of the trade regime (WTO, PIIE).'},
+  {s:'russia', t:'oil', w:3, sign:1, conf:'directional', why:'Russia supplies about 12% of global oil, so sanctions or cuts remove barrels and spike prices.', stat:'The 2022 invasion pushed Brent above $120/bbl (IEA, EIA).'},
+  {s:'russia', t:'gold', w:1, sign:1, conf:'directional', why:'Conflict drives safe-haven demand for gold.', stat:'Geopolitical premium in gold during 2022 (WGC).'},
+  {s:'china', t:'equit', w:2, sign:0, conf:'directional', why:'China strength cuts both ways. Growth lifts multinational revenue, while tension and tariffs squeeze margins.', stat:'No stable sign. Tariff escalation pressured S&P multinationals in 2018 to 2019, while China demand supported earnings in expansions (PIIE, FactSet).'},
+  {s:'china', t:'tsy', w:2, sign:-1, conf:'unverified', aud:false, note:'Holdings decline is documented, but the price impact of China selling on Treasuries is contested in the literature.', why:'China holds about $780B of Treasuries. If it sells, Treasury prices fall and yields rise.', stat:'China holdings fell from a $1.3T peak to ~$780B (US Treasury TIC data). Price impact unverified. No free daily series for the price impact: TIC holdings are monthly.'},
+  {s:'china', t:'oil', w:2, sign:1, conf:'directional', why:'China is the largest crude importer, so stronger growth lifts global oil demand.', stat:'China drives a large share of marginal oil demand (EIA, IEA).'},
+  {s:'geo', t:'oil', w:2, sign:1, conf:'directional', why:'Trade and shipping-route disruptions constrain oil supply and lift prices.', stat:'Route disruptions add a risk premium to crude (IEA).'},
+  {s:'geo', t:'cpi', w:2, sign:1, conf:'directional', why:'Tariffs and supply-chain breaks raise import costs, feeding directly into inflation.', stat:'Post-COVID disruptions added 1.5 to 2% to global CPI, 2021 to 2022 (IMF, PIIE).'},
+  {s:'geo', t:'credit', w:1, sign:-1, conf:'unverified', aud:false, note:'No named dataset behind the uncertainty-premium claim.', why:'Trade-policy uncertainty makes lenders cautious and widens spreads.', stat:'Uncertainty premium in spreads during trade escalations. No sourced measurement. No free geopolitical-risk series to measure the spread premium against.'},
+  {s:'russia', t:'geo', w:2, sign:1, conf:'directional', why:'Russia sanctions rewired trade rules and energy flows, intensifying overall disruption.', stat:'Structural regime shift in global trade (WTO, IEA).'},
+  {s:'china', t:'geo', w:2, sign:1, conf:'directional', why:'US-China policy effectively sets the global trade regime, so escalation raises systemic tension.', stat:'Structural driver of the trade regime (WTO, PIIE).'},
 
   // ── Money & deposits (Mk13) ───────────────────────────────────────────────
   {s:'credit', t:'deposits', w:2, sign:1, conf:'directional', why:'Bank lending creates deposits: a new loan credits the borrower\'s account, so credit expansion is literally money creation.', stat:'Endogenous money view. Source: Bank of England, Money creation in the modern economy (2014).'},
   {s:'deposits', t:'banks', w:3, sign:1, conf:'directional', why:'Deposits are banks\' cheapest and largest funding source; a stable deposit base is what lets banks lend and hold assets.', stat:'Deposits fund the bulk of US bank balance sheets. Source: FDIC.'},
-  {s:'deposits', t:'m2', w:3, sign:1, conf:'measured', why:'Checkable and savings deposits are the largest component of M2, so deposit growth mechanically expands the money supply.', stat:'Deposits are the dominant M2 component. Source: FRED M2SL.'},
+  {s:'deposits', t:'m2', w:3, sign:1, conf:'directional', why:'Checkable and savings deposits are the largest component of M2, so deposit growth mechanically expands the money supply.', stat:'Deposits are the dominant M2 component. Source: FRED M2SL.'},
   {s:'fdic', t:'deposits', w:2, sign:1, conf:'directional', why:'FDIC insurance to $250k makes deposits money-good, preventing runs and keeping the deposit base stable.', stat:'Insures roughly $10T of deposits via the DIF. Source: FDIC.'},
   {s:'ffr', t:'deposits', w:2, sign:-1, conf:'directional', why:'When policy rates rise above sticky deposit rates, cash flows out of deposits into higher-yielding money funds and T-bills (deposit disintermediation).', stat:'The 2022-23 cycle drove record flows from deposits to money funds. Source: Fed H.8, ICI.'},
-  {s:'ffr', t:'m2', w:2, sign:-1, conf:'directional', why:'Tighter policy slows credit and drains liquidity, so faster rate hikes coincide with slower or negative broad-money growth.', stat:'M2 contracted year-on-year in 2023 during the hiking cycle. Source: FRED M2SL.'},
-  {s:'m2', t:'cpi', w:2, sign:1, conf:'directional', why:'Broad-money growth well above output tends to feed inflation with a long, variable lag (loose quantity-theory channel).', stat:'The 2020-22 M2 surge preceded the inflation spike; the link is loose. Source: FRED M2SL, CPIAUCSL.'},
-  {s:'m2', t:'gold', w:1, sign:1, conf:'directional', why:'Rapid money-supply growth stokes debasement and inflation fears, a core part of the bull case for gold as a monetary hedge.', stat:'Directional; magnitude unquantified. Source: WGC.'},
+  {s:'ffr', t:'m2', w:2, sign:-1, conf:'directional', why:'Tighter policy slows credit and drains liquidity, so faster rate hikes coincide with slower or negative broad-money growth.', stat:'M2 contracted year-on-year in 2023 during the hiking cycle. Source: FRED M2SL. Not fittable at daily frequency: only 9 usable daily changes (the series is monthly).'},
+  {s:'m2', t:'cpi', w:2, sign:1, conf:'directional', why:'Broad-money growth well above output tends to feed inflation with a long, variable lag (loose quantity-theory channel).', stat:'The 2020-22 M2 surge preceded the inflation spike; the link is loose. Source: FRED M2SL, CPIAUCSL. Not fittable at daily frequency: only 9 usable daily changes (the series is monthly).'},
+  {s:'m2', t:'gold', w:1, sign:1, conf:'directional', why:'Rapid money-supply growth stokes debasement and inflation fears, a core part of the bull case for gold as a monetary hedge.', stat:'Directional; magnitude unquantified. Source: WGC. Not fittable at daily frequency: only 4 usable daily changes (the series is monthly).'},
 
   // ── Mortgage rates (Mk13) ─────────────────────────────────────────────────
-  {s:'yield', t:'mortgage', w:3, sign:1, conf:'measured', why:'The 30-year mortgage is priced off the 10-year Treasury plus a spread, so long-end yields, not the fed funds rate, set mortgage costs.', stat:'Mortgage rate tracks the 10Y with a 1.5 to 3% spread. Source: FRED MORTGAGE30US vs DGS10.'},
+  {s:'yield', t:'mortgage', w:3, sign:1, conf:'measured', why:'The 30-year mortgage is priced off the 10-year Treasury plus a spread, so long-end yields, not the fed funds rate, set mortgage costs.', stat:'Mortgage rate tracks the 10Y with a 1.5 to 3% spread. Source: FRED MORTGAGE30US vs DGS10. Fitted over 40 usable daily changes in the train split: slope=+0.2892, |t|=2.4.'},
   {s:'mbs', t:'mortgage', w:2, sign:1, conf:'directional', why:'Lenders price loans off where they can sell the resulting MBS, so wider MBS spreads push mortgage rates above Treasuries.', stat:'The primary-secondary spread widens with MBS stress. Source: Freddie Mac PMMS.'},
-  {s:'ffr', t:'mortgage', w:1, sign:1, conf:'directional', why:'Policy rates reach mortgages only indirectly, via the long end and MBS spreads: a weak, lagged link, not a direct peg.', stat:'Mortgage rates can move opposite the fed funds rate. Source: FRED.'},
-  {s:'mortgage', t:'credit', w:2, sign:-1, conf:'directional', why:'Housing is the largest household credit market, so higher mortgage rates freeze sales and refinancing and tighten overall credit conditions.', stat:'Mortgage debt is the biggest US household liability. Source: NY Fed Household Debt report.'},
+  {s:'ffr', t:'mortgage', w:1, sign:1, conf:'directional', why:'Policy rates reach mortgages only indirectly, via the long end and MBS spreads: a weak, lagged link, not a direct peg.', stat:'Mortgage rates can move opposite the fed funds rate. Source: FRED. Tested over 40 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.5). The mechanism is sourced; the magnitude is not measured here.'},
+  {s:'mortgage', t:'credit', w:2, sign:1, conf:'measured', why:'Housing is the largest household credit market, so higher mortgage rates freeze sales and refinancing and tighten overall credit conditions.', stat:'Mortgage debt is the biggest US household liability. Source: NY Fed Household Debt report. Fitted over 40 usable daily changes in the train split: slope=+0.5232, |t|=2.0. The sign shown is the fitted one; the earlier hand sign was -1.'},
 
   // ── Private credit (Mk13) ─────────────────────────────────────────────────
   {s:'privcredit', t:'credit', w:2, sign:1, conf:'directional', why:'Private credit now rivals bank and bond lending as a source of corporate credit, so its expansion loosens overall financial conditions.', stat:'Roughly $1.6 to 1.7T AUM. Source: IMF GFSR.'},
   {s:'ffr', t:'privcredit', w:2, sign:0, conf:'directional', why:'Floating-rate loans mean higher policy rates lift fund yields but also raise borrower default risk: a two-sided effect.', stat:'Conditional sign. Source: IMF GFSR 2024.'},
   {s:'banks', t:'privcredit', w:1, sign:-1, conf:'directional', why:'As banks retrench from middle-market lending after Dodd-Frank, private credit expands to fill the gap, so bank pullback grows the sector.', stat:'The sector grew as banks\' leveraged-lending share fell. Source: IMF GFSR.'},
-  {s:'hf', t:'privcredit', w:1, sign:1, conf:'directional', why:'Private credit sits inside the same asset-management complex; funds and their investors channel capital into direct lending in search of yield.', stat:'Directional; magnitude unquantified. Source: industry estimates.'},
+  {s:'hf', t:'privcredit', w:1, sign:1, conf:'unverified', why:'Private credit sits inside the same asset-management complex; funds and their investors channel capital into direct lending in search of yield.', stat:'Directional; magnitude unquantified. Source: industry estimates. "Industry estimates" names no dataset, so the magnitude is unsourced.'},
 
   // ── Breadth links (Mk15) ──────────────────────────────────────────────────
-  {s:'tsy', t:'tbills', w:3, sign:1, conf:'measured', why:'The Treasury issues bills to fund the deficit and manage cash; issuance sets bill supply.', stat:'~$6T bills outstanding. Source: US Treasury, SIFMA.'},
+  {s:'tsy', t:'tbills', w:3, sign:1, conf:'measured', why:'The Treasury issues bills to fund the deficit and manage cash; issuance sets bill supply.', stat:'~$6T bills outstanding. Source: US Treasury, SIFMA. Fitted over 198 usable daily changes in the train split: slope=+0.1431, |t|=4.6.'},
   {s:'tbills', t:'mmf', w:3, sign:1, conf:'directional', why:'Money-market funds hold bills as their core asset, so bill supply drives fund allocation and yields.', stat:'Bills are the largest MMF holding. Source: ICI, OFR.'},
-  {s:'ffr', t:'tbills', w:3, sign:1, conf:'measured', why:'Bill yields track the Fed funds rate almost one-for-one at the front end.', stat:'T-bill yields ~= policy rate. Source: FRED DTB3 vs FEDFUNDS.'},
-  {s:'vix', t:'options', w:3, sign:1, conf:'measured', why:'The VIX is derived from S&P 500 option prices, so option-implied vol IS the fear gauge.', stat:'VIX = 30-day implied vol from SPX options. Source: Cboe.'},
+  {s:'ffr', t:'tbills', w:3, sign:1, conf:'directional', why:'Bill yields track the Fed funds rate almost one-for-one at the front end.', stat:'T-bill yields ~= policy rate. Source: FRED DTB3 vs FEDFUNDS. Tested over 198 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.4). The mechanism is sourced; the magnitude is not measured here.'},
+  {s:'vix', t:'options', w:3, sign:1, conf:'directional', why:'The VIX is derived from S&P 500 option prices, so option-implied vol IS the fear gauge.', stat:'VIX = 30-day implied vol from SPX options. Source: Cboe.'},
   {s:'options', t:'equit', w:2, sign:0, conf:'directional', why:'Dealer option hedging (gamma) can amplify or dampen index moves depending on positioning.', stat:'Conditional sign. Source: OCC, dealer-gamma research.'},
   {s:'equit', t:'etf', w:3, sign:1, conf:'directional', why:'ETFs hold the equity market; index levels drive ETF NAVs via creation/redemption.', stat:'Passive holds a majority of equity fund assets. Source: ICI.'},
   {s:'etf', t:'equit', w:2, sign:1, conf:'directional', why:'Concentrated passive flows move whole indices, feeding back into prices.', stat:'Directional; flow-driven. Source: Fed FSR.'},
-  {s:'oil', t:'energy', w:3, sign:1, conf:'measured', why:'Energy company earnings and stocks move with the oil price.', stat:'Energy equities strongly correlated with WTI. Source: S&P DJI, EIA.'},
-  {s:'energy', t:'equit', w:1, sign:1, conf:'directional', why:'Energy is an S&P sector, so its swings show up in the index during oil shocks.', stat:'~4% index weight, larger earnings swing. Source: S&P DJI.'},
+  {s:'oil', t:'energy', w:3, sign:1, conf:'measured', why:'Energy company earnings and stocks move with the oil price.', stat:'Energy equities strongly correlated with WTI. Source: S&P DJI, EIA. Fitted over 198 usable daily changes in the train split: slope=+0.002217, |t|=8.1.'},
+  {s:'energy', t:'equit', w:1, sign:1, conf:'directional', why:'Energy is an S&P sector, so its swings show up in the index during oil shocks.', stat:'~4% index weight, larger earnings swing. Source: S&P DJI. Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=1.4 - too weak to act on (logged as a conflict).'},
   {s:'mortgage', t:'house', w:2, sign:-1, conf:'directional', why:'Higher mortgage rates cut household affordability and housing wealth.', stat:'Mortgage debt is the largest household liability. Source: NY Fed.'},
   {s:'credit', t:'house', w:2, sign:1, conf:'directional', why:'Looser credit conditions expand consumer borrowing capacity and spending.', stat:'Consumer credit tracks financial conditions. Source: Fed G.19.'},
   {s:'house', t:'equit', w:1, sign:1, conf:'directional', why:'Consumption is ~two-thirds of GDP, so household demand supports corporate earnings and equities.', stat:'PCE ~68% of GDP. Source: BEA.'},
@@ -3356,6 +3356,18 @@ function validateProvenance() {
     Object.entries(row).forEach(([t, cell]) => demote('ELASTICITY.' + d + '.' + t, cell)));
   Object.entries(NODE_ELASTICITY).forEach(([d, row]) =>
     Object.entries(row).forEach(([t, cell]) => demote('NODE_ELASTICITY.' + d + '.' + t, cell)));
+
+  // Links were never run through this check, which is how 48 of the 93 runtime
+  // links ended up with no `conf` at all — the audit log filed them as guesswork
+  // by default rather than by finding. A link keeps its source in `stat`, not
+  // `src`, so it needs its own pass rather than reusing `demote` above.
+  LINKS.forEach(l => {
+    if (l.conf && l.conf !== CONF.UNVERIFIED && !l.stat) {
+      PROV_DEMOTIONS.push('LINKS.' + l.s + '→' + l.t +
+                          ' claimed "' + l.conf + '" with no source');
+      l.conf = CONF.UNVERIFIED;
+    }
+  });
 
   // Cross-check NODE_ELASTICITY signs against the LINKS graph. NODE_ELASTICITY is
   // keyed by display label, LINKS by node id, so translate through NODE_MAP.
