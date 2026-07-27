@@ -4,11 +4,15 @@
 
 `bullion_mkultra.html` (39 nodes / 86 links) reports its own trustworthiness in the Audit Log
 via `provCoverage()` (`bullion-live-map/bullion_mkultra.html:3389`), which tallies
-`bump(l.conf || CONF.UNVERIFIED)` over `LINKS`. **No link in the file carries a `conf:` field**,
-so all 86 fall into the red "unverified — set by feel; the sign may be wrong" segment. Every one
-of those links *does* carry a `stat:` citation string. The map is therefore defaming its own
-evidence base: this is a metadata gap, not an evidence gap, and the coverage bar is currently the
-most misleading number on the page.
+`bump(l.conf || CONF.UNVERIFIED)` over `LINKS`. **57 of the 86 links carry no `conf:` field**,
+so two thirds of the graph falls into the red "unverified — set by feel; the sign may be wrong"
+segment. Every one of those links *does* carry a `stat:` citation string. The map is therefore
+defaming its own evidence base: this is a metadata gap, not an evidence gap, and the coverage bar
+is currently the most misleading number on the page.
+
+The remaining 29 links already carry a tier (7 `measured`, 22 `directional`), all on the Mk15/Mk17
+nodes — so the convention exists and this pass extends it. Those values are quoted string literals
+(`conf:'measured'`), not `CONF.*` constants; match that form.
 
 Meanwhile `data.json` now carries **23 fields over 366 days** (Mk17), and 22 of 39 nodes map to a
 live field — which means **39 of the 86 links have both endpoints backed by real data** and can be
@@ -60,10 +64,12 @@ both resolve to a `data.json` field (39 pairs; the node→field map is `NODE_LIV
 `dxy_fx`, `tsy`). Emit a new **LINKS** section in `calibration_report.txt` with slope, t, n, and
 the MEASURED/insignificant verdict per pair.
 
-**2. Tier all 86 links in `bullion_mkultra.html`.**
-Write `conf:` onto every entry in the `LINKS` array (`:1180`–`:1235` region) per the tier model,
-using the report from item 1. MEASURED links also get the fitted slope and t appended to their
-`stat:` clause. Nothing gets a magnitude it did not earn (Mk15.2 / Mk17 precedent).
+**2. Tier the 57 untiered links in `bullion_mkultra.html`.**
+Write `conf:'…'` onto the 57 `LINKS` entries that lack one, per the tier model and the report from
+item 1. Also **re-check the 29 that already carry a tier** against the fit — a link asserting
+`measured` that the data does not support must be demoted, or the pass is only half honest.
+MEASURED links get the fitted slope and t appended to their `stat:` clause. Nothing gets a
+magnitude it did not earn (Mk15.2 / Mk17 precedent).
 
 **3. Sign audit + conflict resolution.**
 Where a fitted sign contradicts the hand-set `sign:`: |t| ≥ 2 → flip `sign:`, and record the flip
