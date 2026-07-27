@@ -1,6 +1,6 @@
 # Bullion "Honesty Pass" (Spec 1 of 2) — Session Handoff
 
-**Written:** 2026-07-27 · **For:** a fresh session picking up the Bullion map after the honesty pass shipped. Spec 1 is DONE, pushed and live — this is state + the queued Spec 2, not an in-progress resume. Prior handoff: `docs/superpowers/mk17-handoff.md`.
+**Written:** 2026-07-27 (refreshed at `f7a90e6`, end of session) · **For:** a fresh session picking up the Bullion map after the honesty pass shipped. Spec 1 is DONE, pushed and live — this is state + the queued Spec 2, not an in-progress resume. Prior handoff: `docs/superpowers/mk17-handoff.md`.
 
 ## Goal
 
@@ -17,14 +17,15 @@ wrong-signed arrows nothing was checking, and stopped the teaching copy assertin
 
 ## How to resume (do this first)
 
-1. Confirm you are on `main`, synced: `git -C ~/minhthanh0403/claude-projects/claudekit log --oneline -1` should show `ed18751 Mk18: carry the honesty pass into the shared 2D map`, and `git rev-list --left-right --count origin/main...main` should be `0  0`. This effort is `a3f26bb..ed18751` (9 commits on top of Mk17's `688a70e`).
+1. Confirm you are on `main`, synced: `git -C ~/minhthanh0403/claude-projects/claudekit log --oneline -1` should show `f7a90e6 Add the honesty-pass session handoff`, and `git rev-list --left-right --count origin/main...main` should be `0  0`. This effort is `a3f26bb..f7a90e6` — **11 commits** on top of Mk17's `688a70e`, working tree clean of tracked changes.
 2. **There is nothing to resume for Spec 1 — it is shipped and live.** `index.html` → `bullion_mk18.html`, both HTTP 200 on Pages.
 3. For Spec 2 (the queued work), start from scratch with `superpowers:brainstorming` → `writing-plans`. The four approved decisions are already recorded in "What's next" below — do not re-litigate them.
 4. **Immediate next action:** none required. If continuing, brainstorm **Spec 2, the Mk Ultra experience pass** (beginner legibility + visual elevation + motion + WebGL fallback), whose scope the user already chose.
 
 ## Current state (active files)
 
-**Branch:** `main`, 9 commits ahead of base `688a70e`, synced with `origin/main`.
+**Branch:** `main`, 11 commits ahead of base `688a70e`, synced with `origin/main`. No tracked file
+is modified — everything below is committed and pushed.
 
 **Files created / changed:**
 - `bullion-live-map/bullion_mk18.html` — **the new shared map** (`ed18751`), cut from mk17 via `./release.sh 18`. Carries the full honesty pass + 2D tier encoding.
@@ -33,6 +34,9 @@ wrong-signed arrows nothing was checking, and stopped the teaching copy assertin
 - `bullion-live-map/test_calibrate.py` — 11 → **33 tests** (`93e5b1c`).
 - `bullion-live-map/calibration_report.txt` — now has `=== ELASTICITY CELLS ===` + `=== LINKS ===` sections. **This file is the record of every tier, flip and conflict — read it, don't re-derive.**
 - `bullion-live-map/index.html` — repointed to mk18.
+- `docs/superpowers/specs/2026-07-27-bullion-honesty-pass-design.md` — marked COMPLETE (`4db09d5`).
+- `docs/superpowers/honesty-pass-handoff.md` — this file (`f7a90e6`). Unlike most handoffs here it
+  **is** tracked, so don't archive or move it; git preserves it.
 
 **Frozen — DO NOT edit (verified byte-identical after this work):**
 `bullion_mk17.html` `9989bee3…`, `bullion_mk16.html` `ef9fbc55…`, `bullion_mk15.html` `ebfaaaf6…`, and all earlier `mk11..14`. Never resurrect map content into `bullion_mk11_constellation.html` (a redirect stub).
@@ -51,13 +55,14 @@ wrong-signed arrows nothing was checking, and stopped the teaching copy assertin
 - **All 39 nodes now carry a `Source:` line** (was 31). Every hardcoded figure is as-of-dated, and the 6 genuinely unattributed claims either name a source or say they have none.
 - **Live readings in the detail panel**: 19 of 39 nodes (Mk Ultra had none before; mk17 had 16 and one was broken).
 - **Evidence is now a visual channel**: colour = sign, width = strength, opacity + dash = evidence. Only the 3 genuinely unverified links are dashed (was 6 `aud:false` links whose signs are now settled). Legend gained an EVIDENCE block; relationship rows gained tier badges.
-- **Tests:** `tests/` 41/41, `test_calibrate` 33/33 (was 11).
+- **Tests:** `tests/` 41/41, `test_calibrate` 33/33 (was 11). Re-confirmed green at `f7a90e6`.
 - **Live confirmed:** folder URL and `bullion_mk18.html` both HTTP 200; the live mk18 carries `tier-badge` and the evidence legend.
 
 ## What has failed / risks / caveats
 
 - **Nothing has failed.** All items shipped and were verified in a browser, not just reasoned about.
-- **UNVERIFIED:** no independent code review has run on this branch (previous efforts used an opus whole-branch review; this one did not). Consider `/code-review` before building on it.
+- **UNVERIFIED:** no independent code review has run on these 11 commits (previous efforts in this project ended with an opus whole-branch review; this one did not). Run `/code-review` before building on it — that is the single biggest gap in this effort.
+- **Untracked housekeeping never done** (deliberately, to keep `git add` surgical): `bullion-live-map/__pycache__/`, `tests/__pycache__/` and three `.DS_Store` files will clutter every `git status`. There is no `.gitignore` covering them. Also undecided: whether the five never-tracked handoffs in `docs/superpowers/archive/` should start being tracked.
 - **Two counting errors happened mid-effort and are already corrected in git** (`1ffc320`, `93e5b1c`). If any doc or comment still says "86 links" or "57 untiered", it is stale — the truth is **93 / 48**.
 - **Decisions carried forward that override the plan (do not silently undo):**
   - **Sign flips are applied mechanically** at |t| > 2, by user instruction. I argued `fed→repo` looked like a shared-trend artefact; it turned out moot once the plumbing merge was fixed. Do not add per-link judgment without asking.
