@@ -155,16 +155,17 @@ def field_kind(field):
     return 'pct' if field in PCT_FIELDS else 'level'
 
 
-def parse_links(html):
-    """Extract [{'s','t','sign','conf'}] from a map file's LINKS array.
+def _array_rows(html, name):
+    """Row strings of a top-level `const <name> = [ {...}, {...} ]` array.
 
     A brace-depth scan rather than one big regex: link rows carry prose with
     commas and escaped apostrophes, which a naive pattern splits in the wrong
-    place. `conf` is normalised to a bare lowercase tier, so both the quoted
-    literals ("conf:'measured'") and the constants ("conf:CONF.MEASURED")
-    used in the map read the same way here.
+    place. Returns [] when the array is absent (older map versions).
     """
-    start = html.index('const LINKS = [') + len('const LINKS = [')
+    marker = 'const %s = [' % name
+    if marker not in html:
+        return []
+    start = html.index(marker) + len(marker)
     depth, i = 1, start
     while depth:
         if html[i] == '[':
@@ -185,20 +186,56 @@ def parse_links(html):
             if not depth:
                 rows.append(cur)
                 cur = ''
+    return rows
 
-    out = []
-    for r in rows:
-        s = re.search(r"s:'([^']+)'", r)
-        t = re.search(r"t:'([^']+)'", r)
-        if not (s and t):
+
+def _row_fields(r):
+    """{'s','t','sign','conf'} for one row, or None if it is not a link row.
+
+    `conf` is normalised to a bare lowercase tier so the quoted literals
+    ("conf:'measured'") and the constants ("conf:CONF.MEASURED") that both
+    appear in the map read the same way here.
+    """
+    s = re.search(r"s:'([^']+)'", r)
+    t = re.search(r"t:'([^']+)'", r)
+    if not (s and t):
+        return None
+    sign = re.search(r"sign:\s*(-?\d+)", r)
+    conf = re.search(r"conf:\s*'?([A-Za-z_.]+)'?", r)
+    return {
+        's': s.group(1), 't': t.group(1),
+        'sign': int(sign.group(1)) if sign else None,
+        'conf': conf.group(1).split('.')[-1].lower() if conf else None,
+    }
+
+
+def parse_links(html):
+    """The RUNTIME link graph of a map file, not the LINKS literal.
+
+    The page keeps causal claims in two arrays and merges them at load: each
+    PLUMBING_LINKS row either SUPERSEDES the LINKS row with the same (s, t)
+    pair or is appended (see the `PLUMBING_LINKS.forEach` block in the map).
+    Reading only `LINKS` therefore fits rows that never reach the screen — in
+    bullion_mkultra.html 9 of the 16 plumbing rows supersede, so the literal's
+    86 rows are really 93 at runtime, with different signs and tiers on those 9.
+    """
+    out, index = [], {}
+    for r in _array_rows(html, 'LINKS'):
+        f = _row_fields(r)
+        if f is None:
             continue
-        sign = re.search(r"sign:\s*(-?\d+)", r)
-        conf = re.search(r"conf:\s*'?([A-Za-z_.]+)'?", r)
-        out.append({
-            's': s.group(1), 't': t.group(1),
-            'sign': int(sign.group(1)) if sign else None,
-            'conf': conf.group(1).split('.')[-1].lower() if conf else None,
-        })
+        index[(f['s'], f['t'])] = len(out)
+        out.append(f)
+    for r in _array_rows(html, 'PLUMBING_LINKS'):
+        f = _row_fields(r)
+        if f is None:
+            continue
+        k = (f['s'], f['t'])
+        if k in index:
+            out[index[k]] = f          # supersede in place
+        else:
+            index[k] = len(out)
+            out.append(f)              # append as a new pair
     return out
 
 

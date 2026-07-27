@@ -64,6 +64,10 @@ class TestMk17Cells(unittest.TestCase):
 
 FAKE_MAP = """
 const NODES = [ {id:'a'} ];
+const PLUMBING_LINKS = [
+  {s:'usd', t:'oil', w:3, sign:1, conf:'measured', why:'Superseding row.', stat:'Fitted (FRED).'},
+  {s:'vix', t:'gold', w:2, sign:-1, why:'Appended row.', stat:'Flight to safety (WGC).'},
+];
 const LINKS = [
   {s:'usd', t:'oil', w:1, sign:-1, aud:false, why:'Priced in dollars, so it\\'s pricier.', stat:'Roughly -0.3 (EIA).'},
   {s:'ffr', t:'privcredit', w:2, sign:0, conf:'directional', why:'Cuts both ways.', stat:'Floating-rate (Fed).'},
@@ -72,19 +76,53 @@ const LINKS = [
 ];
 """
 
+NO_PLUMBING_MAP = """
+const LINKS = [
+  {s:'usd', t:'oil', w:1, sign:-1, why:'Only array.', stat:'Roughly -0.3 (EIA).'},
+];
+"""
+
+
+class TestPlumbingMerge(unittest.TestCase):
+    """The page merges PLUMBING_LINKS into LINKS at load, so parse_links must
+    return the runtime graph or the fit grades rows that never render."""
+    def test_plumbing_row_supersedes_matching_pair_in_place(self):
+        links = c.parse_links(FAKE_MAP)
+        usd_oil = [l for l in links if (l['s'], l['t']) == ('usd', 'oil')]
+        self.assertEqual(len(usd_oil), 1, 'superseded pair must not appear twice')
+        self.assertEqual(usd_oil[0]['sign'], 1)          # plumbing sign, not -1
+        self.assertEqual(usd_oil[0]['conf'], 'measured')  # plumbing tier
+    def test_plumbing_row_without_a_match_is_appended(self):
+        pairs = {(l['s'], l['t']) for l in c.parse_links(FAKE_MAP)}
+        self.assertIn(('vix', 'gold'), pairs)
+    def test_runtime_count_is_literal_plus_appended_only(self):
+        # 4 LINKS rows + 1 appended plumbing row (the other superseded) = 5
+        self.assertEqual(len(c.parse_links(FAKE_MAP)), 5)
+    def test_missing_plumbing_array_is_tolerated(self):
+        self.assertEqual(len(c.parse_links(NO_PLUMBING_MAP)), 1)
+    def test_supersede_preserves_original_ordering(self):
+        links = c.parse_links(FAKE_MAP)
+        self.assertEqual((links[0]['s'], links[0]['t']), ('usd', 'oil'))
+
 class TestParseLinks(unittest.TestCase):
     def test_parses_every_row(self):
+        # 4 LINKS rows, one of them superseded by plumbing, plus 1 appended
         links = c.parse_links(FAKE_MAP)
-        self.assertEqual(len(links), 4)
-        self.assertEqual([l['s'] for l in links], ['usd','ffr','fed','sec'])
+        self.assertEqual([l['s'] for l in links], ['usd','ffr','fed','sec','vix'])
     def test_parses_signs_including_zero(self):
         links = c.parse_links(FAKE_MAP)
-        self.assertEqual([l['sign'] for l in links], [-1, 0, 1, 1])
+        by = {(l['s'], l['t']): l['sign'] for l in links}
+        self.assertEqual(by[('ffr','privcredit')], 0)
+        self.assertEqual(by[('fed','fomc')], 1)
+        self.assertEqual(by[('vix','gold')], -1)
     def test_normalises_quoted_and_constant_conf(self):
         # the map uses both conf:'directional' and conf:CONF.MEASURED
-        links = c.parse_links(FAKE_MAP)
-        self.assertEqual([l['conf'] for l in links],
-                         [None, 'directional', 'measured', None])
+        by = {(l['s'], l['t']): l['conf'] for l in c.parse_links(FAKE_MAP)}
+        self.assertEqual(by[('ffr','privcredit')], 'directional')
+        self.assertEqual(by[('fed','fomc')], 'measured')
+    def test_row_without_conf_reads_none(self):
+        by = {(l['s'], l['t']): l['conf'] for l in c.parse_links(FAKE_MAP)}
+        self.assertIsNone(by[('sec','equit')])
     def test_prose_with_escaped_apostrophe_does_not_split_a_row(self):
         # "it\\'s" in the first row must not end the row early
         self.assertEqual(c.parse_links(FAKE_MAP)[0]['t'], 'oil')
