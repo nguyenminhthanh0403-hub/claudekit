@@ -1,7 +1,9 @@
 # Bullion — "Honesty Pass" Design (Spec 1 of 2)
 
 **Date:** 2026-07-27
-**Status:** Approved (brainstorm + plan), implementation starting
+**Status:** COMPLETE — shipped as `bullion_mk18.html` + `bullion_mkultra.html`, pushed and live
+(`ed18751`). Achieved coverage matches the target below exactly: **16 measured / 74 directional /
+3 unverified** of 93 links, 0 untiered, 0 nodes without a source.
 **Predecessor:** Mk17 (`bullion_mk17.html`, current shared map) and `bullion_mkultra.html` (3D fork, seeded from Mk15)
 **Location:** `bullion-live-map/` in the `claudekit` repo.
 **Implementation plan:** `docs/superpowers/plans/2026-07-27-bullion-honesty-pass.md`
@@ -11,24 +13,35 @@
 Make the map's self-reported trustworthiness true.
 
 `provCoverage()` (`bullion_mkultra.html:3389`) tallies confidence over the graph with
-`bump(l.conf || CONF.UNVERIFIED)`. **57 of the 86 links carry no `conf:` field**, so the Audit
-Log's coverage bar drops two thirds of the graph into the red "unverified — set by feel; the sign
-may be wrong" segment. Every one of those links *does* carry a `stat:` citation string. The map is
+`bump(l.conf || CONF.UNVERIFIED)`. **48 of the 93 runtime links carry no `conf:` field**, so the
+Audit Log's coverage bar drops over half the graph into the red "unverified — set by feel; the sign
+may be wrong" segment.
+
+**The graph is 93 links, not 86.** Causal claims live in TWO arrays — `LINKS` (86 rows, `:1153`)
+and `PLUMBING_LINKS` (16 rows, `:1088`) — merged at load by the `PLUMBING_LINKS.forEach` block
+(`:1289`): each plumbing row either **supersedes** the `LINKS` row with the same `(s, t)` pair (9 of
+them do) or is **appended** (7). Any analysis that reads `LINKS` alone grades 9 rows that never
+reach the screen and misses 7 that do. Runtime tiers today: 21 measured, 24 directional, 48 absent. Every one of those links *does* carry a `stat:` citation string. The map is
 defaming its own evidence base: a metadata gap, not an evidence gap, and today the coverage bar is
 the most misleading number on the page.
 
-The other 29 links already carry a tier (7 `measured`, 22 `directional`) — all of them on the
-nodes added in Mk15/Mk17 (`deposits`, `m2`, `mortgage`, `privcredit`, `tbills`, `options`, `etf`,
-`energy`, `house`). So the convention already exists in the file and this pass extends it to the
-rest rather than inventing it. Note those existing values are **quoted string literals**
-(`conf:'measured'`), not the `CONF.*` constants; new entries must match that form. Those 29 are
-themselves re-checked against the fit — a link asserting `measured` that the data does not support
-gets demoted, otherwise the pass is only half honest.
+The other 45 links already carry a tier (21 `measured`, 24 `directional`), so the convention exists
+in the file and this pass extends it rather than inventing it. Note those values are **quoted string
+literals** (`conf:'measured'`), not the `CONF.*` constants; new entries must match that form. Those
+45 are themselves re-checked against the fit — a link asserting `measured` that the data does not
+support gets demoted (`ffr→tbills` is one), otherwise the pass is only half honest.
+
+**Target coverage after the pass: 16 measured / 74 directional / 3 unverified** of 93, against
+today's 21 / 24 / 48. The 3 that stay unverified are `china→tsy` (TIC is monthly), `geo→credit` (no
+free geopolitical-risk feed) and `hf→privcredit` ("industry estimates" names no dataset) — each with
+its reason stated rather than just a verdict.
 
 Since Mk17, `data.json` carries **23 fields across 366 days**, and 22 of 39 nodes bind to a live
-field — so **39 of the 86 links have both endpoints backed by real data** and can be *fitted*
+field — so **37 of the 93 links have both endpoints backed by real data** and can be *fitted*
 rather than asserted. Four of the six links flagged `aud:false` ("⚠ sign unverified") are among
-them, so signs that were guesses can be settled from data.
+them, so signs that were guesses can be settled from data. (Pairs resolving to the *same* field on
+both ends — `fomc→ffr`, `tsy→yield`, `usd→dxy_fx` — are excluded: regressing a series on itself
+always "fits" and proves nothing.)
 
 **Non-goal — this is not the visual pass.** Beginner legibility, visual elevation, motion polish,
 and the WebGL/CDN fallback are Spec 2, brainstormed separately. This spec buys the *numbers*; Spec
