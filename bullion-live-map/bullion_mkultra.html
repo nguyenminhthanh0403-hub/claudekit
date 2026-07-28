@@ -232,6 +232,8 @@
   .rel-detail { display: block; margin-top: 5px; font-size: 11.5px; line-height: 1.5; color: var(--text-dim); }
   .rel-lead { color: var(--text); }
   .rel-detail .rel-stat { display: block; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border); color: var(--gold-dim); font-size: 10.5px; }
+  .rel-field-note { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(212,184,105,0.4); font-family: var(--font-display); font-style: italic; color: var(--text); font-size: 12px; line-height: 1.45; }
+  .rel-field-note::before { content: "— "; color: var(--gold-dim); }
 
   #legend-box {
     position: fixed; left: 12px; bottom: 12px; z-index: 10;
@@ -1233,7 +1235,7 @@ const LINKS = [
   {s:'yield', t:'equit', w:2, sign:-1, conf:'measured', why:'Higher yields raise the discount rate in stock valuations, compressing multiples.', stat:'Regime-dependent. Strongly negative in the 2022 rate shock, often positive in growth booms. No stable coefficient. Fitted over 197 usable daily changes in the train split: slope=-0.02869, |t|=2.0.'},
   {s:'yield', t:'fins', w:2, sign:1, conf:'directional', why:'A steeper curve widens bank net interest margins (borrow short, lend long).', stat:'Bank stocks track curve steepness loosely (FRED: T10Y2Y vs $BKX). Tested over 197 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.4 - too weak to act on (logged as a conflict).'},
   {s:'yield', t:'mbs', w:2, sign:-1, conf:'directional', why:'Higher long-term yields raise mortgage rates and cut the value of mortgage bonds.', stat:'Mortgage rates track the 10Y plus a spread (SIFMA, FRED).'},
-  {s:'credit', t:'equit', w:1, sign:-1, conf:'measured', why:'Tight credit spreads signal confidence and easy corporate funding, which supports stocks.', stat:'HY spreads and the S&P move inversely, roughly -0.7. Tighter spreads lift equities (FRED). Fitted over 199 usable daily changes in the train split: slope=-0.08569, |t|=12.5. The sign shown is the fitted one; the earlier hand sign was +1.'},
+  {s:'credit', t:'equit', w:1, sign:-1, conf:'measured', why:'Tight credit spreads signal confidence and easy corporate funding, which supports stocks.', stat:'HY spreads and the S&P move inversely, roughly -0.7. Tighter spreads lift equities (FRED). Fitted over 199 usable daily changes in the train split: slope=-0.08569, |t|=12.5. The sign shown is the fitted one; the earlier hand sign was +1.', fieldNote:'I originally had wider credit spreads lifting stocks — which, looking back, never made sense. Once I actually measured it, spreads widening tracks equities falling, the way you'd expect.'},
 
   // ── Equity sectors ────────────────────────────────────────────────────────
   {s:'equit', t:'tech', w:2, sign:1, conf:'measured', why:'Tech is a high-beta slice of the broad market and amplifies its direction.', stat:'Nasdaq-100 beta to the S&P is roughly 1.2 to 1.3. Fitted over 199 usable daily changes in the train split: slope=+0.000231, |t|=28.3.'},
@@ -1253,7 +1255,7 @@ const LINKS = [
   {s:'ffr', t:'usd', w:2, sign:1, conf:'directional', why:'Higher US rates attract global capital seeking yield, raising demand for dollars.', stat:'DXY rose about 19% in 2022 alongside the hiking cycle (ICE). Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=0.6 - too weak to act on (logged as a conflict).'},
   {s:'usd', t:'dxy_fx', w:2, sign:-1, conf:'directional', why:'A strong dollar weakens EM currencies and makes their dollar debt costlier.', stat:'A 10% USD rise historically cuts EM GDP about 1.5% (IMF WP/19/25).'},
   {s:'usd', t:'gold', w:2, sign:-1, conf:'measured', why:'Gold is priced in dollars and pays no yield, so a stronger dollar makes it less attractive.', stat:'Long-run USD/gold correlation is roughly -0.4 to -0.6 (WGC). Fitted over 199 usable daily changes in the train split: slope=-0.01465, |t|=4.4.'},
-  {s:'usd', t:'oil', w:1, sign:1, conf:'measured', note:'The sign here is the fitted one and disagrees with the pricing mechanism in `why`. Over this window the dollar and crude rose together.', why:'Crude is priced in dollars, so a stronger dollar makes it pricier for foreign buyers - which argues for an inverse link.', stat:'Long-run studies find a weak inverse link, roughly -0.3 (EIA). Fitted over 198 usable daily changes in the train split: slope=+0.02732, |t|=4.7. The sign shown is the fitted one; the earlier hand sign was -1. The textbook dollar-pricing channel is negative, so this window reads as a demand-led regime rather than a refutation.'},
+  {s:'usd', t:'oil', w:1, sign:1, conf:'measured', note:'The sign here is the fitted one and disagrees with the pricing mechanism in `why`. Over this window the dollar and crude rose together.', why:'Crude is priced in dollars, so a stronger dollar makes it pricier for foreign buyers - which argues for an inverse link.', stat:'Long-run studies find a weak inverse link, roughly -0.3 (EIA). Fitted over 198 usable daily changes in the train split: slope=+0.02732, |t|=4.7. The sign shown is the fitted one; the earlier hand sign was -1. The textbook dollar-pricing channel is negative, so this window reads as a demand-led regime rather than a refutation.', fieldNote:'I had this coded as dollar up → oil down — the textbook FX-pricing story everyone learns. The data disagreed. Over this window it's actually positive. I'm leaving that in and telling you it's weird rather than hiding it.'},
   {s:'usd', t:'equit', w:1, sign:-1, conf:'measured', why:'Roughly 40% of S&P revenue is foreign, so a strong dollar shrinks it once converted back.', stat:'A recurring EPS headwind in earnings seasons (FactSet). Fitted over 199 usable daily changes in the train split: slope=-0.004636, |t|=3.2.'},
   {s:'dxy_fx', t:'credit', w:1, sign:1, conf:'directional', note:'Sign derived from mechanism reasoning. Tested against measured spread data and no daily-frequency relationship was found, so the magnitude stays unclaimed.', why:'Stronger EM currencies ease dollar-debt burdens and global risk appetite, which supports credit conditions.', stat:'Spillover concentrated in risk-off episodes. Tested over 199 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.4). The mechanism is sourced; the magnitude is not measured here.'},
 
@@ -2501,7 +2503,9 @@ function buildRelationships(d) {
           '<span class="rel-lead" style="color:' + color + '">' + word + '.</span> ' +
           '<span class="rel-lead">' + enrichText(lead) + '.</span> ' +
           enrichText(r.l.why) +
-          '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span></div>' +
+          '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span>' +
+          (r.l.fieldNote ? '<div class="rel-field-note">' + enrichText(r.l.fieldNote) + '</div>' : '') +
+          '</div>' +
       '</div>';
   };
 
