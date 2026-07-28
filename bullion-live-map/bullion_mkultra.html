@@ -106,6 +106,14 @@
   .btn.active { background: rgba(212,184,105,0.15); border-color: var(--gold-dim); color: var(--gold); }
 
   #stage { flex: 1 1 auto; position: relative; overflow: hidden; }
+  #render-fallback {
+    position: absolute; inset: 0; z-index: 5;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 12px; padding: 32px; text-align: center;
+    background: var(--bg-deep);
+  }
+  #render-fallback h2 { font-size: 18px; margin: 0; }
+  #render-fallback p { font-size: 13px; color: var(--text-dim); max-width: 360px; margin: 0; line-height: 1.5; }
   #network-svg { width: 100%; height: 100%; display: block; }
   #mkultra-canvas {
     cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23d4b869' stroke-width='1.5'/%3E%3Cpath d='M12 4 L14.2 11 L12 20 L9.8 11 Z' fill='%23d4b869' stroke='%230b0e16' stroke-width='0.6'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%230b0e16'/%3E%3C/svg%3E") 12 12, grab;
@@ -1576,6 +1584,25 @@ const Renderer = (function () {
   const LONG_PRESS_MS = 380, MOVE_CANCEL_PX = 10;
   let downPos = null, downWasTouch = false, pressTimer = null, longPressId = null;
 
+  function hasWebGLSupport() {
+    try {
+      const c = document.createElement('canvas');
+      return !!(c.getContext('webgl2') || c.getContext('webgl') || c.getContext('experimental-webgl'));
+    } catch (e) { return false; }
+  }
+
+  function showRenderFallback() {
+    if (document.getElementById('render-fallback')) return; // don't duplicate on re-entry
+    const card = document.createElement('div');
+    card.id = 'render-fallback';
+    card.innerHTML =
+      '<h2>Here\'s the same map, flattened</h2>' +
+      '<p>This view needs 3D graphics your browser isn\'t giving us right now. The Overview board shows every node and link the same way, without WebGL.</p>' +
+      '<button class="btn run-btn" id="render-fallback-btn">Open the Overview board</button>';
+    stageEl.appendChild(card);
+    document.getElementById('render-fallback-btn').addEventListener('click', () => showView('board'));
+  }
+
   function fire(cbs, ...args) {
     cbs.forEach(fn => { try { fn(...args); } catch (e) { console.error(e); } });
   }
@@ -2053,8 +2080,12 @@ const Renderer = (function () {
   }
 
   async function build(nodesArr) {
-    await threeLoad;
-    if (!THREE) return; // Three.js failed to load (CDN blocked/offline) — fail soft, no crash.
+    if (!hasWebGLSupport()) { showRenderFallback(); return; }
+    const loaded = await Promise.race([
+      threeLoad.then(() => true),
+      new Promise(resolve => setTimeout(() => resolve(false), 8000)),
+    ]);
+    if (!loaded || !THREE) { showRenderFallback(); return; } // CDN blocked, offline, or timed out
     disposeScene();
     if (svgEl) svgEl.style.display = 'none'; // Mk Ultra's render layer is the canvas mounted below, not the SVG
 
@@ -2067,7 +2098,13 @@ const Renderer = (function () {
     camera = new THREE.PerspectiveCamera(50, w / (h || 1), 1, 6000);
     camera.position.set(0, 0, SPHERE_R * 3.1);
 
-    webglRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    try {
+      webglRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    } catch (err) {
+      console.error('Mk Ultra: WebGL context creation failed', err);
+      showRenderFallback();
+      return;
+    }
     webglRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
     // `false` = update the drawing buffer only, never the canvas element's
     // own CSS size. The canvas's 100%/100% below does that responsively and
