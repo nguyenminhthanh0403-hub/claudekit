@@ -329,8 +329,12 @@
   select.scenario-select optgroup { background: var(--bg-panel); color: var(--gold-dim); font-style: normal; }
   select.scenario-select option { background: var(--bg-panel); color: var(--text); }
   select.scenario-select.active {
+    /* Overrides the 1px border-width from select.scenario-select above; the deep
+       blood-red hue is a deliberate choice, so salience comes from a thicker
+       border + a stronger glow rather than a lighter colour. */
     border-color: var(--scenario-active);
-    box-shadow: 0 0 0 2px rgba(139,0,0,0.35);
+    border-width: 2px;
+    box-shadow: 0 0 0 2px rgba(139,0,0,0.8);
   }
 
   /* ── Control drawer: slides in from the left, holds metrics + AI + scenarios help ── */
@@ -3925,6 +3929,9 @@ document.getElementById('run-scenario-btn').addEventListener('click', () => {
 document.getElementById('scenario-select').addEventListener('change', (e) => {
   const ex = document.getElementById('scenario-explain');
   if (ex) ex.textContent = SCENARIO_EXPLAIN[e.target.value] || '';
+  // Re-truth the highlight: changing the selection without pressing Run must not
+  // leave the border lit on a scenario that isn't actually running.
+  setActiveScenario(state.shock);
 });
 document.querySelectorAll('#control-drawer [data-shock]').forEach(b => {
   b.addEventListener('mouseenter', () => {
