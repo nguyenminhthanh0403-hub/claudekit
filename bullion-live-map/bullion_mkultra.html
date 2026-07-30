@@ -209,6 +209,9 @@
   .detail-live b { color: var(--text); font-weight: 600; }
   .detail-live .live-static { color: var(--gold-dim); font-weight: 700; margin-left: 1px; }
   .detail-live .live-note { display: block; margin-top: 3px; font-size: 10px; font-style: italic; color: var(--gold-dim); }
+  .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
+  .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -243,6 +246,8 @@
   .rel-detail .rel-stat { display: block; margin-top: 5px; padding-top: 5px; border-top: 1px dashed var(--border); color: var(--gold-dim); font-size: 10.5px; }
   .rel-field-note { display: block; margin-top: 6px; padding-top: 6px; border-top: 1px dashed rgba(212,184,105,0.4); font-family: var(--font-display); font-style: italic; color: var(--text); font-size: 12px; line-height: 1.45; }
   .rel-field-note::before { content: "— "; color: var(--gold-dim); }
+  .rel-field-note-narrate { background: none; border: none; color: var(--gold-dim); font-size: 12px; cursor: pointer; margin-left: 6px; padding: 0 2px; vertical-align: middle; }
+  .rel-field-note-narrate:hover { color: var(--gold); }
 
   #legend-box {
     position: fixed; left: 12px; bottom: 12px; z-index: 10;
@@ -577,7 +582,10 @@
       <div id="detail-title">—</div>
       <div id="detail-layer">—</div>
     </div>
-    <button id="detail-close">&times;</button>
+    <div class="detail-header-actions">
+      <button id="detail-narrate" class="narrate-btn" title="Play narration" hidden>&#128266;</button>
+      <button id="detail-close">&times;</button>
+    </div>
   </div>
   <div id="detail-body">
     <div class="section-label">Overview</div>
@@ -2543,7 +2551,9 @@ function buildRelationships(d) {
           '<span class="rel-lead">' + enrichText(lead) + '.</span> ' +
           enrichText(r.l.why) +
           '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span>' +
-          (r.l.fieldNote ? '<div class="rel-field-note">' + enrichText(r.l.fieldNote) + '</div>' : '') +
+          (r.l.fieldNote ? '<div class="rel-field-note">' + enrichText(r.l.fieldNote) +
+            (NARRATION_LINKS[r.l.s + '-' + r.l.t] ? ' <button class="rel-field-note-narrate" title="Play narration" onclick="playNarration(\'' + NARRATION_LINKS[r.l.s + '-' + r.l.t] + '\')">&#128266;</button>' : '') +
+            '</div>' : '') +
           '</div>' +
       '</div>';
   };
@@ -2585,6 +2595,16 @@ function openDetail(d) {
   const _stage = COLUMN_TITLES[d.col] || '';
   document.getElementById('detail-layer').innerHTML =
     _group + (_stage ? ' <span class="detail-stage">· ' + _stage + '</span>' : '');
+  const narrateBtn = document.getElementById('detail-narrate');
+  if (narrateBtn) {
+    if (NARRATION_MANIFEST[d.id]) {
+      narrateBtn.hidden = false;
+      narrateBtn.onclick = function() { playNarration(NARRATION_MANIFEST[d.id]); };
+    } else {
+      narrateBtn.hidden = true;
+      narrateBtn.onclick = null;
+    }
+  }
   const bullets = (!beginnerMode && d.expert) ? d.expert : d.beginner;
   const ul = document.getElementById('detail-bullets');
   ul.innerHTML = (bullets||[]).map(b => `<li>${enrichText(b)}</li>`).join('');
@@ -3947,6 +3967,27 @@ const NODE_LIVE_FIELD = {
   // the node shows a current reading next to its dated hand-typed figure.
   nfp: ['nfp_mom'], cpi: ['cpi_yoy'], ffr: ['ffr'],
 };
+// Pilot voice narration: node id -> pre-generated MP3 filename, and
+// "<source>-<target>" link id -> field-note MP3 filename, both under
+// audio/narration/. No entry means no button — see
+// docs/superpowers/specs/2026-07-30-bullion-voice-narration-design.md.
+const NARRATION_MANIFEST = {
+  fed:   'node-fed.mp3',
+  gold:  'node-gold.mp3',
+  vix:   'node-vix.mp3',
+  sec:   'node-sec.mp3',
+  repo:  'node-repo.mp3',
+  yield: 'node-yield.mp3',
+};
+const NARRATION_LINKS = {
+  'credit-equit': 'link-credit-equit.mp3',
+  'usd-oil':      'link-usd-oil.mp3',
+};
+function playNarration(file) {
+  new Audio('audio/narration/' + file).play().catch(function(err) {
+    console.warn('Narration playback failed:', err);
+  });
+}
 
 // Metric cell id suffix -> data.json field name. `spread` is absent because it
 // is computed from us10y and us2y rather than fetched — it is class 'derived'

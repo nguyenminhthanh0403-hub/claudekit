@@ -180,6 +180,9 @@
   }
   #detail-title { font-size: 17px; font-weight: 700; color: var(--gold); line-height: 1.3; }
   #detail-layer { font-size: 11px; color: var(--text-dim); margin-top: 4px; }
+  .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
+  .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -527,7 +530,10 @@
       <div id="detail-title">—</div>
       <div id="detail-layer">—</div>
     </div>
-    <button id="detail-close">&times;</button>
+    <div class="detail-header-actions">
+      <button id="detail-narrate" class="narrate-btn" title="Play narration" hidden>&#128266;</button>
+      <button id="detail-close">&times;</button>
+    </div>
   </div>
   <div id="detail-body">
     <div class="section-label">Overview</div>
@@ -1943,6 +1949,16 @@ function openDetail(d) {
   openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
   document.getElementById('detail-layer').textContent = LAYER_LABELS[d.group] || '';
+  const narrateBtn = document.getElementById('detail-narrate');
+  if (narrateBtn) {
+    if (NARRATION_MANIFEST[d.id]) {
+      narrateBtn.hidden = false;
+      narrateBtn.onclick = function() { playNarration(NARRATION_MANIFEST[d.id]); };
+    } else {
+      narrateBtn.hidden = true;
+      narrateBtn.onclick = null;
+    }
+  }
   const bullets = (!beginnerMode && d.expert) ? d.expert : d.beginner;
   const ul = document.getElementById('detail-bullets');
   ul.innerHTML = (bullets||[]).map(b => `<li>${enrichText(b)}</li>`).join('');
@@ -3289,6 +3305,22 @@ const NODE_LIVE_FIELD = {
   // shows a current reading next to its dated hand-typed figure.
   nfp: ['nfp_mom'], cpi: ['cpi_yoy'], ffr: ['ffr'],
 };
+// Pilot voice narration: node id -> pre-generated MP3 filename under
+// audio/narration/. No entry means no button — see
+// docs/superpowers/specs/2026-07-30-bullion-voice-narration-design.md.
+const NARRATION_MANIFEST = {
+  fed:   'node-fed.mp3',
+  gold:  'node-gold.mp3',
+  vix:   'node-vix.mp3',
+  sec:   'node-sec.mp3',
+  repo:  'node-repo.mp3',
+  yield: 'node-yield.mp3',
+};
+function playNarration(file) {
+  new Audio('audio/narration/' + file).play().catch(function(err) {
+    console.warn('Narration playback failed:', err);
+  });
+}
 function updateMetrics() {
   const s = applyTransmission(state);
   const sp = spread(s), spNum = parseFloat(sp);
