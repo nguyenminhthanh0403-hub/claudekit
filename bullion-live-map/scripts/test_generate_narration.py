@@ -1,3 +1,4 @@
+import re
 import sys
 import tempfile
 import unittest
@@ -60,6 +61,39 @@ class TestHtmlEntityRoundTrip(unittest.TestCase):
         self.assertEqual(
             self._extract_beginner("'gap\\u00a0here'"), "gap\u00a0here"
         )
+
+
+class TestManifestCompleteness(unittest.TestCase):
+    """Guards the invariant Task 2 established: every node in NODES has a
+    NARRATION_MANIFEST entry in both shipped HTML files, and every entry has a
+    real audio file behind it. A 40th node added without regenerating narration
+    fails here instead of shipping a silent 🔊 button."""
+
+    def _manifest_ids(self, html_path):
+        text = html_path.read_text()
+        start = text.index("const NARRATION_MANIFEST = {")
+        end = text.index("};", start)
+        body = text[start:end]
+        return set(re.findall(r"^\s*(\w+):", body, re.M))
+
+    def test_mk18_manifest_covers_every_node(self):
+        nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
+        node_ids = {n["id"] for n in nodes}
+        manifest_ids = self._manifest_ids(ROOT / "bullion_mk18.html")
+        self.assertEqual(node_ids, manifest_ids)
+
+    def test_mkultra_manifest_covers_every_node(self):
+        nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
+        node_ids = {n["id"] for n in nodes}
+        manifest_ids = self._manifest_ids(ROOT / "bullion_mkultra.html")
+        self.assertEqual(node_ids, manifest_ids)
+
+    def test_every_manifest_file_exists_and_nonempty(self):
+        nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
+        for n in nodes:
+            f = ROOT / "audio" / "narration" / f"node-{n['id']}.mp3"
+            self.assertTrue(f.exists(), f"missing {f}")
+            self.assertGreater(f.stat().st_size, 0, f"empty {f}")
 
 
 if __name__ == "__main__":
