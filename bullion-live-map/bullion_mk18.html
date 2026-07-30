@@ -3317,16 +3317,50 @@ const NODE_LIVE_FIELD = {
   // shows a current reading next to its dated hand-typed figure.
   nfp: ['nfp_mom'], cpi: ['cpi_yoy'], ffr: ['ffr'],
 };
-// Pilot voice narration: node id -> pre-generated MP3 filename under
-// audio/narration/. No entry means no button — see
+// Phase 1 voice narration: node id -> pre-generated MP3 filename under
+// audio/narration/. Every node in NODES has a clip. No entry means no
+// button — see
 // docs/superpowers/specs/2026-07-30-bullion-voice-narration-design.md.
 const NARRATION_MANIFEST = {
-  fed:   'node-fed.mp3',
-  gold:  'node-gold.mp3',
-  vix:   'node-vix.mp3',
-  sec:   'node-sec.mp3',
-  repo:  'node-repo.mp3',
-  yield: 'node-yield.mp3',
+  sec:        'node-sec.mp3',
+  cftc:       'node-cftc.mp3',
+  fdic:       'node-fdic.mp3',
+  tsy:        'node-tsy.mp3',
+  fed:        'node-fed.mp3',
+  fomc:       'node-fomc.mp3',
+  ffr:        'node-ffr.mp3',
+  banks:      'node-banks.mp3',
+  dealers:    'node-dealers.mp3',
+  repo:       'node-repo.mp3',
+  mmf:        'node-mmf.mp3',
+  hf:         'node-hf.mp3',
+  gse:        'node-gse.mp3',
+  yield:      'node-yield.mp3',
+  credit:     'node-credit.mp3',
+  equit:      'node-equit.mp3',
+  mbs:        'node-mbs.mp3',
+  tech:       'node-tech.mp3',
+  fins:       'node-fins.mp3',
+  defn:       'node-defn.mp3',
+  cpi:        'node-cpi.mp3',
+  nfp:        'node-nfp.mp3',
+  vix:        'node-vix.mp3',
+  usd:        'node-usd.mp3',
+  dxy_fx:     'node-dxy_fx.mp3',
+  gold:       'node-gold.mp3',
+  oil:        'node-oil.mp3',
+  china:      'node-china.mp3',
+  russia:     'node-russia.mp3',
+  geo:        'node-geo.mp3',
+  deposits:   'node-deposits.mp3',
+  m2:         'node-m2.mp3',
+  mortgage:   'node-mortgage.mp3',
+  privcredit: 'node-privcredit.mp3',
+  tbills:     'node-tbills.mp3',
+  options:    'node-options.mp3',
+  etf:        'node-etf.mp3',
+  energy:     'node-energy.mp3',
+  house:      'node-house.mp3',
 };
 function playNarration(file) {
   new Audio('audio/narration/' + file).play().catch(function(err) {
