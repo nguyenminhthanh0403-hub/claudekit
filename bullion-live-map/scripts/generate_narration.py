@@ -3,6 +3,7 @@
 Text is extracted from bullion_mk18.html's live NODES array at generation
 time (never hardcoded), so narration can't silently drift from the on-page
 text the way a hand-copied dict could."""
+import html
 import json
 import re
 import subprocess
@@ -109,8 +110,12 @@ def extract_node_texts(html_path):
                 f"title found in dumped DOM (chrome exit code: "
                 f"{proc.returncode}). Chrome stderr:\n{stderr_tail}"
             )
+        # Chrome's DOM serializer entity-escapes <title> content, so text
+        # containing & < > or nbsp arrives as &amp; &lt; &gt; &nbsp; — and
+        # still parses as valid JSON. Unescaping is what stops that from
+        # silently corrupting narration text.
         try:
-            return json.loads(match.group(1))
+            return json.loads(html.unescape(match.group(1)))
         except json.JSONDecodeError as e:
             raise RuntimeError(f"Extracted JSON failed to parse: {e}")
 
