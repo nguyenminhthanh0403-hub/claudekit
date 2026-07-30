@@ -69,8 +69,8 @@ def main():
         ta.save(str(wav_tmp), wav, model.sr)
 
         subprocess.run(
-            ["ffmpeg", "-y", "-i", str(wav_tmp), "-codec:a", "libmp3lame",
-             "-qscale:a", "2", str(mp3_out)],
+            ["ffmpeg", "-y", "-i", str(wav_tmp), "-af", "afftdn=nf=-25",
+             "-codec:a", "libmp3lame", "-qscale:a", "2", str(mp3_out)],
             check=True,
         )
         wav_tmp.unlink()
