@@ -12,9 +12,6 @@ import tempfile
 import time
 from pathlib import Path
 
-import torchaudio as ta
-from chatterbox.tts import ChatterboxTTS
-
 ROOT = Path(__file__).resolve().parent.parent
 VOICE_SAMPLE = ROOT / "audio" / "voice_sample" / "user_voice.wav"
 OUTPUT_DIR = ROOT / "audio" / "narration"
@@ -121,6 +118,13 @@ def extract_node_texts(html_path):
 
 
 def main():
+    # Imported here, not at module scope: torchaudio and chatterbox only exist
+    # inside .venv-narration, and extract_node_texts (which the test suite
+    # exercises) needs neither. Keeping them local lets this module import
+    # under stock python3 so the tests run in the standard suite.
+    import torchaudio as ta
+    from chatterbox.tts import ChatterboxTTS
+
     if not VOICE_SAMPLE.exists():
         sys.exit(f"Voice sample not found: {VOICE_SAMPLE}")
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)

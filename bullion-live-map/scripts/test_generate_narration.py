@@ -88,6 +88,14 @@ class TestManifestCompleteness(unittest.TestCase):
         manifest_ids = self._manifest_ids(ROOT / "bullion_mkultra.html")
         self.assertEqual(node_ids, manifest_ids)
 
+    def test_both_files_have_identical_node_text(self):
+        # All 39 MP3s are generated from mk18's text alone. If mkultra's copy of
+        # a node's text is edited without the matching mk18 edit (or vice versa),
+        # mkultra's on-screen text drifts from its own voice-over silently.
+        a = {n["id"]: n["text"] for n in gn.extract_node_texts(ROOT / "bullion_mk18.html")}
+        b = {n["id"]: n["text"] for n in gn.extract_node_texts(ROOT / "bullion_mkultra.html")}
+        self.assertEqual(a, b)
+
     def test_every_manifest_file_exists_and_nonempty(self):
         nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
         for n in nodes:
