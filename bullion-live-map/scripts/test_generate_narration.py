@@ -83,7 +83,7 @@ class TestManifestCompleteness(unittest.TestCase):
         self.assertEqual(node_ids, manifest_ids)
 
     def test_mkultra_manifest_covers_every_node(self):
-        nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
+        nodes = gn.extract_node_texts(ROOT / "bullion_mkultra.html")
         node_ids = {n["id"] for n in nodes}
         manifest_ids = self._manifest_ids(ROOT / "bullion_mkultra.html")
         self.assertEqual(node_ids, manifest_ids)
