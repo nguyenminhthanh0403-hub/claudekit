@@ -36,6 +36,9 @@
     --up:         #e0654f;
     --down:       #7bbf8e;
     --warn:       #e0b15a;
+    --scenario-active: #8b0000; /* deep blood-red, deliberately darker/more saturated
+                                    than --red (used elsewhere for negative shock
+                                    direction) so the two are never visually confused */
   }
   * { box-sizing: border-box; }
   html, body {
@@ -325,6 +328,10 @@
   }
   select.scenario-select optgroup { background: var(--bg-panel); color: var(--gold-dim); font-style: normal; }
   select.scenario-select option { background: var(--bg-panel); color: var(--text); }
+  select.scenario-select.active {
+    border-color: var(--scenario-active);
+    box-shadow: 0 0 0 2px rgba(139,0,0,0.35);
+  }
 
   /* ── Control drawer: slides in from the left, holds metrics + AI + scenarios help ── */
   #control-drawer {
@@ -3524,7 +3531,16 @@ function expandAffected() {
   applyVisibility();
 }
 
+function setActiveScenario(type) {
+  const dropdown = document.getElementById('scenario-select');
+  document.querySelectorAll('#control-drawer [data-shock]').forEach(function(b) {
+    b.classList.toggle('active', type !== null && b.getAttribute('data-shock') === type);
+  });
+  dropdown.classList.toggle('active', type !== null && dropdown.value === type);
+}
+
 function triggerShock(type) {
+  setActiveScenario(type);
   state = buildBaseState(); state.shock = type;
   const ex = document.getElementById('scenario-explain');
   if (ex) ex.textContent = SCENARIO_EXPLAIN[type] || '';
@@ -3541,6 +3557,7 @@ function triggerShock(type) {
   }
 }
 function resetState() {
+  setActiveScenario(null);
   state = buildBaseState(); nodeMultipliers = {};
   const ex = document.getElementById('scenario-explain');
   if (ex) ex.textContent = 'Pick a scenario to see a one-line summary of what it simulates.';
@@ -4073,6 +4090,7 @@ function syncManualUI() {
 // Recompute the whole system from the current driver values.
 function runManual() {
   if (!manualIsDirty()) { resetState(); syncManualUI(); return; }
+  setActiveScenario(null);
   state = buildBaseState();
   state.shock = 'manual';
   // Compute the current driver values' multipliers, then reveal only the branches
