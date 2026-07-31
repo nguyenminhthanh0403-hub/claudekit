@@ -4112,13 +4112,24 @@ const NARRATION_LINKS = {
   'usd-oil':      'link-usd-oil.mp3',
 };
 let captionTimeouts = [];
+function pulseOrb() {
+  const core = document.querySelector('#persona-orb .orb-core');
+  if (!core) return;
+  core.classList.remove('pulse');
+  void core.offsetWidth;   // force reflow so the animation retriggers
+  core.classList.add('pulse');
+}
 function clearCaption() {
+  const orb = document.getElementById('persona-orb');
+  if (orb) { orb.classList.remove('active'); orb.classList.add('idle'); }
   captionTimeouts.forEach(clearTimeout);
   captionTimeouts = [];
   const host = document.getElementById('detail-caption');
   if (host) { host.hidden = true; host.innerHTML = ''; }
 }
 function startCaption(persona, text, duration) {
+  const orb = document.getElementById('persona-orb');
+  if (orb) { orb.classList.remove('idle'); orb.classList.add('active'); }
   const host = document.getElementById('detail-caption');
   if (!host || !text) return;
   const words = text.trim().split(/\s+/);
@@ -4133,6 +4144,7 @@ function startCaption(persona, text, duration) {
     captionTimeouts.push(setTimeout(function() {
       shown += (i > 0 ? ' ' : '') + word;
       wordsHost.textContent = shown;
+      pulseOrb();
     }, elapsed * 1000));
     elapsed += wordDuration;
   });
