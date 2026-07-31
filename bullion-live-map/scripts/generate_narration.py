@@ -21,6 +21,17 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 SAY_VOICE = "Jamie (Premium)"
 ALFRED_RATE = 240
 
+JOHNNY_RATE = 225
+
+JOHNNY_SCRIPTS = {
+    "fed": "They call it the Federal Reserve. I call it the biggest chrome-plated puppet show in the world — a room full of suits who print money out of thin air and decide who eats and who don't. Rates go up, rates go down, and every time some corpo uptown gets richer while the street picks up the tab. Keeps prices 'stable,' they say. Sure. Stable for them.",
+    "gold": "Gold. Old-world chrome, choom — no batteries, no code, can't be hacked, can't be printed. When the suits panic and the dollar starts bleeding out, everybody runs for the shiny rock like it's the last exit off a burning highway. Ironic, right? Most advanced economy on the planet, and when it all goes sideways, we're back to digging up shiny metal.",
+    "vix": "They call it the fear index. I call it the market's heart-rate monitor right before a flatline. Number's low, everybody's cruising, thinks the good times never end. Number spikes past thirty — that's panic, choom, suits sprinting for the exits, dumping everything, prices crashing like a bad cyberware job.",
+    "sec": "SEC. Supposed to be the cops on the beat, keeping the corpos honest. Half the time they're a step behind, chasing paper trails after the damage's already done. But pull 'em out of the picture and it's open season — little guy's holding a busted contract while the suits count their cut.",
+    "repo": "Repo market. Nobody talks about it 'cause it's boring — banks trading bonds for cash overnight, greasing the wheels so the whole system doesn't seize up. But pull that plug, choom, everything stops. No headlines, no warning — just the whole city going dark 'cause the wiring underneath finally gave out.",
+    "yield": "Yield curve. Line on a chart nobody looks at till it flips upside down — then suddenly everybody's screaming recession. Funny thing about the future: it's usually cheaper to borrow for than the present. When that flips, smart money thinks tomorrow's rough. Pay attention when it inverts, choom. The suits sure do.",
+}
+
 PROBE_SCRIPT = (
     "<script>document.title = 'NODE_TEXT_JSON:' + "
     "JSON.stringify(NODES.map(function(n){"
@@ -176,6 +187,11 @@ def main():
     for node in nodes:
         out = OUTPUT_DIR / f"node-{node['id']}.mp3"
         synthesize(node["text"], ALFRED_RATE, out)
+        print(f"wrote {out}")
+
+    for node_id, script in JOHNNY_SCRIPTS.items():
+        out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
+        synthesize(script, JOHNNY_RATE, out)
         print(f"wrote {out}")
 
 
