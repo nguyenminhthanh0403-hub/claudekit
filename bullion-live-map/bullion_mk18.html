@@ -1964,6 +1964,7 @@ function arrowGlyphs(l) {
 
 // ── Detail panel ────────────────────────────────────────────────────────
 function openDetail(d) {
+  clearCaption();
   openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
   document.getElementById('detail-layer').textContent = LAYER_LABELS[d.group] || '';

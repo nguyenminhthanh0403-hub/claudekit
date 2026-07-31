@@ -2605,6 +2605,7 @@ function arrowGlyphs(l) {
 
 // ── Detail panel ────────────────────────────────────────────────────────
 function openDetail(d) {
+  clearCaption();
   openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
   // Group = what kind of thing it is; stage = where it sits in the causal flow
