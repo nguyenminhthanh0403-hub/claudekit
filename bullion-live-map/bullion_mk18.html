@@ -1973,6 +1973,7 @@ function openDetail(d) {
     if (NARRATION_MANIFEST[d.id]) {
       narrateBtn.hidden = false;
       narrateBtn.onclick = function() { playCurrentNarration(d); };
+      maybeAutoplayNarration(d);
     } else {
       narrateBtn.hidden = true;
       narrateBtn.onclick = null;
@@ -3454,6 +3455,15 @@ function playCurrentNarration(d) {
   const resolved = resolveNarration(d);
   if (!resolved.file) return;
   playNarration(resolved.file, resolved.persona, resolved.text);
+}
+function maybeAutoplayNarration(d) {
+  const key = 'bullion-narration-autoplayed';
+  let seen;
+  try { seen = JSON.parse(sessionStorage.getItem(key) || '[]'); } catch (e) { seen = []; }
+  if (seen.includes(d.id)) return;
+  seen.push(d.id);
+  sessionStorage.setItem(key, JSON.stringify(seen));
+  playCurrentNarration(d);
 }
 function updateMetrics() {
   const s = applyTransmission(state);
