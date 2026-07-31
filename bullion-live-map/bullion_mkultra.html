@@ -215,6 +215,10 @@
   .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
   .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+  #detail-caption { margin: 8px 0; padding: 6px 8px; border-radius: 6px; background: var(--bg-panel2); border: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
+  #detail-caption[hidden] { display: none; }
+  .caption-persona { color: var(--gold); font-weight: 700; margin-right: 4px; }
+  .caption-words { color: var(--text); }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -572,6 +576,7 @@
       <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
       <button class="btn adv-control" id="reset-view-btn">Reset View</button>
       <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
+      <button class="btn" id="persona-toggle-btn" title="Switch narration voice between Alfred (butler) and Johnny (rocker)">&#127908; Alfred</button>
       <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
     </div>
   </div>
@@ -603,6 +608,7 @@
     <div class="section-label">Overview</div>
     <ul id="detail-bullets"></ul>
     <div class="detail-live" id="detail-live"></div>
+    <div id="detail-caption" hidden></div>
     <div class="section-label">Causal Relationships</div>
     <div class="rel-summary" id="rel-summary"></div>
     <div id="rel-list"></div>
@@ -2599,6 +2605,7 @@ function arrowGlyphs(l) {
 
 // ── Detail panel ────────────────────────────────────────────────────────
 function openDetail(d) {
+  clearCaption();
   openDetailNode = d;
   document.getElementById('detail-title').textContent = d.label;
   // Group = what kind of thing it is; stage = where it sits in the causal flow
@@ -2611,7 +2618,7 @@ function openDetail(d) {
   if (narrateBtn) {
     if (NARRATION_MANIFEST[d.id]) {
       narrateBtn.hidden = false;
-      narrateBtn.onclick = function() { playNarration(NARRATION_MANIFEST[d.id]); };
+      narrateBtn.onclick = function() { playCurrentNarration(d); };
     } else {
       narrateBtn.hidden = true;
       narrateBtn.onclick = null;
@@ -2651,6 +2658,7 @@ function openDetail(d) {
   document.getElementById('app').classList.add('panel-open');
 }
 function closeDetail() {
+  clearCaption();
   openDetailNode = null;
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('app').classList.remove('panel-open');
@@ -4025,14 +4033,94 @@ const NARRATION_MANIFEST = {
   energy:     'node-energy.mp3',
   house:      'node-house.mp3',
 };
+// Johnny (rocker persona) pilot: 6 nodes only, hand-written flavor text
+// (deliberately NOT the factual page copy — see
+// docs/superpowers/specs/2026-07-31-bullion-voice-persona-toggle-design.md).
+// JOHNNY_SCRIPTS must stay byte-identical to generate_narration.py's copy —
+// tested by scripts/test_generate_narration.py.
+const JOHNNY_MANIFEST = {
+  fed:   'johnny-fed.mp3',
+  gold:  'johnny-gold.mp3',
+  vix:   'johnny-vix.mp3',
+  sec:   'johnny-sec.mp3',
+  repo:  'johnny-repo.mp3',
+  yield: 'johnny-yield.mp3',
+};
+const JOHNNY_SCRIPTS = {
+  fed: "They call it the Federal Reserve. I call it the biggest chrome-plated puppet show in the world — a room full of suits who print money out of thin air and decide who eats and who don't. Rates go up, rates go down, and every time some corpo uptown gets richer while the street picks up the tab. Keeps prices 'stable,' they say. Sure. Stable for them.",
+  gold: "Gold. Old-world chrome, choom — no batteries, no code, can't be hacked, can't be printed. When the suits panic and the dollar starts bleeding out, everybody runs for the shiny rock like it's the last exit off a burning highway. Ironic, right? Most advanced economy on the planet, and when it all goes sideways, we're back to digging up shiny metal.",
+  vix: "They call it the fear index. I call it the market's heart-rate monitor right before a flatline. Number's low, everybody's cruising, thinks the good times never end. Number spikes past thirty — that's panic, choom, suits sprinting for the exits, dumping everything, prices crashing like a bad cyberware job.",
+  sec: "SEC. Supposed to be the cops on the beat, keeping the corpos honest. Half the time they're a step behind, chasing paper trails after the damage's already done. But pull 'em out of the picture and it's open season — little guy's holding a busted contract while the suits count their cut.",
+  repo: "Repo market. Nobody talks about it 'cause it's boring — banks trading bonds for cash overnight, greasing the wheels so the whole system doesn't seize up. But pull that plug, choom, everything stops. No headlines, no warning — just the whole city going dark 'cause the wiring underneath finally gave out.",
+  yield: "Yield curve. Line on a chart nobody looks at till it flips upside down — then suddenly everybody's screaming recession. Funny thing about the future: it's usually cheaper to borrow for than the present. When that flips, smart money thinks tomorrow's rough. Pay attention when it inverts, choom. The suits sure do.",
+};
 const NARRATION_LINKS = {
   'credit-equit': 'link-credit-equit.mp3',
   'usd-oil':      'link-usd-oil.mp3',
 };
-function playNarration(file) {
-  new Audio('audio/narration/' + file).play().catch(function(err) {
+let captionTimeouts = [];
+function clearCaption() {
+  captionTimeouts.forEach(clearTimeout);
+  captionTimeouts = [];
+  const host = document.getElementById('detail-caption');
+  if (host) { host.hidden = true; host.innerHTML = ''; }
+}
+function startCaption(persona, text, duration) {
+  const host = document.getElementById('detail-caption');
+  if (!host || !text) return;
+  const words = text.trim().split(/\s+/);
+  const totalChars = words.reduce(function(sum, w) { return sum + w.length; }, 0) || 1;
+  host.hidden = false;
+  host.innerHTML = '<span class="caption-persona">' + persona + ':</span> <span class="caption-words"></span>';
+  const wordsHost = host.querySelector('.caption-words');
+  let elapsed = 0;
+  let shown = '';
+  words.forEach(function(word, i) {
+    const wordDuration = (word.length / totalChars) * duration;
+    captionTimeouts.push(setTimeout(function() {
+      shown += (i > 0 ? ' ' : '') + word;
+      wordsHost.textContent = shown;
+    }, elapsed * 1000));
+    elapsed += wordDuration;
+  });
+}
+function playNarration(file, persona, text) {
+  clearCaption();
+  const audio = new Audio('audio/narration/' + file);
+  if (persona && text) {
+    audio.addEventListener('loadedmetadata', function() {
+      startCaption(persona, text, audio.duration);
+    });
+  }
+  audio.play().catch(function(err) {
     console.warn('Narration playback failed:', err);
   });
+  return audio;
+}
+let narrationPersona = localStorage.getItem('bullion-narration-persona') === 'johnny' ? 'johnny' : 'alfred';
+function applyPersonaToggle() {
+  const btn = document.getElementById('persona-toggle-btn');
+  if (!btn) return;
+  btn.innerHTML = narrationPersona === 'johnny' ? '&#127908; Johnny' : '&#127908; Alfred';
+  btn.classList.toggle('active', narrationPersona === 'johnny');
+}
+document.getElementById('persona-toggle-btn').addEventListener('click', function() {
+  narrationPersona = narrationPersona === 'alfred' ? 'johnny' : 'alfred';
+  localStorage.setItem('bullion-narration-persona', narrationPersona);
+  applyPersonaToggle();
+});
+applyPersonaToggle();
+
+function resolveNarration(d) {
+  if (narrationPersona === 'johnny' && JOHNNY_MANIFEST[d.id]) {
+    return { file: JOHNNY_MANIFEST[d.id], persona: 'JOHNNY', text: JOHNNY_SCRIPTS[d.id] };
+  }
+  return { file: NARRATION_MANIFEST[d.id], persona: 'ALFRED', text: (d.beginner || []).join(' ') };
+}
+function playCurrentNarration(d) {
+  const resolved = resolveNarration(d);
+  if (!resolved.file) return;
+  playNarration(resolved.file, resolved.persona, resolved.text);
 }
 
 // Metric cell id suffix -> data.json field name. `spread` is absent because it
