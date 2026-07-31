@@ -11,6 +11,22 @@ import generate_narration as gn
 ROOT = Path(__file__).resolve().parent.parent
 
 
+def _js_object_keys(html_path, const_name):
+    text = html_path.read_text()
+    start = text.index(f"const {const_name} = {{")
+    end = text.index("};", start)
+    body = text[start:end]
+    return set(re.findall(r"^\s*(\w+):", body, re.M))
+
+
+def _johnny_scripts_from_html(html_path):
+    text = html_path.read_text()
+    start = text.index("const JOHNNY_SCRIPTS = {")
+    end = text.index("};", start)
+    body = text[start:end]
+    return dict(re.findall(r'(\w+):\s*"((?:\\.|[^"\\])*)"', body))
+
+
 class TestExtractNodeTexts(unittest.TestCase):
     def test_extracts_all_39_nodes(self):
         nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
@@ -114,23 +130,16 @@ class TestManifestCompleteness(unittest.TestCase):
     real audio file behind it. A 40th node added without regenerating narration
     fails here instead of shipping a silent 🔊 button."""
 
-    def _manifest_ids(self, html_path):
-        text = html_path.read_text()
-        start = text.index("const NARRATION_MANIFEST = {")
-        end = text.index("};", start)
-        body = text[start:end]
-        return set(re.findall(r"^\s*(\w+):", body, re.M))
-
     def test_mk18_manifest_covers_every_node(self):
         nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
         node_ids = {n["id"] for n in nodes}
-        manifest_ids = self._manifest_ids(ROOT / "bullion_mk18.html")
+        manifest_ids = _js_object_keys(ROOT / "bullion_mk18.html", "NARRATION_MANIFEST")
         self.assertEqual(node_ids, manifest_ids)
 
     def test_mkultra_manifest_covers_every_node(self):
         nodes = gn.extract_node_texts(ROOT / "bullion_mkultra.html")
         node_ids = {n["id"] for n in nodes}
-        manifest_ids = self._manifest_ids(ROOT / "bullion_mkultra.html")
+        manifest_ids = _js_object_keys(ROOT / "bullion_mkultra.html", "NARRATION_MANIFEST")
         self.assertEqual(node_ids, manifest_ids)
 
     def test_both_files_have_identical_node_text(self):
@@ -147,6 +156,43 @@ class TestManifestCompleteness(unittest.TestCase):
             f = ROOT / "audio" / "narration" / f"node-{n['id']}.mp3"
             self.assertTrue(f.exists(), f"missing {f}")
             self.assertGreater(f.stat().st_size, 0, f"empty {f}")
+
+
+class TestJohnnyPersona(unittest.TestCase):
+    """Guards Johnny's pilot scope and the Python/JS text duplication this
+    persona deliberately reintroduces (see the design spec's rationale) —
+    every place Johnny's script text lives must agree exactly."""
+
+    EXPECTED_IDS = {"fed", "gold", "vix", "sec", "repo", "yield"}
+
+    def test_johnny_scripts_cover_exactly_the_pilot_six(self):
+        self.assertEqual(set(gn.JOHNNY_SCRIPTS.keys()), self.EXPECTED_IDS)
+
+    def test_every_johnny_script_is_nonempty(self):
+        for node_id, script in gn.JOHNNY_SCRIPTS.items():
+            self.assertTrue(script.strip(), f"empty Johnny script for {node_id}")
+
+    def test_every_johnny_clip_exists_and_nonempty(self):
+        for node_id in gn.JOHNNY_SCRIPTS:
+            f = ROOT / "audio" / "narration" / f"johnny-{node_id}.mp3"
+            self.assertTrue(f.exists(), f"missing {f}")
+            self.assertGreater(f.stat().st_size, 0, f"empty {f}")
+
+    def test_mk18_johnny_manifest_matches_johnny_scripts_keys(self):
+        ids = _js_object_keys(ROOT / "bullion_mk18.html", "JOHNNY_MANIFEST")
+        self.assertEqual(ids, set(gn.JOHNNY_SCRIPTS.keys()))
+
+    def test_mkultra_johnny_manifest_matches_johnny_scripts_keys(self):
+        ids = _js_object_keys(ROOT / "bullion_mkultra.html", "JOHNNY_MANIFEST")
+        self.assertEqual(ids, set(gn.JOHNNY_SCRIPTS.keys()))
+
+    def test_mk18_johnny_caption_text_matches_python(self):
+        js_scripts = _johnny_scripts_from_html(ROOT / "bullion_mk18.html")
+        self.assertEqual(js_scripts, gn.JOHNNY_SCRIPTS)
+
+    def test_mkultra_johnny_caption_text_matches_python(self):
+        js_scripts = _johnny_scripts_from_html(ROOT / "bullion_mkultra.html")
+        self.assertEqual(js_scripts, gn.JOHNNY_SCRIPTS)
 
 
 if __name__ == "__main__":
