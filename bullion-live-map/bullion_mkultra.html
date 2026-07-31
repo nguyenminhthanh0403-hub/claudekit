@@ -35,6 +35,9 @@
     --gold-dim:   #a8925a;
     --green:      #7bbf8e;
     --red:        #e0654f;
+    --blue:       #4d7fb8;
+    --blue-dim:   #24425e;
+    --red-dim:    #7a2e1f;
     --amber:      #e0b15a;
     --up:         #e0654f;
     --down:       #7bbf8e;
@@ -275,6 +278,48 @@
     color: var(--gold-dim); font-weight: 700; margin: 2px 0 0;
   }
 
+  /* ── Persona orb: floating narration-persona indicator, replaces the old
+     header toggle button (#persona-toggle-btn) ───────────────────────── */
+  #persona-orb {
+    position: fixed; right: 18px; bottom: 18px; z-index: 15;
+    display: flex; flex-direction: column; align-items: center; gap: 4px;
+    cursor: pointer; transition: transform 0.28s ease;
+  }
+  .orb-core {
+    width: 52px; height: 52px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+  }
+  .orb-icon { font-size: 24px; line-height: 1; }
+  .orb-label {
+    font-size: 9px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 0.06em; color: var(--text-dim);
+  }
+  #persona-orb.persona-alfred .orb-core {
+    background: radial-gradient(circle at 35% 30%, #9fc6f5, var(--blue) 55%, var(--blue-dim));
+  }
+  #persona-orb.persona-johnny .orb-core {
+    background: radial-gradient(circle at 35% 30%, #f2a08f, var(--red) 55%, var(--red-dim));
+  }
+  #persona-orb.idle .orb-core { animation: orbBreathe 3.6s ease-in-out infinite; }
+  @keyframes orbBreathe {
+    0%, 100% { transform: scale(1);    opacity: 0.75; }
+    50%      { transform: scale(1.12); opacity: 1;    }
+  }
+  #persona-orb.active .orb-core.pulse { animation: orbPulse 0.32s ease-out; }
+  @keyframes orbPulse {
+    0%   { transform: scale(1);    box-shadow: 0 0 0 0 currentColor; }
+    60%  { transform: scale(1.22); box-shadow: 0 0 0 10px transparent; }
+    100% { transform: scale(1);    box-shadow: 0 0 0 0 transparent; }
+  }
+  #persona-orb.nudge .orb-core { animation: toolsPulse 2s ease-out 3; }
+  .orb-nudge-tip {
+    position: absolute; right: 0; bottom: 100%; margin-bottom: 8px;
+    background: rgba(11,14,22,0.95); border: 1px solid var(--border); border-radius: 6px;
+    padding: 4px 8px; font-size: 10.5px; white-space: nowrap; color: var(--text-dim);
+  }
+  #app.panel-open #persona-orb { transform: translateX(calc(-1 * min(380px, 92vw))); }
+
   #hint-banner {
     position: fixed; top: 66px; left: 50%; transform: translateX(-50%);
     z-index: 5; font-size: 12px; color: var(--text-dim);
@@ -356,6 +401,7 @@
     #detail-panel.open { transform: translateY(0); }
     /* Shift the graph UP so the reveal stays visible above the sheet */
     #app.panel-open #stage { transform: translateY(-16vh); }
+    #app.panel-open #persona-orb { transform: translateY(calc(-62vh - 12px)); }
   }
 
   /* ═══ Mk5 additions: scenario controls, glossary, AI drawer, stats ═══ */
@@ -576,7 +622,6 @@
       <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
       <button class="btn adv-control" id="reset-view-btn">Reset View</button>
       <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
-      <button class="btn" id="persona-toggle-btn" title="Switch narration voice between Alfred (butler) and Johnny (rocker)">&#127908; Alfred</button>
       <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
     </div>
   </div>
@@ -616,6 +661,13 @@
 </div>
 
 <div id="legend-box"></div>
+
+<div id="persona-orb" title="Switch narration voice" class="idle persona-alfred"
+     role="button" tabindex="0" aria-label="Switch narration voice, currently Alfred">
+  <div class="orb-core"><span class="orb-icon">&#127913;</span></div>
+  <div class="orb-label">Alfred</div>
+  <div class="orb-nudge-tip" hidden>Tap to switch narrator voice</div>
+</div>
 
 <!-- ── Control drawer: scenarios, live metrics, glossary, AI analysis ── -->
 <div id="control-drawer">
@@ -4105,11 +4157,6 @@ function applyPersonaToggle() {
   btn.innerHTML = narrationPersona === 'johnny' ? '&#127908; Johnny' : '&#127908; Alfred';
   btn.classList.toggle('active', narrationPersona === 'johnny');
 }
-document.getElementById('persona-toggle-btn').addEventListener('click', function() {
-  narrationPersona = narrationPersona === 'alfred' ? 'johnny' : 'alfred';
-  localStorage.setItem('bullion-narration-persona', narrationPersona);
-  applyPersonaToggle();
-});
 applyPersonaToggle();
 
 function resolveNarration(d) {
