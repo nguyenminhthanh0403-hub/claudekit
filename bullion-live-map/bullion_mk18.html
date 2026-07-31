@@ -275,16 +275,24 @@
   }
   #persona-orb.active .orb-core.pulse { animation: orbPulse 0.32s ease-out; }
   @keyframes orbPulse {
-    0%   { transform: scale(1);    box-shadow: 0 0 0 0 currentColor; }
-    60%  { transform: scale(1.22); box-shadow: 0 0 0 10px transparent; }
-    100% { transform: scale(1);    box-shadow: 0 0 0 0 transparent; }
+    0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 currentColor; }
+    60%  { transform: scale(1.22); box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 10px transparent; }
+    100% { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 transparent; }
   }
-  #persona-orb.nudge .orb-core { animation: toolsPulse 2s ease-out 3; }
+  #persona-orb.nudge .orb-core { animation: orbNudgePulse 2s ease-out 3; }
+  @keyframes orbNudgePulse {
+    0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0.55); }
+    70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 8px rgba(212,164,65,0); }
+    100% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0); }
+  }
   .orb-nudge-tip {
     position: absolute; right: 0; bottom: 100%; margin-bottom: 8px;
     background: rgba(11,14,22,0.95); border: 1px solid var(--border); border-radius: 6px;
     padding: 4px 8px; font-size: 10.5px; white-space: nowrap; color: var(--text-dim);
   }
+  /* Requires #detail-panel to precede #persona-orb in DOM order (both are
+     body-level siblings, outside #app) — the general sibling combinator
+     silently stops matching if that order ever changes. */
   #detail-panel.open ~ #persona-orb { transform: translateX(calc(-1 * min(380px, 92vw))); }
 
   #hint-banner {
@@ -3452,9 +3460,14 @@ function pulseOrb() {
   void core.offsetWidth;   // force reflow so the animation retriggers
   core.classList.add('pulse');
 }
-function clearCaption() {
+function setOrbNarrating(on) {
   const orb = document.getElementById('persona-orb');
-  if (orb) { orb.classList.remove('active'); orb.classList.add('idle'); }
+  if (!orb) return;
+  orb.classList.toggle('active', on);
+  orb.classList.toggle('idle', !on);
+}
+function clearCaption() {
+  setOrbNarrating(false);
   captionTimeouts.forEach(clearTimeout);
   captionTimeouts = [];
   const host = document.getElementById('detail-caption');
@@ -3462,8 +3475,7 @@ function clearCaption() {
 }
 function startCaption(persona, text, duration) {
   dismissOrbNudge();
-  const orb = document.getElementById('persona-orb');
-  if (orb) { orb.classList.remove('idle'); orb.classList.add('active'); }
+  setOrbNarrating(true);
   const host = document.getElementById('detail-caption');
   if (!host || !text) return;
   const words = text.trim().split(/\s+/);
@@ -3491,6 +3503,7 @@ function playNarration(file, persona, text) {
       startCaption(persona, text, audio.duration);
     });
   }
+  audio.addEventListener('ended', function() { setOrbNarrating(false); });
   audio.play().catch(function(err) {
     console.warn('Narration playback failed:', err);
   });
@@ -3514,18 +3527,19 @@ function toggleNarrationPersona() {
   dismissOrbNudge();
 }
 const orbEl = document.getElementById('persona-orb');
-orbEl.addEventListener('click', toggleNarrationPersona);
-orbEl.addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNarrationPersona(); }
-});
-applyPersonaToggle();
-if (!sessionStorage.getItem('bullion-orb-nudge-shown')) {
-  const nudgeOrb = document.getElementById('persona-orb');
-  nudgeOrb.classList.add('nudge');
-  nudgeOrb.querySelector('.orb-nudge-tip').hidden = false;
+if (orbEl) {
+  orbEl.addEventListener('click', toggleNarrationPersona);
+  orbEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNarrationPersona(); }
+  });
+  if (!sessionStorage.getItem('bullion-orb-nudge-dismissed')) {
+    orbEl.classList.add('nudge');
+    orbEl.querySelector('.orb-nudge-tip').hidden = false;
+  }
 }
+applyPersonaToggle();
 function dismissOrbNudge() {
-  sessionStorage.setItem('bullion-orb-nudge-shown', '1');
+  sessionStorage.setItem('bullion-orb-nudge-dismissed', '1');
   const orb = document.getElementById('persona-orb');
   if (!orb) return;
   orb.classList.remove('nudge');
