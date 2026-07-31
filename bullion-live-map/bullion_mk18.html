@@ -3461,6 +3461,7 @@ function clearCaption() {
   if (host) { host.hidden = true; host.innerHTML = ''; }
 }
 function startCaption(persona, text, duration) {
+  dismissOrbNudge();
   const orb = document.getElementById('persona-orb');
   if (orb) { orb.classList.remove('idle'); orb.classList.add('active'); }
   const host = document.getElementById('detail-caption');
@@ -3510,6 +3511,7 @@ function toggleNarrationPersona() {
   narrationPersona = narrationPersona === 'alfred' ? 'johnny' : 'alfred';
   localStorage.setItem('bullion-narration-persona', narrationPersona);
   applyPersonaToggle();
+  dismissOrbNudge();
 }
 const orbEl = document.getElementById('persona-orb');
 orbEl.addEventListener('click', toggleNarrationPersona);
@@ -3517,6 +3519,18 @@ orbEl.addEventListener('keydown', function(e) {
   if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNarrationPersona(); }
 });
 applyPersonaToggle();
+if (!sessionStorage.getItem('bullion-orb-nudge-shown')) {
+  const nudgeOrb = document.getElementById('persona-orb');
+  nudgeOrb.classList.add('nudge');
+  nudgeOrb.querySelector('.orb-nudge-tip').hidden = false;
+}
+function dismissOrbNudge() {
+  sessionStorage.setItem('bullion-orb-nudge-shown', '1');
+  const orb = document.getElementById('persona-orb');
+  if (!orb) return;
+  orb.classList.remove('nudge');
+  orb.querySelector('.orb-nudge-tip').hidden = true;
+}
 
 function resolveNarration(d) {
   if (narrationPersona === 'johnny' && JOHNNY_MANIFEST[d.id]) {
