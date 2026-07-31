@@ -4152,11 +4152,25 @@ function playNarration(file, persona, text) {
 }
 let narrationPersona = localStorage.getItem('bullion-narration-persona') === 'johnny' ? 'johnny' : 'alfred';
 function applyPersonaToggle() {
-  const btn = document.getElementById('persona-toggle-btn');
-  if (!btn) return;
-  btn.innerHTML = narrationPersona === 'johnny' ? '&#127908; Johnny' : '&#127908; Alfred';
-  btn.classList.toggle('active', narrationPersona === 'johnny');
+  const orb = document.getElementById('persona-orb');
+  if (!orb) return;
+  const isJohnny = narrationPersona === 'johnny';
+  orb.classList.toggle('persona-alfred', !isJohnny);
+  orb.classList.toggle('persona-johnny', isJohnny);
+  orb.querySelector('.orb-icon').textContent = isJohnny ? '\u{1F479}' : '\u{1F3A9}';
+  orb.querySelector('.orb-label').textContent = isJohnny ? 'Johnny' : 'Alfred';
+  orb.setAttribute('aria-label', 'Switch narration voice, currently ' + (isJohnny ? 'Johnny' : 'Alfred'));
 }
+function toggleNarrationPersona() {
+  narrationPersona = narrationPersona === 'alfred' ? 'johnny' : 'alfred';
+  localStorage.setItem('bullion-narration-persona', narrationPersona);
+  applyPersonaToggle();
+}
+const orbEl = document.getElementById('persona-orb');
+orbEl.addEventListener('click', toggleNarrationPersona);
+orbEl.addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleNarrationPersona(); }
+});
 applyPersonaToggle();
 
 function resolveNarration(d) {
