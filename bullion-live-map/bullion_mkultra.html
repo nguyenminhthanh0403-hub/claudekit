@@ -215,6 +215,10 @@
   .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
   .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+  #detail-caption { margin: 8px 0; padding: 6px 8px; border-radius: 6px; background: var(--bg-panel2); border: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
+  #detail-caption[hidden] { display: none; }
+  .caption-persona { color: var(--gold); font-weight: 700; margin-right: 4px; }
+  .caption-words { color: var(--text); }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -604,6 +608,7 @@
     <div class="section-label">Overview</div>
     <ul id="detail-bullets"></ul>
     <div class="detail-live" id="detail-live"></div>
+    <div id="detail-caption" hidden></div>
     <div class="section-label">Causal Relationships</div>
     <div class="rel-summary" id="rel-summary"></div>
     <div id="rel-list"></div>
@@ -2652,6 +2657,7 @@ function openDetail(d) {
   document.getElementById('app').classList.add('panel-open');
 }
 function closeDetail() {
+  clearCaption();
   openDetailNode = null;
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('app').classList.remove('panel-open');
@@ -4051,10 +4057,44 @@ const NARRATION_LINKS = {
   'credit-equit': 'link-credit-equit.mp3',
   'usd-oil':      'link-usd-oil.mp3',
 };
-function playNarration(file) {
-  new Audio('audio/narration/' + file).play().catch(function(err) {
+let captionTimeouts = [];
+function clearCaption() {
+  captionTimeouts.forEach(clearTimeout);
+  captionTimeouts = [];
+  const host = document.getElementById('detail-caption');
+  if (host) { host.hidden = true; host.innerHTML = ''; }
+}
+function startCaption(persona, text, duration) {
+  const host = document.getElementById('detail-caption');
+  if (!host || !text) return;
+  const words = text.trim().split(/\s+/);
+  const totalChars = words.reduce(function(sum, w) { return sum + w.length; }, 0) || 1;
+  host.hidden = false;
+  host.innerHTML = '<span class="caption-persona">' + persona + ':</span> <span class="caption-words"></span>';
+  const wordsHost = host.querySelector('.caption-words');
+  let elapsed = 0;
+  let shown = '';
+  words.forEach(function(word, i) {
+    const wordDuration = (word.length / totalChars) * duration;
+    captionTimeouts.push(setTimeout(function() {
+      shown += (i > 0 ? ' ' : '') + word;
+      wordsHost.textContent = shown;
+    }, elapsed * 1000));
+    elapsed += wordDuration;
+  });
+}
+function playNarration(file, persona, text) {
+  clearCaption();
+  const audio = new Audio('audio/narration/' + file);
+  if (persona && text) {
+    audio.addEventListener('loadedmetadata', function() {
+      startCaption(persona, text, audio.duration);
+    });
+  }
+  audio.play().catch(function(err) {
     console.warn('Narration playback failed:', err);
   });
+  return audio;
 }
 let narrationPersona = localStorage.getItem('bullion-narration-persona') === 'johnny' ? 'johnny' : 'alfred';
 function applyPersonaToggle() {
@@ -4079,7 +4119,7 @@ function resolveNarration(d) {
 function playCurrentNarration(d) {
   const resolved = resolveNarration(d);
   if (!resolved.file) return;
-  playNarration(resolved.file);
+  playNarration(resolved.file, resolved.persona, resolved.text);
 }
 
 // Metric cell id suffix -> data.json field name. `spread` is absent because it
