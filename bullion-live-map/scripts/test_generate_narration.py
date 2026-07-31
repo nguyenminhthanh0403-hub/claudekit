@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import generate_narration as gn
@@ -29,6 +30,50 @@ class TestExtractNodeTexts(unittest.TestCase):
             "The central bank that controls interest rates and money supply. "
             "It keeps prices stable, supports jobs, and lends as a last resort in crises."
         )
+
+
+class TestVoiceInstallationCheck(unittest.TestCase):
+    """Tests that _voice_installed() correctly detects installed and missing voices."""
+
+    def test_voice_installed_detects_real_voice(self):
+        """Test that _voice_installed() returns True for "Jamie (Premium)"."""
+        # This test actually queries the system for real voices
+        result = gn._voice_installed("Jamie (Premium)")
+        self.assertTrue(result, "Jamie (Premium) voice should be installed on this system")
+
+    def test_voice_installed_rejects_fake_voice(self):
+        """Test that _voice_installed() returns False for a clearly non-existent voice."""
+        # Use a voice name that's almost certainly not installed
+        result = gn._voice_installed("NonExistentVoiceXYZ123")
+        self.assertFalse(result, "NonExistentVoiceXYZ123 should not be installed")
+
+    def test_voice_installed_with_mocked_output(self):
+        """Test that _voice_installed() correctly parses the output from 'say -v ?'."""
+        # Mock the subprocess.run to return fake voice data
+        mock_output = "Agnes  \nBruce  \nJamie (Premium)  \n"
+        from unittest.mock import MagicMock
+        with patch("generate_narration.subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(stdout=mock_output)
+            # Should find Jamie (Premium) when mocked output includes it
+            result = gn._voice_installed("Jamie (Premium)")
+            self.assertTrue(result)
+
+    def test_voice_installed_with_mocked_missing_voice(self):
+        """Test that _voice_installed() returns False when voice is not in the mocked output."""
+        mock_output = "Agnes  \nBruce  \n"
+        from unittest.mock import MagicMock
+        with patch("generate_narration.subprocess.run") as mock_run:
+            mock_run.return_value = MagicMock(stdout=mock_output)
+            # Should not find Jamie (Premium) when it's not in mocked output
+            result = gn._voice_installed("Jamie (Premium)")
+            self.assertFalse(result)
+
+    def test_main_raises_on_missing_voice(self):
+        """Test that main() raises RuntimeError if the required voice is not installed."""
+        with patch("generate_narration._voice_installed", return_value=False):
+            with self.assertRaises(RuntimeError) as context:
+                gn.main()
+            self.assertIn("is not installed", str(context.exception))
 
 
 class TestHtmlEntityRoundTrip(unittest.TestCase):

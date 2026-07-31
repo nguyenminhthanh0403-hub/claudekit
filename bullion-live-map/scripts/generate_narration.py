@@ -147,7 +147,28 @@ def synthesize(text, rate, output_mp3_path):
         aiff_path.unlink(missing_ok=True)
 
 
+def _voice_installed(voice_name):
+    """Checks if a voice is installed by querying `say -v '?'`.
+    Returns True if the voice is found, False otherwise.
+    Raises RuntimeError if the query itself fails."""
+    result = subprocess.run(
+        ["say", "-v", "?"], capture_output=True, text=True, check=True
+    )
+    # Each line in the output starts with the voice name followed by space or tab
+    for line in result.stdout.splitlines():
+        if line.startswith(voice_name + " ") or line.startswith(voice_name + "\t"):
+            return True
+    return False
+
+
 def main():
+    # Verify the voice is installed before generating anything
+    if not _voice_installed(SAY_VOICE):
+        raise RuntimeError(
+            f'"{SAY_VOICE}" is not installed. System Settings -> Accessibility -> '
+            "Spoken Content -> System Voice -> Manage Voices."
+        )
+
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     nodes = extract_node_texts(SOURCE_HTML)
