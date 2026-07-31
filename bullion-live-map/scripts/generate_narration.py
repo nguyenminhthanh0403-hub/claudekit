@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Phase 1: generates all 39 node narration MP3s in the user's cloned voice.
-Text is extracted from bullion_mk18.html's live NODES array at generation
-time (never hardcoded), so narration can't silently drift from the on-page
-text the way a hand-copied dict could."""
+"""Generates narration MP3s via macOS's `say` CLI: Alfred (butler, all 39
+nodes, factual on-page text extracted from bullion_mk18.html's live NODES
+array) and Johnny (rocker, 6 pilot nodes, hand-written scripts hardcoded in
+this file). Replaces the original Chatterbox voice-cloning engine, dropped
+after the cloned voice was found to carry the wrong accent."""
 import html
 import json
 import re
@@ -13,10 +14,12 @@ import time
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-VOICE_SAMPLE = ROOT / "audio" / "voice_sample" / "user_voice.wav"
 OUTPUT_DIR = ROOT / "audio" / "narration"
 SOURCE_HTML = ROOT / "bullion_mk18.html"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+
+SAY_VOICE = "Jamie (Premium)"
+ALFRED_RATE = 240
 
 PROBE_SCRIPT = (
     "<script>document.title = 'NODE_TEXT_JSON:' + "
@@ -117,39 +120,42 @@ def extract_node_texts(html_path):
             raise RuntimeError(f"Extracted JSON failed to parse: {e}")
 
 
-def main():
-    # Imported here, not at module scope: torchaudio and chatterbox only exist
-    # inside .venv-narration, and extract_node_texts (which the test suite
-    # exercises) needs neither. Keeping them local lets this module import
-    # under stock python3 so the tests run in the standard suite.
-    import torchaudio as ta
-    from chatterbox.tts import ChatterboxTTS
+def synthesize(text, rate, output_mp3_path):
+    """Runs `say` at the given words-per-minute rate and converts the output
+    to MP3 via ffmpeg. Fails loudly (raises RuntimeError) if the voice is
+    missing or either subprocess errors — never falls back silently."""
+    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
+        aiff_path = Path(tmp.name)
+    try:
+        try:
+            subprocess.run(
+                ["say", "-v", SAY_VOICE, "-r", str(rate), "-o", str(aiff_path), text],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f'`say -v "{SAY_VOICE}"` failed (exit {e.returncode}). Is the '
+                f'"{SAY_VOICE}" voice installed? System Settings -> Accessibility -> '
+                "Spoken Content -> System Voice -> Manage Voices."
+            ) from e
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(aiff_path),
+             "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
+            check=True,
+        )
+    finally:
+        aiff_path.unlink(missing_ok=True)
 
-    if not VOICE_SAMPLE.exists():
-        sys.exit(f"Voice sample not found: {VOICE_SAMPLE}")
+
+def main():
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     nodes = extract_node_texts(SOURCE_HTML)
     print(f"Extracted {len(nodes)} node texts from {SOURCE_HTML.name}")
-
-    model = ChatterboxTTS.from_pretrained(device="cpu")
-
     for node in nodes:
-        filename = f"node-{node['id']}.mp3"
-        text = node["text"]
-        wav_tmp = OUTPUT_DIR / (filename[:-4] + ".wav")
-        mp3_out = OUTPUT_DIR / filename
-
-        wav = model.generate(text, audio_prompt_path=str(VOICE_SAMPLE))
-        ta.save(str(wav_tmp), wav, model.sr)
-
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", str(wav_tmp), "-af", "afftdn=nf=-25",
-             "-codec:a", "libmp3lame", "-qscale:a", "2", str(mp3_out)],
-            check=True,
-        )
-        wav_tmp.unlink()
-        print(f"wrote {mp3_out}")
+        out = OUTPUT_DIR / f"node-{node['id']}.mp3"
+        synthesize(node["text"], ALFRED_RATE, out)
+        print(f"wrote {out}")
 
 
 if __name__ == "__main__":
