@@ -23,6 +23,17 @@ ALFRED_RATE = 240
 
 JOHNNY_RATE = 225
 
+TOM_VOICE = "Tom (Enhanced)"
+VOICE_SAMPLE_DIR = ROOT / "audio" / "voice_sample"
+USER_VOICE_PATH = VOICE_SAMPLE_DIR / "user_voice.wav"
+TOM_SAMPLE_PATH = VOICE_SAMPLE_DIR / "tom_sample.wav"
+JAMIE_SAMPLE_PATH = VOICE_SAMPLE_DIR / "jamie_sample.wav"
+VOICE_BLEND_REFERENCE_TEXT = (
+    "This is a reference recording used only to capture this voice's tone "
+    "and timbre for narration blending."
+)
+JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES = -1.5
+
 JOHNNY_SCRIPTS = {
     "fed": "They call it the Federal Reserve. I call it the biggest chrome-plated puppet show in the world — a room full of suits who print money out of thin air and decide who eats and who don't. Rates go up, rates go down, and every time some corpo uptown gets richer while the street picks up the tab. Keeps prices 'stable,' they say. Sure. Stable for them.",
     "gold": "Gold. Old-world chrome, choom — no batteries, no code, can't be hacked, can't be printed. When the suits panic and the dollar starts bleeding out, everybody runs for the shiny rock like it's the last exit off a burning highway. Ironic, right? Most advanced economy on the planet, and when it all goes sideways, we're back to digging up shiny metal.",
@@ -156,6 +167,132 @@ def synthesize(text, rate, output_mp3_path):
         )
     finally:
         aiff_path.unlink(missing_ok=True)
+
+
+def synthesize_reference_wav(voice_name, output_wav_path):
+    """Generates a short reference clip for `voice_name` via `say`, used only
+    to extract a speaker embedding for voice-conversion blending — never
+    played directly. Fails loudly, same posture as synthesize()."""
+    with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
+        aiff_path = Path(tmp.name)
+    try:
+        try:
+            subprocess.run(
+                ["say", "-v", voice_name, "-o", str(aiff_path), VOICE_BLEND_REFERENCE_TEXT],
+                check=True,
+            )
+        except subprocess.CalledProcessError as e:
+            raise RuntimeError(
+                f'`say -v "{voice_name}"` failed (exit {e.returncode}) while '
+                "generating a voice-blend reference clip."
+            ) from e
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(aiff_path), str(output_wav_path)],
+            check=True,
+        )
+    finally:
+        aiff_path.unlink(missing_ok=True)
+
+
+def ensure_reference_clips():
+    """Generates tom_sample.wav / jamie_sample.wav via `say` if missing.
+    user_voice.wav is never generated here — it's a real recording, not
+    something this script can produce; raises if it's absent."""
+    VOICE_SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
+    if not USER_VOICE_PATH.exists():
+        raise RuntimeError(
+            f"{USER_VOICE_PATH} is missing. This is a real recording of the "
+            "user's voice, not something this script can generate."
+        )
+    if not TOM_SAMPLE_PATH.exists():
+        synthesize_reference_wav(TOM_VOICE, TOM_SAMPLE_PATH)
+    if not JAMIE_SAMPLE_PATH.exists():
+        synthesize_reference_wav(SAY_VOICE, JAMIE_SAMPLE_PATH)
+
+
+def load_vc_model():
+    """Loads ChatterboxVC once. Expensive (real model weights) — callers
+    should call this exactly once per script run and reuse the result."""
+    from chatterbox.vc import ChatterboxVC
+    return ChatterboxVC.from_pretrained(device="mps")
+
+
+def embed_reference_clip(vc, wav_path):
+    """Extracts ChatterboxVC's conditioning dict for one reference clip,
+    truncated to the model's DEC_COND_LEN the same way
+    ChatterboxVC.set_target_voice() does internally."""
+    import librosa
+    from chatterbox.vc import ChatterboxVC, S3GEN_SR
+    wav, _ = librosa.load(str(wav_path), sr=S3GEN_SR)
+    wav = wav[: ChatterboxVC.DEC_COND_LEN]
+    return vc.s3gen.embed_ref(wav, S3GEN_SR, device=vc.device)
+
+
+def build_blended_ref_dict(vc, embedding_clip_paths, prompt_clip_path):
+    """Averages the fixed-size speaker x-vector ('embedding') across
+    embedding_clip_paths, but takes the variable-length acoustic prompt
+    ('prompt_token'/'prompt_token_len'/'prompt_feat') from prompt_clip_path
+    alone — averaging those across clips of different lengths would either
+    shape-mismatch or blend unrelated spectrograms into mush. See the design
+    spec's "Blend mechanism" section (corrected 2026-08-01)."""
+    import torch
+    cache = {}
+    for path in set(embedding_clip_paths) | {prompt_clip_path}:
+        cache[path] = embed_reference_clip(vc, path)
+
+    embeddings = torch.stack(
+        [cache[path]["embedding"] for path in embedding_clip_paths], dim=0
+    )
+    prompt_dict = cache[prompt_clip_path]
+    return {
+        "prompt_token": prompt_dict["prompt_token"],
+        "prompt_token_len": prompt_dict["prompt_token_len"],
+        "prompt_feat": prompt_dict["prompt_feat"],
+        "prompt_feat_len": prompt_dict["prompt_feat_len"],
+        "embedding": embeddings.mean(dim=0),
+    }
+
+
+def alfred_ref_dict(vc):
+    """Alfred's 2-way blend: Jamie (the content voice) + the user's own voice."""
+    return build_blended_ref_dict(
+        vc,
+        embedding_clip_paths=[JAMIE_SAMPLE_PATH, USER_VOICE_PATH],
+        prompt_clip_path=USER_VOICE_PATH,
+    )
+
+
+def johnny_ref_dict(vc):
+    """Johnny's 3-way blend: Tom + the user's own voice + Jamie."""
+    return build_blended_ref_dict(
+        vc,
+        embedding_clip_paths=[TOM_SAMPLE_PATH, USER_VOICE_PATH, JAMIE_SAMPLE_PATH],
+        prompt_clip_path=USER_VOICE_PATH,
+    )
+
+
+def convert_voice(vc, ref_dict, input_audio_path, output_wav_path):
+    """Runs ChatterboxVC conversion against a pre-built (possibly blended)
+    ref_dict and writes the result as a wav file."""
+    import soundfile as sf
+    vc.ref_dict = ref_dict
+    wav = vc.generate(str(input_audio_path))
+    sf.write(str(output_wav_path), wav.squeeze(0).cpu().numpy(), vc.sr)
+
+
+def apply_johnny_meanness(wav_path):
+    """In-place pitch-shift of a converted wav file by
+    JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES, for a slightly harsher edge.
+    Johnny-only — never called for Alfred's output. Validated by ear in the
+    Task 1 spike; see the design spec's "Persona voice-color tweak"
+    section."""
+    import librosa
+    import soundfile as sf
+    y, sr = librosa.load(str(wav_path), sr=None)
+    y_shifted = librosa.effects.pitch_shift(
+        y, sr=sr, n_steps=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES
+    )
+    sf.write(str(wav_path), y_shifted, sr)
 
 
 def _voice_installed(voice_name):
