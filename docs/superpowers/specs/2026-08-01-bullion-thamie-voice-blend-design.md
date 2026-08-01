@@ -69,25 +69,42 @@ from the `chatterbox.tts` module that was previously rejected.
 
 `ChatterboxVC.generate(audio, target_voice_path)` accepts exactly one reference clip per
 conversion — internally, `set_target_voice()` loads that one clip and calls
-`s3gen.embed_ref()` to produce a `ref_dict` of conditioning tensors. There is no built-in
-multi-voice blend mode.
+`s3gen.embed_ref()` to produce a `ref_dict`. There is no built-in multi-voice blend mode.
 
-This design blends by **averaging the `ref_dict` tensors** extracted independently from
-each reference clip, then running conversion against the averaged dict, rather than
-picking one dominant voice or chaining multiple sequential conversions (chaining was
-considered and rejected — each additional pass compounds artifacts rather than blending
-cleanly).
+**Confirmed by reading `S3Gen.embed_ref()`'s source directly (2026-08-01):** `ref_dict` is
+not one uniform kind of tensor — it has two conceptually different kinds of fields:
+
+- `embedding` — a fixed-size speaker x-vector. This is the actual speaker-identity signal
+  and the only field that's meaningful to average across independently-extracted clips.
+- `prompt_token` / `prompt_token_len` / `prompt_feat` — a variable-length acoustic prompt
+  (speech tokens + mel spectrogram) taken directly from that one clip's audio content,
+  used for flow-matching continuation. Length is tied to that specific clip's duration.
+  Averaging these across clips of different lengths either shape-mismatches or, if shapes
+  happen to align, blends unrelated spectrograms into acoustic mush — not a blended voice.
+  `prompt_feat_len` is always `None` (confirmed in source), not something to average.
+
+This design therefore blends by **averaging only the `embedding` x-vector** across the
+blend's reference clips, and takes `prompt_token`/`prompt_token_len`/`prompt_feat` from a
+single designated clip rather than averaging them — defaulting to the user's own voice
+clip as that designated source, since that's the identity most worth anchoring the
+acoustic prompt to. Chaining multiple sequential conversions (as an alternative to
+blending) was considered and rejected — each additional pass compounds artifacts rather
+than blending cleanly.
 
 - Reference clips for `Tom (Enhanced)` and `Jamie (Premium)` are synthesized once via
   `say` (any representative sentence — only timbre is extracted, content is irrelevant),
   cached in `audio/voice_sample/` (e.g. `tom_sample.wav`, `jamie_sample.wav`), and checked
   into the repo like `user_voice.wav`. Regenerated only if the underlying `say` voices
   change.
-- Alfred's target = average of `embed_ref(jamie_sample.wav)` + `embed_ref(user_voice.wav)`.
-- Johnny's target = average of `embed_ref(tom_sample.wav)` + `embed_ref(user_voice.wav)` +
-  `embed_ref(jamie_sample.wav)`.
-- This is unproven for this model and is exactly what the spike (below) tests before any
-  pipeline integration work happens.
+- Alfred's target = average of `embed_ref(jamie_sample.wav)['embedding']` +
+  `embed_ref(user_voice.wav)['embedding']`; acoustic prompt from `user_voice.wav`.
+- Johnny's target = average of `embed_ref(tom_sample.wav)['embedding']` +
+  `embed_ref(user_voice.wav)['embedding']` + `embed_ref(jamie_sample.wav)['embedding']`;
+  acoustic prompt from `user_voice.wav`.
+- Even with this correction, whether averaging x-vectors alone (while anchoring the
+  acoustic prompt to one clip) actually sounds like a coherent blend — versus just
+  sounding like the user's voice with a marginal shift — is unproven and exactly what the
+  spike (below) tests before any pipeline integration work happens.
 
 ## Feasibility spike (gates everything below)
 
@@ -163,13 +180,17 @@ this holds regardless of which engine or conversion step produces the file.
 
 ## Risks / unverified
 
-- **Primary risk, gated by the spike:** averaging `ChatterboxVC`'s internal conditioning
-  tensors across 2-3 independently-extracted reference clips is not a documented/supported
-  use of this model. It may produce a coherent blended timbre, or it may not — this is
-  discovered empirically, not assumed.
-- Tensor shape compatibility across reference clips of different lengths is expected
-  (`set_target_voice` truncates to a fixed `DEC_COND_LEN` before extraction) but not yet
-  confirmed — first thing checked during the spike.
+- **Primary risk, gated by the spike:** averaging speaker x-vectors across 2-3
+  independently-extracted reference clips, while anchoring the acoustic prompt
+  (`prompt_token`/`prompt_feat`) to a single clip, is not a documented/supported use of
+  this model. It may produce a coherent blended timbre, or it may sound more like "user's
+  voice with a marginal shift" than a true blend, since the acoustic prompt (arguably the
+  bigger driver of perceived voice color) comes from only one clip — this is discovered
+  empirically, not assumed.
+- The x-vector (`embedding`) is fixed-size regardless of input clip length (speaker
+  encoders produce a constant-dimension output), so shape compatibility for the averaging
+  step itself is low-risk — confirmed by reading `S3Gen.embed_ref()`'s source. The real
+  unknown is perceptual (does it sound blended), not a shape/crash risk.
 - Whether the accent risk is actually as reduced as hypothesized (voice conversion
   preserving `say`'s pronunciation vs. full TTS generating it) is a reasoned expectation,
   not a verified guarantee — the spike's listening test is what actually confirms or
