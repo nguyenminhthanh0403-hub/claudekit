@@ -1,0 +1,11 @@
+# This repo is a static hand-written HTML site (bullion-live-map/), not a
+# Jekyll site. GitHub Pages' default "legacy" build still runs everything
+# through Jekyll regardless (a .nojekyll file at the repo root was tried
+# first and confirmed NOT to suppress this, 2026-08-01 — the
+# actions/jekyll-build-pages action doesn't check for it). Excluding docs/
+# here instead: it holds private planning/spec/handoff markdown that isn't
+# part of the served site and can contain code snippets (e.g. Python
+# f-string braces `{{`) that Jekyll's Liquid parser misreads as template
+# tags and fails on.
+exclude:
+  - docs/
