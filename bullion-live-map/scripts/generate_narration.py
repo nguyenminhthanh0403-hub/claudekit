@@ -142,10 +142,10 @@ def extract_node_texts(html_path):
             raise RuntimeError(f"Extracted JSON failed to parse: {e}")
 
 
-def synthesize(text, rate, output_mp3_path, vc, ref_dict, pitch_shift_semitones=None):
+def synthesize(text, rate, output_mp3_path, vc, ref_dict, apply_meanness=False):
     """Runs `say` at the given words-per-minute rate, converts the result
     through ChatterboxVC against the given (possibly blended) ref_dict,
-    optionally pitch-shifts it (Johnny only, via pitch_shift_semitones), and
+    optionally pitch-shifts it (Johnny only, via apply_meanness), and
     encodes the final result to MP3 via ffmpeg. Fails loudly on any
     subprocess or model error — never falls back silently."""
     with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
@@ -170,7 +170,7 @@ def synthesize(text, rate, output_mp3_path, vc, ref_dict, pitch_shift_semitones=
             check=True,
         )
         convert_voice(vc, ref_dict, wav_in_path, wav_out_path)
-        if pitch_shift_semitones is not None:
+        if apply_meanness:
             apply_johnny_meanness(wav_out_path)
 
         subprocess.run(
@@ -358,7 +358,7 @@ def main():
         out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
         synthesize(
             script, JOHNNY_RATE, out, vc, johnny_dict,
-            pitch_shift_semitones=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES,
+            apply_meanness=True,
         )
         print(f"wrote {out}")
 

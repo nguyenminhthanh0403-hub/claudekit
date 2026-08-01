@@ -142,5 +142,34 @@ class TestApplyJohnnyMeanness(unittest.TestCase):
         self.assertEqual(gn.JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES, -1.5)
 
 
+class TestSynthesizePitchGating(unittest.TestCase):
+    """The spec explicitly requires testing that Johnny's synthesis path
+    applies the pitch-shift and Alfred's does not — this is the one branch
+    that keeps the two personas' voice processing distinct. subprocess.run
+    (the `say` and both ffmpeg calls) and convert_voice are mocked out so no
+    real audio/model work happens; tempfile/Path operations run for real
+    against real temp paths so synthesize()'s .with_suffix() calls and
+    unlink() cleanup don't need their own mocks."""
+
+    def _run_synthesize(self, apply_meanness):
+        with patch("generate_narration.subprocess.run"), \
+             patch("generate_narration.convert_voice"), \
+             patch("generate_narration.apply_johnny_meanness") as mock_meanness:
+            gn.synthesize(
+                "some text", 200, Path("/fake/out.mp3"),
+                vc=object(), ref_dict={},
+                apply_meanness=apply_meanness,
+            )
+        return mock_meanness
+
+    def test_pitch_shift_applied_when_meanness_requested(self):
+        mock_meanness = self._run_synthesize(apply_meanness=True)
+        mock_meanness.assert_called_once()
+
+    def test_pitch_shift_not_applied_by_default(self):
+        mock_meanness = self._run_synthesize(apply_meanness=False)
+        mock_meanness.assert_not_called()
+
+
 if __name__ == "__main__":
     unittest.main()
