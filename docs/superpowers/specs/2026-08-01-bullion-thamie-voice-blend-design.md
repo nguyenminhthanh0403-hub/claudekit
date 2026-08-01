@@ -22,7 +22,10 @@ Johnny 225 wpm) is unchanged — only timbre changes.
 - Alfred's target timbre: 2-way blend of `Jamie (Premium)` (the existing content voice)
   and the user's own reference recording.
 - Johnny's target timbre: 3-way blend of `Tom (Enhanced)`, the user's own reference
-  recording, and `Jamie (Premium)`.
+  recording, and `Jamie (Premium)`, plus a small Johnny-only post-conversion pitch-down
+  for a meaner edge (see "Persona voice-color tweak" below) — added after the Task 1
+  spike's listening test found the base blend "not fully convincing yet" and the user
+  asked for more spite specifically in Johnny's character.
 
 Both `Tom (Enhanced)` (`en_US`) and `Jamie (Premium)` (`en_GB`) are confirmed already
 installed via System Settings → Accessibility → Spoken Content → Manage Voices (verified
@@ -123,6 +126,33 @@ integration. Fallback within this same approach: drop the weakest contributor fr
 blend (e.g. 2-way instead of 3-way for Johnny) and re-spike, before considering Approach 2
 or 3 above.
 
+**Result (2026-08-01): gate passed.** Both blends confirmed by the user as a coherent
+blend with the correct accent. Caveat raised alongside the pass: the voice is "not fully
+convincing yet" — not a blocker for proceeding, but a quality bar to re-check against real,
+full-length regenerated clips at Task 4's listening pass (see the implementation plan). If
+it's still not convincing at that point, the next move is revisiting blend composition
+(the spec's stated fallback above), not further tuning around the underlying issue.
+
+## Persona voice-color tweak: Johnny-only pitch-down
+
+Raised by the user immediately after the spike gate passed, prompted by both the "not
+fully convincing yet" note above and a separate ask for Johnny's character to read as
+more spiteful. Two levers exist for "more spiteful": sharper script wording (a copy
+change, no pipeline impact, not in scope for this spec) and a harsher voice *color* (in
+scope here).
+
+Neither `say` (rate-only scripting) nor `ChatterboxVC` (timbre, not prosody/emotion) can
+express "spiteful delivery" directly — the only available lever in this pipeline is a
+small pitch/formant adjustment applied to Johnny's already-converted output. Tested via a
+quick extension of the Task 1 spike: `librosa.effects.pitch_shift` at **-1.5 semitones**,
+applied after voice conversion, before MP3 encoding. Confirmed by ear in the same session
+as the base blend. Johnny-only — Alfred's blend and output are unaffected by this section.
+
+This supersedes the "Explicitly not building" section's original "no pitch/formant
+differentiation" line below, scoped narrowly to this one Johnny-only tweak — the broader
+point (no *per-persona voice-cloning* differentiation beyond this, no UI-exposed control
+over it) still holds.
+
 ## Pipeline integration (after spike passes)
 
 `bullion-live-map/scripts/generate_narration.py`:
@@ -133,7 +163,8 @@ or 3 above.
    startup, not recomputed per node.
 3. `synthesize()` grows a step: `say` → `.aiff` → `.wav` (needed for `librosa`/VC input,
    reusing the existing `ffmpeg` call) → voice-convert against the persona's blended
-   `ref_dict` → final `.mp3` (`ffmpeg`, same encode settings as today).
+   `ref_dict` → (Johnny only) pitch-shift -1.5 semitones per the "Persona voice-color
+   tweak" section above → final `.mp3` (`ffmpeg`, same encode settings as today).
 4. Output contract unchanged: same `OUTPUT_DIR`, same `node-<id>.mp3` /
    `johnny-<id>.mp3` filenames, overwriting today's `say`-only files in place.
 5. Error handling keeps the existing posture: fail loudly, no silent fallback (missing
@@ -155,6 +186,9 @@ this holds regardless of which engine or conversion step produces the file.
   existing split in this test file between fast checks and the few tests that hit real
   system state (e.g. `_voice_installed` against the real installed voice list).
   `extract_node_texts()` tests are already engine-agnostic and need no changes.
+- Test that Johnny's synthesis path applies the -1.5 semitone pitch-shift and Alfred's
+  does not — a cheap, mockable assertion (call arguments / conditional branch), not one
+  that needs real pitch-shifted audio to verify.
 - Full suite (`cd bullion-live-map && python3 -m unittest discover -s tests && python3 -m
   unittest test_calibrate && python3 -m unittest scripts.test_generate_narration -v`) run
   after regeneration, expecting the same pass count as today's baseline (96/96) plus the
@@ -170,9 +204,10 @@ this holds regardless of which engine or conversion step produces the file.
 
 - No UI changes — this replaces the narration engine's timbre in place, not an additive
   voice option or toggle.
-- No pitch/formant differentiation beyond the existing rate-based split (Alfred 240 wpm,
-  Johnny 225 wpm) — both personas' blends feed the same downstream pipeline. A future
-  per-persona pitch tweak is plausible but out of scope here.
+- No pitch/formant differentiation beyond the existing rate-based split and Johnny's
+  single -1.5 semitone pitch-down (see "Persona voice-color tweak" above, added
+  2026-08-01) — no further per-persona voice tuning, and no UI-exposed control over any
+  of this, is in scope here.
 - No new recording session for `user_voice.wav` — reused as-is unless the spike reveals a
   quality problem traceable to its length/quality, in which case recording a longer/cleaner
   sample becomes a follow-up, not part of this work.
