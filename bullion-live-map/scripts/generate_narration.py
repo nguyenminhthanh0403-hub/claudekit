@@ -142,12 +142,16 @@ def extract_node_texts(html_path):
             raise RuntimeError(f"Extracted JSON failed to parse: {e}")
 
 
-def synthesize(text, rate, output_mp3_path):
-    """Runs `say` at the given words-per-minute rate and converts the output
-    to MP3 via ffmpeg. Fails loudly (raises RuntimeError) if the voice is
-    missing or either subprocess errors — never falls back silently."""
+def synthesize(text, rate, output_mp3_path, vc, ref_dict, pitch_shift_semitones=None):
+    """Runs `say` at the given words-per-minute rate, converts the result
+    through ChatterboxVC against the given (possibly blended) ref_dict,
+    optionally pitch-shifts it (Johnny only, via pitch_shift_semitones), and
+    encodes the final result to MP3 via ffmpeg. Fails loudly on any
+    subprocess or model error — never falls back silently."""
     with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
         aiff_path = Path(tmp.name)
+    wav_in_path = aiff_path.with_suffix(".in.wav")
+    wav_out_path = aiff_path.with_suffix(".out.wav")
     try:
         try:
             subprocess.run(
@@ -160,13 +164,24 @@ def synthesize(text, rate, output_mp3_path):
                 f'"{SAY_VOICE}" voice installed? System Settings -> Accessibility -> '
                 "Spoken Content -> System Voice -> Manage Voices."
             ) from e
+
         subprocess.run(
-            ["ffmpeg", "-y", "-i", str(aiff_path),
+            ["ffmpeg", "-y", "-i", str(aiff_path), str(wav_in_path)],
+            check=True,
+        )
+        convert_voice(vc, ref_dict, wav_in_path, wav_out_path)
+        if pitch_shift_semitones is not None:
+            apply_johnny_meanness(wav_out_path)
+
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(wav_out_path),
              "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
             check=True,
         )
     finally:
         aiff_path.unlink(missing_ok=True)
+        wav_in_path.unlink(missing_ok=True)
+        wav_out_path.unlink(missing_ok=True)
 
 
 def synthesize_reference_wav(voice_name, output_wav_path):
@@ -310,25 +325,41 @@ def _voice_installed(voice_name):
 
 
 def main():
-    # Verify the voice is installed before generating anything
+    # Verify both voices are installed before generating anything
     if not _voice_installed(SAY_VOICE):
         raise RuntimeError(
             f'"{SAY_VOICE}" is not installed. System Settings -> Accessibility -> '
             "Spoken Content -> System Voice -> Manage Voices."
         )
+    if not _voice_installed(TOM_VOICE):
+        raise RuntimeError(
+            f'"{TOM_VOICE}" is not installed. System Settings -> Accessibility -> '
+            "Spoken Content -> System Voice -> Manage Voices."
+        )
 
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    ensure_reference_clips()
+
+    print("Loading ChatterboxVC (first run downloads model weights)...")
+    vc = load_vc_model()
+    print("Building Alfred's blend (Jamie + user)...")
+    alfred_dict = alfred_ref_dict(vc)
+    print("Building Johnny's blend (Tom + user + Jamie)...")
+    johnny_dict = johnny_ref_dict(vc)
 
     nodes = extract_node_texts(SOURCE_HTML)
     print(f"Extracted {len(nodes)} node texts from {SOURCE_HTML.name}")
     for node in nodes:
         out = OUTPUT_DIR / f"node-{node['id']}.mp3"
-        synthesize(node["text"], ALFRED_RATE, out)
+        synthesize(node["text"], ALFRED_RATE, out, vc, alfred_dict)
         print(f"wrote {out}")
 
     for node_id, script in JOHNNY_SCRIPTS.items():
         out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
-        synthesize(script, JOHNNY_RATE, out)
+        synthesize(
+            script, JOHNNY_RATE, out, vc, johnny_dict,
+            pitch_shift_semitones=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES,
+        )
         print(f"wrote {out}")
 
 
