@@ -95,6 +95,33 @@ class TestBuildBlendedRefDict(unittest.TestCase):
             torch.equal(result["embedding"], torch.tensor([[3.0, 4.0]]))
         )
 
+    def test_weighted_average_matches_johnny_actor_blend(self):
+        """Mirrors Johnny's production weights (actor 90%, the other 3 clips
+        splitting the remaining 10%) to lock in the weighted-mean formula."""
+        clip_actor = Path("/fake/actor.wav")
+        clip_b = Path("/fake/b.wav")
+        clip_c = Path("/fake/c.wav")
+        clip_d = Path("/fake/d.wav")
+        fakes = {
+            clip_actor: self._fake_ref_dict(10.0, 1),
+            clip_b: self._fake_ref_dict(0.0, 2),
+            clip_c: self._fake_ref_dict(0.0, 3),
+            clip_d: self._fake_ref_dict(0.0, 4),
+        }
+        with patch(
+            "generate_narration.embed_reference_clip",
+            side_effect=lambda vc, path: fakes[path],
+        ):
+            result = gn.build_blended_ref_dict(
+                vc=object(),
+                embedding_clip_paths=[clip_actor, clip_b, clip_c, clip_d],
+                prompt_clip_path=clip_actor,
+                weights=[0.90, 0.10 / 3, 0.10 / 3, 0.10 / 3],
+            )
+        expected = torch.tensor([[9.0, 10.0]])
+        self.assertTrue(torch.allclose(result["embedding"], expected, atol=1e-5))
+        self.assertTrue(torch.equal(result["prompt_token"], fakes[clip_actor]["prompt_token"]))
+
 
 class TestEnsureReferenceClips(unittest.TestCase):
     def test_raises_if_user_voice_missing(self):
@@ -103,8 +130,16 @@ class TestEnsureReferenceClips(unittest.TestCase):
                 gn.ensure_reference_clips()
             self.assertIn("missing", str(ctx.exception))
 
+    def test_raises_if_actor_sample_missing(self):
+        with patch.object(gn, "USER_VOICE_PATH", ROOT / "audio" / "voice_sample" / "user_voice.wav"), \
+             patch.object(gn, "ACTOR_SAMPLE_PATH", Path("/nonexistent/actor_sample.wav")):
+            with self.assertRaises(RuntimeError) as ctx:
+                gn.ensure_reference_clips()
+            self.assertIn("missing", str(ctx.exception))
+
     def test_synthesizes_missing_tom_and_jamie_clips(self):
         with patch.object(gn, "USER_VOICE_PATH", ROOT / "audio" / "voice_sample" / "user_voice.wav"), \
+             patch.object(gn, "ACTOR_SAMPLE_PATH", ROOT / "audio" / "voice_sample" / "actor_sample.wav"), \
              patch.object(gn, "TOM_SAMPLE_PATH", Path("/tmp/does-not-exist-tom.wav")), \
              patch.object(gn, "JAMIE_SAMPLE_PATH", Path("/tmp/does-not-exist-jamie.wav")), \
              patch("generate_narration.synthesize_reference_wav") as mock_synth:
