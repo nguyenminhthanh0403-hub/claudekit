@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
-"""Generates narration MP3s via macOS's `say` CLI: Alfred (butler, all 39
-nodes, factual on-page text extracted from bullion_mk18.html's live NODES
-array) and Johnny (rocker, 6 pilot nodes, hand-written scripts hardcoded in
-this file). Replaces the original Chatterbox voice-cloning engine, dropped
-after the cloned voice was found to carry the wrong accent."""
+"""Generates narration MP3s for Alfred (butler, all 39 nodes, factual
+on-page text extracted from bullion_mk18.html's live NODES array) and
+Johnny (rocker, 6 pilot nodes, hand-written scripts hardcoded in this
+file). Content is generated via macOS's `say` CLI, then re-colored via a
+ChatterboxVC voice-conversion pass blending in reference voices (see
+build_blended_ref_dict) — not the original Chatterbox text-to-speech
+engine, which was dropped after the cloned voice carried the wrong
+accent; this reuses the same library for a different purpose (audio-in
+voice conversion, not text-in speech generation)."""
 import html
 import json
 import re
@@ -19,9 +23,9 @@ SOURCE_HTML = ROOT / "bullion_mk18.html"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 SAY_VOICE = "Jamie (Premium)"
-ALFRED_RATE = 240
+ALFRED_RATE = 233
 
-JOHNNY_RATE = 225
+JOHNNY_RATE = 233
 
 TOM_VOICE = "Tom (Enhanced)"
 VOICE_SAMPLE_DIR = ROOT / "audio" / "voice_sample"
@@ -32,7 +36,6 @@ VOICE_BLEND_REFERENCE_TEXT = (
     "This is a reference recording used only to capture this voice's tone "
     "and timbre for narration blending."
 )
-JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES = -1.5
 
 JOHNNY_SCRIPTS = {
     "fed": "They call it the Federal Reserve. I call it the biggest chrome-plated puppet show in the world — a room full of suits who print money out of thin air and decide who eats and who don't. Rates go up, rates go down, and every time some corpo uptown gets richer while the street picks up the tab. Keeps prices 'stable,' they say. Sure. Stable for them.",
@@ -142,10 +145,9 @@ def extract_node_texts(html_path):
             raise RuntimeError(f"Extracted JSON failed to parse: {e}")
 
 
-def synthesize(text, rate, output_mp3_path, vc, ref_dict, apply_meanness=False):
+def synthesize(text, rate, output_mp3_path, vc, ref_dict):
     """Runs `say` at the given words-per-minute rate, converts the result
-    through ChatterboxVC against the given (possibly blended) ref_dict,
-    optionally pitch-shifts it (Johnny only, via apply_meanness), and
+    through ChatterboxVC against the given (possibly blended) ref_dict, and
     encodes the final result to MP3 via ffmpeg. Fails loudly on any
     subprocess or model error — never falls back silently."""
     with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
@@ -170,8 +172,6 @@ def synthesize(text, rate, output_mp3_path, vc, ref_dict, apply_meanness=False):
             check=True,
         )
         convert_voice(vc, ref_dict, wav_in_path, wav_out_path)
-        if apply_meanness:
-            apply_johnny_meanness(wav_out_path)
 
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(wav_out_path),
@@ -295,21 +295,6 @@ def convert_voice(vc, ref_dict, input_audio_path, output_wav_path):
     sf.write(str(output_wav_path), wav.squeeze(0).cpu().numpy(), vc.sr)
 
 
-def apply_johnny_meanness(wav_path):
-    """In-place pitch-shift of a converted wav file by
-    JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES, for a slightly harsher edge.
-    Johnny-only — never called for Alfred's output. Validated by ear in the
-    Task 1 spike; see the design spec's "Persona voice-color tweak"
-    section."""
-    import librosa
-    import soundfile as sf
-    y, sr = librosa.load(str(wav_path), sr=None)
-    y_shifted = librosa.effects.pitch_shift(
-        y, sr=sr, n_steps=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES
-    )
-    sf.write(str(wav_path), y_shifted, sr)
-
-
 def _voice_installed(voice_name):
     """Checks if a voice is installed by querying `say -v '?'`.
     Returns True if the voice is found, False otherwise.
@@ -356,10 +341,7 @@ def main():
 
     for node_id, script in JOHNNY_SCRIPTS.items():
         out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
-        synthesize(
-            script, JOHNNY_RATE, out, vc, johnny_dict,
-            apply_meanness=True,
-        )
+        synthesize(script, JOHNNY_RATE, out, vc, johnny_dict)
         print(f"wrote {out}")
 
 
