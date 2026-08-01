@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Reduce the reported "robotic/synthetic" quality of Bullion's `say`-CLI narration by adding a voice-conversion pass (via `ChatterboxVC`) that re-colors Alfred's and Johnny's timbre toward a blend of reference voices, without changing pronunciation, timing, or the front-end.
+**Goal:** Reduce the reported "robotic/synthetic" quality of Bullion's `say`-CLI narration by adding a voice-conversion pass (via `ChatterboxVC`) that re-colors Alfred's and Johnny's timbre toward a blend of reference voices, plus a small Johnny-only pitch-down for more spite, without changing pronunciation, timing, or the front-end.
 
-**Architecture:** Two-stage generation in `generate_narration.py`: Stage 1 (unchanged) — `say -v "Jamie (Premium)"` generates content audio at each persona's tuned rate. Stage 2 (new) — that audio is run through `ChatterboxVC`, converting its timbre against a persona-specific *blended* target: Alfred averages the speaker x-vector of `Jamie (Premium)` + the user's own voice; Johnny averages `Tom (Enhanced)` + the user's own voice + `Jamie (Premium)`. Only the fixed-size x-vector is averaged — the variable-length acoustic prompt (`prompt_token`/`prompt_feat`) is taken from a single designated clip (the user's own voice) to avoid blending mismatched spectrograms. Output contract (filenames, `OUTPUT_DIR`) is unchanged; front-end needs zero changes since caption/pulse timing derives from `audio.duration` at playback time.
+**Architecture:** Two-stage generation in `generate_narration.py`: Stage 1 (unchanged) — `say -v "Jamie (Premium)"` generates content audio at each persona's tuned rate. Stage 2 (new) — that audio is run through `ChatterboxVC`, converting its timbre against a persona-specific *blended* target: Alfred averages the speaker x-vector of `Jamie (Premium)` + the user's own voice; Johnny averages `Tom (Enhanced)` + the user's own voice + `Jamie (Premium)`. Only the fixed-size x-vector is averaged — the variable-length acoustic prompt (`prompt_token`/`prompt_feat`) is taken from a single designated clip (the user's own voice) to avoid blending mismatched spectrograms. Johnny's converted output then gets one further step: a -1.5 semitone pitch-down for a meaner edge (Alfred is untouched by this). Output contract (filenames, `OUTPUT_DIR`) is unchanged; front-end needs zero changes since caption/pulse timing derives from `audio.duration` at playback time.
 
 **Tech Stack:** Python 3.12, `chatterbox-tts` (`ChatterboxVC`), `torch`, `librosa`, `soundfile` — all already installed in `bullion-live-map/.venv-narration` (leftover from the original Chatterbox engine, confirmed present, no new dependency to install). macOS `say` CLI (`Jamie (Premium)`, `Tom (Enhanced)` — both confirmed installed via `say -v '?'`). `ffmpeg` (already a dependency of the existing script).
 
@@ -13,7 +13,7 @@
 - Spec: `docs/superpowers/specs/2026-08-01-bullion-thamie-voice-blend-design.md` — read it before starting; this plan implements it exactly, including its 2026-08-01 correction (average only the x-vector `embedding`, not the whole `ref_dict`).
 - **Environment split, load-bearing for every task below:** `generate_narration.py` currently has zero third-party imports and its existing test suite runs under plain system `python3` (confirmed: `/opt/homebrew/bin/python3` has no `torch` installed). This plan adds voice-conversion functions that need `torch`/`librosa`/`soundfile`/`chatterbox` — **those imports must be lazy (inside the function bodies that need them), not at module top level**, so the existing fast tests keep running under plain `python3` unmodified. Anything that actually loads `ChatterboxVC` or calls the new blend functions — the new test file, the spike script, and real narration generation — must run under `.venv-narration/bin/python3`, never plain `python3`.
 - No front-end changes anywhere in this plan (confirmed engine-agnostic caption/pulse sync — see spec's "Front-end wiring" section).
-- No UI toggle, no pitch/formant differentiation beyond the existing rate split, no new `user_voice.wav` recording — see spec's "Explicitly not building".
+- No UI toggle, no pitch/formant differentiation beyond the rate split and Johnny's single -1.5 semitone pitch-down, no new `user_voice.wav` recording — see spec's "Explicitly not building".
 - Fail loudly, no silent fallback — matches the existing script's posture (missing voice raises `RuntimeError`, same class of failure for a missing reference clip or missing `user_voice.wav`).
 - Audible quality is **never automatable** — every task below that touches actual sound ends in a human listening step, not an automated pass/fail.
 
@@ -219,6 +219,8 @@ sample clips get committed as part of the real pipeline.)
   - `build_blended_ref_dict(vc, embedding_clip_paths: list[Path], prompt_clip_path: Path) -> dict` — averages `embedding` across `embedding_clip_paths`; takes `prompt_token`/`prompt_token_len`/`prompt_feat`/`prompt_feat_len` from `prompt_clip_path` alone.
   - `alfred_ref_dict(vc) -> dict`, `johnny_ref_dict(vc) -> dict` — the two persona-specific blends.
   - `convert_voice(vc, ref_dict: dict, input_audio_path: Path, output_wav_path: Path) -> None` — runs conversion, writes a wav file.
+  - `JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES: float` — `-1.5`, validated by ear in the Task 1 spike.
+  - `apply_johnny_meanness(wav_path: Path) -> None` — in-place pitch-shift of a wav file, Johnny-only.
 
 - [ ] **Step 1: Write the failing tests for `build_blended_ref_dict`**
 
@@ -339,6 +341,36 @@ class TestEnsureReferenceClips(unittest.TestCase):
             self.assertEqual(mock_synth.call_count, 2)
 
 
+class TestApplyJohnnyMeanness(unittest.TestCase):
+    """Johnny gets a -1.5 semitone post-conversion pitch-down (validated by
+    ear in the Task 1 spike, see the design spec's "Persona voice-color
+    tweak" section); Alfred must not be touched by this. Patches the real
+    librosa/soundfile module paths, not generate_narration's namespace —
+    apply_johnny_meanness imports them lazily inside its own body (see
+    Global Constraints), so there is no generate_narration.librosa
+    attribute to patch; `import librosa` inside the function still binds to
+    the same module object patch() modifies here."""
+
+    def test_pitch_shifts_by_the_configured_semitone_amount(self):
+        with patch("librosa.load", return_value=("fake_audio_array", 24000)) as mock_load, \
+             patch("librosa.effects.pitch_shift", return_value="shifted_audio_array") as mock_shift, \
+             patch("soundfile.write") as mock_write:
+            gn.apply_johnny_meanness(Path("/fake/johnny-fed.wav"))
+
+            mock_load.assert_called_once_with("/fake/johnny-fed.wav", sr=None)
+            mock_shift.assert_called_once_with(
+                "fake_audio_array",
+                sr=24000,
+                n_steps=gn.JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES,
+            )
+            mock_write.assert_called_once_with(
+                "/fake/johnny-fed.wav", "shifted_audio_array", 24000
+            )
+
+    def test_configured_amount_is_a_modest_pitch_down(self):
+        self.assertEqual(gn.JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES, -1.5)
+
+
 if __name__ == "__main__":
     unittest.main()
 ```
@@ -347,7 +379,7 @@ if __name__ == "__main__":
 
 Run: `cd bullion-live-map && .venv-narration/bin/python3 -m unittest scripts.test_voice_blend -v`
 
-Expected: FAIL — `AttributeError: module 'generate_narration' has no attribute 'build_blended_ref_dict'` (and similar for `ensure_reference_clips`).
+Expected: FAIL — `AttributeError: module 'generate_narration' has no attribute 'build_blended_ref_dict'` (and similar for `ensure_reference_clips`, `apply_johnny_meanness`, `JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES`).
 
 - [ ] **Step 3: Add the reference-clip and blend-embedding functions to `generate_narration.py`**
 
@@ -363,6 +395,7 @@ VOICE_BLEND_REFERENCE_TEXT = (
     "This is a reference recording used only to capture this voice's tone "
     "and timbre for narration blending."
 )
+JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES = -1.5
 ```
 
 Add these functions after `synthesize()` (heavy imports are lazy/local to each
@@ -479,17 +512,34 @@ def convert_voice(vc, ref_dict, input_audio_path, output_wav_path):
     vc.ref_dict = ref_dict
     wav = vc.generate(str(input_audio_path))
     sf.write(str(output_wav_path), wav.squeeze(0).cpu().numpy(), vc.sr)
+
+
+def apply_johnny_meanness(wav_path):
+    """In-place pitch-shift of a converted wav file by
+    JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES, for a slightly harsher edge.
+    Johnny-only — never called for Alfred's output. Validated by ear in the
+    Task 1 spike; see the design spec's "Persona voice-color tweak"
+    section."""
+    import librosa
+    import soundfile as sf
+    y, sr = librosa.load(str(wav_path), sr=None)
+    y_shifted = librosa.effects.pitch_shift(
+        y, sr=sr, n_steps=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES
+    )
+    sf.write(str(wav_path), y_shifted, sr)
 ```
 
 - [ ] **Step 4: Run the new tests to verify they pass**
 
 Run: `cd bullion-live-map && .venv-narration/bin/python3 -m unittest scripts.test_voice_blend -v`
 
-Expected: PASS, all 5 tests (`test_averages_embedding_across_two_clips`,
+Expected: PASS, all 7 tests (`test_averages_embedding_across_two_clips`,
 `test_prompt_fields_come_from_the_designated_clip_only`,
 `test_three_way_average_matches_johnny_blend_shape`,
 `test_raises_if_user_voice_missing`,
-`test_synthesizes_missing_tom_and_jamie_clips`).
+`test_synthesizes_missing_tom_and_jamie_clips`,
+`test_pitch_shifts_by_the_configured_semitone_amount`,
+`test_configured_amount_is_a_modest_pitch_down`).
 
 - [ ] **Step 5: Verify the existing fast test suite still runs under plain `python3` (no accidental heavy import at module scope)**
 
@@ -511,7 +561,9 @@ build_blended_ref_dict averages only ChatterboxVC's fixed-size speaker
 x-vector across reference clips, taking the acoustic prompt from one
 designated clip (the user's own voice) — see the design spec's
 2026-08-01 correction. Heavy ML imports are lazy/function-local so the
-existing fast test suite keeps running under plain python3.
+existing fast test suite keeps running under plain python3. Also adds
+apply_johnny_meanness, a -1.5 semitone post-conversion pitch-down
+applied to Johnny only.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
@@ -528,17 +580,18 @@ EOF
 - Modify: `bullion-live-map/scripts/generate_narration.py` (`synthesize()` and `main()`)
 
 **Interfaces:**
-- Consumes: everything from Task 2 (`ensure_reference_clips`, `load_vc_model`, `alfred_ref_dict`, `johnny_ref_dict`, `convert_voice`).
-- Produces: regenerated `audio/narration/*.mp3` files (same filenames as today, now voice-converted).
+- Consumes: everything from Task 2 (`ensure_reference_clips`, `load_vc_model`, `alfred_ref_dict`, `johnny_ref_dict`, `convert_voice`, `apply_johnny_meanness`).
+- Produces: regenerated `audio/narration/*.mp3` files (same filenames as today, now voice-converted; Johnny's additionally pitch-shifted).
 
-- [ ] **Step 1: Rewrite `synthesize()` to run its output through voice conversion**
+- [ ] **Step 1: Rewrite `synthesize()` to run its output through voice conversion (and, optionally, the meanness pitch-shift)**
 
 Replace the existing `synthesize()` function body with:
 
 ```python
-def synthesize(text, rate, output_mp3_path, vc, ref_dict):
+def synthesize(text, rate, output_mp3_path, vc, ref_dict, pitch_shift_semitones=None):
     """Runs `say` at the given words-per-minute rate, converts the result
-    through ChatterboxVC against the given (possibly blended) ref_dict, and
+    through ChatterboxVC against the given (possibly blended) ref_dict,
+    optionally pitch-shifts it (Johnny only, via pitch_shift_semitones), and
     encodes the final result to MP3 via ffmpeg. Fails loudly on any
     subprocess or model error — never falls back silently."""
     with tempfile.NamedTemporaryFile(suffix=".aiff", delete=False) as tmp:
@@ -563,6 +616,8 @@ def synthesize(text, rate, output_mp3_path, vc, ref_dict):
             check=True,
         )
         convert_voice(vc, ref_dict, wav_in_path, wav_out_path)
+        if pitch_shift_semitones is not None:
+            apply_johnny_meanness(wav_out_path)
 
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(wav_out_path),
@@ -574,6 +629,12 @@ def synthesize(text, rate, output_mp3_path, vc, ref_dict):
         wav_in_path.unlink(missing_ok=True)
         wav_out_path.unlink(missing_ok=True)
 ```
+
+Note: `pitch_shift_semitones` is passed through only to decide *whether* to call
+`apply_johnny_meanness` (which always uses the module constant
+`JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES` internally) — `main()` in Step 2 passes
+`JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES` for Johnny's calls and leaves the
+parameter at its `None` default for Alfred's.
 
 - [ ] **Step 2: Update `main()` to load the model once, build both blends once, and pass them through**
 
@@ -612,7 +673,10 @@ def main():
 
     for node_id, script in JOHNNY_SCRIPTS.items():
         out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
-        synthesize(script, JOHNNY_RATE, out, vc, johnny_dict)
+        synthesize(
+            script, JOHNNY_RATE, out, vc, johnny_dict,
+            pitch_shift_semitones=JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES,
+        )
         print(f"wrote {out}")
 ```
 
@@ -648,7 +712,7 @@ unaffected by the underlying audio content changing.
 
 Also run: `.venv-narration/bin/python3 -m unittest scripts.test_voice_blend -v`
 
-Expected: PASS, same 5 tests from Task 2.
+Expected: PASS, same 7 tests from Task 2.
 
 - [ ] **Step 6: Commit**
 
@@ -669,8 +733,9 @@ Wire voice-conversion blend into narration generation, regenerate all clips
 
 synthesize()/main() now run say's output through ChatterboxVC against
 each persona's blended target (Alfred: Jamie+user, Johnny:
-Tom+user+Jamie) before encoding to MP3. All 47 existing narration clips
-regenerated in place under the new pipeline.
+Tom+user+Jamie) before encoding to MP3, with Johnny's output additionally
+pitch-shifted -1.5 semitones for a meaner edge. All 47 existing
+narration clips regenerated in place under the new pipeline.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
@@ -696,14 +761,22 @@ change in this project (per the spec's "Testing" section).
 
 Ask the user to listen to a handful of the actual regenerated clips across
 both personas (not just the Task 1 spike's one-clip-each sample) and confirm:
-does it sound less robotic than before, and is the accent still correct? This
-is the actual acceptance criterion for the whole feature — do not report this
-plan as complete without an explicit yes from the user here.
+does it sound less robotic than before, is the accent still correct, and
+(Johnny specifically) does the meanness pitch-down land right at -1.5
+semitones across a range of his actual scripts, not just the one spike clip?
+This is the actual acceptance criterion for the whole feature — do not report
+this plan as complete without an explicit yes from the user here. Also
+revisit the "not fully convincing yet" note from Task 1's gate explicitly —
+does that concern still stand on full-length real clips, or has it resolved?
 
-- If **no**: this is a real regression to investigate, not something to patch
-  around — go back to Task 1's spike with a revised blend (drop a
-  contributor, or try prompt-clip anchored on a different clip) rather than
-  tweaking pipeline code blindly.
+- If **no** (robotic/accent regression): this is a real regression to
+  investigate, not something to patch around — go back to Task 1's spike
+  with a revised blend (drop a contributor, or try prompt-clip anchored on a
+  different clip) rather than tweaking pipeline code blindly.
+- If Johnny's meanness amount is off: adjust
+  `JOHNNY_MEANNESS_PITCH_SHIFT_SEMITONES` in `generate_narration.py` and
+  re-run Task 3 Step 4 (regeneration) — a quick, cheap iteration, no need to
+  revisit the blend itself for this specific adjustment.
 
 - [ ] **Step 3: Ask for a fresh push decision**
 
