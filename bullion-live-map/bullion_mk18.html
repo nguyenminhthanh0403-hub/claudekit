@@ -270,9 +270,14 @@
   }
   #persona-orb.idle .orb-core { animation: orbBreathe 3.6s ease-in-out infinite; }
   @keyframes orbBreathe {
-    0%, 100% { transform: scale(1);    opacity: 0.75; }
-    50%      { transform: scale(1.12); opacity: 1;    }
+    /* 0.4 matches NODE_BASE_OPACITY — resting orb reads at the same
+       translucency as a resting map node. */
+    0%, 100% { transform: scale(1);    opacity: 0.4;  }
+    50%      { transform: scale(1.12); opacity: 0.65; }
   }
+  #persona-orb.active .orb-core { opacity: 1; }
+  #persona-orb:hover .orb-core,
+  #persona-orb:focus-visible .orb-core { opacity: 1 !important; }
   #persona-orb.active .orb-core.pulse { animation: orbPulse 0.32s ease-out; }
   @keyframes orbPulse {
     0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 currentColor; }
