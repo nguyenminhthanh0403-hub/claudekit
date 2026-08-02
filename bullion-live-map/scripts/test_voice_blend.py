@@ -146,7 +146,9 @@ class TestSynthesizeJohnny(unittest.TestCase):
         self.assertEqual(calls["cfg_weight"], gn.JOHNNY_CFG_WEIGHT)
         mock_save.assert_called_once()
         mock_run.assert_called_once()
-        self.assertIn("/tmp/out.mp3", mock_run.call_args[0][0])
+        ffmpeg_args = mock_run.call_args[0][0]
+        self.assertIn("/tmp/out.mp3", ffmpeg_args)
+        self.assertIn(f"atempo={gn.JOHNNY_TEMPO}", ffmpeg_args)
 
 
 if __name__ == "__main__":

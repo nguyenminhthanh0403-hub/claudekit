@@ -159,14 +159,15 @@ class TestManifestCompleteness(unittest.TestCase):
 
 
 class TestJohnnyPersona(unittest.TestCase):
-    """Guards Johnny's pilot scope and the Python/JS text duplication this
-    persona deliberately reintroduces (see the design spec's rationale) —
-    every place Johnny's script text lives must agree exactly."""
+    """Guards Johnny's full-coverage scope (expanded from the original 6-node
+    pilot to every node, same as Alfred) and the Python/JS text duplication
+    this persona deliberately reintroduces (see the design spec's rationale)
+    — every place Johnny's script text lives must agree exactly."""
 
-    EXPECTED_IDS = {"fed", "gold", "vix", "sec", "repo", "yield"}
-
-    def test_johnny_scripts_cover_exactly_the_pilot_six(self):
-        self.assertEqual(set(gn.JOHNNY_SCRIPTS.keys()), self.EXPECTED_IDS)
+    def test_johnny_scripts_cover_every_node(self):
+        nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
+        node_ids = {n["id"] for n in nodes}
+        self.assertEqual(set(gn.JOHNNY_SCRIPTS.keys()), node_ids)
 
     def test_every_johnny_script_is_nonempty(self):
         for node_id, script in gn.JOHNNY_SCRIPTS.items():
