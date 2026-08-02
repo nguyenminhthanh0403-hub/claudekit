@@ -27,6 +27,14 @@ def _johnny_scripts_from_html(html_path):
     return dict(re.findall(r'(\w+):\s*"((?:\\.|[^"\\])*)"', body))
 
 
+def _double_quoted_dict_from_html(html_path, const_name):
+    text = html_path.read_text()
+    start = text.index(f"const {const_name} = {{")
+    end = text.index("};", start)
+    body = text[start:end]
+    return dict(re.findall(r'(\w+):\s*"((?:\\.|[^"\\])*)"', body))
+
+
 class TestExtractNodeTexts(unittest.TestCase):
     def test_extracts_all_39_nodes(self):
         nodes = gn.extract_node_texts(ROOT / "bullion_mk18.html")
@@ -194,6 +202,69 @@ class TestJohnnyPersona(unittest.TestCase):
     def test_mkultra_johnny_caption_text_matches_python(self):
         js_scripts = _johnny_scripts_from_html(ROOT / "bullion_mkultra.html")
         self.assertEqual(js_scripts, gn.JOHNNY_SCRIPTS)
+
+
+class TestEventNarration(unittest.TestCase):
+    """Item 8 (2026-08-02 review): guards the 10 scenario/dropdown triggers +
+    AI-analysis button's event-narration layer the same way TestManifestCompleteness
+    and TestJohnnyPersona guard the per-node one — every EVENT_IDS entry needs
+    a script in both personas' Python dicts, a matching manifest entry in both
+    HTML files, identical caption text between Python and JS, and (once
+    generated) a real non-empty audio file."""
+
+    def test_event_ids_have_alfred_scripts(self):
+        self.assertEqual(set(gn.EVENT_ALFRED_SCRIPTS.keys()), set(gn.EVENT_IDS))
+        for k, v in gn.EVENT_ALFRED_SCRIPTS.items():
+            self.assertTrue(v.strip(), f"empty Alfred event script for {k}")
+
+    def test_event_ids_have_johnny_scripts(self):
+        self.assertEqual(set(gn.EVENT_JOHNNY_SCRIPTS.keys()), set(gn.EVENT_IDS))
+        for k, v in gn.EVENT_JOHNNY_SCRIPTS.items():
+            self.assertTrue(v.strip(), f"empty Johnny event script for {k}")
+
+    def test_mk18_event_manifest_matches_event_ids(self):
+        ids = _js_object_keys(ROOT / "bullion_mk18.html", "EVENT_NARRATION_MANIFEST")
+        self.assertEqual(ids, set(gn.EVENT_IDS))
+
+    def test_mkultra_event_manifest_matches_event_ids(self):
+        ids = _js_object_keys(ROOT / "bullion_mkultra.html", "EVENT_NARRATION_MANIFEST")
+        self.assertEqual(ids, set(gn.EVENT_IDS))
+
+    def test_mk18_event_johnny_manifest_matches_event_ids(self):
+        ids = _js_object_keys(ROOT / "bullion_mk18.html", "EVENT_JOHNNY_MANIFEST")
+        self.assertEqual(ids, set(gn.EVENT_IDS))
+
+    def test_mkultra_event_johnny_manifest_matches_event_ids(self):
+        ids = _js_object_keys(ROOT / "bullion_mkultra.html", "EVENT_JOHNNY_MANIFEST")
+        self.assertEqual(ids, set(gn.EVENT_IDS))
+
+    def test_mk18_event_alfred_text_matches_python(self):
+        js = _double_quoted_dict_from_html(ROOT / "bullion_mk18.html", "EVENT_ALFRED_SCRIPTS")
+        self.assertEqual(js, gn.EVENT_ALFRED_SCRIPTS)
+
+    def test_mkultra_event_alfred_text_matches_python(self):
+        js = _double_quoted_dict_from_html(ROOT / "bullion_mkultra.html", "EVENT_ALFRED_SCRIPTS")
+        self.assertEqual(js, gn.EVENT_ALFRED_SCRIPTS)
+
+    def test_mk18_event_johnny_text_matches_python(self):
+        js = _double_quoted_dict_from_html(ROOT / "bullion_mk18.html", "EVENT_JOHNNY_SCRIPTS")
+        self.assertEqual(js, gn.EVENT_JOHNNY_SCRIPTS)
+
+    def test_mkultra_event_johnny_text_matches_python(self):
+        js = _double_quoted_dict_from_html(ROOT / "bullion_mkultra.html", "EVENT_JOHNNY_SCRIPTS")
+        self.assertEqual(js, gn.EVENT_JOHNNY_SCRIPTS)
+
+    def test_every_event_alfred_clip_exists_and_nonempty(self):
+        for event_id in gn.EVENT_IDS:
+            f = ROOT / "audio" / "narration" / f"event-{event_id}.mp3"
+            self.assertTrue(f.exists(), f"missing {f}")
+            self.assertGreater(f.stat().st_size, 0, f"empty {f}")
+
+    def test_every_event_johnny_clip_exists_and_nonempty(self):
+        for event_id in gn.EVENT_IDS:
+            f = ROOT / "audio" / "narration" / f"johnny-event-{event_id}.mp3"
+            self.assertTrue(f.exists(), f"missing {f}")
+            self.assertGreater(f.stat().st_size, 0, f"empty {f}")
 
 
 if __name__ == "__main__":

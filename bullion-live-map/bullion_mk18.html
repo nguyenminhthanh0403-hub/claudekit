@@ -131,10 +131,12 @@
     background: var(--bg-panel2); color: var(--text);
     border: 1px solid var(--border); border-left-width: 4px;
     border-radius: 6px; padding: 7px 9px; font-size: 12px; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s, border-color 0.15s, opacity 0.32s ease;
   }
   .board-card:hover { background: #182034; border-color: #2a3352; }
   .board-card.hub { font-weight: 700; }
+  /* Mirrors .node-g.dimmed so the board dims exactly like the map does. */
+  .board-card.dimmed { opacity: 0.12; }
 
   .node-g { cursor: pointer; transition: opacity 0.32s ease; }
   .node-g text { pointer-events: none; user-select: none; }
@@ -1953,12 +1955,16 @@ function focusNode(id) {
   window._mk5Node.classed('focus-active', d => d.id === id);
   // Only highlight links that directly terminate on the focused node.
   window._mk5Link.classed('dimmed', d => !(d.source.id === id || d.target.id === id));
+  // The 2D board is a second view of the same nodes — dim it the same way
+  // so focus reads identically whichever tab is showing.
+  document.querySelectorAll('.board-card').forEach(c => c.classList.toggle('dimmed', !keep.has(c.dataset.id)));
 }
 function clearFocus() {
   if (stickyFocusId) { focusNode(stickyFocusId); return; }
   window._mk5Node.classed('dimmed', false);
   window._mk5Node.classed('focus-active', false);
   window._mk5Link.classed('dimmed', false);
+  document.querySelectorAll('.board-card').forEach(c => c.classList.remove('dimmed'));
 }
 
 // ── Relationship colour helpers ──────────────────────────────────────────
@@ -2144,12 +2150,27 @@ function buildBoard() {
       card.style.borderLeftColor = GROUP_COLOR[n.group] || '#8891a6';
       card.textContent = n.label;
       card.setAttribute('aria-label', n.label);
-      card.addEventListener('click', () => openDetail(n));
+      card.dataset.id = n.id;
+      card.addEventListener('click', event => {
+        // Stop the click from bubbling to #board-view's own listener, which
+        // treats any click that reaches it as a background click.
+        event.stopPropagation();
+        stickyFocusId = n.id;
+        focusNode(n.id);
+        openDetail(n);
+      });
       col.appendChild(card);
     });
     view.appendChild(col);
   });
 }
+// A click that lands on the board itself (not a card — those stop
+// propagation above) mirrors the map's background-click deselect.
+document.getElementById('board-view').addEventListener('click', function() {
+  stickyFocusId = null;
+  clearFocus();
+  closeDetail();
+});
 
 function showView(which) {
   const isMap = which !== 'board';
@@ -3558,6 +3579,77 @@ const JOHNNY_SCRIPTS = {
   energy: "Energy sector. Oil and gas company stocks, rising and falling on nothing but the price of crude — about four percent of the S&P by weight, but when oil spikes, these stocks swing the hardest and the fastest. Half hedge, half bet: they're the one corner of the equity market that actually wins when everyone else's input costs are getting crushed.",
   house: "Households. That's you, choom. Two-thirds of the whole economy, every quarter, riding on what you and everyone like you decides to spend. Mortgage rate ticks up, debt payments eat more of the paycheck, confidence wobbles — and suddenly the biggest number in GDP is just a few hundred million people deciding whether to buy the thing or not. Every policy in this whole map, eventually, is aimed at you.",
 };
+// Item 8 (2026-08-02 review): event-triggered narration for the 10 scenario
+// buttons/dropdown entries (all routed through triggerShock()) and the
+// AI-analysis button. Generic flavor lines, not data-dependent — mirrors
+// the node manifest pattern above but keyed by scenario/event id instead
+// of node id. Must stay byte-identical to
+// scripts/generate_narration.py's EVENT_ALFRED_SCRIPTS/EVENT_JOHNNY_SCRIPTS
+// (tested by scripts/test_generate_narration.py).
+const EVENT_NARRATION_MANIFEST = {
+  rate_hike:         'event-rate_hike.mp3',
+  vix_spike:         'event-vix_spike.mp3',
+  cpi_rise:          'event-cpi_rise.mp3',
+  usd_shock:         'event-usd_shock.mp3',
+  bank_stress:       'event-bank_stress.mp3',
+  fiscal_stimulus:   'event-fiscal_stimulus.mp3',
+  fiscal_tightening: 'event-fiscal_tightening.mp3',
+  geo_conflict:      'event-geo_conflict.mp3',
+  trade_war:         'event-trade_war.mp3',
+  deregulation:      'event-deregulation.mp3',
+  ai_analysis:       'event-ai_analysis.mp3',
+};
+const EVENT_ALFRED_SCRIPTS = {
+  rate_hike: "Simulating a fifty basis point rate hike. Borrowing costs rise across the board, and long-duration assets like technology stocks take the hardest hit.",
+  vix_spike: "Simulating a volatility spike above thirty. Investors are fleeing risk for shelter in Treasuries, gold, and defensive stocks.",
+  cpi_rise: "Simulating inflation running hot. Markets are pricing in a more aggressive Federal Reserve well before any actual policy move.",
+  usd_shock: "Simulating a dollar surge. Global funding conditions tighten, squeezing anyone who borrows or buys in dollars.",
+  bank_stress: "Simulating a deposit run on a bank. Lending freezes as money rushes into Treasuries and money market funds.",
+  fiscal_stimulus: "Simulating deficit-funded government spending. Growth gets a boost, but heavier bond issuance pushes yields higher.",
+  fiscal_tightening: "Simulating an austerity or debt-ceiling standoff. Growth drags, and markets price in a political risk premium.",
+  geo_conflict: "Simulating a war or sanctions escalation. Oil supply is disrupted, energy prices spike, and capital rushes toward safe havens.",
+  trade_war: "Simulating new tariffs and a trade war. Import costs rise, and companies with global supply chains come under pressure.",
+  deregulation: "Simulating looser financial rules. Bank profits and lending expand now, at the cost of risk building up unseen.",
+  ai_analysis: "Running the analysis now. One moment, while current conditions are weighed against every driver on this map.",
+};
+const EVENT_JOHNNY_MANIFEST = {
+  rate_hike:         'johnny-event-rate_hike.mp3',
+  vix_spike:         'johnny-event-vix_spike.mp3',
+  cpi_rise:          'johnny-event-cpi_rise.mp3',
+  usd_shock:         'johnny-event-usd_shock.mp3',
+  bank_stress:       'johnny-event-bank_stress.mp3',
+  fiscal_stimulus:   'johnny-event-fiscal_stimulus.mp3',
+  fiscal_tightening: 'johnny-event-fiscal_tightening.mp3',
+  geo_conflict:      'johnny-event-geo_conflict.mp3',
+  trade_war:         'johnny-event-trade_war.mp3',
+  deregulation:      'johnny-event-deregulation.mp3',
+  ai_analysis:       'johnny-event-ai_analysis.mp3',
+};
+const EVENT_JOHNNY_SCRIPTS = {
+  rate_hike: "Rate hike, fifty basis points. Every loan in the country just got more expensive overnight, choom — and the tech stocks feel it worst, 'cause their whole story was cheap money.",
+  vix_spike: "Fear gauge just blew past thirty. Everybody's dumping the risky stuff and running for the shelters — gold, Treasuries, the boring stocks nobody brags about owning.",
+  cpi_rise: "Inflation's running hot again. Markets don't even wait for the Fed anymore, choom — they just price in the pain early.",
+  usd_shock: "Dollar's surging. Feels like a flex until you remember half the planet owes debt in the currency that just got more expensive to pay back.",
+  bank_stress: "Depositors are running for the exits. Lending freezes solid, and the money's already halfway into a Treasury bill before the bank even opens Monday.",
+  fiscal_stimulus: "Government's spending borrowed money again. Growth gets a jolt, but somebody's gotta buy all those new bonds — and that somebody wants a higher rate for the trouble.",
+  fiscal_tightening: "Debt ceiling standoff, choom. Washington plays chicken with the full faith and credit of the whole system, and the market prices in the stupidity.",
+  geo_conflict: "War's broken out, sanctions are flying. Oil supply gets choked, prices spike, and everybody's chrome runs for gold like it's the last exit off a burning highway.",
+  trade_war: "Tariffs just went up. Every company running a global supply chain just got a tax nobody voted for, and tech eats it worst.",
+  deregulation: "Rules just got looser. Banks get to run hotter, profits climb — and somewhere down the line, that's exactly the kind of slack that snaps.",
+  ai_analysis: "Running the numbers now, choom. Give it a second to weigh the whole grid.",
+};
+function resolveEventNarration(eventId) {
+  if (narrationPersona === 'johnny' && EVENT_JOHNNY_MANIFEST[eventId]) {
+    return { file: EVENT_JOHNNY_MANIFEST[eventId], persona: 'JOHNNY', text: EVENT_JOHNNY_SCRIPTS[eventId] };
+  }
+  const file = EVENT_NARRATION_MANIFEST[eventId];
+  return file ? { file, persona: 'ALFRED', text: EVENT_ALFRED_SCRIPTS[eventId] } : null;
+}
+function playEventNarration(eventId) {
+  const resolved = resolveEventNarration(eventId);
+  if (!resolved) return;
+  playNarration(resolved.file, resolved.persona, resolved.text);
+}
 let captionTimeouts = [];
 function pulseOrb() {
   const core = document.querySelector('#persona-orb .orb-core');
@@ -3918,6 +4010,7 @@ function triggerShock(type) {
   applyTransmission(state);
   expandAffected();
   updateMetrics();
+  playEventNarration(type);
   if (SHOCK_WHY[type]) {
     const sorted = Object.fromEntries(Object.entries(nodeMultipliers).sort((a,b)=>Math.abs(b[1])-Math.abs(a[1])));
     renderImpacts(sorted, SHOCK_WHY[type], SHOCK_META[type].title);
@@ -4005,6 +4098,7 @@ async function runAIAnalysis() {
   const btn = document.getElementById('run-ai-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Analyzing...';
+  playEventNarration('ai_analysis');
   const s=applyTransmission(state), ms=buildMacroState(s);
   const systemPrompt = `You are a senior macro strategist at a top-tier Wall Street firm. You receive a MacroMarketState JSON representing current US financial and global macro conditions.\n\nOutput ONLY a strict JSON object with EXACTLY these fields:\n\n{\n  "market_narrative": "Exactly 3 sentences. Institutional-grade language covering the monetary regime, risk appetite, commodity/FX dynamics, and any geopolitical transmission.",\n  "system_health_score": <integer 1-100 where 100 = perfect stability, 50 = moderate stress, <30 = crisis>,\n  "node_impact_multipliers": {\n    "Tech_Equities": <float -1 to 1>, "Financials": <float -1 to 1>, "Defensive": <float -1 to 1>,\n    "Credit_Markets": <float -1 to 1>, "Yield_Curve": <float -1 to 1>, "Fed_Reserve": <float -1 to 1>,\n    "SPX": <float -1 to 1>, "USD": <float -1 to 1>, "Gold": <float -1 to 1>, "Oil": <float -1 to 1>,\n    "EM_FX": <float -1 to 1>, "China": <float -1 to 1>\n  }\n}\n\nPositive multiplier = bullish/stabilising. Negative = bearish/destabilising.\nOutput ONLY valid JSON. No preamble, no commentary, no markdown fences.`;
   let parsed = null;

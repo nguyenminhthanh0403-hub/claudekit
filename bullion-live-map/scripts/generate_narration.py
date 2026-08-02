@@ -31,12 +31,22 @@ SOURCE_HTML = ROOT / "bullion_mk18.html"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
 SAY_VOICE = "Jamie (Premium)"
-ALFRED_RATE = 218
+ALFRED_RATE = 213  # was 218; user review 2026-08-02: "Alfred is speaking too fast"
 
 JOHNNY_EXAGGERATION = 0.8
 JOHNNY_CFG_WEIGHT = 0.3
-JOHNNY_TEMPO = 0.9  # ffmpeg atempo — ChatterboxTTS has no native rate control;
-                    # confirmed-by-ear against the "banks" sample (2026-08-02).
+JOHNNY_TEMPO = 0.95  # ffmpeg atempo — ChatterboxTTS has no native rate control;
+                     # was 0.9, raised per user review 2026-08-02 ("Johnny is
+                     # speaking too slow").
+
+# Loudness target for both personas' final encode — user review 2026-08-02:
+# Johnny measured ~-32 LUFS integrated vs Alfred's ~-20 LUFS on 3 sample
+# node pairs (fed/gold/vix), both around -2..-3 dBTP true peak. A fixed
+# runtime gain multiplier was rejected (per-clip peak headroom varies too
+# much — a gain closing the gap on "fed" would clip on "gold"/"vix");
+# loudnorm is a true loudness normalizer with peak limiting, so it closes
+# the gap correctly per-clip instead of by a single blanket number.
+LOUDNORM_FILTER = "loudnorm=I=-20:TP=-2:LRA=7"
 
 VOICE_SAMPLE_DIR = ROOT / "audio" / "voice_sample"
 USER_VOICE_PATH = VOICE_SAMPLE_DIR / "user_voice.wav"
@@ -87,6 +97,47 @@ JOHNNY_SCRIPTS = {
     "etf": "ETFs. Baskets of stocks wrapped up and traded like a single share, and at this point most new investing money flows straight through them instead of picking stocks one at a time. Convenient, cheap, and it means concentrated flows can now move an entire index at once. Quiet machinery running most of the market's plumbing these days — nobody clocks it till a corner of it, like a high-yield bond ETF, seizes up.",
     "energy": "Energy sector. Oil and gas company stocks, rising and falling on nothing but the price of crude — about four percent of the S&P by weight, but when oil spikes, these stocks swing the hardest and the fastest. Half hedge, half bet: they're the one corner of the equity market that actually wins when everyone else's input costs are getting crushed.",
     "house": "Households. That's you, choom. Two-thirds of the whole economy, every quarter, riding on what you and everyone like you decides to spend. Mortgage rate ticks up, debt payments eat more of the paycheck, confidence wobbles — and suddenly the biggest number in GDP is just a few hundred million people deciding whether to buy the thing or not. Every policy in this whole map, eventually, is aimed at you.",
+}
+
+# Item 8 (2026-08-02 review): short flavor lines fired on the 10 scenario
+# triggers (5 quick-shock buttons + 5 dropdown scenarios, all routed through
+# the same triggerShock(type) in the HTML) and on the AI-analysis button —
+# a second event-driven narration layer alongside the per-node one above.
+# Deliberately generic (not data-dependent): the AI-analysis line always
+# reads the same regardless of the numeric result, since there is no static
+# audio file for every possible score.
+EVENT_IDS = [
+    "rate_hike", "vix_spike", "cpi_rise", "usd_shock", "bank_stress",
+    "fiscal_stimulus", "fiscal_tightening", "geo_conflict", "trade_war",
+    "deregulation", "ai_analysis",
+]
+
+EVENT_ALFRED_SCRIPTS = {
+    "rate_hike": "Simulating a fifty basis point rate hike. Borrowing costs rise across the board, and long-duration assets like technology stocks take the hardest hit.",
+    "vix_spike": "Simulating a volatility spike above thirty. Investors are fleeing risk for shelter in Treasuries, gold, and defensive stocks.",
+    "cpi_rise": "Simulating inflation running hot. Markets are pricing in a more aggressive Federal Reserve well before any actual policy move.",
+    "usd_shock": "Simulating a dollar surge. Global funding conditions tighten, squeezing anyone who borrows or buys in dollars.",
+    "bank_stress": "Simulating a deposit run on a bank. Lending freezes as money rushes into Treasuries and money market funds.",
+    "fiscal_stimulus": "Simulating deficit-funded government spending. Growth gets a boost, but heavier bond issuance pushes yields higher.",
+    "fiscal_tightening": "Simulating an austerity or debt-ceiling standoff. Growth drags, and markets price in a political risk premium.",
+    "geo_conflict": "Simulating a war or sanctions escalation. Oil supply is disrupted, energy prices spike, and capital rushes toward safe havens.",
+    "trade_war": "Simulating new tariffs and a trade war. Import costs rise, and companies with global supply chains come under pressure.",
+    "deregulation": "Simulating looser financial rules. Bank profits and lending expand now, at the cost of risk building up unseen.",
+    "ai_analysis": "Running the analysis now. One moment, while current conditions are weighed against every driver on this map.",
+}
+
+EVENT_JOHNNY_SCRIPTS = {
+    "rate_hike": "Rate hike, fifty basis points. Every loan in the country just got more expensive overnight, choom — and the tech stocks feel it worst, 'cause their whole story was cheap money.",
+    "vix_spike": "Fear gauge just blew past thirty. Everybody's dumping the risky stuff and running for the shelters — gold, Treasuries, the boring stocks nobody brags about owning.",
+    "cpi_rise": "Inflation's running hot again. Markets don't even wait for the Fed anymore, choom — they just price in the pain early.",
+    "usd_shock": "Dollar's surging. Feels like a flex until you remember half the planet owes debt in the currency that just got more expensive to pay back.",
+    "bank_stress": "Depositors are running for the exits. Lending freezes solid, and the money's already halfway into a Treasury bill before the bank even opens Monday.",
+    "fiscal_stimulus": "Government's spending borrowed money again. Growth gets a jolt, but somebody's gotta buy all those new bonds — and that somebody wants a higher rate for the trouble.",
+    "fiscal_tightening": "Debt ceiling standoff, choom. Washington plays chicken with the full faith and credit of the whole system, and the market prices in the stupidity.",
+    "geo_conflict": "War's broken out, sanctions are flying. Oil supply gets choked, prices spike, and everybody's chrome runs for gold like it's the last exit off a burning highway.",
+    "trade_war": "Tariffs just went up. Every company running a global supply chain just got a tax nobody voted for, and tech eats it worst.",
+    "deregulation": "Rules just got looser. Banks get to run hotter, profits climb — and somewhere down the line, that's exactly the kind of slack that snaps.",
+    "ai_analysis": "Running the numbers now, choom. Give it a second to weigh the whole grid.",
 }
 
 PROBE_SCRIPT = (
@@ -218,6 +269,7 @@ def synthesize(text, rate, output_mp3_path, vc, ref_dict):
 
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(wav_out_path),
+             "-filter:a", LOUDNORM_FILTER,
              "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
             check=True,
         )
@@ -362,7 +414,7 @@ def synthesize_johnny(text, output_mp3_path, tts):
         ta.save(str(wav_path), wav, tts.sr)
         subprocess.run(
             ["ffmpeg", "-y", "-i", str(wav_path),
-             "-filter:a", f"atempo={JOHNNY_TEMPO}",
+             "-filter:a", f"atempo={JOHNNY_TEMPO},{LOUDNORM_FILTER}",
              "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
             check=True,
         )
