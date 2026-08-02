@@ -27,6 +27,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 OUTPUT_DIR = ROOT / "audio" / "narration"
+JOHNNY_RAW_CACHE_DIR = OUTPUT_DIR / "raw_cache_johnny"
 SOURCE_HTML = ROOT / "bullion_mk18.html"
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 
@@ -400,26 +401,32 @@ def synthesize_johnny(text, output_mp3_path, tts):
     blending in Tom/Jamie/the user's voice), applies a JOHNNY_TEMPO time-stretch
     (pitch-preserved — ChatterboxTTS has no native rate control), then encodes
     to MP3 via ffmpeg. Fails loudly on any model or subprocess error — never
-    falls back silently."""
-    import torchaudio as ta
-    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
-        wav_path = Path(tmp.name)
-    try:
+    falls back silently.
+
+    Caches the pre-tempo raw WAV in JOHNNY_RAW_CACHE_DIR, keyed by the output
+    mp3's filename stem. A cache hit skips tts.generate() (the expensive,
+    memory-heavy diffusion sampling) entirely and re-encodes straight from
+    the cached raw audio — so a future JOHNNY_TEMPO-only change is a cheap
+    ffmpeg re-encode instead of a full regen. Only valid for tempo-only
+    changes: if JOHNNY_EXAGGERATION, JOHNNY_CFG_WEIGHT, or the script text
+    changes, delete the corresponding cached .wav to force fresh generation."""
+    JOHNNY_RAW_CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    raw_wav_path = JOHNNY_RAW_CACHE_DIR / f"{Path(output_mp3_path).stem}.wav"
+    if not raw_wav_path.exists():
+        import torchaudio as ta
         wav = tts.generate(
             text,
             audio_prompt_path=str(ACTOR_SAMPLE_PATH),
             exaggeration=JOHNNY_EXAGGERATION,
             cfg_weight=JOHNNY_CFG_WEIGHT,
         )
-        ta.save(str(wav_path), wav, tts.sr)
-        subprocess.run(
-            ["ffmpeg", "-y", "-i", str(wav_path),
-             "-filter:a", f"atempo={JOHNNY_TEMPO},{LOUDNORM_FILTER}",
-             "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
-            check=True,
-        )
-    finally:
-        wav_path.unlink(missing_ok=True)
+        ta.save(str(raw_wav_path), wav, tts.sr)
+    subprocess.run(
+        ["ffmpeg", "-y", "-i", str(raw_wav_path),
+         "-filter:a", f"atempo={JOHNNY_TEMPO},{LOUDNORM_FILTER}",
+         "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
+        check=True,
+    )
 
 
 def _voice_installed(voice_name):
