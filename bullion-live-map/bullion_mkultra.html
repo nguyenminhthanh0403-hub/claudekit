@@ -218,10 +218,38 @@
   .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
   .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
-  #detail-caption { margin: 8px 0; padding: 6px 8px; border-radius: 6px; background: var(--bg-panel2); border: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
-  #detail-caption[hidden] { display: none; }
-  .caption-persona { color: var(--gold); font-weight: 700; margin-right: 4px; }
-  .caption-words { color: var(--text); }
+  /* ── Narration caption: a persistent subtitle bar, deliberately OUTSIDE
+     #detail-panel so closing/clicking off the node never hides mid-line
+     narration text (it used to live inside #detail-caption in the panel
+     body and vanish the instant the panel closed). Styled per-speaker:
+     cyberpunk yellow/mono glow for Johnny, cool blue for Alfred. ────── */
+  #narration-caption {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 20; max-width: min(640px, 88vw);
+    padding: 10px 18px; border-radius: 10px;
+    background: rgba(11,14,22,0.9); backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    font-size: 13px; line-height: 1.5; text-align: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    pointer-events: none; /* subtitle-style: never blocks clicks underneath */
+  }
+  #narration-caption.hidden { display: none; }
+  #narration-caption .caption-persona { font-weight: 700; margin-right: 6px; }
+  #narration-caption .caption-words { color: var(--text); }
+  #narration-caption.persona-alfred { border-color: var(--blue-dim); }
+  #narration-caption.persona-alfred .caption-persona { color: var(--blue); text-transform: uppercase; letter-spacing: 0.06em; }
+  #narration-caption.persona-alfred .caption-words { color: #cfe0f5; }
+  #narration-caption.persona-johnny {
+    border-color: rgba(212,184,105,0.7);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 18px rgba(255,196,0,0.25);
+  }
+  #narration-caption.persona-johnny .caption-persona,
+  #narration-caption.persona-johnny .caption-words {
+    font-family: ui-monospace, "SF Mono", "Courier New", monospace;
+    color: #ffe45c;
+    text-shadow: 0 0 6px rgba(255,214,0,0.85), 0 0 14px rgba(255,153,0,0.45);
+  }
+  #narration-caption.persona-johnny .caption-persona { text-transform: uppercase; letter-spacing: 0.14em; }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -278,12 +306,21 @@
     color: var(--gold-dim); font-weight: 700; margin: 2px 0 0;
   }
 
-  /* ── Persona orb: floating narration-persona indicator, replaces the old
-     header toggle button (#persona-toggle-btn) ───────────────────────── */
+  /* ── Persona orb: narration-persona indicator + click/keyboard target,
+     centred at the origin of the orbital sphere — the same point every node
+     orbits, like the sun in a solar system — instead of a screen-corner
+     toggle button. Deliberately not connected to any node by a link/tube.
+     A child of #stage now (not a body-level fixed sibling) so it rides
+     along automatically when #stage itself shifts on panel-open, and its
+     centring lines up with the real glowing sphere the Renderer draws at
+     the WebGL scene's origin (see Renderer's sunMesh/setOrbState) — camera
+     panning is disabled (controls.enablePan = false) so that origin always
+     projects to dead-centre of the canvas, whatever the camera angle. ── */
   #persona-orb {
-    position: fixed; right: 18px; bottom: 18px; z-index: 15;
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
+    z-index: 8;
     display: flex; flex-direction: column; align-items: center; gap: 4px;
-    cursor: pointer; transition: transform 0.28s ease;
+    cursor: pointer;
   }
   .orb-core {
     width: 52px; height: 52px; border-radius: 50%;
@@ -325,14 +362,23 @@
     100% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0); }
   }
   .orb-nudge-tip {
-    position: absolute; right: 0; bottom: 100%; margin-bottom: 8px;
+    position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 8px;
     background: rgba(11,14,22,0.95); border: 1px solid var(--border); border-radius: 6px;
     padding: 4px 8px; font-size: 10.5px; white-space: nowrap; color: var(--text-dim);
   }
-  /* Requires #detail-panel to precede #persona-orb in DOM order (both are
-     body-level siblings, outside #app) — the general sibling combinator
-     silently stops matching if that order ever changes. */
-  #detail-panel.open ~ #persona-orb { transform: translateX(calc(-1 * min(380px, 92vw))); }
+  /* Fallback dock: the Overview/board tab hides #stage entirely (display:
+     none), which would take the orb down with it since it's normally
+     #stage's child. showView() reparents the orb to <body> and adds this
+     class whenever the board tab is active, so the persona toggle stays
+     reachable there too — same corner-button treatment the orb (and its
+     2D-map counterpart in bullion_mk18.html) always used before this moved
+     into the 3D scene. */
+  #persona-orb.orb-docked {
+    position: fixed; left: auto; top: auto; right: 18px; bottom: 18px;
+    transform: none; z-index: 15; transition: transform 0.28s ease;
+  }
+  #persona-orb.orb-docked .orb-nudge-tip { left: auto; right: 0; transform: none; }
+  #detail-panel.open ~ #persona-orb.orb-docked { transform: translateX(calc(-1 * min(380px, 92vw))); }
 
   #hint-banner {
     position: fixed; top: 66px; left: 50%; transform: translateX(-50%);
@@ -415,7 +461,12 @@
     #detail-panel.open { transform: translateY(0); }
     /* Shift the graph UP so the reveal stays visible above the sheet */
     #app.panel-open #stage { transform: translateY(-16vh); }
-    #detail-panel.open ~ #persona-orb { transform: translateY(calc(-62vh - 12px)); }
+    /* Keep the caption above the bottom sheet instead of buried under it */
+    #app.panel-open #narration-caption { bottom: calc(62vh + 12px); max-width: 92vw; }
+    /* Only the docked (board-tab) orb needs to dodge the bottom sheet — the
+       centred 3D-stage orb never coexists with it (#stage is hidden while
+       the sheet's board tab is active). */
+    #detail-panel.open ~ #persona-orb.orb-docked { transform: translateY(calc(-62vh - 12px)); }
   }
 
   /* ═══ Mk5 additions: scenario controls, glossary, AI drawer, stats ═══ */
@@ -648,6 +699,17 @@
       <div id="coach-body"></div>
       <div id="coach-actions"><button class="btn" id="coach-next">Got it &rarr;</button></div>
     </div>
+    <div id="persona-orb" title="Switch narration voice" class="idle persona-alfred"
+         role="button" tabindex="0" aria-label="Switch narration voice, currently Alfred">
+      <div class="orb-core"><span class="orb-icon"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
+        <path d="M7 15 L17 15 L17 17 L7 17 Z" fill="#fff" fill-opacity="0.55"/>
+        <path d="M9 6 L15 6 L15 15 L9 15 Z" fill="#fff" fill-opacity="0.55"/>
+        <path d="M9 8.5 L15 8.5 L15 9.5 L9 9.5 Z" fill="#fff" fill-opacity="0.35"/>
+        <path d="M17.5 16 L20.5 20 L19 22" stroke="#fff" stroke-width="1.4" stroke-opacity="0.55" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg></span></div>
+      <div class="orb-label">Alfred</div>
+      <div class="orb-nudge-tip" hidden>Tap to switch narrator voice</div>
+    </div>
   </div>
   <div id="board-view" role="tabpanel" aria-label="Overview board" hidden></div>
 </div>
@@ -667,7 +729,6 @@
     <div class="section-label">Overview</div>
     <ul id="detail-bullets"></ul>
     <div class="detail-live" id="detail-live"></div>
-    <div id="detail-caption" hidden></div>
     <div class="section-label">Causal Relationships</div>
     <div class="rel-summary" id="rel-summary"></div>
     <div id="rel-list"></div>
@@ -676,17 +737,7 @@
 
 <div id="legend-box"></div>
 
-<div id="persona-orb" title="Switch narration voice" class="idle persona-alfred"
-     role="button" tabindex="0" aria-label="Switch narration voice, currently Alfred">
-  <div class="orb-core"><span class="orb-icon"><svg viewBox="0 0 24 24" width="24" height="24" aria-hidden="true">
-    <path d="M7 15 L17 15 L17 17 L7 17 Z" fill="#fff" fill-opacity="0.55"/>
-    <path d="M9 6 L15 6 L15 15 L9 15 Z" fill="#fff" fill-opacity="0.55"/>
-    <path d="M9 8.5 L15 8.5 L15 9.5 L9 9.5 Z" fill="#fff" fill-opacity="0.35"/>
-    <path d="M17.5 16 L20.5 20 L19 22" stroke="#fff" stroke-width="1.4" stroke-opacity="0.55" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-  </svg></span></div>
-  <div class="orb-label">Alfred</div>
-  <div class="orb-nudge-tip" hidden>Tap to switch narrator voice</div>
-</div>
+<div id="narration-caption" class="hidden persona-alfred" aria-live="polite"></div>
 
 <!-- ── Control drawer: scenarios, live metrics, glossary, AI analysis ── -->
 <div id="control-drawer">
@@ -1652,6 +1703,19 @@ const Renderer = (function () {
   const HIGHLIGHT_SCALE   = 1.35;  // selected orb grows this much
   let camTween = null;             // in-flight "redirect the globe to a node" camera move
 
+  // Persona "sun" (Johnny/Alfred bubble): a real WebGL mesh sitting at the
+  // world origin — the one point every node orbits, same as the sun in a
+  // solar system — instead of a flat DOM circle pinned to a screen corner.
+  // Deliberately kept OUT of meshList: it must never be raycast-picked,
+  // dimmed by focus()/clearFocusImpl(), or read as a node by anything that
+  // iterates meshList. Click/keyboard toggling stays on the DOM #persona-orb
+  // (now CSS-centred over this same point); setOrbState() below is its only
+  // write surface, driven from the app layer's setOrbNarrating/
+  // applyPersonaToggle so the two never drift out of sync.
+  let sunMesh = null, sunGlow = null;
+  let orbPersona = 'alfred', orbActive = false;
+  const ORB_COLOR = { alfred: 0x4d7fb8, johnny: 0xe0654f };
+
   // Declutter (Phase 5): the set of node ids currently allowed to show a
   // label — hubs are always in it; focus()/clearFocus() (already called on
   // every hover/click/deselect) add or reset the focused node + its
@@ -2019,6 +2083,22 @@ const Renderer = (function () {
     });
   }
 
+  // Drives the sun's idle breathe / active glow — mirrors the DOM orb's own
+  // CSS keyframes (orbBreathe: 3.6s, opacity 0.4<->0.65, scale 1<->1.12) so
+  // the WebGL body and the DOM click-target read as one synchronized thing.
+  function updateSunPulse(time) {
+    if (!sunMesh) return;
+    const t = (time || 0) / 1000;
+    const cyclePos = ((t % 3.6) / 3.6) * Math.PI * 2;
+    const breathe = 0.5 - 0.5 * Math.cos(cyclePos); // 0 -> 1 -> 0
+    const targetOpacity = orbActive ? 1 : (NODE_BASE_OPACITY + breathe * 0.25);
+    const targetScale = orbActive ? 1.15 : (1 + breathe * 0.12);
+    sunMesh.material.opacity += (targetOpacity - sunMesh.material.opacity) * 0.15;
+    const s = sunMesh.scale.x + (targetScale - sunMesh.scale.x) * 0.15;
+    sunMesh.scale.setScalar(s);
+    if (sunGlow) sunGlow.material.opacity = orbActive ? 0.85 : (0.4 + breathe * 0.2);
+  }
+
   // Small canvas-drawn radial-gradient texture used for the hub glow sprites —
   // avoids pulling in an EffectComposer/UnrealBloomPass just for this.
   function makeGlowTexture() {
@@ -2070,6 +2150,7 @@ const Renderer = (function () {
     meshById = {}; meshList = []; baseVisible = {}; layerVis = {};
     linkObjs = []; linkBaseVisible = {}; linkLayerVis = {};
     hoveredId = null; downPos = null; longPressId = null;
+    sunMesh = null; sunGlow = null; // scene.traverse() above already disposed their geometry/material
   }
 
   function updatePointer(event) {
@@ -2168,6 +2249,7 @@ const Renderer = (function () {
     updateCamTween(time);       // must run before controls.update() reads camera.position
     if (controls) controls.update();
     updateHubPulse(time);
+    updateSunPulse(time);
     updateTweens(time);
     updateColorTweens(time);
     // Label projection touches the DOM (not the GPU), so it's throttled to
@@ -2244,6 +2326,25 @@ const Renderer = (function () {
     pointer = new THREE.Vector2(-10, -10);
 
     const glowTex = makeGlowTexture();
+
+    // Persona sun: real geometry at the origin, not a decal — see the
+    // ORB_COLOR/sunMesh comment above for why it stays out of meshList.
+    const sunColor = new THREE.Color(ORB_COLOR[orbPersona]);
+    const sunMat = new THREE.MeshStandardMaterial({
+      color: sunColor, transparent: true, opacity: NODE_BASE_OPACITY,
+      emissive: sunColor.clone(), emissiveIntensity: 0.55,
+      roughness: 0.35, metalness: 0.1,
+    });
+    sunMesh = new THREE.Mesh(new THREE.SphereGeometry(16, 24, 18), sunMat);
+    sunMesh.position.set(0, 0, 0);
+    scene.add(sunMesh);
+    sunGlow = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: glowTex, color: sunColor, transparent: true, opacity: 0.4,
+      depthWrite: false, blending: THREE.AdditiveBlending,
+    }));
+    sunGlow.position.set(0, 0, 0);
+    sunGlow.scale.set(70, 70, 1);
+    scene.add(sunGlow);
 
     nodesArr.forEach((d, i) => {
       const meshR = Math.max(3.5, (d.r || 8) * NODE_UNIT);
@@ -2399,6 +2500,18 @@ const Renderer = (function () {
     linkObjs.forEach(lo => { lo.mat.opacity = lo.baseOpacity != null ? lo.baseOpacity : 0.55; });
   }
 
+  // Public write surface for the persona sun — called from the app layer's
+  // setOrbNarrating/applyPersonaToggle so the WebGL body always matches
+  // whichever narrator + narrating-state the DOM #persona-orb shows.
+  function setOrbState(persona, active) {
+    orbPersona = persona === 'johnny' ? 'johnny' : 'alfred';
+    orbActive = !!active;
+    if (!THREE) return;
+    const c = new THREE.Color(ORB_COLOR[orbPersona]);
+    if (sunMesh) { sunMesh.material.color.copy(c); sunMesh.material.emissive.copy(c); }
+    if (sunGlow) sunGlow.material.color.copy(c);
+  }
+
   function setLayerFilter(activeLayersSet) {
     if (!ready) return;
     Object.keys(meshById).forEach(id => {
@@ -2439,7 +2552,7 @@ const Renderer = (function () {
 
   return {
     build, redraw, setVisibility, focus, clearFocus: clearFocusImpl,
-    setLayerFilter, recolor, resetView, focusCameraOn,
+    setLayerFilter, recolor, resetView, focusCameraOn, setOrbState,
     nodeById: id => nodesDataIndex[id],
     nodes: () => nodesData,
     onNodeActivate: fn => cbActivate.push(fn),
@@ -2616,11 +2729,6 @@ function buildRelationships(d) {
     const word = (r.dir === 'out' ? SIGN_WORD[sign] : SIGN_WORD_IN[sign]);
     const arrow = r.dir === 'out' ? '&rarr;' : '&larr;';
     const name = nodeById[r.other].label;
-    // Plain-language lead so the direction and effect read in words, not just an arrow.
-    const effect = sign === '1' ? 'raises' : sign === '-1' ? 'lowers' : 'shifts';
-    const lead = (r.dir === 'in')
-      ? 'When <b>' + name + '</b> rises, it ' + effect + ' this'
-      : 'This ' + effect + ' <b>' + name + '</b> when it rises';
     return '<div class="rel-row" data-to="' + r.other + '">' +
         '<div class="rel-row-top">' +
           '<span class="rel-dot" style="background:' + color + '"></span>' +
@@ -2637,7 +2745,6 @@ function buildRelationships(d) {
           (r.l.conf ? '<span class="tier-badge tier ' + r.l.conf + '" title="' +
                       TIER_TITLE[r.l.conf] + '">' + r.l.conf + '</span> ' : '') +
           '<span class="rel-lead" style="color:' + color + '">' + word + '.</span> ' +
-          '<span class="rel-lead">' + enrichText(lead) + '.</span> ' +
           enrichText(r.l.why) +
           '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span>' +
           (r.l.fieldNote ? '<div class="rel-field-note">' + enrichText(r.l.fieldNote) +
@@ -2730,7 +2837,11 @@ function openDetail(d) {
   document.getElementById('app').classList.add('panel-open');
 }
 function closeDetail() {
-  clearCaption();
+  // Deliberately NOT clearing the caption here: it now lives in the
+  // persistent #narration-caption bar (outside #detail-panel) so an
+  // accidental click-away doesn't cut off narration text mid-line. It's
+  // only cleared when a new line starts (playNarration) or the current
+  // one finishes (the 'ended' handler).
   openDetailNode = null;
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('app').classList.remove('panel-open');
@@ -2770,11 +2881,22 @@ function buildBoard() {
 
 function showView(which) {
   const is3d = which !== 'board';
-  document.getElementById('stage').style.display = is3d ? '' : 'none';
+  const stageEl = document.getElementById('stage');
+  stageEl.style.display = is3d ? '' : 'none';
   document.getElementById('board-view').hidden = is3d;
   const t3 = document.getElementById('tab-3d'), tb = document.getElementById('tab-board');
   t3.classList.toggle('active', is3d);  t3.setAttribute('aria-selected', String(is3d));
   tb.classList.toggle('active', !is3d); tb.setAttribute('aria-selected', String(!is3d));
+  // The persona orb normally lives centred inside #stage (the solar-system
+  // "sun" position), but #stage goes display:none on the board tab, which
+  // would take the orb down with it. Reparent it to <body> and dock it in
+  // the corner (same fallback the 2D map uses) so the narration toggle
+  // stays reachable while browsing the board.
+  const orb = document.getElementById('persona-orb');
+  if (orb) {
+    orb.classList.toggle('orb-docked', !is3d);
+    (is3d ? stageEl : document.body).appendChild(orb);
+  }
   // The 3D canvas sizes itself from #stage; while hidden it can read 0 width,
   // so re-fit it the moment we come back to the map (redraw() no-ops if the
   // scene isn't ready yet).
@@ -4209,22 +4331,25 @@ function setOrbNarrating(on) {
   if (!orb) return;
   orb.classList.toggle('active', on);
   orb.classList.toggle('idle', !on);
+  if (Renderer.setOrbState) Renderer.setOrbState(narrationPersona, on);
 }
 function clearCaption() {
   setOrbNarrating(false);
   captionTimeouts.forEach(clearTimeout);
   captionTimeouts = [];
-  const host = document.getElementById('detail-caption');
-  if (host) { host.hidden = true; host.innerHTML = ''; }
+  const host = document.getElementById('narration-caption');
+  if (host) { host.classList.add('hidden'); host.innerHTML = ''; }
 }
 function startCaption(persona, text, duration) {
   dismissOrbNudge();
   setOrbNarrating(true);
-  const host = document.getElementById('detail-caption');
+  const host = document.getElementById('narration-caption');
   if (!host || !text) return;
+  host.classList.toggle('persona-johnny', persona === 'JOHNNY');
+  host.classList.toggle('persona-alfred', persona !== 'JOHNNY');
   const words = text.trim().split(/\s+/);
   const totalChars = words.reduce(function(sum, w) { return sum + w.length; }, 0) || 1;
-  host.hidden = false;
+  host.classList.remove('hidden');
   host.innerHTML = '<span class="caption-persona">' + persona + ':</span> <span class="caption-words"></span>';
   const wordsHost = host.querySelector('.caption-words');
   let elapsed = 0;
@@ -4239,15 +4364,28 @@ function startCaption(persona, text, duration) {
     elapsed += wordDuration;
   });
 }
+let currentNarrationAudio = null;
 function playNarration(file, persona, text) {
   clearCaption();
+  // Switching nodes mid-line used to leave the old clip playing underneath
+  // the new one; a fully-stopped previous Audio (not just .pause(), which
+  // some browsers still let bleed a trailing buffer) is what guarantees the
+  // new line starts into silence.
+  if (currentNarrationAudio) {
+    currentNarrationAudio.pause();
+    currentNarrationAudio.currentTime = 0;
+    currentNarrationAudio.src = '';
+  }
   const audio = new Audio('audio/narration/' + file);
+  currentNarrationAudio = audio;
   if (persona && text) {
     audio.addEventListener('loadedmetadata', function() {
       startCaption(persona, text, audio.duration);
     });
   }
-  audio.addEventListener('ended', function() { setOrbNarrating(false); });
+  audio.addEventListener('ended', function() {
+    if (currentNarrationAudio === audio) { currentNarrationAudio = null; clearCaption(); }
+  });
   audio.play().catch(function(err) {
     console.warn('Narration playback failed:', err);
   });
@@ -4274,6 +4412,7 @@ function applyPersonaToggle() {
   orb.querySelector('.orb-icon').innerHTML = isJohnny ? JOHNNY_ICON_SVG : ALFRED_ICON_SVG;
   orb.querySelector('.orb-label').textContent = isJohnny ? 'Johnny' : 'Alfred';
   orb.setAttribute('aria-label', 'Switch narration voice, currently ' + (isJohnny ? 'Johnny' : 'Alfred'));
+  if (Renderer.setOrbState) Renderer.setOrbState(narrationPersona, orb.classList.contains('active'));
 }
 function toggleNarrationPersona() {
   narrationPersona = narrationPersona === 'alfred' ? 'johnny' : 'alfred';

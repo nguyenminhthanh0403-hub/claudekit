@@ -189,10 +189,38 @@
   .detail-header-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
   .narrate-btn { background: none; border: 1px solid var(--border); border-radius: 6px; color: var(--gold-dim); font-size: 14px; cursor: pointer; line-height: 1; padding: 3px 7px; }
   .narrate-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
-  #detail-caption { margin: 8px 0; padding: 6px 8px; border-radius: 6px; background: var(--bg-panel2); border: 1px solid var(--border); font-size: 12px; line-height: 1.5; }
-  #detail-caption[hidden] { display: none; }
-  .caption-persona { color: var(--gold); font-weight: 700; margin-right: 4px; }
-  .caption-words { color: var(--text); }
+  /* ── Narration caption: a persistent subtitle bar, deliberately OUTSIDE
+     #detail-panel so closing/clicking off the node never hides mid-line
+     narration text (it used to live inside #detail-caption in the panel
+     body and vanish the instant the panel closed). Styled per-speaker:
+     cyberpunk yellow/mono glow for Johnny, cool blue for Alfred. ────── */
+  #narration-caption {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 20; max-width: min(640px, 88vw);
+    padding: 10px 18px; border-radius: 10px;
+    background: rgba(11,14,22,0.9); backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    font-size: 13px; line-height: 1.5; text-align: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    pointer-events: none; /* subtitle-style: never blocks clicks underneath */
+  }
+  #narration-caption.hidden { display: none; }
+  #narration-caption .caption-persona { font-weight: 700; margin-right: 6px; }
+  #narration-caption .caption-words { color: var(--text); }
+  #narration-caption.persona-alfred { border-color: var(--blue-dim); }
+  #narration-caption.persona-alfred .caption-persona { color: var(--blue); text-transform: uppercase; letter-spacing: 0.06em; }
+  #narration-caption.persona-alfred .caption-words { color: #cfe0f5; }
+  #narration-caption.persona-johnny {
+    border-color: rgba(212,184,105,0.7);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45), 0 0 18px rgba(255,196,0,0.25);
+  }
+  #narration-caption.persona-johnny .caption-persona,
+  #narration-caption.persona-johnny .caption-words {
+    font-family: ui-monospace, "SF Mono", "Courier New", monospace;
+    color: #ffe45c;
+    text-shadow: 0 0 6px rgba(255,214,0,0.85), 0 0 14px rgba(255,153,0,0.45);
+  }
+  #narration-caption.persona-johnny .caption-persona { text-transform: uppercase; letter-spacing: 0.14em; }
   #detail-close { background: none; border: none; color: var(--text-dim); font-size: 20px; cursor: pointer; line-height: 1; padding: 2px 6px; }
   #detail-close:hover { color: var(--text); }
   #detail-body { padding: 14px 18px; overflow-y: auto; flex: 1 1 auto; font-size: 13px; line-height: 1.55; touch-action: pan-y; }
@@ -381,6 +409,8 @@
     #detail-panel.open { transform: translateY(0); }
     /* Shift the graph UP so the reveal stays visible above the sheet */
     #app.panel-open #stage { transform: translateY(-16vh); }
+    /* Keep the caption above the bottom sheet instead of buried under it */
+    #app.panel-open #narration-caption { bottom: calc(62vh + 12px); max-width: 92vw; }
     #detail-panel.open ~ #persona-orb { transform: translateY(calc(-62vh - 12px)); }
   }
 
@@ -615,7 +645,6 @@
     <div class="section-label">Overview</div>
     <ul id="detail-bullets"></ul>
     <div class="detail-live" id="detail-live"></div>
-    <div id="detail-caption" hidden></div>
     <div class="section-label">Causal Relationships</div>
     <div class="rel-summary" id="rel-summary"></div>
     <div id="rel-list"></div>
@@ -623,6 +652,8 @@
 </div>
 
 <div id="legend-box"></div>
+
+<div id="narration-caption" class="hidden persona-alfred" aria-live="polite"></div>
 
 <div id="persona-orb" title="Switch narration voice" class="idle persona-alfred"
      role="button" tabindex="0" aria-label="Switch narration voice, currently Alfred">
@@ -1979,11 +2010,6 @@ function buildRelationships(d) {
     const word = (r.dir === 'out' ? SIGN_WORD[sign] : SIGN_WORD_IN[sign]);
     const arrow = r.dir === 'out' ? '&rarr;' : '&larr;';
     const name = nodeById[r.other].label;
-    // Plain-language lead so the direction and effect read in words, not just an arrow.
-    const effect = sign === '1' ? 'raises' : sign === '-1' ? 'lowers' : 'shifts';
-    const lead = (r.dir === 'in')
-      ? 'When <b>' + name + '</b> rises, it ' + effect + ' this'
-      : 'This ' + effect + ' <b>' + name + '</b> when it rises';
     return '<div class="rel-row" data-to="' + r.other + '">' +
         '<div class="rel-row-top">' +
           '<span class="rel-dot" style="background:' + color + '"></span>' +
@@ -2000,7 +2026,6 @@ function buildRelationships(d) {
           (r.l.conf ? '<span class="tier-badge tier ' + r.l.conf + '" title="' +
                       TIER_TITLE[r.l.conf] + '">' + r.l.conf + '</span> ' : '') +
           '<span class="rel-lead" style="color:' + color + '">' + word + '.</span> ' +
-          '<span class="rel-lead">' + enrichText(lead) + '.</span> ' +
           enrichText(r.l.why) +
           '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span></div>' +
       '</div>';
@@ -2083,7 +2108,11 @@ function openDetail(d) {
   document.getElementById('app').classList.add('panel-open');
 }
 function closeDetail() {
-  clearCaption();
+  // Deliberately NOT clearing the caption here: it now lives in the
+  // persistent #narration-caption bar (outside #detail-panel) so an
+  // accidental click-away doesn't cut off narration text mid-line. It's
+  // only cleared when a new line starts (playNarration) or the current
+  // one finishes (the 'ended' handler).
   openDetailNode = null;
   document.getElementById('detail-panel').classList.remove('open');
   document.getElementById('app').classList.remove('panel-open');
@@ -3547,17 +3576,19 @@ function clearCaption() {
   setOrbNarrating(false);
   captionTimeouts.forEach(clearTimeout);
   captionTimeouts = [];
-  const host = document.getElementById('detail-caption');
-  if (host) { host.hidden = true; host.innerHTML = ''; }
+  const host = document.getElementById('narration-caption');
+  if (host) { host.classList.add('hidden'); host.innerHTML = ''; }
 }
 function startCaption(persona, text, duration) {
   dismissOrbNudge();
   setOrbNarrating(true);
-  const host = document.getElementById('detail-caption');
+  const host = document.getElementById('narration-caption');
   if (!host || !text) return;
+  host.classList.toggle('persona-johnny', persona === 'JOHNNY');
+  host.classList.toggle('persona-alfred', persona !== 'JOHNNY');
   const words = text.trim().split(/\s+/);
   const totalChars = words.reduce(function(sum, w) { return sum + w.length; }, 0) || 1;
-  host.hidden = false;
+  host.classList.remove('hidden');
   host.innerHTML = '<span class="caption-persona">' + persona + ':</span> <span class="caption-words"></span>';
   const wordsHost = host.querySelector('.caption-words');
   let elapsed = 0;
@@ -3572,15 +3603,28 @@ function startCaption(persona, text, duration) {
     elapsed += wordDuration;
   });
 }
+let currentNarrationAudio = null;
 function playNarration(file, persona, text) {
   clearCaption();
+  // Switching nodes mid-line used to leave the old clip playing underneath
+  // the new one; a fully-stopped previous Audio (not just .pause(), which
+  // some browsers still let bleed a trailing buffer) is what guarantees the
+  // new line starts into silence.
+  if (currentNarrationAudio) {
+    currentNarrationAudio.pause();
+    currentNarrationAudio.currentTime = 0;
+    currentNarrationAudio.src = '';
+  }
   const audio = new Audio('audio/narration/' + file);
+  currentNarrationAudio = audio;
   if (persona && text) {
     audio.addEventListener('loadedmetadata', function() {
       startCaption(persona, text, audio.duration);
     });
   }
-  audio.addEventListener('ended', function() { setOrbNarrating(false); });
+  audio.addEventListener('ended', function() {
+    if (currentNarrationAudio === audio) { currentNarrationAudio = null; clearCaption(); }
+  });
   audio.play().catch(function(err) {
     console.warn('Narration playback failed:', err);
   });
