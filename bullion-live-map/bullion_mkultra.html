@@ -111,7 +111,14 @@
   .btn:hover { background: #182034; border-color: #2a3352; }
   .btn.active { background: rgba(212,184,105,0.15); border-color: var(--gold-dim); color: var(--gold); }
 
-  #stage { flex: 1 1 auto; position: relative; overflow: hidden; }
+  /* margin-bottom (not padding) reserves room for #narration-caption below
+     the stage without the caption bar overlapping the sphere/orb: the
+     Three.js renderer sizes itself off stageEl.clientHeight (build()/resize
+     handlers), which includes padding but excludes margin, so this actually
+     shrinks the render box and shifts its (and #persona-orb's, centred on
+     it) vertical midpoint up — a plain height reduction wouldn't fight the
+     flex:1 1 auto growth the same way. */
+  #stage { flex: 1 1 auto; position: relative; overflow: hidden; margin-bottom: 112px; }
   #render-fallback {
     position: absolute; inset: 0; z-index: 5;
     display: flex; flex-direction: column; align-items: center; justify-content: center;
