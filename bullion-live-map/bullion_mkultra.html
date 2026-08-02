@@ -335,7 +335,7 @@
   .orb-core {
     width: 52px; height: 52px; border-radius: 50%;
     display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 14px 2px var(--orb-glow, transparent);
   }
   .orb-icon { display: flex; }
   .orb-icon svg { display: block; width: 24px; height: 24px; }
@@ -344,43 +344,46 @@
     letter-spacing: 0.06em; color: var(--text-dim);
   }
   #persona-orb.persona-alfred .orb-core {
+    --orb-glow: rgba(77,127,184,0.65);
     background: radial-gradient(circle at 35% 30%, #9fc6f5, var(--blue) 55%, var(--blue-dim));
   }
   #persona-orb.persona-johnny .orb-core {
+    --orb-glow: rgba(224,101,79,0.65);
     background: radial-gradient(circle at 35% 30%, #f2a08f, var(--red) 55%, var(--red-dim));
   }
   #persona-orb.idle .orb-core { animation: orbBreathe 3.6s ease-in-out infinite; }
   @keyframes orbBreathe {
-    /* 0.4 matches NODE_BASE_OPACITY — resting orb reads at the same
-       translucency as a resting map node. */
-    0%, 100% { transform: scale(1);    opacity: 0.4;  }
-    50%      { transform: scale(1.12); opacity: 0.65; }
+    /* 0.3 sits a touch below NODE_BASE_OPACITY (0.4) — the orb reads as
+       slightly more translucent than a resting map node, glowing softly
+       in the persona color as it breathes. */
+    0%, 100% { transform: scale(1);    opacity: 0.3;  box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 10px 1px var(--orb-glow, transparent); }
+    50%      { transform: scale(1.12); opacity: 0.55; box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 22px 6px var(--orb-glow, transparent); }
   }
   #persona-orb.active .orb-core { opacity: 1; }
   #persona-orb:hover .orb-core,
   #persona-orb:focus-visible .orb-core { opacity: 1 !important; }
   #persona-orb.active .orb-core.pulse { animation: orbPulse 0.32s ease-out; }
   @keyframes orbPulse {
-    0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 currentColor; }
-    60%  { transform: scale(1.22); box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 10px transparent; }
-    100% { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 transparent; }
+    0%   { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 currentColor, 0 0 14px 2px var(--orb-glow, transparent); }
+    60%  { transform: scale(1.22); box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 10px transparent, 0 0 14px 2px var(--orb-glow, transparent); }
+    100% { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 transparent, 0 0 14px 2px var(--orb-glow, transparent); }
   }
   #persona-orb.nudge .orb-core { animation: orbNudgePulse 2s ease-out 3; }
   @keyframes orbNudgePulse {
-    0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0.55); }
-    70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 8px rgba(212,164,65,0); }
-    100% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0); }
+    0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0.55), 0 0 14px 2px var(--orb-glow, transparent); }
+    70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 8px rgba(212,164,65,0), 0 0 14px 2px var(--orb-glow, transparent); }
+    100% { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0), 0 0 14px 2px var(--orb-glow, transparent); }
   }
   .orb-nudge-tip {
     position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 8px;
     background: rgba(11,14,22,0.95); border: 1px solid var(--border); border-radius: 6px;
     padding: 4px 8px; font-size: 10.5px; white-space: nowrap; color: var(--text-dim);
   }
-  .orb-johnny-disclaimer {
-    position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 8px;
-    background: rgba(11,14,22,0.97); border: 1px solid var(--border); border-radius: 6px;
-    padding: 8px 10px; font-size: 10.5px; line-height: 1.4; white-space: normal;
-    width: 220px; color: var(--text-dim);
+  #johnny-disclaimer-tip {
+    position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
+    z-index: 16; background: rgba(11,14,22,0.97); border: 1px solid var(--border);
+    border-radius: 6px; padding: 8px 14px; font-size: 10.5px; line-height: 1.4;
+    text-align: center; color: var(--text-dim); max-width: min(360px, 90vw);
   }
   /* Fallback dock: the Overview/board tab hides #stage entirely (display:
      none), which would take the orb down with it since it's normally
@@ -394,7 +397,6 @@
     transform: none; z-index: 15; transition: transform 0.28s ease;
   }
   #persona-orb.orb-docked .orb-nudge-tip { left: auto; right: 0; transform: none; }
-  #persona-orb.orb-docked .orb-johnny-disclaimer { left: auto; right: 0; transform: none; }
   #detail-panel.open ~ #persona-orb.orb-docked { transform: translateX(calc(-1 * min(380px, 92vw))); }
 
   #hint-banner {
@@ -726,7 +728,6 @@
       </svg></span></div>
       <div class="orb-label">Alfred</div>
       <div class="orb-nudge-tip" hidden>Tap to switch narrator voice</div>
-      <div class="orb-johnny-disclaimer" hidden>Johnny's voice/attitude is a nod to Cyberpunk 2077's Johnny Silverhand &mdash; cynical, rough language. Tap the orb anytime to switch back to Alfred.</div>
     </div>
   </div>
   <div id="board-view" role="tabpanel" aria-label="Overview board" hidden></div>
@@ -756,6 +757,8 @@
 <div id="legend-box"></div>
 
 <div id="narration-caption" class="hidden persona-alfred" aria-live="polite"></div>
+
+<div id="johnny-disclaimer-tip" hidden>Johnny's voice/attitude is a nod to Cyberpunk 2077's Johnny Silverhand &mdash; cynical, rough language. Tap the orb anytime to switch back to Alfred.</div>
 
 <!-- ── Control drawer: scenarios, live metrics, glossary, AI analysis ── -->
 <div id="control-drawer">
@@ -4537,8 +4540,7 @@ function toggleNarrationPersona() {
 function maybeShowJohnnyDisclaimer() {
   if (localStorage.getItem('bullion-johnny-disclaimer-seen')) return;
   localStorage.setItem('bullion-johnny-disclaimer-seen', '1');
-  const orb = document.getElementById('persona-orb');
-  const tip = orb && orb.querySelector('.orb-johnny-disclaimer');
+  const tip = document.getElementById('johnny-disclaimer-tip');
   if (!tip) return;
   tip.hidden = false;
   setTimeout(function() { tip.hidden = true; }, 9000);
