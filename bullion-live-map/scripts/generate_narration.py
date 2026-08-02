@@ -2,12 +2,20 @@
 """Generates narration MP3s for Alfred (butler, all 39 nodes, factual
 on-page text extracted from bullion_mk18.html's live NODES array) and
 Johnny (rocker, 6 pilot nodes, hand-written scripts hardcoded in this
-file). Content is generated via macOS's `say` CLI, then re-colored via a
+file).
+
+Alfred's content is generated via macOS's `say` CLI, then re-colored via a
 ChatterboxVC voice-conversion pass blending in reference voices (see
-build_blended_ref_dict) — not the original Chatterbox text-to-speech
-engine, which was dropped after the cloned voice carried the wrong
-accent; this reuses the same library for a different purpose (audio-in
-voice conversion, not text-in speech generation)."""
+build_blended_ref_dict).
+
+Johnny is generated directly by ChatterboxTTS (native text-to-speech, not
+voice conversion) from the hired voice actor's recording alone — no `say`
+scaffold, no blending in Tom/Jamie/the user's voice. An earlier attempt at
+TTS mode (cloning the user's own voice) was dropped after the cloned voice
+carried the wrong accent; that problem did not reproduce with the actor's
+recording as the reference, and TTS mode's exaggeration/cfg_weight controls
+gave a genuinely more lively/bitter delivery than anything achievable by
+recoloring a flat `say` reading, so Johnny moved to this mechanism."""
 import html
 import json
 import re
@@ -25,15 +33,13 @@ CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 SAY_VOICE = "Jamie (Premium)"
 ALFRED_RATE = 218
 
-JOHNNY_RATE = 218
+JOHNNY_EXAGGERATION = 0.8
+JOHNNY_CFG_WEIGHT = 0.3
 
-TOM_VOICE = "Tom (Enhanced)"
 VOICE_SAMPLE_DIR = ROOT / "audio" / "voice_sample"
 USER_VOICE_PATH = VOICE_SAMPLE_DIR / "user_voice.wav"
-TOM_SAMPLE_PATH = VOICE_SAMPLE_DIR / "tom_sample.wav"
 JAMIE_SAMPLE_PATH = VOICE_SAMPLE_DIR / "jamie_sample.wav"
 ACTOR_SAMPLE_PATH = VOICE_SAMPLE_DIR / "actor_sample.wav"
-JOHNNY_ACTOR_WEIGHTS = [0.90, 0.10 / 3, 0.10 / 3, 0.10 / 3]
 VOICE_BLEND_REFERENCE_TEXT = (
     "This is a reference recording used only to capture this voice's tone "
     "and timbre for narration blending."
@@ -212,10 +218,9 @@ def synthesize_reference_wav(voice_name, output_wav_path):
 
 
 def ensure_reference_clips():
-    """Generates tom_sample.wav / jamie_sample.wav via `say` if missing.
-    user_voice.wav and actor_sample.wav are never generated here — they're
-    real recordings, not something this script can produce; raises if
-    either is absent."""
+    """Generates jamie_sample.wav via `say` if missing. user_voice.wav and
+    actor_sample.wav are never generated here — they're real recordings,
+    not something this script can produce; raises if either is absent."""
     VOICE_SAMPLE_DIR.mkdir(parents=True, exist_ok=True)
     if not USER_VOICE_PATH.exists():
         raise RuntimeError(
@@ -227,8 +232,6 @@ def ensure_reference_clips():
             f"{ACTOR_SAMPLE_PATH} is missing. This is a real recording of "
             "the hired voice actor, not something this script can generate."
         )
-    if not TOM_SAMPLE_PATH.exists():
-        synthesize_reference_wav(TOM_VOICE, TOM_SAMPLE_PATH)
     if not JAMIE_SAMPLE_PATH.exists():
         synthesize_reference_wav(SAY_VOICE, JAMIE_SAMPLE_PATH)
 
@@ -238,6 +241,14 @@ def load_vc_model():
     should call this exactly once per script run and reuse the result."""
     from chatterbox.vc import ChatterboxVC
     return ChatterboxVC.from_pretrained(device="mps")
+
+
+def load_tts_model():
+    """Loads ChatterboxTTS once, for Johnny's direct text-to-speech
+    generation. Expensive (real model weights) — callers should call this
+    exactly once per script run and reuse the result."""
+    from chatterbox.tts import ChatterboxTTS
+    return ChatterboxTTS.from_pretrained(device="mps")
 
 
 def embed_reference_clip(vc, wav_path):
@@ -251,15 +262,14 @@ def embed_reference_clip(vc, wav_path):
     return vc.s3gen.embed_ref(wav, S3GEN_SR, device=vc.device)
 
 
-def build_blended_ref_dict(vc, embedding_clip_paths, prompt_clip_path, weights=None):
-    """Blends the fixed-size speaker x-vector ('embedding') across
-    embedding_clip_paths — a plain mean by default, or a weighted average
-    if weights (aligned with embedding_clip_paths, normalized to sum to 1)
-    is given — but takes the variable-length acoustic prompt
+def build_blended_ref_dict(vc, embedding_clip_paths, prompt_clip_path):
+    """Averages the fixed-size speaker x-vector ('embedding') across
+    embedding_clip_paths, but takes the variable-length acoustic prompt
     ('prompt_token'/'prompt_token_len'/'prompt_feat') from prompt_clip_path
     alone — averaging those across clips of different lengths would either
     shape-mismatch or blend unrelated spectrograms into mush. See the design
-    spec's "Blend mechanism" section (corrected 2026-08-01)."""
+    spec's "Blend mechanism" section (corrected 2026-08-01). Used only for
+    Alfred now — Johnny is generated directly by ChatterboxTTS, no blend."""
     import torch
     cache = {}
     for path in set(embedding_clip_paths) | {prompt_clip_path}:
@@ -268,12 +278,7 @@ def build_blended_ref_dict(vc, embedding_clip_paths, prompt_clip_path, weights=N
     embeddings = torch.stack(
         [cache[path]["embedding"] for path in embedding_clip_paths], dim=0
     )
-    if weights is None:
-        blended_embedding = embeddings.mean(dim=0)
-    else:
-        w = torch.tensor(weights, dtype=embeddings.dtype, device=embeddings.device)
-        w = (w / w.sum()).view(-1, *([1] * (embeddings.dim() - 1)))
-        blended_embedding = (embeddings * w).sum(dim=0)
+    blended_embedding = embeddings.mean(dim=0)
     prompt_dict = cache[prompt_clip_path]
     return {
         "prompt_token": prompt_dict["prompt_token"],
@@ -293,24 +298,6 @@ def alfred_ref_dict(vc):
     )
 
 
-def johnny_ref_dict(vc):
-    """Johnny's 4-way blend: the hired voice actor's recording as the
-    dominant 90% component (also the acoustic-prompt source, so his
-    delivery texture carries through, not just his tone color), with
-    Tom + the user's own voice + Jamie splitting the remaining 10%."""
-    return build_blended_ref_dict(
-        vc,
-        embedding_clip_paths=[
-            ACTOR_SAMPLE_PATH,
-            TOM_SAMPLE_PATH,
-            USER_VOICE_PATH,
-            JAMIE_SAMPLE_PATH,
-        ],
-        prompt_clip_path=ACTOR_SAMPLE_PATH,
-        weights=JOHNNY_ACTOR_WEIGHTS,
-    )
-
-
 def convert_voice(vc, ref_dict, input_audio_path, output_wav_path):
     """Runs ChatterboxVC conversion against a pre-built (possibly blended)
     ref_dict and writes the result as a wav file."""
@@ -318,6 +305,32 @@ def convert_voice(vc, ref_dict, input_audio_path, output_wav_path):
     vc.ref_dict = ref_dict
     wav = vc.generate(str(input_audio_path))
     sf.write(str(output_wav_path), wav.squeeze(0).cpu().numpy(), vc.sr)
+
+
+def synthesize_johnny(text, output_mp3_path, tts):
+    """Generates Johnny's line directly with ChatterboxTTS, using the hired
+    voice actor's recording as the sole voice prompt (no `say` scaffold, no
+    blending in Tom/Jamie/the user's voice), then encodes to MP3 via ffmpeg.
+    Fails loudly on any model or subprocess error — never falls back
+    silently."""
+    import torchaudio as ta
+    with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
+        wav_path = Path(tmp.name)
+    try:
+        wav = tts.generate(
+            text,
+            audio_prompt_path=str(ACTOR_SAMPLE_PATH),
+            exaggeration=JOHNNY_EXAGGERATION,
+            cfg_weight=JOHNNY_CFG_WEIGHT,
+        )
+        ta.save(str(wav_path), wav, tts.sr)
+        subprocess.run(
+            ["ffmpeg", "-y", "-i", str(wav_path),
+             "-codec:a", "libmp3lame", "-qscale:a", "2", str(output_mp3_path)],
+            check=True,
+        )
+    finally:
+        wav_path.unlink(missing_ok=True)
 
 
 def _voice_installed(voice_name):
@@ -335,15 +348,10 @@ def _voice_installed(voice_name):
 
 
 def main():
-    # Verify both voices are installed before generating anything
+    # Verify the say voice is installed before generating anything
     if not _voice_installed(SAY_VOICE):
         raise RuntimeError(
             f'"{SAY_VOICE}" is not installed. System Settings -> Accessibility -> '
-            "Spoken Content -> System Voice -> Manage Voices."
-        )
-    if not _voice_installed(TOM_VOICE):
-        raise RuntimeError(
-            f'"{TOM_VOICE}" is not installed. System Settings -> Accessibility -> '
             "Spoken Content -> System Voice -> Manage Voices."
         )
 
@@ -354,8 +362,8 @@ def main():
     vc = load_vc_model()
     print("Building Alfred's blend (Jamie + user)...")
     alfred_dict = alfred_ref_dict(vc)
-    print("Building Johnny's blend (actor 90% + Tom + user + Jamie)...")
-    johnny_dict = johnny_ref_dict(vc)
+    print("Loading ChatterboxTTS for Johnny...")
+    tts = load_tts_model()
 
     nodes = extract_node_texts(SOURCE_HTML)
     print(f"Extracted {len(nodes)} node texts from {SOURCE_HTML.name}")
@@ -366,7 +374,7 @@ def main():
 
     for node_id, script in JOHNNY_SCRIPTS.items():
         out = OUTPUT_DIR / f"johnny-{node_id}.mp3"
-        synthesize(script, JOHNNY_RATE, out, vc, johnny_dict)
+        synthesize_johnny(script, out, tts)
         print(f"wrote {out}")
 
 

@@ -73,7 +73,7 @@ class TestBuildBlendedRefDict(unittest.TestCase):
         )
         self.assertIsNone(result["prompt_feat_len"])
 
-    def test_three_way_average_matches_johnny_blend_shape(self):
+    def test_averages_embedding_across_three_clips(self):
         clip_a = Path("/fake/a.wav")
         clip_b = Path("/fake/b.wav")
         clip_c = Path("/fake/c.wav")
@@ -95,33 +95,6 @@ class TestBuildBlendedRefDict(unittest.TestCase):
             torch.equal(result["embedding"], torch.tensor([[3.0, 4.0]]))
         )
 
-    def test_weighted_average_matches_johnny_actor_blend(self):
-        """Mirrors Johnny's production weights (actor 90%, the other 3 clips
-        splitting the remaining 10%) to lock in the weighted-mean formula."""
-        clip_actor = Path("/fake/actor.wav")
-        clip_b = Path("/fake/b.wav")
-        clip_c = Path("/fake/c.wav")
-        clip_d = Path("/fake/d.wav")
-        fakes = {
-            clip_actor: self._fake_ref_dict(10.0, 1),
-            clip_b: self._fake_ref_dict(0.0, 2),
-            clip_c: self._fake_ref_dict(0.0, 3),
-            clip_d: self._fake_ref_dict(0.0, 4),
-        }
-        with patch(
-            "generate_narration.embed_reference_clip",
-            side_effect=lambda vc, path: fakes[path],
-        ):
-            result = gn.build_blended_ref_dict(
-                vc=object(),
-                embedding_clip_paths=[clip_actor, clip_b, clip_c, clip_d],
-                prompt_clip_path=clip_actor,
-                weights=[0.90, 0.10 / 3, 0.10 / 3, 0.10 / 3],
-            )
-        expected = torch.tensor([[9.0, 10.0]])
-        self.assertTrue(torch.allclose(result["embedding"], expected, atol=1e-5))
-        self.assertTrue(torch.equal(result["prompt_token"], fakes[clip_actor]["prompt_token"]))
-
 
 class TestEnsureReferenceClips(unittest.TestCase):
     def test_raises_if_user_voice_missing(self):
@@ -137,14 +110,43 @@ class TestEnsureReferenceClips(unittest.TestCase):
                 gn.ensure_reference_clips()
             self.assertIn("missing", str(ctx.exception))
 
-    def test_synthesizes_missing_tom_and_jamie_clips(self):
+    def test_synthesizes_missing_jamie_clip(self):
         with patch.object(gn, "USER_VOICE_PATH", ROOT / "audio" / "voice_sample" / "user_voice.wav"), \
              patch.object(gn, "ACTOR_SAMPLE_PATH", ROOT / "audio" / "voice_sample" / "actor_sample.wav"), \
-             patch.object(gn, "TOM_SAMPLE_PATH", Path("/tmp/does-not-exist-tom.wav")), \
              patch.object(gn, "JAMIE_SAMPLE_PATH", Path("/tmp/does-not-exist-jamie.wav")), \
              patch("generate_narration.synthesize_reference_wav") as mock_synth:
             gn.ensure_reference_clips()
-            self.assertEqual(mock_synth.call_count, 2)
+            self.assertEqual(mock_synth.call_count, 1)
+
+
+class TestSynthesizeJohnny(unittest.TestCase):
+    """Locks in the confirmed-by-ear production config: Johnny is generated
+    directly from the actor's recording via ChatterboxTTS, not the say+VC
+    blend path Alfred uses."""
+
+    def test_generates_from_actor_sample_with_confirmed_settings(self):
+        fake_tts = type("FakeTTS", (), {"sr": 24000})()
+        fake_tts.generate = lambda *a, **k: None
+        calls = {}
+
+        def fake_generate(text, **kwargs):
+            calls["text"] = text
+            calls.update(kwargs)
+            return "fake-wav-tensor"
+
+        fake_tts.generate = fake_generate
+
+        with patch("generate_narration.subprocess.run") as mock_run, \
+             patch("torchaudio.save") as mock_save:
+            gn.synthesize_johnny("test line", Path("/tmp/out.mp3"), fake_tts)
+
+        self.assertEqual(calls["text"], "test line")
+        self.assertEqual(calls["audio_prompt_path"], str(gn.ACTOR_SAMPLE_PATH))
+        self.assertEqual(calls["exaggeration"], gn.JOHNNY_EXAGGERATION)
+        self.assertEqual(calls["cfg_weight"], gn.JOHNNY_CFG_WEIGHT)
+        mock_save.assert_called_once()
+        mock_run.assert_called_once()
+        self.assertIn("/tmp/out.mp3", mock_run.call_args[0][0])
 
 
 if __name__ == "__main__":
