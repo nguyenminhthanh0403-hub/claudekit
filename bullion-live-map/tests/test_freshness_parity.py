@@ -90,6 +90,22 @@ class TestFreshnessToleranceParity(unittest.TestCase):
                     f"fetch_bullion_data.py.",
                 )
 
+    def test_live_maps_agree_on_pipeline_tolerance(self):
+        """PIPELINE_TOLERANCE_DAYS has no Python source of truth (it's a
+        UI-only banner threshold), so the two live maps are each other's only
+        guard against silently drifting apart."""
+        values = {}
+        for name in LIVE_MAPS:
+            with open(os.path.join(MAP_DIR, name)) as f:
+                html = f.read()
+            m = re.search(r"const\s+PIPELINE_TOLERANCE_DAYS\s*=\s*(\d+)", html)
+            self.assertIsNotNone(m, f"PIPELINE_TOLERANCE_DAYS not found in {name}")
+            values[name] = int(m.group(1))
+        self.assertEqual(
+            len(set(values.values())), 1,
+            f"PIPELINE_TOLERANCE_DAYS has drifted between live maps: {values}",
+        )
+
     def test_every_shipped_cadence_has_a_tolerance(self):
         """Catch the drift at its source: a FIELD_META cadence with no entry
         in the tolerance table is unjudgeable, which is how 'weekly' hid."""

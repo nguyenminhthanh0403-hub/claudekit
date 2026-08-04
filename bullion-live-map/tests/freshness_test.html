@@ -290,6 +290,64 @@ fetch('../index.html')
           gold_px: TEN_FRESH_FIELDS.gold_px}}),
         '9 of 10 measured fields are missing from this data file: us2y, us10y, vix, ffr, wti_px, cpi_yoy, nfp_mom, dxy, spx.');
     }
+
+    // ── pipelineLiveness / renderPipelineAlarm: the stale-pipeline banner ──
+    const m6 = html.match(/PIPELINE-LIVENESS-START([\s\S]*?)PIPELINE-LIVENESS-END/);
+    if (!m6) { check('pipelineLiveness present', false, true); }
+    else {
+      // The leading '\n' is REQUIRED — see the note on the freshnessVerdict
+      // block above: the captured source ends inside the closing marker
+      // line's '// ───' comment, so appended code without a newline first
+      // is silently swallowed by it.
+      (0, eval)(m6[1].replace(/^[^\n]*\n/, '')
+        + '\n; window.pipelineLiveness = pipelineLiveness;'
+        + '  window.pipelineAlarmMessage = pipelineAlarmMessage;'
+        + '  window.renderPipelineAlarm = renderPipelineAlarm;'
+        + '  window.PIPELINE_TOLERANCE_DAYS = PIPELINE_TOLERANCE_DAYS;');
+
+      const PTODAY = '2026-08-04';
+      check('pipeline tolerance is 3 days',
+        window.PIPELINE_TOLERANCE_DAYS, 3);
+      check('generated today is fresh',
+        pipelineLiveness('2026-08-04T09:41:38Z', PTODAY, 3), {state:'fresh', ageDays:0});
+      check('exactly at tolerance is fresh',
+        pipelineLiveness('2026-08-01T00:00:00Z', PTODAY, 3), {state:'fresh', ageDays:3});
+      check('one day past tolerance is stale',
+        pipelineLiveness('2026-07-31T00:00:00Z', PTODAY, 3), {state:'stale', ageDays:4});
+      check('long-dead pipeline is stale',
+        pipelineLiveness('2026-07-20T09:41:38Z', PTODAY, 3), {state:'stale', ageDays:15});
+      check('missing timestamp is unknown',
+        pipelineLiveness(null, PTODAY, 3), {state:'unknown', ageDays:null});
+      check('unparseable timestamp is unknown',
+        pipelineLiveness('not-a-real-timestamp', PTODAY, 3), {state:'unknown', ageDays:null});
+
+      check('stale and unknown use distinct wording',
+        pipelineAlarmMessage({state:'stale', ageDays:15}, '2026-07-20T09:41:38Z')
+          !== pipelineAlarmMessage({state:'unknown', ageDays:null}, null),
+        true);
+
+      // renderPipelineAlarm DOM assertions — a detached element is enough;
+      // the function only ever touches .hidden/.textContent on what it's given.
+      const staleProv   = {generatedAt: '2026-07-20T09:41:38Z'};
+      const freshProv   = {generatedAt: '2026-08-04T09:41:38Z'};
+      const unknownProv = {generatedAt: null};
+
+      let bar = document.createElement('div');
+      renderPipelineAlarm(bar, true, staleProv, PTODAY);
+      check('bar shown for a stale envelope', bar.hidden, false);
+
+      bar = document.createElement('div');
+      renderPipelineAlarm(bar, true, freshProv, PTODAY);
+      check('bar hidden for a fresh envelope', bar.hidden, true);
+
+      bar = document.createElement('div');
+      renderPipelineAlarm(bar, false, staleProv, PTODAY);
+      check('bar hidden when live data is toggled off, even if stale', bar.hidden, true);
+
+      bar = document.createElement('div');
+      renderPipelineAlarm(bar, true, unknownProv, PTODAY);
+      check('bar shown for an envelope with no generated_at', bar.hidden, false);
+    }
   })
   .catch(e => results.push('FAIL  harness error: ' + e.message))
   .finally(() => {
