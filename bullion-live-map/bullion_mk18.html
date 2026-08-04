@@ -73,6 +73,19 @@
 
   #app { position: relative; z-index: 1; height: 100%; width: 100%; display: flex; flex-direction: column; }
 
+  /* First child of <body>, above #app entirely, so a dead pipeline is
+     impossible to miss regardless of which view/tab is open underneath it. */
+  #pipeline-alarm {
+    flex: none; display: flex; align-items: center; justify-content: center;
+    gap: 8px; padding: 7px 16px; font-size: 12px; font-weight: 600;
+    text-align: center; line-height: 1.4;
+    background: rgba(224,177,90,0.16); color: var(--warn);
+    border-bottom: 1px solid rgba(224,177,90,0.4);
+  }
+  /* Same id-specificity-beats-[hidden] fix as #board-view[hidden] below in
+     this stylesheet: hidden alone will not hide a flex-displayed element. */
+  #pipeline-alarm[hidden] { display: none; }
+
   #header {
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: space-between;
@@ -606,6 +619,7 @@
 </style>
 </head>
 <body>
+<div id="pipeline-alarm" role="status" hidden></div>
 <div id="starfield"></div>
 <div id="app">
   <div id="header">
@@ -2366,7 +2380,12 @@ function fitAppToViewport() {
   const vv = window.visualViewport;
   const vh = (vv && vv.height) || window.innerHeight || document.documentElement.clientHeight;
   const app = document.getElementById('app');
-  if (app && vh) app.style.height = Math.round(vh) + 'px';
+  const alarmBar = document.getElementById('pipeline-alarm');
+  // #app's height is set here in JS, not by CSS, so it must be told to give
+  // up the alarm bar's own height — otherwise the bar pushes the bottom of
+  // the map off screen instead of the map shrinking to make room for it.
+  const alarmH = (alarmBar && !alarmBar.hidden) ? alarmBar.offsetHeight : 0;
+  if (app && vh) app.style.height = Math.max(0, Math.round(vh) - alarmH) + 'px';
 }
 
 function recenterGraph() {
@@ -3847,6 +3866,17 @@ function updateMetrics() {
   renderLiveProvenance(s);
   renderMetricProvenance();
   renderLiveBadge(s);
+  {
+    const alarmBar = document.getElementById('pipeline-alarm');
+    const wasHidden = !alarmBar || alarmBar.hidden;
+    renderPipelineAlarm(alarmBar, useLiveData, window.BULLION_PROVENANCE,
+      new Date().toISOString().slice(0, 10));
+    // Only re-measure the viewport on an actual visibility flip —
+    // updateMetrics fires on every shock-slider drag frame, and reading
+    // offsetHeight forces a synchronous reflow, so re-fitting unconditionally
+    // here would thrash layout during dragging.
+    if (alarmBar && wasHidden !== alarmBar.hidden) fitAppToViewport();
+  }
   renderStats(s);
   updateGraph(s);
 }
@@ -4685,35 +4715,6 @@ function setupHistoryDatePicker() {
   clearBtn.addEventListener('click', () => { input.value = ''; applyDate(null); });
 }
 
-fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout measures it
-buildGraph();
-buildLegend();
-updateMetrics();
-validateProvenance();
-document.getElementById('audit-log-btn').addEventListener('click', openAuditLog);
-
-// ─── FRESHNESS-VERDICT-START ────────────────────────────────────────────────
-// Mirrors freshness_verdict() in fetch_bullion_data.py. Judged on a field's
-// PUBLICATION date, never its reference date: June CPI references 2026-06-01
-// but publishes 2026-07-14, so by reference it looks broken and by publication
-// it is on time. tests/freshness_test.html extracts this block by its marker
-// comments and asserts the same cases as the Python suite — renaming or
-// removing the markers breaks that test, which is intended.
-const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, fomc: null };
-const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
-
-function freshnessVerdict(cadence, published, today, overrideDays) {
-  if (published == null || cadence === 'fomc') return { state: 'unknown', ageDays: null };
-  const tolerance = (overrideDays != null) ? overrideDays : CADENCE_TOLERANCE_DAYS[cadence];
-  if (tolerance == null) return { state: 'unknown', ageDays: null };
-  // Parse as UTC midnight so DST never shifts a day boundary.
-  const ms = Date.parse(today + 'T00:00:00Z') - Date.parse(published + 'T00:00:00Z');
-  if (Number.isNaN(ms)) return { state: 'unknown', ageDays: null };
-  const ageDays = Math.round(ms / 86400000);
-  return { state: ageDays > tolerance ? 'flagged' : 'fresh', ageDays: ageDays };
-}
-// ─── FRESHNESS-VERDICT-END ──────────────────────────────────────────────────
-
 // ─── PIPELINE-LIVENESS-START ────────────────────────────────────────────────
 // Distinguishes "the fetcher ran and had nothing new to report" from "the
 // fetcher has been dead for days" — generated_at is a timestamp, so data.json
@@ -4723,7 +4724,16 @@ function freshnessVerdict(cadence, published, today, overrideDays) {
 // exactly the failure mode that let the 'weekly' cadence bug hide for days.
 // See docs/superpowers/specs/2026-08-04-bullion-pipeline-liveness-alarm-design.md.
 // tests/freshness_test.html extracts this block by its marker comments —
-// renaming or removing them breaks that test, which is intended.
+// renaming or removing them breaks that test, which is intended. Placed
+// here, BEFORE the initial updateMetrics() call below, rather than beside
+// freshnessVerdict further down: freshnessVerdict is only ever reached
+// asynchronously (inside the data.json fetch callback), by which point the
+// whole script has already run once top-to-bottom, but renderPipelineAlarm
+// is called from the very first synchronous updateMetrics() a few lines
+// down — placing this block after that call threw "PIPELINE_TOLERANCE_DAYS
+// cannot be accessed before initialization" (a TDZ ReferenceError) on every
+// page load, aborting the rest of the script before the data.json fetch
+// ever ran. Caught live via headless-Chrome verification, not by inspection.
 const PIPELINE_TOLERANCE_DAYS = 3;
 
 function pipelineLiveness(generatedAt, nowISO, toleranceDays) {
@@ -4767,6 +4777,35 @@ function renderPipelineAlarm(bar, isLive, prov, nowISO) {
   bar.textContent = '⚠ ' + pipelineAlarmMessage(liveness, generatedAt);
 }
 // ─── PIPELINE-LIVENESS-END ──────────────────────────────────────────────────
+
+fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout measures it
+buildGraph();
+buildLegend();
+updateMetrics();
+validateProvenance();
+document.getElementById('audit-log-btn').addEventListener('click', openAuditLog);
+
+// ─── FRESHNESS-VERDICT-START ────────────────────────────────────────────────
+// Mirrors freshness_verdict() in fetch_bullion_data.py. Judged on a field's
+// PUBLICATION date, never its reference date: June CPI references 2026-06-01
+// but publishes 2026-07-14, so by reference it looks broken and by publication
+// it is on time. tests/freshness_test.html extracts this block by its marker
+// comments and asserts the same cases as the Python suite — renaming or
+// removing the markers breaks that test, which is intended.
+const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, fomc: null };
+const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
+
+function freshnessVerdict(cadence, published, today, overrideDays) {
+  if (published == null || cadence === 'fomc') return { state: 'unknown', ageDays: null };
+  const tolerance = (overrideDays != null) ? overrideDays : CADENCE_TOLERANCE_DAYS[cadence];
+  if (tolerance == null) return { state: 'unknown', ageDays: null };
+  // Parse as UTC midnight so DST never shifts a day boundary.
+  const ms = Date.parse(today + 'T00:00:00Z') - Date.parse(published + 'T00:00:00Z');
+  if (Number.isNaN(ms)) return { state: 'unknown', ageDays: null };
+  const ageDays = Math.round(ms / 86400000);
+  return { state: ageDays > tolerance ? 'flagged' : 'fresh', ageDays: ageDays };
+}
+// ─── FRESHNESS-VERDICT-END ──────────────────────────────────────────────────
 
 // ─── NORMALISE-ENVELOPE-START ───────────────────────────────────────────────
 // Turns whatever data.json contained into one shape the rest of the map can
