@@ -50,7 +50,7 @@ jobs:
           printf '%s\n' "$FRED_API_KEY" > "$HOME/.config/bullion/fred_api_key"
 
       - name: Fetch live financial data
-        run: python3 bullion-live-map/fetch_bullion_data.py
+        run: exit 1 # TEMPORARY — deliberate failure for pipeline-alarm live-fire test, reverted in the same session
 
       - name: Commit and push if data changed
         run: |
