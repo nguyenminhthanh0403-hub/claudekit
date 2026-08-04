@@ -5409,7 +5409,7 @@ document.getElementById('audit-log-btn').addEventListener('click', openAuditLog)
 // it is on time. tests/freshness_test.html extracts this block by its marker
 // comments and asserts the same cases as the Python suite — renaming or
 // removing the markers breaks that test, which is intended.
-const CADENCE_TOLERANCE_DAYS = { daily: 7, monthly: 45, fomc: null };
+const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, fomc: null };
 const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
 
 function freshnessVerdict(cadence, published, today, overrideDays) {

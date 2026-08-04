@@ -27,11 +27,17 @@ jobs:
           python-version: "3.12"
 
       - name: Provision FRED API key from secret
+        # The secret was created as FRED but this step read FRED_API_KEY, so it
+        # resolved to empty and every scheduled run from 2026-07-20 to
+        # 2026-08-04 died here — the pipeline never once published. A secret
+        # name is invisible from the code side and unset secrets expand to ""
+        # rather than erroring, so accept either name instead of depending on
+        # the two spellings being kept in sync by hand.
         env:
-          FRED_API_KEY: ${{ secrets.FRED_API_KEY }}
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY || secrets.FRED }}
         run: |
           if [ -z "$FRED_API_KEY" ]; then
-            echo "FRED_API_KEY secret is not set. Add it under" >&2
+            echo "Neither the FRED_API_KEY nor the FRED secret is set. Add one under" >&2
             echo "Settings -> Secrets and variables -> Actions -> New repository secret." >&2
             exit 1
           fi
