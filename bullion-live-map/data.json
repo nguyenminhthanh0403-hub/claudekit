@@ -14,7 +14,7 @@
       "published": "2026-08-04",
       "ref_date": "2026-08-04",
       "source": "Yahoo DX-Y.NYB",
-      "value": 99.92
+      "value": 99.95
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -38,7 +38,7 @@
       "published": "2026-08-04",
       "ref_date": "2026-08-04",
       "source": "Yahoo GC=F",
-      "value": 4127.4
+      "value": 4123.8
     },
     "hy_oas": {
       "cadence": "daily",
@@ -185,7 +185,7 @@
       "value": 84.86
     }
   },
-  "generated_at": "2026-08-04T12:07:47Z",
+  "generated_at": "2026-08-04T12:38:57Z",
   "history": {
     "2025-08-01": {
       "cpi_yoy": 3.1,
@@ -5493,8 +5493,8 @@
       "xlp": 84.86
     },
     "2026-08-04": {
-      "dxy": 99.92,
-      "gold_px": 4127.4
+      "dxy": 99.95,
+      "gold_px": 4123.8
     }
   },
   "schema": 2
