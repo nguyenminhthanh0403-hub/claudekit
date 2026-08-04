@@ -14,7 +14,7 @@
       "published": "2026-08-04",
       "ref_date": "2026-08-04",
       "source": "Yahoo DX-Y.NYB",
-      "value": 100.01
+      "value": 99.92
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -38,7 +38,7 @@
       "published": "2026-08-04",
       "ref_date": "2026-08-04",
       "source": "Yahoo GC=F",
-      "value": 4105.1
+      "value": 4127.4
     },
     "hy_oas": {
       "cadence": "daily",
@@ -99,16 +99,16 @@
     "sofr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-03",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-04",
+      "ref_date": "2026-08-03",
       "source": "FRED SOFR",
-      "value": 3.66
+      "value": 3.65
     },
     "spx": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-31",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "Yahoo ^GSPC",
       "value": 7600.5
     },
@@ -155,37 +155,37 @@
     "xle": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-31",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "Yahoo XLE",
       "value": 58.79
     },
     "xlf": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-31",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "Yahoo XLF",
       "value": 57.38
     },
     "xlk": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-31",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "Yahoo XLK",
       "value": 178.04
     },
     "xlp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-31",
-      "ref_date": "2026-07-31",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "Yahoo XLP",
       "value": 84.86
     }
   },
-  "generated_at": "2026-08-04T09:41:38Z",
+  "generated_at": "2026-08-04T12:07:47Z",
   "history": {
     "2025-08-01": {
       "cpi_yoy": 3.1,
@@ -5482,11 +5482,19 @@
       "xlp": 85.05
     },
     "2026-08-03": {
-      "rrp": 2.1
+      "dxy": 99.96,
+      "gold_px": 4033.7,
+      "rrp": 2.1,
+      "sofr": 3.65,
+      "spx": 7600.5,
+      "xle": 58.79,
+      "xlf": 57.38,
+      "xlk": 178.04,
+      "xlp": 84.86
     },
     "2026-08-04": {
-      "dxy": 100.01,
-      "gold_px": 4105.1
+      "dxy": 99.92,
+      "gold_px": 4127.4
     }
   },
   "schema": 2
