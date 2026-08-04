@@ -11,72 +11,72 @@
     "dxy": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-08-04",
+      "ref_date": "2026-08-04",
       "source": "Yahoo DX-Y.NYB",
-      "value": 101.47
+      "value": 100.01
     },
     "fed_bs": {
       "cadence": "weekly",
       "class": "measured",
-      "published": "2026-07-23",
-      "ref_date": "2026-07-22",
+      "published": "2026-07-30",
+      "ref_date": "2026-07-29",
       "source": "FRED WALCL",
-      "value": 6747378.0
+      "value": 6738190.0
     },
     "ffr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-23",
+      "published": "2026-08-03",
+      "ref_date": "2026-07-31",
       "source": "FRED DFF",
       "value": 3.63
     },
     "gold_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-08-04",
+      "ref_date": "2026-08-04",
       "source": "Yahoo GC=F",
-      "value": 4070.8
+      "value": 4105.1
     },
     "hy_oas": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-23",
-      "ref_date": "2026-07-23",
+      "published": "2026-07-30",
+      "ref_date": "2026-07-30",
       "source": "FRED BAMLH0A0HYM2",
-      "value": 2.77
+      "value": 2.84
     },
     "ig_oas": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-23",
-      "ref_date": "2026-07-23",
+      "published": "2026-07-30",
+      "ref_date": "2026-07-30",
       "source": "FRED BAMLC0A0CM",
-      "value": 0.79
+      "value": 0.8
     },
     "m2": {
       "cadence": "monthly",
       "class": "measured",
-      "published": "2026-06-23",
-      "ref_date": "2026-05-01",
+      "published": "2026-07-28",
+      "ref_date": "2026-06-01",
       "source": "FRED M2SL",
-      "value": 23052.3
+      "value": 23155.2
     },
     "mortgage_30y": {
       "cadence": "weekly",
       "class": "measured",
-      "published": "2026-07-23",
-      "ref_date": "2026-07-23",
+      "published": "2026-07-30",
+      "ref_date": "2026-07-30",
       "source": "FRED MORTGAGE30US",
-      "value": 6.58
+      "value": 6.66
     },
     "nfci": {
       "cadence": "weekly",
       "class": "measured",
-      "published": "2026-07-22",
-      "ref_date": "2026-07-17",
+      "published": "2026-07-29",
+      "ref_date": "2026-07-24",
       "source": "FRED NFCI",
       "value": -0.55
     },
@@ -91,239 +91,106 @@
     "rrp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-08-03",
+      "ref_date": "2026-08-03",
       "source": "FRED RRPONTSYD",
-      "value": 0.7
+      "value": 2.1
     },
     "sofr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-23",
+      "published": "2026-08-03",
+      "ref_date": "2026-07-31",
       "source": "FRED SOFR",
-      "value": 3.64
+      "value": 3.66
     },
     "spx": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "Yahoo ^GSPC",
-      "value": 7411.98
+      "value": 7600.5
     },
     "tbill_3m": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-23",
+      "published": "2026-08-03",
+      "ref_date": "2026-07-31",
       "source": "FRED DTB3",
-      "value": 3.81
+      "value": 3.69
     },
     "us10y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-23",
+      "published": "2026-08-03",
+      "ref_date": "2026-07-31",
       "source": "FRED DGS10",
-      "value": 4.71
+      "value": 4.75
     },
     "us2y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-23",
+      "published": "2026-08-03",
+      "ref_date": "2026-07-31",
       "source": "FRED DGS2",
-      "value": 4.37
+      "value": 4.28
     },
     "vix": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-23",
-      "ref_date": "2026-07-23",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "FRED VIXCLS",
-      "value": 18.7
+      "value": 16.0
     },
     "wti_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-22",
-      "ref_date": "2026-07-20",
+      "published": "2026-07-29",
+      "ref_date": "2026-07-27",
       "source": "FRED DCOILWTICO",
-      "value": 84.38
+      "value": 84.25
     },
     "xle": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "Yahoo XLE",
-      "value": 59.62
+      "value": 58.79
     },
     "xlf": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "Yahoo XLF",
-      "value": 56.31
+      "value": 57.38
     },
     "xlk": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "Yahoo XLK",
-      "value": 175.88
+      "value": 178.04
     },
     "xlp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-07-24",
-      "ref_date": "2026-07-24",
+      "published": "2026-07-31",
+      "ref_date": "2026-07-31",
       "source": "Yahoo XLP",
-      "value": 84.13
+      "value": 84.86
     }
   },
-  "generated_at": "2026-07-25T11:23:12Z",
+  "generated_at": "2026-08-04T09:41:38Z",
   "history": {
-    "2025-07-01": {
-      "cpi_yoy": 3.1,
-      "m2": 22020.4,
-      "nfp_mom": 64.0
-    },
-    "2025-07-25": {
-      "dxy": 97.65,
-      "ffr": 4.33,
-      "gold_px": 3334.0,
-      "hy_oas": 2.84,
-      "ig_oas": 0.78,
-      "nfci": -0.52,
-      "rrp": 150.5,
-      "sofr": 4.36,
-      "spx": 6388.64,
-      "tbill_3m": 4.25,
-      "us10y": 4.4,
-      "us2y": 3.91,
-      "vix": 14.9,
-      "wti_px": 66.38,
-      "xle": 43.55,
-      "xlf": 53.44,
-      "xlk": 130.99,
-      "xlp": 81.5
-    },
-    "2025-07-26": {
-      "ffr": 4.33
-    },
-    "2025-07-27": {
-      "ffr": 4.33
-    },
-    "2025-07-28": {
-      "dxy": 98.66,
-      "ffr": 4.33,
-      "gold_px": 3309.1,
-      "hy_oas": 2.82,
-      "ig_oas": 0.78,
-      "rrp": 170.5,
-      "sofr": 4.36,
-      "spx": 6389.77,
-      "tbill_3m": 4.24,
-      "us10y": 4.42,
-      "us2y": 3.91,
-      "vix": 15.0,
-      "wti_px": 67.81,
-      "xle": 44.04,
-      "xlf": 53.07,
-      "xlk": 132.04,
-      "xlp": 80.66
-    },
-    "2025-07-29": {
-      "dxy": 98.91,
-      "ffr": 4.33,
-      "gold_px": 3323.4,
-      "hy_oas": 2.86,
-      "ig_oas": 0.79,
-      "rrp": 171.0,
-      "sofr": 4.36,
-      "spx": 6370.86,
-      "tbill_3m": 4.24,
-      "us10y": 4.34,
-      "us2y": 3.86,
-      "vix": 16.0,
-      "wti_px": 70.27,
-      "xle": 44.47,
-      "xlf": 52.8,
-      "xlk": 132.04,
-      "xlp": 81.19
-    },
-    "2025-07-30": {
-      "dxy": 99.94,
-      "fed_bs": 6642578.0,
-      "ffr": 4.33,
-      "gold_px": 3295.8,
-      "hy_oas": 2.89,
-      "ig_oas": 0.78,
-      "rrp": 155.5,
-      "sofr": 4.32,
-      "spx": 6362.9,
-      "tbill_3m": 4.25,
-      "us10y": 4.38,
-      "us2y": 3.94,
-      "vix": 15.5,
-      "wti_px": 71.09,
-      "xle": 43.84,
-      "xlf": 52.7,
-      "xlk": 132.34,
-      "xlp": 80.47
-    },
-    "2025-07-31": {
-      "dxy": 100.03,
-      "ffr": 4.33,
-      "gold_px": 3293.2,
-      "hy_oas": 2.86,
-      "ig_oas": 0.79,
-      "mortgage_30y": 6.72,
-      "rrp": 214.4,
-      "sofr": 4.39,
-      "spx": 6339.39,
-      "tbill_3m": 4.24,
-      "us10y": 4.37,
-      "us2y": 3.94,
-      "vix": 16.7,
-      "wti_px": 70.36,
-      "xle": 43.6,
-      "xlf": 52.37,
-      "xlk": 131.37,
-      "xlp": 79.78
-    },
     "2025-08-01": {
       "cpi_yoy": 3.1,
-      "dxy": 98.69,
-      "ffr": 4.33,
-      "gold_px": 3347.7,
-      "hy_oas": 3.13,
-      "ig_oas": 0.82,
-      "m2": 22087.1,
-      "nfci": -0.52,
-      "nfp_mom": -70.0,
-      "rrp": 97.4,
-      "sofr": 4.34,
-      "spx": 6238.01,
-      "tbill_3m": 4.19,
-      "us10y": 4.23,
-      "us2y": 3.69,
-      "vix": 20.4,
-      "wti_px": 68.39,
-      "xle": 42.79,
-      "xlf": 51.4,
-      "xlk": 128.54,
-      "xlp": 80.16
-    },
-    "2025-08-02": {
-      "ffr": 4.33
-    },
-    "2025-08-03": {
-      "ffr": 4.33
+      "m2": 22092.5,
+      "nfp_mom": -70.0
     },
     "2025-08-04": {
       "dxy": 98.78,
@@ -748,7 +615,7 @@
       "ffr": 4.33,
       "hy_oas": 2.84,
       "ig_oas": 0.81,
-      "m2": 22170.4,
+      "m2": 22176.1,
       "nfp_mom": 76.0,
       "vix": 16.1
     },
@@ -1194,7 +1061,7 @@
       "gold_px": 3867.5,
       "hy_oas": 2.81,
       "ig_oas": 0.76,
-      "m2": 22245.1,
+      "m2": 22249.8,
       "nfp_mom": -140.0,
       "rrp": 10.2,
       "sofr": 4.2,
@@ -1663,7 +1530,7 @@
     "2025-11-01": {
       "cpi_yoy": 2.6,
       "ffr": 3.86,
-      "m2": 22277.3,
+      "m2": 22279.8,
       "nfp_mom": 41.0
     },
     "2025-11-02": {
@@ -2075,7 +1942,7 @@
       "gold_px": 4239.3,
       "hy_oas": 2.94,
       "ig_oas": 0.82,
-      "m2": 22353.4,
+      "m2": 22355.3,
       "nfp_mom": -17.0,
       "rrp": 3.2,
       "sofr": 4.12,
@@ -2533,7 +2400,7 @@
     "2026-01-01": {
       "cpi_yoy": 2.5,
       "ffr": 3.64,
-      "m2": 22429.3,
+      "m2": 22420.1,
       "nfp_mom": 160.0
     },
     "2026-01-02": {
@@ -2967,7 +2834,7 @@
     "2026-02-01": {
       "cpi_yoy": 2.5,
       "ffr": 3.64,
-      "m2": 22626.9,
+      "m2": 22620.3,
       "nfp_mom": -156.0
     },
     "2026-02-02": {
@@ -3375,7 +3242,7 @@
     "2026-03-01": {
       "cpi_yoy": 2.6,
       "ffr": 3.64,
-      "m2": 22686.2,
+      "m2": 22676.1,
       "nfp_mom": 214.0
     },
     "2026-03-02": {
@@ -3840,7 +3707,7 @@
       "gold_px": 4783.2,
       "hy_oas": 3.16,
       "ig_oas": 0.87,
-      "m2": 22804.5,
+      "m2": 22799.9,
       "nfp_mom": 148.0,
       "rrp": 2.1,
       "sofr": 3.65,
@@ -4287,7 +4154,7 @@
       "gold_px": 4629.9,
       "hy_oas": 2.77,
       "ig_oas": 0.81,
-      "m2": 23052.3,
+      "m2": 23055.6,
       "nfci": -0.5,
       "nfp_mom": 129.0,
       "rrp": 0.6,
@@ -4721,6 +4588,7 @@
       "gold_px": 4475.2,
       "hy_oas": 2.72,
       "ig_oas": 0.73,
+      "m2": 23155.2,
       "nfp_mom": 57.0,
       "rrp": 1.3,
       "sofr": 3.65,
@@ -5201,7 +5069,7 @@
       "ffr": 3.63,
       "hy_oas": 2.74,
       "ig_oas": 0.75,
-      "nfci": -0.53,
+      "nfci": -0.52,
       "vix": 15.8
     },
     "2026-07-04": {
@@ -5294,7 +5162,7 @@
       "gold_px": 4104.1,
       "hy_oas": 2.69,
       "ig_oas": 0.77,
-      "nfci": -0.54,
+      "nfci": -0.53,
       "rrp": 0.5,
       "sofr": 3.55,
       "spx": 7575.39,
@@ -5398,7 +5266,7 @@
       "gold_px": 4012.7,
       "hy_oas": 2.73,
       "ig_oas": 0.79,
-      "nfci": -0.55,
+      "nfci": -0.54,
       "rrp": 0.1,
       "sofr": 3.59,
       "spx": 7457.69,
@@ -5450,6 +5318,7 @@
       "us10y": 4.63,
       "us2y": 4.26,
       "vix": 17.1,
+      "wti_px": 86.04,
       "xle": 58.5,
       "xlf": 56.11,
       "xlk": 180.78,
@@ -5469,6 +5338,7 @@
       "us10y": 4.67,
       "us2y": 4.31,
       "vix": 16.6,
+      "wti_px": 87.66,
       "xle": 59.2,
       "xlf": 56.05,
       "xlk": 180.27,
@@ -5488,6 +5358,7 @@
       "us10y": 4.71,
       "us2y": 4.37,
       "vix": 18.7,
+      "wti_px": 93.08,
       "xle": 59.38,
       "xlf": 55.83,
       "xlk": 178.45,
@@ -5495,13 +5366,127 @@
     },
     "2026-07-24": {
       "dxy": 101.47,
+      "ffr": 3.63,
       "gold_px": 4067.6,
+      "hy_oas": 2.79,
+      "ig_oas": 0.8,
+      "nfci": -0.55,
       "rrp": 0.7,
+      "sofr": 3.64,
       "spx": 7411.98,
+      "tbill_3m": 3.81,
+      "us10y": 4.69,
+      "us2y": 4.33,
+      "vix": 18.6,
+      "wti_px": 91.74,
       "xle": 59.62,
       "xlf": 56.31,
       "xlk": 175.88,
       "xlp": 84.13
+    },
+    "2026-07-25": {
+      "ffr": 3.63
+    },
+    "2026-07-26": {
+      "ffr": 3.63
+    },
+    "2026-07-27": {
+      "dxy": 101.51,
+      "ffr": 3.63,
+      "gold_px": 4074.5,
+      "hy_oas": 2.81,
+      "ig_oas": 0.81,
+      "rrp": 1.4,
+      "sofr": 3.64,
+      "spx": 7413.18,
+      "tbill_3m": 3.82,
+      "us10y": 4.65,
+      "us2y": 4.31,
+      "vix": 18.7,
+      "wti_px": 84.25,
+      "xle": 58.36,
+      "xlf": 56.88,
+      "xlk": 174.3,
+      "xlp": 85.36
+    },
+    "2026-07-28": {
+      "dxy": 101.38,
+      "ffr": 3.63,
+      "gold_px": 4036.3,
+      "hy_oas": 2.84,
+      "ig_oas": 0.81,
+      "rrp": 1.1,
+      "sofr": 3.65,
+      "spx": 7428.78,
+      "tbill_3m": 3.77,
+      "us10y": 4.61,
+      "us2y": 4.26,
+      "vix": 18.2,
+      "xle": 57.57,
+      "xlf": 57.6,
+      "xlk": 171.09,
+      "xlp": 87.06
+    },
+    "2026-07-29": {
+      "dxy": 100.8,
+      "fed_bs": 6738190.0,
+      "ffr": 3.63,
+      "gold_px": 4034.7,
+      "hy_oas": 2.87,
+      "ig_oas": 0.81,
+      "rrp": 2.6,
+      "sofr": 3.65,
+      "spx": 7316.15,
+      "tbill_3m": 3.7,
+      "us10y": 4.67,
+      "us2y": 4.22,
+      "vix": 20.7,
+      "xle": 58.65,
+      "xlf": 56.68,
+      "xlk": 166.57,
+      "xlp": 87.36
+    },
+    "2026-07-30": {
+      "dxy": 100.01,
+      "ffr": 3.63,
+      "gold_px": 4100.1,
+      "hy_oas": 2.84,
+      "ig_oas": 0.8,
+      "mortgage_30y": 6.66,
+      "rrp": 1.1,
+      "sofr": 3.65,
+      "spx": 7437.63,
+      "tbill_3m": 3.69,
+      "us10y": 4.68,
+      "us2y": 4.23,
+      "vix": 17.1,
+      "xle": 58.96,
+      "xlf": 57.0,
+      "xlk": 175.73,
+      "xlp": 85.47
+    },
+    "2026-07-31": {
+      "dxy": 99.8,
+      "ffr": 3.63,
+      "gold_px": 4049.1,
+      "rrp": 2.2,
+      "sofr": 3.66,
+      "spx": 7489.72,
+      "tbill_3m": 3.69,
+      "us10y": 4.75,
+      "us2y": 4.28,
+      "vix": 16.0,
+      "xle": 59.55,
+      "xlf": 56.94,
+      "xlk": 175.35,
+      "xlp": 85.05
+    },
+    "2026-08-03": {
+      "rrp": 2.1
+    },
+    "2026-08-04": {
+      "dxy": 100.01,
+      "gold_px": 4105.1
     }
   },
   "schema": 2
