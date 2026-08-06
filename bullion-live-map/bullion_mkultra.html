@@ -1780,6 +1780,9 @@ const Renderer = (function () {
   // spurious activate), and drives the touch long-press hover-preview.
   const LONG_PRESS_MS = 380, MOVE_CANCEL_PX = 10;
   let downPos = null, downWasTouch = false, pressTimer = null, longPressId = null;
+  let isDragging = false;
+  const CURSOR_GRAB = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='none' stroke='%23d4b869' stroke-width='1.5'/%3E%3Cpath d='M12 4 L14.2 11 L12 20 L9.8 11 Z' fill='%23d4b869' stroke='%230b0e16' stroke-width='0.6'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%230b0e16'/%3E%3C/svg%3E") 12 12, grab`;
+  const CURSOR_GRABBING = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='9' fill='%23d4b869' fill-opacity='0.25' stroke='%23d4b869' stroke-width='1.5'/%3E%3Cpath d='M12 4 L14.2 11 L12 20 L9.8 11 Z' fill='%23d4b869' stroke='%230b0e16' stroke-width='0.6'/%3E%3Ccircle cx='12' cy='12' r='1.6' fill='%230b0e16'/%3E%3C/svg%3E") 12 12, grabbing`;
 
   function hasWebGLSupport() {
     try {
@@ -2202,6 +2205,9 @@ const Renderer = (function () {
   // onNodeLeave/onBackgroundClick seam. Desktop hover previews on genuine
   // mouse movement; touch's equivalent is the long-press timer below, kept
   // deliberately separate so a touch drag-to-orbit never also triggers hover.
+  function applyCursor() {
+    canvas.style.cursor = hoveredId ? 'pointer' : (isDragging ? CURSOR_GRABBING : CURSOR_GRAB);
+  }
   function onPointerMove(event) {
     // A press is in progress: cancel the long-press timer once the finger/
     // pointer has moved far enough that this reads as a drag, not a hold —
@@ -2219,7 +2225,7 @@ const Renderer = (function () {
       hoveredId = id;
       if (id) fire(cbHover, id);
     }
-    canvas.style.cursor = id ? 'pointer' : 'grab';
+    applyCursor();
   }
   function activateAtPointer(event) {
     updatePointer(event);
@@ -2236,6 +2242,8 @@ const Renderer = (function () {
   function onPointerDown(event) {
     downPos = [event.clientX, event.clientY];
     downWasTouch = event.pointerType === 'touch';
+    isDragging = !downWasTouch;
+    applyCursor();
     clearTimeout(pressTimer);
     longPressId = null;
     if (!downWasTouch) return;
@@ -2251,6 +2259,8 @@ const Renderer = (function () {
     }, LONG_PRESS_MS);
   }
   function onPointerUp(event) {
+    isDragging = false;
+    applyCursor();
     clearTimeout(pressTimer);
     const wasLongPress = longPressId !== null;
     longPressId = null;
@@ -2273,6 +2283,8 @@ const Renderer = (function () {
   // way nothing is being pointed at anymore, so clear whatever preview/hover
   // is active.
   function onPointerCancel() {
+    isDragging = false;
+    applyCursor();
     clearTimeout(pressTimer);
     if (hoveredId) { fire(cbLeave, hoveredId); hoveredId = null; }
     longPressId = null;
