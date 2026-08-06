@@ -2799,6 +2799,7 @@ function buildRelationships(d) {
           '<span class="rel-dot" style="background:' + color + '"></span>' +
           '<span class="rel-arrow">' + arrow + '</span>' +
           '<span class="rel-name">' + name + '</span>' +
+          (r.l.fieldNote ? '<span class="fieldnote-badge" title="Field note — the creator's own note on this link">&#9998;</span>' : '') +
           '<span class="rel-arrows" style="color:' + color + '" title="Direction and strength (? = unverified sign)">' + arrowGlyphs(r.l) + '</span>' +
           '<span class="rel-strength">' + strengthWord(r.l.w) + '</span>' +
         '</div>' +
