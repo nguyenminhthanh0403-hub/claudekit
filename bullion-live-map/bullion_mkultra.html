@@ -2928,7 +2928,14 @@ function buildBoard() {
       const card = document.createElement('button');
       card.className = 'board-card' + (n.isHub ? ' hub' : '');
       card.style.borderLeftColor = GROUP_COLOR[n.group] || '#8891a6';
-      card.textContent = n.label;
+      card.appendChild(document.createTextNode(n.label));
+      if (FIELDNOTE_NODE_IDS.has(n.id)) {
+        const badge = document.createElement('span');
+        badge.className = 'fieldnote-badge';
+        badge.textContent = '✎';
+        badge.title = 'Field note - the creator\'s own note on this link';
+        card.appendChild(badge);
+      }
       card.setAttribute('aria-label', n.label);
       card.dataset.id = n.id;
       card.addEventListener('click', event => {
