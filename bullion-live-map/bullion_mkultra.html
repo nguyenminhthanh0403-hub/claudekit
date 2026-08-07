@@ -1537,6 +1537,10 @@ PLUMBING_LINKS.forEach(pl => {
 // drives the discoverability marker on board cards, node labels, and relationship rows.
 const FIELDNOTE_NODE_IDS = new Set();
 LINKS.forEach(l => { if (l.fieldNote) { FIELDNOTE_NODE_IDS.add(l.s); FIELDNOTE_NODE_IDS.add(l.t); } });
+// Shared title text for the field-note discoverability badge (✎) — used on board cards,
+// 3D node labels, and relationship-detail rows. Single source of truth to avoid the
+// em-dash/curly-apostrophe retyping bugs that hit this literal twice during implementation.
+const FIELDNOTE_TITLE = 'Field note — the creator’s own note on this link';
 
 // ─── CAUSAL PIPELINE COLUMNS (ported from Mk4) ──────────────────────────────
 // The map reads left → right (top → bottom on phones) as a causal story:
@@ -1985,7 +1989,7 @@ const Renderer = (function () {
         const badge = document.createElement('span');
         badge.className = 'fieldnote-badge';
         badge.textContent = '✎';
-        badge.title = 'Field note — the creator’s own note on this link';
+        badge.title = FIELDNOTE_TITLE;
         el.appendChild(badge);
       }
       labelContainer.appendChild(el);
@@ -2799,7 +2803,7 @@ function buildRelationships(d) {
           '<span class="rel-dot" style="background:' + color + '"></span>' +
           '<span class="rel-arrow">' + arrow + '</span>' +
           '<span class="rel-name">' + name + '</span>' +
-          (r.l.fieldNote ? '<span class="fieldnote-badge" title="Field note — the creator’s own note on this link">&#9998;</span>' : '') +
+          (r.l.fieldNote ? '<span class="fieldnote-badge" title="' + FIELDNOTE_TITLE + '">&#9998;</span>' : '') +
           '<span class="rel-arrows" style="color:' + color + '" title="Direction and strength (? = unverified sign)">' + arrowGlyphs(r.l) + '</span>' +
           '<span class="rel-strength">' + strengthWord(r.l.w) + '</span>' +
         '</div>' +
@@ -2941,7 +2945,7 @@ function buildBoard() {
         const badge = document.createElement('span');
         badge.className = 'fieldnote-badge';
         badge.textContent = '✎';
-        badge.title = 'Field note — the creator’s own note on this link';
+        badge.title = FIELDNOTE_TITLE;
         card.appendChild(badge);
       }
       card.setAttribute('aria-label', n.label);
