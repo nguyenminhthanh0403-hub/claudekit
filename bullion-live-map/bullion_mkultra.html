@@ -584,6 +584,8 @@
 
   .glossary-view { padding: 9px 11px; font-size: 11px; color: var(--text-dim); background: var(--bg-deep); overflow-y: auto; touch-action: pan-y; border-radius: 6px; max-height: 240px; border: 1px solid var(--border); }
   .chain-picker-row { display: flex; align-items: center; gap: 8px; }
+  .chain-picker-row select { flex: 1 1 0; min-width: 0; }
+  .chain-count { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
   .chain-static-arrow { color: var(--text-dim); font-size: 14px; }
   .chain-results { display: flex; flex-direction: column; gap: 8px; max-height: 240px; overflow-y: auto; }
   .chain-empty { font-size: 12px; color: var(--text-dim); padding: 8px; }
@@ -601,7 +603,7 @@
   .chain-conf-unverified { background: rgba(224,101,79,0.18); color: var(--red); }
   .chain-sign-pos { background: rgba(123,191,142,0.18); color: var(--green); }
   .chain-sign-neg { background: rgba(224,101,79,0.18); color: var(--red); }
-  .chain-sign-zero { background: rgba(136,145,166,0.18); color: var(--text-dim); }
+  .chain-sign-zero { background: rgba(224,177,90,0.18); color: #e0b15a; }
   .chain-hop-why { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; }
   .chain-hop-stat { font-size: 10px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; opacity: 0.85; }
   .glossary-view dl { margin: 0; }
@@ -1699,12 +1701,21 @@ function findChains(startId, endId, maxHops = 3) {
   return paths;
 }
 
-// Net sign is only meaningful when every hop follows its edge's stored
-// direction -- a path with any backward hop has no single honest "effect of
-// A on B" to report, so this returns null rather than a fabricated number.
+// Net sign is only meaningful when every hop follows a single consistent
+// direction -- either all forward (the query's own A-to-B direction) or all
+// backward (a valid B-to-A chain, read in reverse; every backward hop
+// flipped is a forward hop the other way). A path with hops in BOTH
+// directions has no single honest "effect" to report, so this returns null
+// rather than a fabricated number. Callers MUST check `.reversed` and label
+// a reversed net sign as applying end-to-start, never present it as if it
+// answers the forward A-to-B question.
 function netSignForPath(path) {
-  if (path.length === 0 || !path.every(hop => hop.forward)) return null;
-  return path.reduce((acc, hop) => acc * (hop.link.sign || 0), 1);
+  if (path.length === 0) return null;
+  const allForward = path.every(hop => hop.forward);
+  const allBackward = path.every(hop => !hop.forward);
+  if (!allForward && !allBackward) return null;
+  const sign = path.reduce((acc, hop) => acc * (hop.link.sign || 0), 1);
+  return { sign, reversed: allBackward };
 }
 
 let expandedHubs = new Set();   // hub ids the user has clicked open
@@ -5297,7 +5308,7 @@ function signSymbol(sign) {
 }
 
 function renderChainCard(path) {
-  const netSign = netSignForPath(path);
+  const net = netSignForPath(path);
   const seqIds = [path[0].from, ...path.map(h => h.to)];
   const headerParts = seqIds.map((id, i) => {
     const label = '<span class="chain-node">' + (ID_TO_LABEL[id] || id) + '</span>';
@@ -5305,8 +5316,9 @@ function renderChainCard(path) {
     const arrow = path[i].forward ? '→' : '←';
     return label + ' <span class="chain-arrow">' + arrow + '</span> ';
   }).join('');
-  const netBadge = netSign === null ? '' :
-    '<span class="chain-net-badge ' + signBadgeClass(netSign) + '">net ' + signSymbol(netSign) + '</span>';
+  const netBadge = net === null ? '' :
+    '<span class="chain-net-badge ' + signBadgeClass(net.sign) + '">net ' + signSymbol(net.sign) +
+      (net.reversed ? ' (reverse)' : '') + '</span>';
   const hopsHtml = path.map(hop => {
     const l = hop.link;
     const dirLabel = (ID_TO_LABEL[hop.from] || hop.from) + (hop.forward ? ' → ' : ' ← ') + (ID_TO_LABEL[hop.to] || hop.to);
@@ -5333,7 +5345,9 @@ function renderChainResults(startId, endId) {
     container.innerHTML = '<div class="chain-empty">Not meaningfully connected within 3 hops in this model.</div>';
     return;
   }
-  container.innerHTML = paths.map(renderChainCard).join('');
+  const countLabel = '<div class="chain-count">' + paths.length +
+    (paths.length === 1 ? ' path found' : ' paths found') + '</div>';
+  container.innerHTML = countLabel + paths.map(renderChainCard).join('');
 }
 
 function populateChainSelects() {
@@ -5341,12 +5355,21 @@ function populateChainSelects() {
     .map(n => '<option value="' + n.id + '">' + n.label + '</option>').join('');
   document.getElementById('chain-start').innerHTML = opts;
   document.getElementById('chain-end').innerHTML = opts;
-  document.getElementById('chain-end').selectedIndex = 1;
+  // Default to a pair known to have real paths (the spec's own showcase
+  // example), not the alphabetically-first two nodes -- an arbitrary
+  // alphabetical default previously landed on a disconnected pair, so a
+  // user's very first click showed "not connected" for a discovery feature.
+  document.getElementById('chain-start').value = 'mortgage';
+  document.getElementById('chain-end').value = 'repo';
 }
 populateChainSelects();
-document.getElementById('chain-trace-btn').addEventListener('click', () => {
+function runChainTrace() {
   renderChainResults(document.getElementById('chain-start').value, document.getElementById('chain-end').value);
-});
+}
+document.getElementById('chain-trace-btn').addEventListener('click', runChainTrace);
+document.getElementById('chain-start').addEventListener('change', runChainTrace);
+document.getElementById('chain-end').addEventListener('change', runChainTrace);
+runChainTrace(); // show the default pair's result immediately, not an empty box
 
 function toggleGlossary() {
   const box = document.getElementById('glossary-box');

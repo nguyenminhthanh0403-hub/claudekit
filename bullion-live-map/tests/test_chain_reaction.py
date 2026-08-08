@@ -97,12 +97,16 @@ def find_chains(neighbors, edge_of, start, end, max_hops=3):
 
 
 def net_sign(path):
-    if not path or not all(hop[2]["forward"] for hop in path):
+    if not path:
+        return None
+    all_forward = all(hop[2]["forward"] for hop in path)
+    all_backward = all(not hop[2]["forward"] for hop in path)
+    if not all_forward and not all_backward:
         return None
     net = 1
     for hop in path:
         net *= hop[2]["sign"]
-    return net
+    return {"sign": net, "reversed": all_backward}
 
 
 class TestChainReactionTraversal(unittest.TestCase):
@@ -131,9 +135,25 @@ class TestChainReactionTraversal(unittest.TestCase):
             ("mortgage", "yield", "hf", "repo"),
         }
         self.assertEqual(sequences, expected)
-        # None of these 7 real paths happen to be all-forward, so none should
-        # report a net sign -- a genuine property of this pair, not a bug.
-        self.assertTrue(all(net_sign(p) is None for p in paths))
+        # 5 of these 7 are genuinely mixed-direction (no honest net sign).
+        # The other 2 (yield->dealers->repo, yield->hf->repo) are all-backward
+        # -- a real chain, just read start-to-end in reverse -- and now get a
+        # reversed net sign rather than being lumped in with the mixed ones.
+        by_seq = {tuple([p[0][0]] + [hop[1] for hop in p]): p for p in paths}
+        mixed_sequences = expected - {
+            ("mortgage", "yield", "dealers", "repo"),
+            ("mortgage", "yield", "hf", "repo"),
+        }
+        for seq in mixed_sequences:
+            self.assertIsNone(net_sign(by_seq[seq]), f"{seq} should have no net sign (mixed direction)")
+        self.assertEqual(
+            net_sign(by_seq[("mortgage", "yield", "dealers", "repo")]),
+            {"sign": -1, "reversed": True},
+        )
+        self.assertEqual(
+            net_sign(by_seq[("mortgage", "yield", "hf", "repo")]),
+            {"sign": 0, "reversed": True},
+        )
 
     def test_unconnected_pair_within_three_hops(self):
         paths = find_chains(self.neighbors, self.edge_of, "banks", "cftc", 3)
@@ -162,12 +182,12 @@ class TestChainReactionTraversal(unittest.TestCase):
         direct = next(
             p for p in paths if [p[0][0]] + [hop[1] for hop in p] == ["ffr", "tech"]
         )
-        self.assertEqual(net_sign(direct), -1)
+        self.assertEqual(net_sign(direct), {"sign": -1, "reversed": False})
         three_hop = next(
             p for p in paths
             if [p[0][0]] + [hop[1] for hop in p] == ["ffr", "credit", "equit", "tech"]
         )
-        self.assertEqual(net_sign(three_hop), 1)
+        self.assertEqual(net_sign(three_hop), {"sign": 1, "reversed": False})
 
 
 if __name__ == "__main__":
