@@ -143,6 +143,20 @@ class TestChainReactionTraversal(unittest.TestCase):
         paths = find_chains(self.neighbors, self.edge_of, "mortgage", "mortgage", 3)
         self.assertEqual(paths, [])
 
+    def test_every_stored_edge_resolves_to_its_own_direction(self):
+        # A pair with a link stored a->b must resolve forward=True for (a,b)
+        # -- even when the reverse pair b->a is ALSO separately stored (e.g.
+        # banks/fdic, equit/etf both exist as distinct, separately-cited
+        # edges in this graph). find_link must never let one direction's
+        # citation/sign shadow the other's.
+        for (s, t, w, sign) in self.edges:
+            result = find_link(self.edge_of, s, t)
+            self.assertTrue(
+                result["forward"],
+                f"{s}->{t} should resolve forward=True (its own stored edge), got {result}",
+            )
+            self.assertEqual(result["sign"], sign)
+
     def test_all_forward_path_computes_net_sign(self):
         paths = find_chains(self.neighbors, self.edge_of, "ffr", "tech", 3)
         direct = next(
