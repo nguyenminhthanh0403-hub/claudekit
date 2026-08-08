@@ -583,6 +583,30 @@
   .impacts-note { font-size: 12px; color: var(--warn); opacity: 0.85; font-style: italic; line-height: 1.4; margin-bottom: 6px; }
 
   .glossary-view { padding: 9px 11px; font-size: 11px; color: var(--text-dim); background: var(--bg-deep); overflow-y: auto; touch-action: pan-y; border-radius: 6px; max-height: 240px; border: 1px solid var(--border); }
+  .chain-picker-row { display: flex; align-items: center; gap: 8px; }
+  .chain-static-arrow { color: var(--text-dim); font-size: 14px; }
+  .chain-results { display: flex; flex-direction: column; gap: 8px; }
+  .chain-empty { font-size: 12px; color: var(--text-dim); padding: 8px; }
+  .chain-card { border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; background: var(--bg-panel2); }
+  .chain-path-header { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+  .chain-node { color: var(--gold); }
+  .chain-arrow { color: var(--text-dim); }
+  .chain-net-badge { margin-left: 6px; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700; }
+  .chain-net-pos { background: rgba(123,191,142,0.18); color: var(--green); }
+  .chain-net-neg { background: rgba(224,101,79,0.18); color: var(--red); }
+  .chain-net-zero { background: rgba(136,145,166,0.18); color: var(--text-dim); }
+  .chain-hop { padding: 6px 0; border-top: 1px solid var(--border); }
+  .chain-hop:first-child { border-top: none; padding-top: 0; }
+  .chain-hop-label { font-size: 11px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .chain-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .chain-conf-measured { background: rgba(212,184,105,0.18); color: var(--gold); }
+  .chain-conf-directional { background: rgba(136,145,166,0.18); color: var(--text-dim); }
+  .chain-conf-unverified { background: rgba(224,101,79,0.18); color: var(--red); }
+  .chain-sign-pos { background: rgba(123,191,142,0.18); color: var(--green); }
+  .chain-sign-neg { background: rgba(224,101,79,0.18); color: var(--red); }
+  .chain-sign-zero { background: rgba(136,145,166,0.18); color: var(--text-dim); }
+  .chain-hop-why { font-size: 11px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; }
+  .chain-hop-stat { font-size: 10px; color: var(--text-dim); margin-top: 3px; line-height: 1.5; opacity: 0.85; }
   .glossary-view dl { margin: 0; }
   .glossary-view dt { font-weight: 600; color: var(--gold); margin-top: 7px; }
   .glossary-view dt:first-child { margin-top: 0; }
@@ -884,6 +908,17 @@
     <div>
       <div class="drawer-label">Acronym glossary <span class="drawer-tag" id="glossary-toggle">show</span></div>
       <div class="glossary-view hidden" id="glossary-box"></div>
+    </div>
+
+    <div>
+      <div class="drawer-label">Chain reaction</div>
+      <div class="chain-picker-row">
+        <select class="scenario-select" id="chain-start"></select>
+        <span class="chain-static-arrow">&#8596;</span>
+        <select class="scenario-select" id="chain-end"></select>
+      </div>
+      <button class="run-btn" id="chain-trace-btn" style="margin-top:8px">Trace connection</button>
+      <div id="chain-results" class="chain-results" style="margin-top:8px"></div>
     </div>
 
   </div>
@@ -5250,6 +5285,66 @@ document.querySelectorAll('#control-drawer [data-shock]').forEach(b => {
 });
 document.getElementById('reset-shock-btn').addEventListener('click', resetState);
 document.getElementById('run-ai-btn').addEventListener('click', runAIAnalysis);
+
+// ── Chain-reaction hypothesis: UI ───────────────────────────────────────────
+function signBadgeClass(sign) {
+  return sign > 0 ? 'chain-sign-pos' : sign < 0 ? 'chain-sign-neg' : 'chain-sign-zero';
+}
+function signSymbol(sign) {
+  return sign > 0 ? '+' : sign < 0 ? '−' : '0';
+}
+
+function renderChainCard(path) {
+  const netSign = netSignForPath(path);
+  const seqIds = [path[0].from, ...path.map(h => h.to)];
+  const headerParts = seqIds.map((id, i) => {
+    const label = '<span class="chain-node">' + (ID_TO_LABEL[id] || id) + '</span>';
+    if (i === seqIds.length - 1) return label;
+    const arrow = path[i].forward ? '→' : '←';
+    return label + ' <span class="chain-arrow">' + arrow + '</span> ';
+  }).join('');
+  const netBadge = netSign === null ? '' :
+    '<span class="chain-net-badge ' + signBadgeClass(netSign) + '">net ' + signSymbol(netSign) + '</span>';
+  const hopsHtml = path.map(hop => {
+    const l = hop.link;
+    const dirLabel = (ID_TO_LABEL[hop.from] || hop.from) + (hop.forward ? ' → ' : ' ← ') + (ID_TO_LABEL[hop.to] || hop.to);
+    return '<div class="chain-hop">' +
+      '<div class="chain-hop-label">' + dirLabel +
+        '<span class="chain-badge chain-conf-' + l.conf + '">' + l.conf + '</span>' +
+        '<span class="chain-badge ' + signBadgeClass(l.sign) + '">' + signSymbol(l.sign) + '</span>' +
+      '</div>' +
+      '<div class="chain-hop-why">' + l.why + '</div>' +
+      (l.stat ? '<div class="chain-hop-stat">' + l.stat + '</div>' : '') +
+    '</div>';
+  }).join('');
+  return '<div class="chain-card"><div class="chain-path-header">' + headerParts + netBadge + '</div>' + hopsHtml + '</div>';
+}
+
+function renderChainResults(startId, endId) {
+  const container = document.getElementById('chain-results');
+  if (!startId || !endId || startId === endId) {
+    container.innerHTML = '<div class="chain-empty">Pick two different nodes.</div>';
+    return;
+  }
+  const paths = findChains(startId, endId, 3);
+  if (paths.length === 0) {
+    container.innerHTML = '<div class="chain-empty">Not meaningfully connected within 3 hops in this model.</div>';
+    return;
+  }
+  container.innerHTML = paths.map(renderChainCard).join('');
+}
+
+function populateChainSelects() {
+  const opts = NODES.slice().sort((a, b) => a.label.localeCompare(b.label))
+    .map(n => '<option value="' + n.id + '">' + n.label + '</option>').join('');
+  document.getElementById('chain-start').innerHTML = opts;
+  document.getElementById('chain-end').innerHTML = opts;
+  document.getElementById('chain-end').selectedIndex = 1;
+}
+populateChainSelects();
+document.getElementById('chain-trace-btn').addEventListener('click', () => {
+  renderChainResults(document.getElementById('chain-start').value, document.getElementById('chain-end').value);
+});
 
 function toggleGlossary() {
   const box = document.getElementById('glossary-box');
