@@ -189,6 +189,32 @@ class TestChainReactionTraversal(unittest.TestCase):
         )
         self.assertEqual(net_sign(three_hop), {"sign": 1, "reversed": False})
 
+    def test_reverse_label_present_in_render_source(self):
+        # The parity test (test_chain_reaction_js_parity.py) guards the
+        # COMPUTATION of {sign, reversed} -- it never renders anything, so it
+        # would stay green even if the "(reverse)" label were silently
+        # deleted from renderChainCard. That label is the one thing standing
+        # between an honest reversed-direction net sign and one that reads
+        # as if it answered the forward question the user actually asked.
+        # This is a cheap static guard on the presentation layer, not a
+        # replacement for the parity test's computation guard.
+        with open(MAP_PATH, encoding="utf-8") as f:
+            html = f.read()
+        start = html.index("function renderChainCard(path) {")
+        end = html.index("\n}\n", start)
+        render_source = html[start:end]
+        self.assertIn(
+            "net.reversed",
+            render_source,
+            "renderChainCard should branch on net.reversed to label a reversed net sign",
+        )
+        self.assertIn(
+            "(reverse)",
+            render_source,
+            "renderChainCard should render the literal '(reverse)' qualifier "
+            "for an all-backward path's net-sign badge",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
