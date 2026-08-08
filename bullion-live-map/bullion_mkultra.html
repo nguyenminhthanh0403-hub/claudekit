@@ -1284,9 +1284,9 @@ const NODES = [
       'Baskets of stocks or bonds you can trade like a single share.',
       'Most new investing money flows through them, shaping which assets rise.'],
     expert:[
-      'Passive vehicles now hold a majority of US equity fund assets; creation/redemption ties ETF prices to the underlying.',
+      'Index funds/ETFs held 57% of combined equity fund assets as of Sept 2024; creation/redemption ties ETF prices to the underlying.',
       'Concentrated flows move whole indices and can propagate stress in illiquid underlyings (e.g. HY bond ETFs).',
-      'Source: ICI, Fed Financial Stability Report.'] },
+      'Source: ICI Release: Active and Index Investing, Sept 2024; Fed staff research, FEDS 2018-060 (index-inclusion effects, Section 2.4).'] },
   { id:'energy', label:'Energy Sector', group:'sectors',
     beginner:[
       'Oil and gas company stocks.',
@@ -1498,8 +1498,8 @@ const LINKS = [
   {s:'ffr', t:'tbills', w:3, sign:1, conf:'directional', why:'Bill yields track the Fed funds rate almost one-for-one at the front end.', stat:'T-bill yields ~= policy rate. Source: FRED DTB3 vs FEDFUNDS. Tested over 198 usable daily changes in the train split: no significant daily-frequency relationship (|t|=0.4). The mechanism is sourced; the magnitude is not measured here.'},
   {s:'vix', t:'options', w:3, sign:1, conf:'directional', why:'The VIX is derived from S&P 500 option prices, so option-implied vol IS the fear gauge.', stat:'VIX = 30-day implied vol from SPX options. Source: Cboe.'},
   {s:'options', t:'equit', w:2, sign:0, conf:'directional', why:'Dealer option hedging (gamma) can amplify or dampen index moves depending on positioning.', stat:'Conditional sign. Source: OCC, dealer-gamma research.'},
-  {s:'equit', t:'etf', w:3, sign:1, conf:'directional', why:'ETFs hold the equity market; index levels drive ETF NAVs via creation/redemption.', stat:'Passive holds a majority of equity fund assets. Source: ICI.'},
-  {s:'etf', t:'equit', w:2, sign:1, conf:'directional', why:'Concentrated passive flows move whole indices, feeding back into prices.', stat:'Directional; flow-driven. Source: Fed FSR.'},
+  {s:'equit', t:'etf', w:3, sign:1, conf:'directional', why:'ETFs hold the equity market; index levels drive ETF NAVs via creation/redemption.', stat:'Index funds/ETFs held 57% of combined domestic+world equity fund assets as of Sept 2024 (computed from ICI’s own active/index totals). Passive share of all long-term fund assets: 19% in 2010 → 52% in 2025. Source: ICI Release: Active and Index Investing, Sept 2024; ICI 2026 Investment Company Fact Book, Fig. 2.5.'},
+  {s:'etf', t:'equit', w:2, sign:1, conf:'directional', why:'Concentrated passive flows move whole indices, feeding back into prices.', stat:'Directional; flow-driven. Fed staff research documents “index-inclusion effects”: assets added to an index see valuation, volatility, and comovement effects as passive/ETF flows track it. Source: Fed staff research, FEDS 2018-060 “The Shift from Active to Passive Investing” (Section 2.4, Table 4).'},
   {s:'oil', t:'energy', w:3, sign:1, conf:'measured', why:'Energy company earnings and stocks move with the oil price.', stat:'Energy equities strongly correlated with WTI. Source: S&P DJI, EIA. Fitted over 198 usable daily changes in the train split: slope=+0.002217, |t|=8.1.'},
   {s:'energy', t:'equit', w:1, sign:1, conf:'directional', why:'Energy is an S&P sector, so its swings show up in the index during oil shocks.', stat:'~4% index weight, larger earnings swing. Source: S&P DJI. Tested over 199 usable daily changes in the train split: the fitted sign disagrees with the sign shown, but only at |t|=1.4 - too weak to act on (logged as a conflict).'},
   {s:'mortgage', t:'house', w:2, sign:-1, conf:'directional', why:'Higher mortgage rates cut household affordability and housing wealth.', stat:'Mortgage debt is the largest household liability. Source: NY Fed.'},
