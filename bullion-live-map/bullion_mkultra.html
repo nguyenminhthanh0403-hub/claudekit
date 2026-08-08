@@ -1626,6 +1626,50 @@ const neighborsOf = {};
 NODES.forEach(n => neighborsOf[n.id] = new Set());
 LINKS.forEach(l => { neighborsOf[l.s].add(l.t); neighborsOf[l.t].add(l.s); });
 
+// ── Chain-reaction hypothesis: multi-hop connections between two nodes ─────
+// Pure traversal over the already-merged LINKS array (PLUMBING_LINKS has
+// already superseded/appended into it above this point). Undirected search --
+// an edge is walkable either way -- but each hop records the edge's actual
+// stored s/t direction so callers can label it forward/backward rather than
+// implying a one-way causal flow that isn't there. See
+// docs/superpowers/specs/2026-08-08-bullion-mkultra-chain-reaction-hypothesis-design.md.
+function findLinkBetween(a, b) {
+  const link = LINKS.find(l => (l.s === a && l.t === b) || (l.s === b && l.t === a));
+  if (!link) return null;
+  return { link, forward: link.s === a };
+}
+
+function findChains(startId, endId, maxHops = 3) {
+  const paths = [];
+  function dfs(current, visited, path) {
+    if (path.length > maxHops) return;
+    if (current === endId && path.length > 0) {
+      paths.push(path.slice());
+      return;
+    }
+    for (const next of neighborsOf[current] || []) {
+      if (visited.has(next)) continue;
+      const hop = findLinkBetween(current, next);
+      if (!hop) continue;
+      visited.add(next);
+      path.push({ from: current, to: next, link: hop.link, forward: hop.forward });
+      dfs(next, visited, path);
+      path.pop();
+      visited.delete(next);
+    }
+  }
+  if (startId !== endId) dfs(startId, new Set([startId]), []);
+  return paths;
+}
+
+// Net sign is only meaningful when every hop follows its edge's stored
+// direction -- a path with any backward hop has no single honest "effect of
+// A on B" to report, so this returns null rather than a fabricated number.
+function netSignForPath(path) {
+  if (path.length === 0 || !path.every(hop => hop.forward)) return null;
+  return path.reduce((acc, hop) => acc * (hop.link.sign || 0), 1);
+}
+
 let expandedHubs = new Set();   // hub ids the user has clicked open
 let beginnerMode = true;        // simplified canvas + plain-language node text; default for new visitors
 let openDetailNode = null;      // the node whose detail panel is currently open, so it can re-render on mode switch
