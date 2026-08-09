@@ -12,7 +12,9 @@ script, same category as calibrate.py.
 
 See docs/superpowers/specs/2026-08-09-bullion-mkultra-macro-engine-design.md
 """
+import math
 import os
+import random
 import statistics
 import sys
 from datetime import datetime, timedelta, timezone
@@ -80,6 +82,69 @@ def field_stats(values):
     if not values:
         raise ValueError("field_stats: empty values")
     return {"mean": statistics.mean(values), "std": statistics.pstdev(values), "n": len(values)}
+
+
+def add_curve_slope(history):
+    """Returns a new history dict with a derived 'curve_slope' = us10y - us2y field."""
+    out = dict(history)
+    us10y, us2y = history.get("us10y", {}), history.get("us2y", {})
+    out["curve_slope"] = {d: us10y[d] - us2y[d] for d in us10y if d in us2y}
+    return out
+
+
+def build_zscore_rows(history, stats_by_field, fields):
+    """Dates (sorted) and z-scored rows where every field in `fields` is present.
+
+    Each row is clipped to +/-3 per field, matching the client-side engine's
+    clipping so the historical composite distribution used for percentile
+    lookup is built the same way the live score will be computed.
+    """
+    date_sets = [set(history[f].keys()) for f in fields]
+    common = sorted(set.intersection(*date_sets)) if date_sets else []
+    rows = []
+    for d in common:
+        row = []
+        for f in fields:
+            s = stats_by_field[f]
+            z = (history[f][d] - s["mean"]) / s["std"] if s["std"] else 0.0
+            row.append(max(-3.0, min(3.0, z)))
+        rows.append(row)
+    return common, rows
+
+
+def pca_first_component(rows, n_iter=500, seed=1):
+    """First principal component via power iteration on X^T X / n (rows are
+    already z-scored, i.e. approximately mean-zero per column, so this is
+    power iteration on the covariance matrix without building it explicitly).
+    """
+    n_fields = len(rows[0])
+    n_rows = len(rows)
+    rnd = random.Random(seed)
+    v = [rnd.random() - 0.5 for _ in range(n_fields)]
+
+    def normalize(vec):
+        norm = math.sqrt(sum(x * x for x in vec)) or 1.0
+        return [x / norm for x in vec]
+
+    v = normalize(v)
+    for _ in range(n_iter):
+        xv = [sum(row[j] * v[j] for j in range(n_fields)) for row in rows]
+        w = [sum(xv[i] * rows[i][j] for i in range(n_rows)) / n_rows for j in range(n_fields)]
+        v = normalize(w)
+    return v
+
+
+def orient_loadings(loadings, fields, anchor_field="vix"):
+    idx = fields.index(anchor_field)
+    if loadings[idx] < 0:
+        return [-x for x in loadings]
+    return list(loadings)
+
+
+def percentile_table(values, n_points=101):
+    ordered = sorted(values)
+    last = len(ordered) - 1
+    return [ordered[round(p / (n_points - 1) * last)] for p in range(n_points)]
 
 
 if __name__ == "__main__":
