@@ -823,7 +823,7 @@ git commit -m "Mk Ultra macro engine: add computeNodeMultipliers reusing NODE_EL
 - Consumes: the `computeCompositeScore` result (Task 4), the `computeNodeMultipliers` result (Task 5), `live` (flat `{field: number}`), `BASELINE_STATS.fields.cpi_yoy` / `.nfp_mom` if present (for context sentence — note `nfp_mom` is NOT in `COMPOSITE_FIELDS`/`BASELINE_STATS` per Task 3's `MEAN_REVERTING_FIELDS`; it needs to be added there too — see Step 0 below).
 - Produces: `buildMacroNarrative(compositeResult, nodeResult, live)` returning a single string of exactly 3 sentences.
 
-- [ ] **Step 0: Add `nfp_mom` to the baseline fields (correction to Task 3)**
+- [ ] **Step 0: Add `nfp_mom` to the baseline fields (correction to Task 1)**
 
 `MEAN_REVERTING_FIELDS` in `backfill_baseline.py` (Task 1) already omits `nfp_mom`. Add it:
 
