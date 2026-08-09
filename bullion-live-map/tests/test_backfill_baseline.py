@@ -76,5 +76,67 @@ class TestPercentileTable(unittest.TestCase):
             self.assertGreaterEqual(table[i], table[i - 1])
 
 
+import json
+
+from backfill_baseline import build_baseline, render_js_block, splice_into_html
+
+
+class TestBuildBaseline(unittest.TestCase):
+    def _synthetic_history(self):
+        # Dates are generated relative to "now" (not hardcoded to 2020-01)
+        # because build_baseline's TRENDING_FIELDS path filters to the last
+        # RECENT_WINDOW_YEARS using datetime.now(): a fixed 2020 fixture
+        # would fall outside that window and field_stats() would raise on
+        # an empty list once "now" drifts more than ~2 years past 2020-01.
+        from datetime import datetime, timedelta, timezone
+        base = datetime.now(timezone.utc)
+        dates = [(base - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(27, -1, -1)]
+        history = {}
+        for i, f in enumerate(["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y",
+                                "vix", "spx", "fed_bs", "rrp", "ffr", "cpi_yoy", "dxy", "wti_px"]):
+            history[f] = {d: 1.0 + i * 0.1 + 0.01 * n for n, d in enumerate(dates)}
+        return history
+
+    def test_build_baseline_produces_expected_keys(self):
+        baseline = build_baseline(self._synthetic_history())
+        self.assertIn("fields", baseline)
+        self.assertIn("curve_slope", baseline["fields"])
+        self.assertIn("pc1_loadings", baseline)
+        self.assertEqual(set(baseline["pc1_loadings"].keys()),
+                          {"hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y",
+                           "curve_slope", "vix", "spx", "fed_bs", "rrp"})
+        self.assertEqual(len(baseline["composite_percentiles"]), 101)
+        for f in ("ffr", "cpi_yoy", "dxy", "wti_px"):
+            self.assertIn(f, baseline["fields"])
+
+
+class TestSplice(unittest.TestCase):
+    def test_splice_replaces_only_between_markers(self):
+        html = (
+            "before\n"
+            "// ─── BASELINE-STATS-START ───\n"
+            "const BASELINE_STATS = { old: true };\n"
+            "// ─── BASELINE-STATS-END ───\n"
+            "after\n"
+        )
+        out = splice_into_html(html, "const BASELINE_STATS = { new: true };")
+        self.assertIn("before", out)
+        self.assertIn("after", out)
+        self.assertIn("new: true", out)
+        self.assertNotIn("old: true", out)
+
+    def test_splice_raises_if_markers_missing(self):
+        with self.assertRaises(ValueError):
+            splice_into_html("no markers here", "const BASELINE_STATS = {};")
+
+    def test_render_js_block_is_valid_json_payload(self):
+        baseline = {"generated_at": "2026-08-09", "fields": {"vix": {"mean": 18.0, "std": 5.0, "n": 100, "window_years": 15}},
+                    "pc1_loadings": {"vix": 1.0}, "composite_percentiles": [0.0, 1.0]}
+        block = render_js_block(baseline)
+        self.assertTrue(block.strip().startswith("const BASELINE_STATS ="))
+        inner = block.strip()[len("const BASELINE_STATS ="):].rstrip(";").strip()
+        self.assertEqual(json.loads(inner), baseline)
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -12,15 +12,20 @@ script, same category as calibrate.py.
 
 See docs/superpowers/specs/2026-08-09-bullion-mkultra-macro-engine-design.md
 """
+import json
 import math
 import os
 import random
 import statistics
 import sys
+import urllib.error
 from datetime import datetime, timedelta, timezone
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from fetch_bullion_data import FRED_SERIES, YAHOO_SYMBOLS, KEY_PATH, fetch_fred_series, fetch_yahoo_symbol
+from fetch_bullion_data import (
+    FRED_SERIES, YAHOO_SYMBOLS, KEY_PATH, fetch_yahoo_symbol,
+    http_get_json, fred_url, parse_fred_observations,
+)
 
 FULL_WINDOW_YEARS = 15
 RECENT_WINDOW_YEARS = 2
@@ -45,19 +50,64 @@ def _read_fred_key():
         return f.read().strip()
 
 
+def _fetch_fred_history_only(series_id, key, units, decimals, start, end):
+    """Full observation history for a series, current vintage only.
+
+    fetch_bullion_data.fetch_fred_series requests a realtime RANGE
+    (realtime_start=start, realtime_end=9999-12-31) for series with no
+    `units` transform, to recover each observation's publication date for
+    freshness checks. Over a 15yr backfill window that range spans
+    thousands of revision vintages for a daily series like DGS2 (2Y
+    yield), and FRED rejects any realtime-range request once the vintage
+    count exceeds 2000: "Bad Request. There are N vintage dates in the
+    specified real-time period ... This exceeds the maximum number of
+    vintage dates allowed for this file type (2000)." (verified against
+    the live API 2026-08-09).
+
+    The baseline only needs historical VALUES, not publication dates, so
+    this issues a plain observation_start/observation_end request with no
+    realtime keys at all -- FRED then returns exactly one (current) row
+    per observation date, which sidesteps the cap entirely and gives
+    today's best-known value for every historical date. That is also the
+    right input for a stats/PCA baseline: it should reflect currently-known
+    history, not each value's as-first-published vintage.
+    """
+    params = {
+        "series_id": series_id,
+        "api_key": key,
+        "file_type": "json",
+        "sort_order": "asc",
+        "observation_start": start,
+        "observation_end": end,
+    }
+    if units:
+        params["units"] = units
+    try:
+        data = http_get_json(fred_url(params))
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  FRED {series_id}: fetch failed ({e})", file=sys.stderr)
+        return {}
+    _, _, _, hist = parse_fred_observations(data, decimals)
+    return hist
+
+
 def fetch_all_history(key, start, end):
     """Fetch full history for every tracked FRED + Yahoo field.
 
-    Returns {field: {date_str: value}}. Yahoo uses range_="max" (no
-    arbitrary-length range token is guaranteed valid) and results are
-    filtered to [start, end] here.
+    Returns {field: {date_str: value}}. Yahoo's range_ is bounded to
+    FULL_WINDOW_YEARS rather than "max": Yahoo's chart API silently
+    downgrades interval=1d to a coarse 3-month bucket once a symbol's full
+    history (e.g. ^GSPC back to 1927) is requested with range=max, which
+    would leave spx with ~170 quarterly points instead of ~3800 daily ones
+    (verified against the live API 2026-08-09). A bounded range token like
+    "15y" keeps 1d granularity; results are then filtered to [start, end]
+    here as before.
     """
     out = {}
     for series_id, (field, units, decimals) in FRED_SERIES.items():
-        _, _, _, hist = fetch_fred_series(series_id, key, units, decimals, start, end)
-        out[field] = hist
+        out[field] = _fetch_fred_history_only(series_id, key, units, decimals, start, end)
     for symbol, (field, decimals) in YAHOO_SYMBOLS.items():
-        _, _, _, hist = fetch_yahoo_symbol(symbol, decimals, range_="max")
+        _, _, _, hist = fetch_yahoo_symbol(symbol, decimals, range_=f"{FULL_WINDOW_YEARS}y")
         out[field] = {d: v for d, v in hist.items() if start <= d <= end}
     return out
 
@@ -147,9 +197,85 @@ def percentile_table(values, n_points=101):
     return [ordered[round(p / (n_points - 1) * last)] for p in range(n_points)]
 
 
+def build_baseline(history):
+    history = add_curve_slope(history)
+    # The forward-fill target grid must come from the OTHER (dense/daily)
+    # fields, not from FORWARD_FILL_FIELDS' own dates: a field's own date
+    # set trivially already contains itself, so building the grid from
+    # FORWARD_FILL_FIELDS alone makes forward_fill() a no-op and leaves
+    # fed_bs on its native weekly cadence. That silently shrinks the
+    # z-scored row intersection in build_zscore_rows down to only the
+    # weekly dates every other field happens to also have a value on
+    # (observed: ~154 rows instead of ~750+ over the fields' overlap
+    # window) -- verified 2026-08-09 against live-fetched history.
+    all_dates_sorted = sorted({d for f, h in history.items() if f not in FORWARD_FILL_FIELDS for d in h})
+    for f in FORWARD_FILL_FIELDS:
+        if f in history:
+            history[f] = forward_fill(history[f], all_dates_sorted)
+
+    fields_out = {}
+    for f in MEAN_REVERTING_FIELDS + ["curve_slope"]:
+        if f not in history or not history[f]:
+            continue
+        stats = field_stats(list(history[f].values()))
+        stats["window_years"] = FULL_WINDOW_YEARS
+        fields_out[f] = stats
+    for f in TRENDING_FIELDS:
+        if f not in history or not history[f]:
+            continue
+        cutoff = (datetime.now(timezone.utc) - timedelta(days=365 * RECENT_WINDOW_YEARS)).strftime("%Y-%m-%d")
+        recent_values = [v for d, v in history[f].items() if d >= cutoff]
+        stats = field_stats(recent_values)
+        stats["window_years"] = RECENT_WINDOW_YEARS
+        fields_out[f] = stats
+
+    dates, rows = build_zscore_rows(history, fields_out, COMPOSITE_FIELDS)
+    loadings = orient_loadings(pca_first_component(rows), COMPOSITE_FIELDS, anchor_field="vix")
+    pc1 = dict(zip(COMPOSITE_FIELDS, loadings))
+    composite_series = [sum(row[i] * loadings[i] for i in range(len(loadings))) for row in rows]
+
+    return {
+        "generated_at": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+        "fields": fields_out,
+        "pc1_loadings": pc1,
+        "composite_percentiles": percentile_table(composite_series) if composite_series else [],
+    }
+
+
+def render_js_block(baseline):
+    return "const BASELINE_STATS = " + json.dumps(baseline, indent=2) + ";"
+
+
+def splice_into_html(html_text, js_block):
+    # Search on the bare marker TEXT, not a full decorative comment line --
+    # matching on exact dash-run length would be fragile (the line's dash
+    # padding has no functional meaning and could reflow without this
+    # function needing to change).
+    start_token = "BASELINE-STATS-START"
+    end_token = "BASELINE-STATS-END"
+    start_idx = html_text.find(start_token)
+    end_idx = html_text.find(end_token)
+    if start_idx == -1 or end_idx == -1:
+        raise ValueError("BASELINE-STATS markers not found in HTML")
+    # Splice after the START marker's own line, and before the END marker's line.
+    start = html_text.index("\n", start_idx) + 1
+    end = html_text.rfind("\n", 0, end_idx)
+    before = html_text[:start]
+    after = html_text[end:]
+    return before + js_block + after
+
+
 if __name__ == "__main__":
     key = _read_fred_key()
-    end = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    start_full = (datetime.now(timezone.utc) - timedelta(days=365 * FULL_WINDOW_YEARS)).strftime("%Y-%m-%d")
-    history = fetch_all_history(key, start_full, end)
-    print(f"Fetched history for {len(history)} fields, window {start_full}..{end}", file=sys.stderr)
+    end_date = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    start_date = (datetime.now(timezone.utc) - timedelta(days=365 * FULL_WINDOW_YEARS)).strftime("%Y-%m-%d")
+    history = fetch_all_history(key, start_date, end_date)
+    baseline = build_baseline(history)
+    js_block = render_js_block(baseline)
+    html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bullion_mkultra.html")
+    with open(html_path) as f:
+        html_text = f.read()
+    with open(html_path, "w") as f:
+        f.write(splice_into_html(html_text, js_block))
+    print(f"BASELINE_STATS refreshed: {len(baseline['fields'])} fields, "
+          f"{len(baseline['composite_percentiles'])} percentile points", file=sys.stderr)
