@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <!-- Content Security Policy: d3 and all app code are inlined and no external
      resources are loaded, so default-src stays 'self'. connect-src is limited to
-     same-origin (data.json, the optional backend) and the Anthropic API, so a
-     user's API key can never be POSTed anywhere else. 'unsafe-inline' is required
-     for the inline <script>/<style> blocks this single-file app is built from.
-     Mk Ultra additionally loads Three.js r160 + OrbitControls as ESM modules from
-     a single pinned jsDelivr URL (see the <script type="importmap"> below) — that
-     host is allow-listed on script-src/connect-src, and ONLY that host. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.anthropic.com https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+     same-origin (data.json) — the macro analysis engine is a deterministic,
+     fully local quant engine with no network calls, so no third-party API host
+     needs to be allow-listed here. 'unsafe-inline' is required for the inline
+     <script>/<style> blocks this single-file app is built from. Mk Ultra
+     additionally loads Three.js r160 + OrbitControls as ESM modules from a
+     single pinned jsDelivr URL (see the <script type="importmap"> below) —
+     that host is allow-listed on script-src/connect-src, and ONLY that host. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Bullion Mk Ultra — US Financial System Constellation</title>
 <meta name="description" content="An interactive map of how the US financial system actually connects — live Treasury yields, inflation, gold and volatility, with every causal link explained in plain English.">
@@ -562,6 +563,12 @@
 
   .narrative-box { font-size: 12px; color: var(--text-dim); line-height: 1.6; background: var(--bg-panel2); border-radius: 6px; padding: 10px; border: 1px solid var(--border); white-space: pre-wrap; }
   .health-score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  /* This file has NO generic `.hidden { display: none }` utility -- every
+     other `.hidden` rule here is id-scoped (#coach.hidden, #manual-box.hidden,
+     #narration-caption.hidden). So hiding the disabled composite-health-score
+     UI needs its own rule; the id-level `display: flex` on .health-score-row
+     also has to be beaten, hence naming both selectors explicitly. */
+  .health-score-row.hidden, .health-bar-wrap.hidden { display: none; }
   .health-score-num { font-size: 19px; font-weight: 600; color: var(--gold); }
   .health-bar-wrap { margin: 2px 0 4px; }
   .health-bar-bg { height: 7px; background: var(--bg-deep); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
@@ -880,20 +887,20 @@
     </div>
 
     <div>
-      <div class="drawer-label">AI analysis</div>
-      <div class="health-score-row">
+      <div class="drawer-label">Macro analysis</div>
+      <div class="health-score-row hidden">
         <span class="health-score-num" id="health-num">&mdash;</span>
-        <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run AI analysis</span>
+        <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run macro analysis</span>
       </div>
-      <div class="health-bar-wrap">
+      <div class="health-bar-wrap hidden">
         <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
       </div>
-      <div class="narrative-box" id="narrative-box">Tap "Run AI analysis" for a macro strategist's read on current conditions.</div>
+      <div class="narrative-box" id="narrative-box">Tap "Run macro analysis" for a quantitative read on current conditions.</div>
       <div id="impacts-section" class="hidden" style="margin-top:8px">
         <div class="drawer-label" id="impacts-label">Node impact multipliers</div>
         <div id="impacts-list"></div>
       </div>
-      <button class="run-btn" id="run-ai-btn" style="margin-top:8px">Run AI analysis &#x2197;</button>
+      <button class="run-btn" id="run-ai-btn" style="margin-top:8px">Run macro analysis &#x2197;</button>
       <div style="text-align:center;margin-top:6px">
         <span class="disclaimer-link" id="disclaimer-link">Disclaimer &amp; privacy</span>
       </div>
@@ -3682,6 +3689,8 @@ function currentLiveSource() {
 
 let state = buildBaseState();
 let nodeMultipliers = {};
+let lastNodeMultiplierResult = { mults: {}, tiers: {}, noDataNodes: [] };
+let hasRunMacroAnalysis = false; // distinguishes "never run" from "ran and found 0 missing nodes"
 
 function buildBaseState() {
   const base = {
@@ -3829,6 +3838,321 @@ const ELASTICITY = {
 // Sign consistency with LINKS is now enforced at load time by validateProvenance().
 const NE = (v, conf, src) => ({ v, conf, src: src || '' });
 const D_ = CONF.DIRECTIONAL, U_ = CONF.UNVERIFIED, M_ = CONF.MEASURED;
+
+    // ─── BASELINE-STATS-START ──────────────────────────────────────────────
+const BASELINE_STATS = {
+  "generated_at": "2026-08-10",
+  "fields": {
+    "hy_oas": {
+      "mean": 3.159197452229299,
+      "std": 0.43401634064001954,
+      "n": 785,
+      "window_years": 15
+    },
+    "ig_oas": {
+      "mean": 0.9105357142857143,
+      "std": 0.14769649226210693,
+      "n": 784,
+      "window_years": 15
+    },
+    "sofr": {
+      "mean": 2.6688489208633093,
+      "std": 1.9360317442709907,
+      "n": 2085,
+      "window_years": 15
+    },
+    "tbill_3m": {
+      "mean": 1.6130066755674233,
+      "std": 1.8618723757587812,
+      "n": 3745,
+      "window_years": 15
+    },
+    "us10y": {
+      "mean": 2.614977303070761,
+      "std": 1.0672174647066248,
+      "n": 3745,
+      "window_years": 15
+    },
+    "us2y": {
+      "mean": 1.8185126835781042,
+      "std": 1.614010620953926,
+      "n": 3745,
+      "window_years": 15
+    },
+    "vix": {
+      "mean": 18.1224269544617,
+      "std": 6.83169589202535,
+      "n": 3799,
+      "window_years": 15
+    },
+    "ffr": {
+      "mean": 1.6408022660818713,
+      "std": 1.8646866641980737,
+      "n": 5472,
+      "window_years": 15
+    },
+    "cpi_yoy": {
+      "mean": 2.7202247191011235,
+      "std": 1.3252245750137697,
+      "n": 178,
+      "window_years": 15
+    },
+    "dxy": {
+      "mean": 94.45568585831785,
+      "std": 8.447732243719004,
+      "n": 3769,
+      "window_years": 15
+    },
+    "wti_px": {
+      "mean": 70.54689765458423,
+      "std": 21.134549566167525,
+      "n": 3752,
+      "window_years": 15
+    },
+    "nfp_mom": {
+      "mean": 149.25555555555556,
+      "std": 1606.1572433130304,
+      "n": 180,
+      "window_years": 15
+    },
+    "curve_slope": {
+      "mean": 0.7964646194926569,
+      "std": 0.8141668838161042,
+      "n": 3745,
+      "window_years": 15
+    },
+    "spx": {
+      "mean": 6411.53424,
+      "std": 633.8507501918905,
+      "n": 500,
+      "window_years": 2
+    },
+    "fed_bs": {
+      "mean": 6744614.134430727,
+      "std": 160775.962488591,
+      "n": 729,
+      "window_years": 2
+    },
+    "rrp": {
+      "mean": 103.21532258064516,
+      "std": 114.32440881413905,
+      "n": 496,
+      "window_years": 2
+    }
+  },
+  "pc1_loadings": {
+    "hy_oas": -0.18139540145065847,
+    "ig_oas": -0.1893200996064332,
+    "sofr": 0.29518773119188524,
+    "tbill_3m": 0.48823802604029665,
+    "us10y": 0.5851805806223975,
+    "us2y": 0.47892226368252017,
+    "curve_slope": -0.18235903166633044,
+    "vix": 0.009202756539541385,
+    "spx": -0.0038537678672375154,
+    "fed_bs": 0.020648073168455527,
+    "rrp": 0.01256556010365473
+  },
+  "composite_percentiles": [
+    1.5397989616278336,
+    1.80991866949325,
+    1.8839313868492624,
+    1.9834806049267342,
+    2.09914112987846,
+    2.114368356557064,
+    2.124590759266174,
+    2.1539324232739756,
+    2.1795902495823456,
+    2.190400356312006,
+    2.1977898300775993,
+    2.215461811627294,
+    2.2306817566201222,
+    2.2546710268734653,
+    2.2600493636220467,
+    2.267543161973707,
+    2.276728100295902,
+    2.2867028780532648,
+    2.2938192280974063,
+    2.2980387315707778,
+    2.3052445673388333,
+    2.313156083688177,
+    2.3332266184713175,
+    2.346673916966554,
+    2.3518510043410066,
+    2.3674984373139027,
+    2.3816518051796574,
+    2.4032246574662075,
+    2.411068262818949,
+    2.4187958539227066,
+    2.425652047458356,
+    2.442062077096289,
+    2.4555717812180533,
+    2.4692877697536857,
+    2.4774924234037496,
+    2.4886790263336143,
+    2.4942571779161447,
+    2.5106937325942265,
+    2.521829818799275,
+    2.530951613054131,
+    2.545810379275324,
+    2.554088258319322,
+    2.5641989766975963,
+    2.5679206836505664,
+    2.573131781513041,
+    2.581022800309968,
+    2.589789205887482,
+    2.5967825593031364,
+    2.600485094907359,
+    2.6072175534029176,
+    2.6180096392290513,
+    2.6281493774131173,
+    2.6302892707733943,
+    2.6461565673871377,
+    2.6525339160564565,
+    2.661156017228955,
+    2.6757811307476116,
+    2.681751996578631,
+    2.6987341398574207,
+    2.7132314344722954,
+    2.7333816582407837,
+    2.7385998264384654,
+    2.7566691984441873,
+    2.767257474226028,
+    2.7795854367100357,
+    2.7872605859607735,
+    2.791024857034366,
+    2.80060476703043,
+    2.817075118651387,
+    2.823201581398065,
+    2.838402931001318,
+    2.8469644060568653,
+    2.8581921679577347,
+    2.8696474216889016,
+    2.877727960462533,
+    2.8789271135593997,
+    2.8825545366587533,
+    2.902399098945889,
+    2.9128789389446545,
+    2.9236307102183012,
+    2.9323591999890173,
+    2.9559850667867718,
+    2.969653379485758,
+    2.98853685335235,
+    3.017271388941075,
+    3.0590253478681584,
+    3.0807173590455443,
+    3.09701904372408,
+    3.1116976670118737,
+    3.125363720347073,
+    3.133920824974777,
+    3.1422185830094245,
+    3.1484431355400897,
+    3.168134273698176,
+    3.1821397299581764,
+    3.196952056298391,
+    3.225104647839142,
+    3.250080034931788,
+    3.270079416200288,
+    3.2891819842356846,
+    3.3828335704617283
+  ],
+  "composite_window_years": 2
+};
+    // ─── BASELINE-STATS-END ────────────────────────────────────────────────
+
+const COMPOSITE_CATEGORY = {
+  hy_oas: 'Credit', ig_oas: 'Credit',
+  spx: 'Equity valuation',
+  sofr: 'Funding', tbill_3m: 'Funding', rrp: 'Funding', fed_bs: 'Funding',
+  us10y: 'Safe assets', us2y: 'Safe assets', curve_slope: 'Safe assets',
+  vix: 'Volatility',
+};
+const COMPOSITE_MIN_FIELDS_FOR_MEASURED = 9; // of 11 total
+
+function _clip3(z) { return Math.max(-3, Math.min(3, z)); }
+
+function _percentileRank(value, table) {
+  // table is sorted ascending, 101 points (0th..100th percentile).
+  if (value <= table[0]) return 0;
+  if (value >= table[table.length - 1]) return 100;
+  for (let p = 1; p < table.length; p++) {
+    if (value <= table[p]) {
+      const lo = table[p - 1], hi = table[p];
+      const frac = hi > lo ? (value - lo) / (hi - lo) : 0;
+      return (p - 1) + frac;
+    }
+  }
+  return 100;
+}
+
+// NOT CURRENTLY CALLED from the UI (see runMacroAnalysis) -- disabled
+// 2026-08-11 after a final whole-branch review found the composite score
+// backwards under real stress. Root cause: PCA fit over the only window
+// where all 11 composite fields have comparable history (~2yr, bounded by
+// two credit-spread series' short FRED retention) puts ~90% of its weight
+// on nominal rate levels, not stress -- VIX/SPX/credit spreads contribute
+// ~0%, because that window had no real stress episode for them to
+// correlate around. A sign-alignment fix was attempted and proven to be a
+// mathematical no-op (PCA is invariant to per-column sign flips). Fixing
+// this needs either a materially different fitting window or a
+// non-PCA-discovered weighting scheme -- see
+// docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md and
+// this session's final-review discussion for the full diagnosis before
+// re-enabling. The function itself is left intact and correct for
+// whichever fix gets chosen.
+function computeCompositeScore(live) {
+  const fields = Object.keys(BASELINE_STATS.pc1_loadings);
+  const liveWithSlope = Object.assign({}, live);
+  if (typeof live.us10y === 'number' && typeof live.us2y === 'number') {
+    liveWithSlope.curve_slope = live.us10y - live.us2y;
+  }
+  const fieldsUsed = [], fieldsMissing = [];
+  const categoryContributions = {};
+  let composite = 0;
+  fields.forEach(f => {
+    const stat = BASELINE_STATS.fields[f];
+    const v = liveWithSlope[f];
+    if (typeof v !== 'number' || !stat || !stat.std) { fieldsMissing.push(f); return; }
+    fieldsUsed.push(f);
+    const z = _clip3((v - stat.mean) / stat.std);
+    const contribution = BASELINE_STATS.pc1_loadings[f] * z;
+    composite += contribution;
+    const cat = COMPOSITE_CATEGORY[f];
+    categoryContributions[cat] = (categoryContributions[cat] || 0) + contribution;
+  });
+  const percentile = _percentileRank(composite, BASELINE_STATS.composite_percentiles);
+  const score = Math.round(100 - percentile);
+  const tier = fieldsUsed.length >= COMPOSITE_MIN_FIELDS_FOR_MEASURED ? 'measured' : 'directional';
+  let leadingCategory = null, leadingAbs = -1;
+  Object.entries(categoryContributions).forEach(([cat, v]) => {
+    if (Math.abs(v) > leadingAbs) { leadingAbs = Math.abs(v); leadingCategory = cat; }
+  });
+  return { score, tier, leadingCategory, categoryContributions, fieldsUsed, fieldsMissing };
+}
+
+function computeNodeMultipliers(driverValues) {
+  const mults = {}, tierByNode = {};
+  Object.keys(NODE_ELASTICITY).forEach(driverKey => {
+    const stat = BASELINE_STATS.fields[driverKey];
+    const current = driverValues[driverKey];
+    if (!stat || typeof current !== 'number') return;
+    const delta = current - stat.mean;
+    if (Math.abs(delta) < 1e-9) return;
+    Object.entries(NODE_ELASTICITY[driverKey]).forEach(([node, cell]) => {
+      mults[node] = (mults[node] || 0) + cell.v * delta;
+      const rank = { measured: 2, directional: 1, unverified: 0 };
+      if (!(node in tierByNode) || rank[cell.conf] < rank[tierByNode[node]]) {
+        tierByNode[node] = cell.conf;
+      }
+    });
+  });
+  Object.keys(mults).forEach(k => {
+    mults[k] = +Math.max(-0.60, Math.min(0.60, mults[k])).toFixed(3);
+    if (Math.abs(mults[k]) < 0.004) { delete mults[k]; delete tierByNode[k]; }
+  });
+  const noDataNodes = Object.keys(NODE_MAP).filter(n => !(n in mults));
+  return { mults, tiers: tierByNode, noDataNodes };
+}
 
 const NODE_ELASTICITY = {
   ffr: {
@@ -4946,9 +5270,9 @@ function resetState() {
 }
 function clearAI() {
   document.getElementById('health-num').textContent   = '\u2014';
-  document.getElementById('health-label').textContent = 'Run AI analysis';
+  document.getElementById('health-label').textContent = 'Run macro analysis';
   document.getElementById('health-bar').style.width   = '0%';
-  document.getElementById('narrative-box').textContent= 'Tap "Run AI analysis" for a macro strategist\'s read on current conditions.';
+  document.getElementById('narrative-box').textContent= 'Tap "Run macro analysis" for a quantitative read on current conditions.';
   document.getElementById('impacts-section').classList.add('hidden');
 }
 
@@ -4984,78 +5308,77 @@ function renderImpacts(mults, whyMap, label) {
   document.getElementById('impacts-section').classList.remove('hidden');
 }
 
-const BACKEND_URL = '';
+function buildMacroNarrative(nodeResult, live) {
+  // The composite health score is currently disabled (see
+  // computeCompositeScore's own comment and
+  // docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md for
+  // the full diagnosis) -- this narrative no longer references it. Two
+  // sentences instead of the original three: CPI/NFP context, then the
+  // node-level headwind/support takeaway (both independent of the
+  // composite score).
+  const cpi = live.cpi_yoy, nfp = live.nfp_mom;
+  const cpiTxt = (typeof cpi === 'number')
+    ? `Core CPI is running at ${cpi.toFixed(1)}% against the Fed's 2% target`
+    : `Core CPI data is unavailable`;
+  const nfpTxt = (typeof nfp === 'number')
+    ? (nfp > 100 ? 'payrolls are trending firm' : (nfp < 0 ? 'payrolls are contracting' : 'payrolls are roughly flat'))
+    : 'payroll data is unavailable';
+  const s1 = `${cpiTxt}; ${nfpTxt}.`;
 
-function runLocalAnalysis(s, ms) {
-  let score = 82;
-  score -= Math.max(0, (s.vix - 17)) * 1.6;
-  if (ms.derived_state.inversion) score -= 8;
-  if (ms.derived_state.tightening_bias) score -= 5;
-  if (s.risk_off) score -= 8;
-  score -= Math.max(0, (5312 - s.spx) / 5312) * 100 * 0.5;
-  score -= Math.max(0, s.cpi_yoy - 2.4) * 4;
-  score = Math.max(5, Math.min(95, Math.round(score)));
-  const shockName = state.shock && SHOCK_META[state.shock]
-    ? SHOCK_META[state.shock].title.replace('Shock: ','').replace('Scenario: ','').replace(' \u2014 propagation','')
-    : null;
-  const s1 = shockName
-    ? `The system is digesting a ${shockName.toLowerCase()} impulse against a ${ms.derived_state.tightening_bias ? 'tightening' : 'neutral-to-easing'} policy backdrop.`
-    : `Conditions sit near baseline with a ${ms.derived_state.tightening_bias ? 'tightening' : 'balanced'} policy bias and no active shock.`;
-  const s2 = s.risk_off
-    ? `Volatility at ${s.vix} signals a risk-off regime: capital is rotating toward Treasuries, gold ($${s.gold_px}/oz) and defensives while credit and long-duration equities underperform.`
-    : `Volatility at ${s.vix} is consistent with functioning risk appetite; the 2s10s spread of ${ms.yield_curve.spread_bps}bps ${ms.derived_state.inversion ? 'remains inverted, a classic late-cycle warning' : 'keeps the curve constructive'}.`;
-  const s3 = `Dollar strength (DXY ${s.dxy}) and crude at $${s.wti_px}/bbl set the external transmission channel, with FOMC probabilities of ${(ms.monetary_policy.fomc_prob_hike*100).toFixed(0)}% hike / ${(ms.monetary_policy.fomc_prob_hold*100).toFixed(0)}% hold / ${(ms.monetary_policy.fomc_prob_cut*100).toFixed(0)}% cut anchoring rate expectations.`;
-  const mults = (state.shock && Object.keys(nodeMultipliers).length)
-    ? Object.assign({}, nodeMultipliers)
-    : { Fed_Reserve:0.02, Yield_Curve:0.02, SPX:0.03, Tech_Equities:0.03, Financials:0.02,
-        Defensive:0.01, Credit_Markets:0.02, USD:0.01, Gold:0.01, Oil:0.0, EM_FX:0.01, China:0.0 };
-  return { market_narrative: s1 + ' ' + s2 + ' ' + s3, system_health_score: score, node_impact_multipliers: mults, engine: 'local' };
+  const entries = Object.entries(nodeResult.mults);
+  let s2;
+  if (entries.length === 0) {
+    s2 = 'No live driver is currently far enough from its historical baseline to move any node materially.';
+  } else {
+    entries.sort((a, b) => a[1] - b[1]);
+    const worst = entries[0], best = entries[entries.length - 1];
+    const pctTxt = v => (v >= 0 ? '+' : '') + (v * 100).toFixed(0) + '%';
+    s2 = `The largest current headwind is to ${worst[0].replace(/_/g, ' ')} (${pctTxt(worst[1])})` +
+      (best[0] !== worst[0] ? `, while ${best[0].replace(/_/g, ' ')} shows the most support (${pctTxt(best[1])}).` : '.');
+  }
+  return s1 + ' ' + s2;
 }
 
-async function runAIAnalysis() {
+function runMacroAnalysis() {
   const btn = document.getElementById('run-ai-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Analyzing...';
   playEventNarration('ai_analysis');
-  const s=applyTransmission(state), ms=buildMacroState(s);
-  const systemPrompt = `You are a senior macro strategist at a top-tier Wall Street firm. You receive a MacroMarketState JSON representing current US financial and global macro conditions.\n\nOutput ONLY a strict JSON object with EXACTLY these fields:\n\n{\n  "market_narrative": "Exactly 3 sentences. Institutional-grade language covering the monetary regime, risk appetite, commodity/FX dynamics, and any geopolitical transmission.",\n  "system_health_score": <integer 1-100 where 100 = perfect stability, 50 = moderate stress, <30 = crisis>,\n  "node_impact_multipliers": {\n    "Tech_Equities": <float -1 to 1>, "Financials": <float -1 to 1>, "Defensive": <float -1 to 1>,\n    "Credit_Markets": <float -1 to 1>, "Yield_Curve": <float -1 to 1>, "Fed_Reserve": <float -1 to 1>,\n    "SPX": <float -1 to 1>, "USD": <float -1 to 1>, "Gold": <float -1 to 1>, "Oil": <float -1 to 1>,\n    "EM_FX": <float -1 to 1>, "China": <float -1 to 1>\n  }\n}\n\nPositive multiplier = bullish/stabilising. Negative = bearish/destabilising.\nOutput ONLY valid JSON. No preamble, no commentary, no markdown fences.`;
-  let parsed = null;
-  try {
-    if (BACKEND_URL) {
-      const presp = await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:ms})});
-      if (!presp.ok) throw new Error('Proxy returned '+presp.status);
-      parsed = await presp.json(); parsed.engine = 'proxy';
-    } else {
-      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
-      const resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl?ctrl.signal:undefined,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:[{role:'user',content:`Current MacroMarketState:\n${JSON.stringify(ms,null,2)}\n\nAnalyze and return structured JSON.`}]})});
-      if (timer) clearTimeout(timer);
-      const data=await resp.json();
-      const raw=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-      parsed.engine = 'claude';
-    }
-  } catch(e) {
-    console.warn('Live AI unavailable, using built-in rule engine:', e && e.message);
-    parsed = null;
-  }
-  const usedFallback = !parsed;
-  if (!parsed) parsed = runLocalAnalysis(s, ms);
-  const suffix = usedFallback
-    ? '\n\n\u26A0 Generated by the built-in rule engine, not AI \u2014 this environment cannot reach Claude. For live AI analysis, open this file inside Claude.ai or run a proxy and set BACKEND_URL in the AI section.'
-    : '';
-  document.getElementById('narrative-box').textContent = (parsed.market_narrative||'No narrative returned.') + suffix;
-  const score=Math.round(parsed.system_health_score||50);
-  document.getElementById('health-num').textContent   = score;
-  document.getElementById('health-label').textContent = (score>70?'Healthy':score>45?'Moderate stress':'Elevated stress') + (usedFallback?' (rule engine)':'');
-  const barColor = score>70?'#7bbf8e':score>45?'#e0b15a':'#e0654f';
-  document.getElementById('health-bar').style.width      = score+'%';
-  document.getElementById('health-bar').style.background = barColor;
-  nodeMultipliers = parsed.node_impact_multipliers||{};
-  renderImpacts(nodeMultipliers, null, usedFallback ? 'Rule-engine node impact multipliers' : 'AI node impact multipliers');
+
+  const s = applyTransmission(state);
+  const driverValues = {};
+  DRIVERS.forEach(d => { driverValues[d.key] = (typeof s[d.key] === 'number') ? s[d.key] : d.base; });
+
+  const nodes = state.shock && Object.keys(nodeMultipliers).length
+    ? {
+        mults: Object.assign({}, nodeMultipliers),
+        // NOTE: tiers intentionally left empty here, unlike the real-
+        // conditions path (computeNodeMultipliers) -- deriving genuine
+        // per-node confidence tiers for a HYPOTHETICAL shock would require
+        // touching the separate, pre-existing shock-propagation code that
+        // builds `nodeMultipliers` from driver deltas. Left as a known,
+        // documented gap rather than a silent one.
+        tiers: {},
+        // Real coverage check, not a fabricated empty list: every NODE_MAP
+        // key absent from the shock-computed mults genuinely has no
+        // driver-elasticity coverage for THIS shock, same definition
+        // computeNodeMultipliers uses for the non-shock case.
+        noDataNodes: Object.keys(NODE_MAP).filter(n => !(n in nodeMultipliers)),
+      }
+    : computeNodeMultipliers(driverValues);
+  lastNodeMultiplierResult = nodes;
+  hasRunMacroAnalysis = true;
+
+  const live = { cpi_yoy: s.cpi_yoy, nfp_mom: s.nfp_mom };
+  const narrative = buildMacroNarrative(nodes, live);
+
+  document.getElementById('narrative-box').textContent = narrative;
+  nodeMultipliers = nodes.mults;
+  renderImpacts(nodeMultipliers, null,
+    state.shock ? 'Scenario node impact multipliers' : 'Current-conditions node impact multipliers');
   updateGraph(applyTransmission(state));
-  btn.disabled=false;
-  btn.innerHTML='Run AI analysis \u2197';
+  btn.disabled = false;
+  btn.innerHTML = 'Run macro analysis \u2197';
 }
 
 // ── Mk12 backtest ────────────────────────────────────────────────────────
@@ -5213,6 +5536,25 @@ function openAuditLog() {
     '<table class="audit-table"><tr><th>Field</th><th>Days</th><th>Direction hit-rate</th><th>R² of change</th></tr>' +
     btRows + '</table>';
 
+  // Node coverage is only known AFTER a real computeNodeMultipliers() run (the
+  // "Run macro analysis" button). Before that, lastNodeMultiplierResult is still
+  // its module-level default { noDataNodes: [] } — an empty array because nothing
+  // has been checked yet, not because coverage was verified. Rendering "every
+  // node covered" in that state would be a confident claim the engine never
+  // actually computed, so it's gated on hasRunMacroAnalysis instead.
+  const macroCoverageNote = hasRunMacroAnalysis
+    ? (lastNodeMultiplierResult.noDataNodes.length
+        ? ('<b>' + lastNodeMultiplierResult.noDataNodes.length + ' nodes</b> have no live-data-backed baseline reading: ' +
+           lastNodeMultiplierResult.noDataNodes.join(', ') + '.')
+        : 'Every conceptual node has at least one live-data-backed driver.')
+    : 'Run macro analysis to see live node-coverage.';
+
+  const macroEngineSection =
+    '<h3>Macro engine methodology</h3><p class="audit-note">Node-level current-conditions readings below are computed from real driver deviations run through the existing, individually-sourced <code>NODE_ELASTICITY</code> matrix (not AI, not PCA). ' +
+    'A separate PCA-weighted composite health score was built but is currently <b>disabled</b>: a final review found it inverted under real stress, and a proposed fix was proven mathematically impossible (PCA is invariant to per-column sign flips). See ' +
+    '<code>docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md</code> for the full diagnosis. No health score or bar is shown pending a methodology revisit.</p>' +
+    '<h3>Macro engine node coverage</h3><p class="audit-note">' + macroCoverageNote + '</p>';
+
   const html =
     '<div class="audit-wrap">' +
       '<h2>Audit Log</h2>' +
@@ -5220,7 +5562,7 @@ function openAuditLog() {
       'Below: every causal number on this map, and how much you should trust it. ' +
       'A polished render makes a guess look exactly like a measured coefficient. This page exists to break that illusion.</p>' +
       backtestSection +
-      bar + conflicts + demotions + superseded + scenNote +
+      bar + conflicts + demotions + superseded + scenNote + macroEngineSection +
       rows('Causal links (' + LINKS.length + ')', linkRows) +
       rows('Elasticity coefficients (' + elasRows.length + ')', elasRows) +
     '</div>';
@@ -5297,7 +5639,7 @@ document.querySelectorAll('#control-drawer [data-shock]').forEach(b => {
   });
 });
 document.getElementById('reset-shock-btn').addEventListener('click', resetState);
-document.getElementById('run-ai-btn').addEventListener('click', runAIAnalysis);
+document.getElementById('run-ai-btn').addEventListener('click', runMacroAnalysis);
 
 // ── Chain-reaction hypothesis: UI ───────────────────────────────────────────
 function signBadgeClass(sign) {
@@ -5958,7 +6300,7 @@ fetch('data.json')
     <h4>Educational use only &mdash; not financial advice</h4>
     <p>This is a personal learning and teaching tool. Its causal links, calibrated coefficients, backtest / &ldquo;model accuracy&rdquo; figures, AI-generated commentary, health scores and impact multipliers are illustrative and may be simplified, outdated, or wrong; the backtest measures same-day co-movement on historical data and is not a forecast. Nothing here is investment, financial, legal, or tax advice, a recommendation to buy or sell anything, or a prediction. The author is not a licensed financial adviser. Do your own research and consult a qualified professional before making any financial decision. The tool is provided &ldquo;as is,&rdquo; without warranty of any kind, and the author accepts no liability for any loss arising from its use.</p>
     <h4>Privacy</h4>
-    <p>This site sets no cookies, uses no analytics, and collects no personal data. It loads live market data from a <code>data.json</code> file served from this same site (refreshed by an automated pipeline). If you use the optional AI feature, your request is sent either to Anthropic&rsquo;s API directly from your browser or to a backend proxy only if you have configured one &mdash; no API key or request is sent to any server operated by the author. The page is hosted on GitHub Pages, whose provider may process your IP address to serve it, under its own privacy policy.</p>
+    <p>This site sets no cookies, uses no analytics, and collects no personal data. It loads live market data from a <code>data.json</code> file served from this same site (refreshed by an automated pipeline). The macro analysis feature runs entirely in your browser as a deterministic, local calculation &mdash; no request, state, or API key is ever sent anywhere for it. The page is hosted on GitHub Pages, whose provider may process your IP address to serve it, under its own privacy policy.</p>
   </div>
 </div>
 
