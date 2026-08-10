@@ -5,13 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
 <!-- Content Security Policy: d3 and all app code are inlined and no external
      resources are loaded, so default-src stays 'self'. connect-src is limited to
-     same-origin (data.json, the optional backend) and the Anthropic API, so a
-     user's API key can never be POSTed anywhere else. 'unsafe-inline' is required
-     for the inline <script>/<style> blocks this single-file app is built from.
-     Mk Ultra additionally loads Three.js r160 + OrbitControls as ESM modules from
-     a single pinned jsDelivr URL (see the <script type="importmap"> below) — that
-     host is allow-listed on script-src/connect-src, and ONLY that host. -->
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://api.anthropic.com https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
+     same-origin (data.json) — the macro analysis engine is a deterministic,
+     fully local quant engine with no network calls, so no third-party API host
+     needs to be allow-listed here. 'unsafe-inline' is required for the inline
+     <script>/<style> blocks this single-file app is built from. Mk Ultra
+     additionally loads Three.js r160 + OrbitControls as ESM modules from a
+     single pinned jsDelivr URL (see the <script type="importmap"> below) —
+     that host is allow-listed on script-src/connect-src, and ONLY that host. -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline'; connect-src 'self' https://cdn.jsdelivr.net; img-src 'self' data:; font-src 'self'; base-uri 'none'; form-action 'none'; object-src 'none'">
 <meta name="referrer" content="no-referrer">
 <title>Bullion Mk Ultra — US Financial System Constellation</title>
 <meta name="description" content="An interactive map of how the US financial system actually connects — live Treasury yields, inflation, gold and volatility, with every causal link explained in plain English.">
@@ -883,7 +884,7 @@
       <div class="drawer-label">AI analysis</div>
       <div class="health-score-row">
         <span class="health-score-num" id="health-num">&mdash;</span>
-        <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run AI analysis</span>
+        <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run macro analysis</span>
       </div>
       <div class="health-bar-wrap">
         <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
@@ -893,7 +894,7 @@
         <div class="drawer-label" id="impacts-label">Node impact multipliers</div>
         <div id="impacts-list"></div>
       </div>
-      <button class="run-btn" id="run-ai-btn" style="margin-top:8px">Run AI analysis &#x2197;</button>
+      <button class="run-btn" id="run-ai-btn" style="margin-top:8px">Run macro analysis &#x2197;</button>
       <div style="text-align:center;margin-top:6px">
         <span class="disclaimer-link" id="disclaimer-link">Disclaimer &amp; privacy</span>
       </div>
@@ -5246,7 +5247,7 @@ function resetState() {
 }
 function clearAI() {
   document.getElementById('health-num').textContent   = '\u2014';
-  document.getElementById('health-label').textContent = 'Run AI analysis';
+  document.getElementById('health-label').textContent = 'Run macro analysis';
   document.getElementById('health-bar').style.width   = '0%';
   document.getElementById('narrative-box').textContent= 'Tap "Run AI analysis" for a macro strategist\'s read on current conditions.';
   document.getElementById('impacts-section').classList.add('hidden');
@@ -5283,8 +5284,6 @@ function renderImpacts(mults, whyMap, label) {
     '<div class="impacts-note">Illustrative multipliers \u2014 directions are sourced, magnitudes are not calibrated to live data.</div>' + rows;
   document.getElementById('impacts-section').classList.remove('hidden');
 }
-
-const BACKEND_URL = '';
 
 function _ordinal(n) {
   const s = ['th', 'st', 'nd', 'rd'], v = n % 100;
@@ -5324,76 +5323,42 @@ function buildMacroNarrative(compositeResult, nodeResult, live) {
   return s1 + ' ' + s2 + ' ' + s3;
 }
 
-function runLocalAnalysis(s, ms) {
-  let score = 82;
-  score -= Math.max(0, (s.vix - 17)) * 1.6;
-  if (ms.derived_state.inversion) score -= 8;
-  if (ms.derived_state.tightening_bias) score -= 5;
-  if (s.risk_off) score -= 8;
-  score -= Math.max(0, (5312 - s.spx) / 5312) * 100 * 0.5;
-  score -= Math.max(0, s.cpi_yoy - 2.4) * 4;
-  score = Math.max(5, Math.min(95, Math.round(score)));
-  const shockName = state.shock && SHOCK_META[state.shock]
-    ? SHOCK_META[state.shock].title.replace('Shock: ','').replace('Scenario: ','').replace(' \u2014 propagation','')
-    : null;
-  const s1 = shockName
-    ? `The system is digesting a ${shockName.toLowerCase()} impulse against a ${ms.derived_state.tightening_bias ? 'tightening' : 'neutral-to-easing'} policy backdrop.`
-    : `Conditions sit near baseline with a ${ms.derived_state.tightening_bias ? 'tightening' : 'balanced'} policy bias and no active shock.`;
-  const s2 = s.risk_off
-    ? `Volatility at ${s.vix} signals a risk-off regime: capital is rotating toward Treasuries, gold ($${s.gold_px}/oz) and defensives while credit and long-duration equities underperform.`
-    : `Volatility at ${s.vix} is consistent with functioning risk appetite; the 2s10s spread of ${ms.yield_curve.spread_bps}bps ${ms.derived_state.inversion ? 'remains inverted, a classic late-cycle warning' : 'keeps the curve constructive'}.`;
-  const s3 = `Dollar strength (DXY ${s.dxy}) and crude at $${s.wti_px}/bbl set the external transmission channel, with FOMC probabilities of ${(ms.monetary_policy.fomc_prob_hike*100).toFixed(0)}% hike / ${(ms.monetary_policy.fomc_prob_hold*100).toFixed(0)}% hold / ${(ms.monetary_policy.fomc_prob_cut*100).toFixed(0)}% cut anchoring rate expectations.`;
-  const mults = (state.shock && Object.keys(nodeMultipliers).length)
-    ? Object.assign({}, nodeMultipliers)
-    : { Fed_Reserve:0.02, Yield_Curve:0.02, SPX:0.03, Tech_Equities:0.03, Financials:0.02,
-        Defensive:0.01, Credit_Markets:0.02, USD:0.01, Gold:0.01, Oil:0.0, EM_FX:0.01, China:0.0 };
-  return { market_narrative: s1 + ' ' + s2 + ' ' + s3, system_health_score: score, node_impact_multipliers: mults, engine: 'local' };
-}
-
-async function runAIAnalysis() {
+function runMacroAnalysis() {
   const btn = document.getElementById('run-ai-btn');
   btn.disabled = true;
   btn.innerHTML = '<span class="spinner"></span> Analyzing...';
   playEventNarration('ai_analysis');
-  const s=applyTransmission(state), ms=buildMacroState(s);
-  const systemPrompt = `You are a senior macro strategist at a top-tier Wall Street firm. You receive a MacroMarketState JSON representing current US financial and global macro conditions.\n\nOutput ONLY a strict JSON object with EXACTLY these fields:\n\n{\n  "market_narrative": "Exactly 3 sentences. Institutional-grade language covering the monetary regime, risk appetite, commodity/FX dynamics, and any geopolitical transmission.",\n  "system_health_score": <integer 1-100 where 100 = perfect stability, 50 = moderate stress, <30 = crisis>,\n  "node_impact_multipliers": {\n    "Tech_Equities": <float -1 to 1>, "Financials": <float -1 to 1>, "Defensive": <float -1 to 1>,\n    "Credit_Markets": <float -1 to 1>, "Yield_Curve": <float -1 to 1>, "Fed_Reserve": <float -1 to 1>,\n    "SPX": <float -1 to 1>, "USD": <float -1 to 1>, "Gold": <float -1 to 1>, "Oil": <float -1 to 1>,\n    "EM_FX": <float -1 to 1>, "China": <float -1 to 1>\n  }\n}\n\nPositive multiplier = bullish/stabilising. Negative = bearish/destabilising.\nOutput ONLY valid JSON. No preamble, no commentary, no markdown fences.`;
-  let parsed = null;
-  try {
-    if (BACKEND_URL) {
-      const presp = await fetch(BACKEND_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({state:ms})});
-      if (!presp.ok) throw new Error('Proxy returned '+presp.status);
-      parsed = await presp.json(); parsed.engine = 'proxy';
-    } else {
-      const ctrl = (typeof AbortController !== 'undefined') ? new AbortController() : null;
-      const timer = ctrl ? setTimeout(() => ctrl.abort(), 8000) : null;
-      const resp = await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json'},signal:ctrl?ctrl.signal:undefined,body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1000,system:systemPrompt,messages:[{role:'user',content:`Current MacroMarketState:\n${JSON.stringify(ms,null,2)}\n\nAnalyze and return structured JSON.`}]})});
-      if (timer) clearTimeout(timer);
-      const data=await resp.json();
-      const raw=data.content.filter(b=>b.type==='text').map(b=>b.text).join('');
-      parsed=JSON.parse(raw.replace(/```json|```/g,'').trim());
-      parsed.engine = 'claude';
-    }
-  } catch(e) {
-    console.warn('Live AI unavailable, using built-in rule engine:', e && e.message);
-    parsed = null;
-  }
-  const usedFallback = !parsed;
-  if (!parsed) parsed = runLocalAnalysis(s, ms);
-  const suffix = usedFallback
-    ? '\n\n\u26A0 Generated by the built-in rule engine, not AI \u2014 this environment cannot reach Claude. For live AI analysis, open this file inside Claude.ai or run a proxy and set BACKEND_URL in the AI section.'
-    : '';
-  document.getElementById('narrative-box').textContent = (parsed.market_narrative||'No narrative returned.') + suffix;
-  const score=Math.round(parsed.system_health_score||50);
-  document.getElementById('health-num').textContent   = score;
-  document.getElementById('health-label').textContent = (score>70?'Healthy':score>45?'Moderate stress':'Elevated stress') + (usedFallback?' (rule engine)':'');
-  const barColor = score>70?'#7bbf8e':score>45?'#e0b15a':'#e0654f';
-  document.getElementById('health-bar').style.width      = score+'%';
+
+  const s = applyTransmission(state);
+  const live = Object.assign({}, window.BULLION_LIVE_DATA || {}, {
+    // The 5 NODE_ELASTICITY drivers can be scenario-shocked; always feed the
+    // engine the CURRENT (possibly shocked) value so a running shock still
+    // shows up in the score, matching this button's pre-existing behavior.
+    vix: s.vix, cpi_yoy: s.cpi_yoy, dxy: s.dxy, wti_px: s.wti_px,
+  });
+  const driverValues = {};
+  DRIVERS.forEach(d => { driverValues[d.key] = (typeof s[d.key] === 'number') ? s[d.key] : d.base; });
+
+  const composite = computeCompositeScore(live);
+  const nodes = state.shock && Object.keys(nodeMultipliers).length
+    ? { mults: Object.assign({}, nodeMultipliers), tiers: {}, noDataNodes: [] }
+    : computeNodeMultipliers(driverValues);
+  const narrative = buildMacroNarrative(composite, nodes, live);
+
+  document.getElementById('narrative-box').textContent = narrative;
+  document.getElementById('health-num').textContent = composite.score;
+  document.getElementById('health-label').textContent =
+    (composite.score > 70 ? 'Healthy' : composite.score > 45 ? 'Moderate stress' : 'Elevated stress') +
+    (composite.tier === 'directional' ? ' (directional \u2014 limited live data)' : '');
+  const barColor = composite.score > 70 ? '#7bbf8e' : composite.score > 45 ? '#e0b15a' : '#e0654f';
+  document.getElementById('health-bar').style.width = composite.score + '%';
   document.getElementById('health-bar').style.background = barColor;
-  nodeMultipliers = parsed.node_impact_multipliers||{};
-  renderImpacts(nodeMultipliers, null, usedFallback ? 'Rule-engine node impact multipliers' : 'AI node impact multipliers');
+  nodeMultipliers = nodes.mults;
+  renderImpacts(nodeMultipliers, null,
+    state.shock ? 'Scenario node impact multipliers' : 'Current-conditions node impact multipliers');
   updateGraph(applyTransmission(state));
-  btn.disabled=false;
-  btn.innerHTML='Run AI analysis \u2197';
+  btn.disabled = false;
+  btn.innerHTML = 'Run macro analysis \u2197';
 }
 
 // ── Mk12 backtest ────────────────────────────────────────────────────────
@@ -5635,7 +5600,7 @@ document.querySelectorAll('#control-drawer [data-shock]').forEach(b => {
   });
 });
 document.getElementById('reset-shock-btn').addEventListener('click', resetState);
-document.getElementById('run-ai-btn').addEventListener('click', runAIAnalysis);
+document.getElementById('run-ai-btn').addEventListener('click', runMacroAnalysis);
 
 // ── Chain-reaction hypothesis: UI ───────────────────────────────────────────
 function signBadgeClass(sign) {

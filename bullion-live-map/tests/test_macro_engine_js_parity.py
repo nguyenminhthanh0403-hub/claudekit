@@ -56,7 +56,7 @@ def _extract_js_snippet_through_node_mults(html):
 
     # Include buildMacroNarrative and _ordinal helper
     ordinal_start = html.index("function _ordinal(n) {")
-    narrative_end = html.index("function runLocalAnalysis(")
+    narrative_end = html.index("function runMacroAnalysis(")
     parts.append(html[ordinal_start:narrative_end])
 
     return "\n".join(parts)
