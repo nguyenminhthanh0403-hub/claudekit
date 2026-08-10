@@ -75,6 +75,43 @@ process.stdout.write(JSON.stringify(computeCompositeScore(live)));
         result = _run_node(script)
         self.assertEqual(result["tier"], "directional")
 
+    def test_percentile_boundaries_map_to_score_extremes(self):
+        # The one invariant that IS guaranteed regardless of field regime
+        # heterogeneity: pushing EVERY composite field simultaneously to its
+        # most-stressed clip (z=+3 in the direction its loading treats as
+        # stress) produces a composite value that upper-bounds anything any
+        # real historical day achieved (real days rarely have all fields
+        # simultaneously at their most extreme together) -- so it must
+        # score at or below the true worst historical day, i.e. score <= 10.
+        # Symmetrically, the least-stressed simultaneous clip must score
+        # >= 90. This does NOT try to hit BASELINE_STATS.composite_percentiles'
+        # exact min/max (that would require knowing which specific field
+        # combination actually produced the historical extreme, which a
+        # single-field or naive solve can't guarantee) -- it only relies on
+        # "all fields simultaneously maximally stressed" being at least as
+        # extreme as anything observed, which is true by construction of
+        # the clip bound itself, not dependent on any field's regime.
+        script = self.snippet + """
+const fields = Object.keys(BASELINE_STATS.pc1_loadings);
+function liveAtExtreme(direction) {
+  // direction = +1 for max stress, -1 for min stress.
+  const live = {};
+  fields.forEach(f => {
+    const stat = BASELINE_STATS.fields[f];
+    const loading = BASELINE_STATS.pc1_loadings[f];
+    const zSign = (loading >= 0 ? 1 : -1) * direction;
+    live[f] = stat.mean + zSign * 3 * stat.std;
+  });
+  return live;
+}
+const hi = computeCompositeScore(liveAtExtreme(1));
+const lo = computeCompositeScore(liveAtExtreme(-1));
+process.stdout.write(JSON.stringify({ lo, hi }));
+"""
+        result = _run_node(script)
+        self.assertGreaterEqual(result["lo"]["score"], 90)
+        self.assertLessEqual(result["hi"]["score"], 10)
+
 
 if __name__ == "__main__":
     unittest.main()
