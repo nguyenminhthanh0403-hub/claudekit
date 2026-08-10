@@ -1,5 +1,6 @@
 .venv-narration/
 audio/narration/raw_cache_johnny/
+audio/narration/.*_done.txt
 audio/voice_sample/*
 !audio/voice_sample/user_voice.wav
 !audio/voice_sample/tom_sample.wav
