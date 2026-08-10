@@ -4100,6 +4100,30 @@ function computeCompositeScore(live) {
   return { score, tier, leadingCategory, categoryContributions, fieldsUsed, fieldsMissing };
 }
 
+function computeNodeMultipliers(driverValues) {
+  const mults = {}, tierByNode = {};
+  Object.keys(NODE_ELASTICITY).forEach(driverKey => {
+    const stat = BASELINE_STATS.fields[driverKey];
+    const current = driverValues[driverKey];
+    if (!stat || typeof current !== 'number') return;
+    const delta = current - stat.mean;
+    if (Math.abs(delta) < 1e-9) return;
+    Object.entries(NODE_ELASTICITY[driverKey]).forEach(([node, cell]) => {
+      mults[node] = (mults[node] || 0) + cell.v * delta;
+      const rank = { measured: 2, directional: 1, unverified: 0 };
+      if (!(node in tierByNode) || rank[cell.conf] < rank[tierByNode[node]]) {
+        tierByNode[node] = cell.conf;
+      }
+    });
+  });
+  Object.keys(mults).forEach(k => {
+    mults[k] = +Math.max(-0.60, Math.min(0.60, mults[k])).toFixed(3);
+    if (Math.abs(mults[k]) < 0.004) { delete mults[k]; delete tierByNode[k]; }
+  });
+  const noDataNodes = Object.keys(NODE_MAP).filter(n => !(n in mults));
+  return { mults, tiers: tierByNode, noDataNodes };
+}
+
 const NODE_ELASTICITY = {
   ffr: {
     Tech_Equities:  NE(-0.075, M_, '2022: the Nasdaq-100 fell ~33% as the 2Y rose ~370bp. Long-duration cash flows reprice hardest. Sign and rough scale both survive that episode.'),

@@ -21,6 +21,42 @@ def _extract_js_snippet(html):
     return html[start:end]
 
 
+def _extract_js_snippet_through_node_mults(html):
+    # Extract minimal needed pieces: NE and constants (needed by NODE_ELASTICITY),
+    # currentLiveSource and SIMULATED_DRIVER_BASE (needed by DRIVERS init),
+    # DRIVERS, BASELINE_STATS, NODE_ELASTICITY, computeCompositeScore,
+    # computeNodeMultipliers, NODE_MAP. Skip DOM/localStorage initialization code.
+    parts = []
+
+    # Include currentLiveSource function (needed by refreshDriverBases)
+    cls_start = html.index("function currentLiveSource() {")
+    cls_end = html.index("}", html.index("return useLiveData")) + 1
+    parts.append(html[cls_start:cls_end])
+
+    # Include NE and constants (needed by NODE_ELASTICITY)
+    ne_start = html.index("const NE = ")
+    ne_end = html.index("const CONF = {") + len("const CONF = {")
+    ne_end = html.index("};\n", ne_end) + 3  # Include closing }; of CONF
+    parts.append(html[ne_start:ne_end])
+
+    # Include DRIVERS through NODE_ELASTICITY
+    drivers_start = html.index("const DRIVERS = ")
+    elasticity_end = html.index("};\n", html.index("const NODE_ELASTICITY = {")) + 3
+    parts.append(html[drivers_start:elasticity_end])
+
+    # Include computeCompositeScore
+    composite_start = html.index("function computeCompositeScore(live)")
+    composite_end = html.index("const NODE_ELASTICITY = {")
+    parts.append(html[composite_start:composite_end])
+
+    # Include NODE_MAP
+    node_map_start = html.index("const NODE_MAP = {")
+    node_map_end = html.index("};\n", node_map_start) + 3
+    parts.append(html[node_map_start:node_map_end])
+
+    return "\n".join(parts)
+
+
 def _run_node(script):
     proc = subprocess.run(["node", "-e", script], capture_output=True, text=True, timeout=30)
     if proc.returncode != 0:
@@ -111,6 +147,54 @@ process.stdout.write(JSON.stringify({ lo, hi }));
         result = _run_node(script)
         self.assertGreaterEqual(result["lo"]["score"], 90)
         self.assertLessEqual(result["hi"]["score"], 10)
+
+
+@unittest.skipUnless(shutil.which("node"), "node not on PATH")
+class TestComputeNodeMultipliersParity(unittest.TestCase):
+    def setUp(self):
+        with open(MAP_PATH) as f:
+            self.snippet = _extract_js_snippet_through_node_mults(f.read())
+
+    def test_all_drivers_at_baseline_mean_yields_no_contributions(self):
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const driverValues = {};
+DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+const result = computeNodeMultipliers(driverValues);
+process.stdout.write(JSON.stringify(result));
+"""
+        result = _run_node(script)
+        self.assertEqual(result["mults"], {})
+
+    def test_nodes_never_covered_by_node_elasticity_are_listed_as_no_data(self):
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const driverValues = {};
+DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+const result = computeNodeMultipliers(driverValues);
+process.stdout.write(JSON.stringify(result.noDataNodes));
+"""
+        no_data = _run_node(script)
+        self.assertIn("Russia", no_data)
+        self.assertIn("Geopolitics", no_data)
+
+    def test_vix_deviation_produces_expected_sign_on_spx(self):
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const driverValues = {};
+DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+// Push VIX 2 std-devs above its own mean.
+driverValues.vix = BASELINE_STATS.fields.vix.mean + 2 * BASELINE_STATS.fields.vix.std;
+const result = computeNodeMultipliers(driverValues);
+process.stdout.write(JSON.stringify(result.mults.SPX));
+"""
+        spx_mult = _run_node(script)
+        # NODE_ELASTICITY.vix.SPX is negative (rising VIX hurts SPX) -- see
+        # bullion_mkultra.html:3862.
+        self.assertLess(spx_mult, 0)
 
 
 if __name__ == "__main__":
