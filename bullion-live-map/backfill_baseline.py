@@ -247,6 +247,18 @@ def build_baseline(history):
     recent_cutoff = (datetime.now(timezone.utc) - timedelta(days=365 * RECENT_WINDOW_YEARS)).strftime("%Y-%m-%d")
     history_for_rows = {f: {d: v for d, v in h.items() if d >= recent_cutoff} for f, h in history.items()}
 
+    # KNOWN UNRESOLVED ISSUE (2026-08-11): even with the windowing above,
+    # PCA fit over this ~2yr sample concentrates ~90% of its weight on
+    # nominal rate levels, not stress -- vix/spx/credit-spreads contribute
+    # ~0%, because the window contains no real stress episode for them to
+    # correlate around. This makes the resulting composite score unreliable
+    # (verified: a synthetic full crisis scored 100/"Healthy"). A sign-
+    # alignment fix was attempted and proven mathematically impossible
+    # (PCA is invariant to per-column sign flips -- see git history /
+    # session notes for the proof). computeCompositeScore in
+    # bullion_mkultra.html is consequently NOT called from the live UI as
+    # of this commit. This function and its output are otherwise left
+    # intact for whoever revisits the methodology.
     dates, rows = build_zscore_rows(history_for_rows, fields_out, COMPOSITE_FIELDS)
     loadings = orient_loadings(pca_first_component(rows), COMPOSITE_FIELDS, anchor_field="vix")
     pc1 = dict(zip(COMPOSITE_FIELDS, loadings))
