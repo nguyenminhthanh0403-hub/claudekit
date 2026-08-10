@@ -881,7 +881,7 @@
     </div>
 
     <div>
-      <div class="drawer-label">AI analysis</div>
+      <div class="drawer-label">Macro analysis</div>
       <div class="health-score-row">
         <span class="health-score-num" id="health-num">&mdash;</span>
         <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run macro analysis</span>
@@ -889,7 +889,7 @@
       <div class="health-bar-wrap">
         <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
       </div>
-      <div class="narrative-box" id="narrative-box">Tap "Run AI analysis" for a macro strategist's read on current conditions.</div>
+      <div class="narrative-box" id="narrative-box">Tap "Run macro analysis" for a quantitative read on current conditions.</div>
       <div id="impacts-section" class="hidden" style="margin-top:8px">
         <div class="drawer-label" id="impacts-label">Node impact multipliers</div>
         <div id="impacts-list"></div>
@@ -5249,7 +5249,7 @@ function clearAI() {
   document.getElementById('health-num').textContent   = '\u2014';
   document.getElementById('health-label').textContent = 'Run macro analysis';
   document.getElementById('health-bar').style.width   = '0%';
-  document.getElementById('narrative-box').textContent= 'Tap "Run AI analysis" for a macro strategist\'s read on current conditions.';
+  document.getElementById('narrative-box').textContent= 'Tap "Run macro analysis" for a quantitative read on current conditions.';
   document.getElementById('impacts-section').classList.add('hidden');
 }
 
@@ -6261,7 +6261,7 @@ fetch('data.json')
     <h4>Educational use only &mdash; not financial advice</h4>
     <p>This is a personal learning and teaching tool. Its causal links, calibrated coefficients, backtest / &ldquo;model accuracy&rdquo; figures, AI-generated commentary, health scores and impact multipliers are illustrative and may be simplified, outdated, or wrong; the backtest measures same-day co-movement on historical data and is not a forecast. Nothing here is investment, financial, legal, or tax advice, a recommendation to buy or sell anything, or a prediction. The author is not a licensed financial adviser. Do your own research and consult a qualified professional before making any financial decision. The tool is provided &ldquo;as is,&rdquo; without warranty of any kind, and the author accepts no liability for any loss arising from its use.</p>
     <h4>Privacy</h4>
-    <p>This site sets no cookies, uses no analytics, and collects no personal data. It loads live market data from a <code>data.json</code> file served from this same site (refreshed by an automated pipeline). If you use the optional AI feature, your request is sent either to Anthropic&rsquo;s API directly from your browser or to a backend proxy only if you have configured one &mdash; no API key or request is sent to any server operated by the author. The page is hosted on GitHub Pages, whose provider may process your IP address to serve it, under its own privacy policy.</p>
+    <p>This site sets no cookies, uses no analytics, and collects no personal data. It loads live market data from a <code>data.json</code> file served from this same site (refreshed by an automated pipeline). The macro analysis feature runs entirely in your browser as a deterministic, local calculation &mdash; no request, state, or API key is ever sent anywhere for it. The page is hosted on GitHub Pages, whose provider may process your IP address to serve it, under its own privacy policy.</p>
   </div>
 </div>
 
