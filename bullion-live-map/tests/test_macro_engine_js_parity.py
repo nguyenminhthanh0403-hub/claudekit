@@ -25,7 +25,7 @@ def _extract_js_snippet_through_node_mults(html):
     # Extract minimal needed pieces: NE and constants (needed by NODE_ELASTICITY),
     # currentLiveSource and SIMULATED_DRIVER_BASE (needed by DRIVERS init),
     # DRIVERS, BASELINE_STATS, NODE_ELASTICITY, computeCompositeScore,
-    # computeNodeMultipliers, NODE_MAP. Skip DOM/localStorage initialization code.
+    # computeNodeMultipliers, buildMacroNarrative, NODE_MAP. Skip DOM/localStorage initialization code.
     parts = []
 
     # Include currentLiveSource function (needed by refreshDriverBases)
@@ -53,6 +53,11 @@ def _extract_js_snippet_through_node_mults(html):
     node_map_start = html.index("const NODE_MAP = {")
     node_map_end = html.index("};\n", node_map_start) + 3
     parts.append(html[node_map_start:node_map_end])
+
+    # Include buildMacroNarrative and _ordinal helper
+    ordinal_start = html.index("function _ordinal(n) {")
+    narrative_end = html.index("function runLocalAnalysis(")
+    parts.append(html[ordinal_start:narrative_end])
 
     return "\n".join(parts)
 
@@ -255,6 +260,32 @@ process.stdout.write(JSON.stringify({
                 f"{result['vixCoeff']} * {result['vixDeviation']} = {expected}) "
                 f"but got {actual}. This suggests contributions are not accumulating."
         )
+
+
+@unittest.skipUnless(shutil.which("node"), "node not on PATH")
+class TestBuildMacroNarrativeParity(unittest.TestCase):
+    def setUp(self):
+        with open(MAP_PATH) as f:
+            self.snippet = _extract_js_snippet_through_node_mults(f.read())
+
+    def test_narrative_has_exactly_three_sentences_and_cites_real_cpi(self):
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const live = {};
+Object.keys(BASELINE_STATS.pc1_loadings).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+live.cpi_yoy = 2.6;
+live.nfp_mom = 150;
+const composite = computeCompositeScore(live);
+const driverValues = {};
+DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+const nodes = computeNodeMultipliers(driverValues);
+const narrative = buildMacroNarrative(composite, nodes, live);
+process.stdout.write(JSON.stringify({ narrative, sentences: narrative.split(/(?<=[.])\\s+/).length }));
+"""
+        result = _run_node(script)
+        self.assertEqual(result["sentences"], 3)
+        self.assertIn("2.6", result["narrative"])
 
 
 if __name__ == "__main__":

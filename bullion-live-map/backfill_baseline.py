@@ -36,7 +36,7 @@ RECENT_WINDOW_YEARS = 2
 # trending series is not a meaningful "normal" — see Global Constraints in
 # the plan for why.
 MEAN_REVERTING_FIELDS = ["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y", "vix",
-                          "ffr", "cpi_yoy", "dxy", "wti_px"]
+                          "ffr", "cpi_yoy", "dxy", "wti_px", "nfp_mom"]
 TRENDING_FIELDS = ["spx", "fed_bs", "rrp"]
 # Fields whose native cadence has gaps a same-day PCA row matrix can't tolerate.
 FORWARD_FILL_FIELDS = ["fed_bs"]
