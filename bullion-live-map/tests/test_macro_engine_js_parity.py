@@ -287,6 +287,51 @@ process.stdout.write(JSON.stringify({ narrative, sentences: narrative.split(/(?<
         self.assertEqual(result["sentences"], 3)
         self.assertIn("2.6", result["narrative"])
 
+    def test_narrative_with_populated_mults_names_worst_and_best_nodes(self):
+        # Test the primary use case: when node multipliers are populated,
+        # the third sentence should correctly identify the worst node as
+        # "headwind" and the best node as "support".
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const live = {};
+Object.keys(BASELINE_STATS.pc1_loadings).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+live.cpi_yoy = 3.2;
+live.nfp_mom = -50;
+const composite = computeCompositeScore(live);
+// Synthetic populated nodeResult: Tech_Equities has the worst (most negative) impact,
+// USD_Strength has the best (most positive) impact.
+const nodes = {
+  mults: {
+    "Tech_Equities": -0.60,
+    "Inflation": -0.15,
+    "USD_Strength": 0.45,
+    "Credit": 0.05
+  },
+  noDataNodes: ["Russia", "Geopolitics"]
+};
+const narrative = buildMacroNarrative(composite, nodes, live);
+process.stdout.write(JSON.stringify({
+  narrative,
+  sentences: narrative.split(/(?<=[.])\\s+/).length,
+  hasTechEquities: narrative.includes("Tech Equities"),
+  hasUSDStrength: narrative.includes("USD Strength"),
+  headwindPattern: narrative.includes("largest current headwind"),
+  supportPattern: narrative.includes("most support")
+}));
+"""
+        result = _run_node(script)
+        self.assertEqual(result["sentences"], 3,
+                         "Narrative must be exactly 3 sentences")
+        self.assertTrue(result["headwindPattern"],
+                        "Narrative must contain 'largest current headwind'")
+        self.assertTrue(result["supportPattern"],
+                        "Narrative must contain 'most support'")
+        self.assertTrue(result["hasTechEquities"],
+                        "Worst node (Tech_Equities) must appear in narrative as 'Tech Equities'")
+        self.assertTrue(result["hasUSDStrength"],
+                        "Best node (USD_Strength) must appear in narrative as 'USD Strength'")
+
 
 if __name__ == "__main__":
     unittest.main()
