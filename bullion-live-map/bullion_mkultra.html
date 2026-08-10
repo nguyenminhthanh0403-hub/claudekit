@@ -3683,6 +3683,7 @@ function currentLiveSource() {
 
 let state = buildBaseState();
 let nodeMultipliers = {};
+let lastNodeMultiplierResult = { mults: {}, tiers: {}, noDataNodes: [] };
 
 function buildBaseState() {
   const base = {
@@ -5343,6 +5344,7 @@ function runMacroAnalysis() {
   const nodes = state.shock && Object.keys(nodeMultipliers).length
     ? { mults: Object.assign({}, nodeMultipliers), tiers: {}, noDataNodes: [] }
     : computeNodeMultipliers(driverValues);
+  lastNodeMultiplierResult = nodes;
   const narrative = buildMacroNarrative(composite, nodes, live);
 
   document.getElementById('narrative-box').textContent = narrative;
@@ -5516,6 +5518,18 @@ function openAuditLog() {
     '<table class="audit-table"><tr><th>Field</th><th>Days</th><th>Direction hit-rate</th><th>R² of change</th></tr>' +
     btRows + '</table>';
 
+  const macroEngineSection = BASELINE_STATS.generated_at
+    ? '<h3>Macro engine methodology</h3><p class="audit-note">Health score and baseline node impacts are computed by a deterministic PCA-weighted composite (not AI) &mdash; see ' +
+      '<code>docs/superpowers/specs/2026-08-09-bullion-mkultra-macro-engine-design.md</code>. ' +
+      'Baseline statistics last refreshed <b>' + BASELINE_STATS.generated_at + '</b>. ' +
+      'Composite fields: <b>' + Object.keys(BASELINE_STATS.pc1_loadings).length + '</b> (PCA-weighted, oriented to VIX). ' +
+      (lastNodeMultiplierResult.noDataNodes.length
+        ? ('<b>' + lastNodeMultiplierResult.noDataNodes.length + ' nodes</b> have no live-data-backed baseline reading: ' +
+           lastNodeMultiplierResult.noDataNodes.join(', ') + '.')
+        : 'Every conceptual node has at least one live-data-backed driver.') +
+      '</p>'
+    : '<h3>Macro engine methodology</h3><p class="audit-note">Baseline statistics have not been generated yet &mdash; run backfill_baseline.py.</p>';
+
   const html =
     '<div class="audit-wrap">' +
       '<h2>Audit Log</h2>' +
@@ -5523,7 +5537,7 @@ function openAuditLog() {
       'Below: every causal number on this map, and how much you should trust it. ' +
       'A polished render makes a guess look exactly like a measured coefficient. This page exists to break that illusion.</p>' +
       backtestSection +
-      bar + conflicts + demotions + superseded + scenNote +
+      bar + conflicts + demotions + superseded + scenNote + macroEngineSection +
       rows('Causal links (' + LINKS.length + ')', linkRows) +
       rows('Elasticity coefficients (' + elasRows.length + ')', elasRows) +
     '</div>';
