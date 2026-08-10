@@ -168,17 +168,33 @@ process.stdout.write(JSON.stringify(result));
         self.assertEqual(result["mults"], {})
 
     def test_nodes_never_covered_by_node_elasticity_are_listed_as_no_data(self):
+        # Perturb drivers so mults has contributions; Russia/Geopolitics have no
+        # elasticity coverage so they should remain in noDataNodes even with other
+        # nodes active. Meanwhile, Tech_Equities (covered by ffr and vix) must be
+        # in mults to distinguish "genuinely uncovered" from "covered but silent".
         script = """
 let selectedHistoryDate = null, useLiveData = false;
 """ + self.snippet + """
 const driverValues = {};
 DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+// Perturb ffr and vix to activate coverage (both reach Tech_Equities in NODE_ELASTICITY).
+driverValues.ffr = BASELINE_STATS.fields.ffr.mean + 1.0 * BASELINE_STATS.fields.ffr.std;
+driverValues.vix = BASELINE_STATS.fields.vix.mean + 1.5 * BASELINE_STATS.fields.vix.std;
 const result = computeNodeMultipliers(driverValues);
-process.stdout.write(JSON.stringify(result.noDataNodes));
+process.stdout.write(JSON.stringify({
+  noDataNodes: result.noDataNodes,
+  hasMultsForTechEquities: 'Tech_Equities' in result.mults,
+  noDataContainsRussia: result.noDataNodes.includes('Russia'),
+  noDataContainsGeo: result.noDataNodes.includes('Geopolitics')
+}));
 """
-        no_data = _run_node(script)
-        self.assertIn("Russia", no_data)
-        self.assertIn("Geopolitics", no_data)
+        result = _run_node(script)
+        self.assertIn("Russia", result["noDataNodes"])
+        self.assertIn("Geopolitics", result["noDataNodes"])
+        self.assertTrue(result["hasMultsForTechEquities"],
+                        "Tech_Equities must have coverage (should be in mults) to distinguish truly uncovered nodes")
+        self.assertTrue(result["noDataContainsRussia"])
+        self.assertTrue(result["noDataContainsGeo"])
 
     def test_vix_deviation_produces_expected_sign_on_spx(self):
         script = """
@@ -195,6 +211,50 @@ process.stdout.write(JSON.stringify(result.mults.SPX));
         # NODE_ELASTICITY.vix.SPX is negative (rising VIX hurts SPX) -- see
         # bullion_mkultra.html:3862.
         self.assertLess(spx_mult, 0)
+
+    def test_multi_driver_accumulation_on_single_node(self):
+        # Verify that when multiple drivers perturb and both target the same node,
+        # their contributions accumulate (sum), not overwrite. Both ffr and vix
+        # have NODE_ELASTICITY entries for Tech_Equities, so we perturb both and
+        # verify the result equals the sum of their individual contributions.
+        script = """
+let selectedHistoryDate = null, useLiveData = false;
+""" + self.snippet + """
+const driverValues = {};
+DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
+const ffrDeviation = 1.0 * BASELINE_STATS.fields.ffr.std;
+const vixDeviation = 1.5 * BASELINE_STATS.fields.vix.std;
+driverValues.ffr = BASELINE_STATS.fields.ffr.mean + ffrDeviation;
+driverValues.vix = BASELINE_STATS.fields.vix.mean + vixDeviation;
+
+const result = computeNodeMultipliers(driverValues);
+
+// Hand-compute expected accumulation: each driver's elasticity * its delta
+const ffrCoeff = NODE_ELASTICITY.ffr.Tech_Equities.v;
+const vixCoeff = NODE_ELASTICITY.vix.Tech_Equities.v;
+const expectedAccumulation = ffrCoeff * ffrDeviation + vixCoeff * vixDeviation;
+
+process.stdout.write(JSON.stringify({
+  actualMultiplier: result.mults.Tech_Equities,
+  expectedAccumulation: expectedAccumulation,
+  ffrCoeff: ffrCoeff,
+  vixCoeff: vixCoeff,
+  ffrDeviation: ffrDeviation,
+  vixDeviation: vixDeviation
+}));
+"""
+        result = _run_node(script)
+        # The actual multiplier should equal the hand-computed sum (within rounding).
+        # We compare at 3 decimal precision since the function rounds to toFixed(3).
+        expected = round(result["expectedAccumulation"], 3)
+        actual = result["actualMultiplier"]
+        self.assertAlmostEqual(
+            actual, expected, places=2,
+            msg=f"Multi-driver accumulation failed. Expected sum of contributions "
+                f"({result['ffrCoeff']} * {result['ffrDeviation']} + "
+                f"{result['vixCoeff']} * {result['vixDeviation']} = {expected}) "
+                f"but got {actual}. This suggests contributions are not accumulating."
+        )
 
 
 if __name__ == "__main__":
