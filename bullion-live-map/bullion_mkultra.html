@@ -4043,6 +4043,62 @@ const BASELINE_STATS = {
   ]
 };
     // ─── BASELINE-STATS-END ────────────────────────────────────────────────
+
+const COMPOSITE_CATEGORY = {
+  hy_oas: 'Credit', ig_oas: 'Credit',
+  spx: 'Equity valuation',
+  sofr: 'Funding', tbill_3m: 'Funding', rrp: 'Funding', fed_bs: 'Funding',
+  us10y: 'Safe assets', us2y: 'Safe assets', curve_slope: 'Safe assets',
+  vix: 'Volatility',
+};
+const COMPOSITE_MIN_FIELDS_FOR_MEASURED = 9; // of 11 total
+
+function _clip3(z) { return Math.max(-3, Math.min(3, z)); }
+
+function _percentileRank(value, table) {
+  // table is sorted ascending, 101 points (0th..100th percentile).
+  if (value <= table[0]) return 0;
+  if (value >= table[table.length - 1]) return 100;
+  for (let p = 1; p < table.length; p++) {
+    if (value <= table[p]) {
+      const lo = table[p - 1], hi = table[p];
+      const frac = hi > lo ? (value - lo) / (hi - lo) : 0;
+      return (p - 1) + frac;
+    }
+  }
+  return 100;
+}
+
+function computeCompositeScore(live) {
+  const fields = Object.keys(BASELINE_STATS.pc1_loadings);
+  const liveWithSlope = Object.assign({}, live);
+  if (typeof live.us10y === 'number' && typeof live.us2y === 'number') {
+    liveWithSlope.curve_slope = live.us10y - live.us2y;
+  }
+  const fieldsUsed = [], fieldsMissing = [];
+  const categoryContributions = {};
+  let composite = 0;
+  fields.forEach(f => {
+    const stat = BASELINE_STATS.fields[f];
+    const v = liveWithSlope[f];
+    if (typeof v !== 'number' || !stat || !stat.std) { fieldsMissing.push(f); return; }
+    fieldsUsed.push(f);
+    const z = _clip3((v - stat.mean) / stat.std);
+    const contribution = BASELINE_STATS.pc1_loadings[f] * z;
+    composite += contribution;
+    const cat = COMPOSITE_CATEGORY[f];
+    categoryContributions[cat] = (categoryContributions[cat] || 0) + contribution;
+  });
+  const percentile = _percentileRank(composite, BASELINE_STATS.composite_percentiles);
+  const score = Math.round(100 - percentile);
+  const tier = fieldsUsed.length >= COMPOSITE_MIN_FIELDS_FOR_MEASURED ? 'measured' : 'directional';
+  let leadingCategory = null, leadingAbs = -1;
+  Object.entries(categoryContributions).forEach(([cat, v]) => {
+    if (Math.abs(v) > leadingAbs) { leadingAbs = Math.abs(v); leadingCategory = cat; }
+  });
+  return { score, tier, leadingCategory, categoryContributions, fieldsUsed, fieldsMissing };
+}
+
 const NODE_ELASTICITY = {
   ffr: {
     Tech_Equities:  NE(-0.075, M_, '2022: the Nasdaq-100 fell ~33% as the 2Y rose ~370bp. Long-duration cash flows reprice hardest. Sign and rough scale both survive that episode.'),
