@@ -290,7 +290,9 @@ process.stdout.write(JSON.stringify({ narrative, sentences: narrative.split(/(?<
     def test_narrative_with_populated_mults_names_worst_and_best_nodes(self):
         # Test the primary use case: when node multipliers are populated,
         # the third sentence should correctly identify the worst node as
-        # "headwind" and the best node as "support".
+        # "headwind" and the best node as "support". This test verifies PAIRING:
+        # that the worst node (Tech_Equities: -60%) is associated with "headwind"
+        # and the best node (USD_Strength: +45%) is associated with "support".
         script = """
 let selectedHistoryDate = null, useLiveData = false;
 """ + self.snippet + """
@@ -314,23 +316,19 @@ const narrative = buildMacroNarrative(composite, nodes, live);
 process.stdout.write(JSON.stringify({
   narrative,
   sentences: narrative.split(/(?<=[.])\\s+/).length,
-  hasTechEquities: narrative.includes("Tech Equities"),
-  hasUSDStrength: narrative.includes("USD Strength"),
-  headwindPattern: narrative.includes("largest current headwind"),
-  supportPattern: narrative.includes("most support")
+  hasWorstNodeAsHeadwind: narrative.includes("headwind is to Tech Equities"),
+  hasBestNodeAsSupport: narrative.includes("USD Strength shows the most support")
 }));
 """
         result = _run_node(script)
         self.assertEqual(result["sentences"], 3,
                          "Narrative must be exactly 3 sentences")
-        self.assertTrue(result["headwindPattern"],
-                        "Narrative must contain 'largest current headwind'")
-        self.assertTrue(result["supportPattern"],
-                        "Narrative must contain 'most support'")
-        self.assertTrue(result["hasTechEquities"],
-                        "Worst node (Tech_Equities) must appear in narrative as 'Tech Equities'")
-        self.assertTrue(result["hasUSDStrength"],
-                        "Best node (USD_Strength) must appear in narrative as 'USD Strength'")
+        self.assertTrue(result["hasWorstNodeAsHeadwind"],
+                        "Worst node (Tech Equities, -60%) must be paired with 'headwind is to' "
+                        "(substring check prevents role-swap regression)")
+        self.assertTrue(result["hasBestNodeAsSupport"],
+                        "Best node (USD Strength, +45%) must be paired with 'shows the most support' "
+                        "(substring check prevents role-swap regression)")
 
 
 if __name__ == "__main__":
