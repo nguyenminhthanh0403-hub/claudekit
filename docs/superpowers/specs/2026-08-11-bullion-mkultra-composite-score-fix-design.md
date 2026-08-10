@@ -43,8 +43,8 @@ Dropped: `sofr`, `tbill_3m`, `us10y`, `us2y` as raw levels. These are policy-rat
 **`bullion_mkultra.html`'s `computeCompositeScore(live)` is rewritten** (same function name/call site, new body):
 
 1. For each of the 7 fields: `z = clip3((live[f] - BASELINE_STATS.fields[f].mean) / BASELINE_STATS.fields[f].std)`, then `signed_z = BASELINE_STATS.stress_sign[f] * z` (positive always means "more stress," regardless of field).
-2. Group `signed_z` by `BASELINE_STATS.category[f]`; average within each of the 5 categories present.
-3. Average the per-category scores (equal weight, one vote per category) → `avg_z`.
+2. Group `signed_z` by `BASELINE_STATS.category[f]`; average within each category that has at least one present field. A category with zero present fields (e.g. a data-source outage affecting its only member, such as `vix` for Volatility) is skipped entirely — it contributes no term to step 3, rather than a synthetic 0.
+3. Average the per-category scores that exist (equal weight, one vote per present category) → `avg_z`. Overall data sufficiency is still gated by `tier` (step 5) — a category dropping out isn't itself a failure mode, just one fewer vote, unless enough fields are missing to also fail the tier threshold.
 4. `score = round(clip(50 - (avg_z / 3) * 50, 0, 100))` — 50 neutral, 0 max stress, 100 max calm, matching the pre-existing scale's meaning (z is bounded ±3 by the per-field clip in step 1, so this maps the full clipped range onto 0–100).
 5. `tier = 'measured'` if enough of the 7 fields have live data, else `'directional'`. `COMPOSITE_MIN_FIELDS_FOR_MEASURED` updates from `9` (of 11) to `6` (of 7), preserving roughly the same ~82% completeness bar.
 6. `leadingCategory` = the category with the largest `|category score|`, same idea as the removed version.
