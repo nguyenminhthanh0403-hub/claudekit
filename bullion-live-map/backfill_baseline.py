@@ -229,7 +229,25 @@ def build_baseline(history):
         stats["window_years"] = RECENT_WINDOW_YEARS
         fields_out[f] = stats
 
-    dates, rows = build_zscore_rows(history, fields_out, COMPOSITE_FIELDS)
+    # The row matrix that feeds the PCA fit AND the percentile table must use
+    # a date range consistent with EVERY composite field's own baseline
+    # window -- not just whatever the raw date intersection happens to
+    # allow. TRENDING_FIELDS (spx/fed_bs/rrp) are z-scored against only
+    # their trailing RECENT_WINDOW_YEARS mean/std (see the loop above); any
+    # row older than that window compares those three fields' actual level
+    # against a mean that didn't apply to that era, producing an artificial
+    # step-discontinuity (verified empirically: dates >2yr old clip to
+    # z=-3 on all three trending fields simultaneously, producing a
+    # composite value ~6 units away from anything in the recent window --
+    # not a gradual trend, a computation artifact). So the row matrix is
+    # restricted to the same trailing window, for every field, even though
+    # MEAN_REVERTING_FIELDS' own stats (fields_out, above) still use their
+    # full FULL_WINDOW_YEARS sample -- only the composite's row matrix
+    # (PCA fit + percentile table) is windowed, not each field's baseline.
+    recent_cutoff = (datetime.now(timezone.utc) - timedelta(days=365 * RECENT_WINDOW_YEARS)).strftime("%Y-%m-%d")
+    history_for_rows = {f: {d: v for d, v in h.items() if d >= recent_cutoff} for f, h in history.items()}
+
+    dates, rows = build_zscore_rows(history_for_rows, fields_out, COMPOSITE_FIELDS)
     loadings = orient_loadings(pca_first_component(rows), COMPOSITE_FIELDS, anchor_field="vix")
     pc1 = dict(zip(COMPOSITE_FIELDS, loadings))
     composite_series = [sum(row[i] * loadings[i] for i in range(len(loadings))) for row in rows]
@@ -239,6 +257,11 @@ def build_baseline(history):
         "fields": fields_out,
         "pc1_loadings": pc1,
         "composite_percentiles": percentile_table(composite_series) if composite_series else [],
+        # The composite's OWN lookback window -- distinct from any single
+        # field's window_years (which can be up to FULL_WINDOW_YEARS). The
+        # narrative (Task 6) must cite this, not a field's window_years, when
+        # describing how far back the composite score's percentile ranking goes.
+        "composite_window_years": RECENT_WINDOW_YEARS,
     }
 
 

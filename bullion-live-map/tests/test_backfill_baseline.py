@@ -78,7 +78,7 @@ class TestPercentileTable(unittest.TestCase):
 
 import json
 
-from backfill_baseline import build_baseline, render_js_block, splice_into_html
+from backfill_baseline import build_baseline, render_js_block, splice_into_html, RECENT_WINDOW_YEARS
 
 
 class TestBuildBaseline(unittest.TestCase):
@@ -108,6 +108,7 @@ class TestBuildBaseline(unittest.TestCase):
         self.assertEqual(len(baseline["composite_percentiles"]), 101)
         for f in ("ffr", "cpi_yoy", "dxy", "wti_px"):
             self.assertIn(f, baseline["fields"])
+        self.assertEqual(baseline["composite_window_years"], RECENT_WINDOW_YEARS)
 
 
 class TestSplice(unittest.TestCase):
