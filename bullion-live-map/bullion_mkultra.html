@@ -3694,6 +3694,7 @@ function currentLiveSource() {
 let state = buildBaseState();
 let nodeMultipliers = {};
 let lastNodeMultiplierResult = { mults: {}, tiers: {}, noDataNodes: [] };
+let lastCompositeResult = { fieldsUsed: [], fieldsMissing: [], categoryContributions: {} };
 let hasRunMacroAnalysis = false; // distinguishes "never run" from "ran and found 0 missing nodes"
 
 function buildBaseState() {
@@ -3848,21 +3849,21 @@ const BASELINE_STATS = {
   "generated_at": "2026-08-11",
   "fields": {
     "hy_oas": {
-      "mean": 3.159197452229299,
-      "std": 0.43401634064001954,
+      "mean": 3.1577579617834397,
+      "std": 0.43366289707154176,
       "n": 785,
       "window_years": 15
     },
     "ig_oas": {
-      "mean": 0.9105357142857143,
-      "std": 0.14769649226210693,
+      "mean": 0.9099744897959183,
+      "std": 0.14735508052793006,
       "n": 784,
       "window_years": 15
     },
     "sofr": {
-      "mean": 2.6688489208633093,
-      "std": 1.9360317442709907,
-      "n": 2085,
+      "mean": 2.6693096836049857,
+      "std": 1.9356819780149044,
+      "n": 2086,
       "window_years": 15
     },
     "tbill_3m": {
@@ -3884,9 +3885,9 @@ const BASELINE_STATS = {
       "window_years": 15
     },
     "vix": {
-      "mean": 18.1224269544617,
-      "std": 6.83169589202535,
-      "n": 3799,
+      "mean": 18.121736842105264,
+      "std": 6.830929360690822,
+      "n": 3800,
       "window_years": 15
     },
     "ffr": {
@@ -3902,8 +3903,8 @@ const BASELINE_STATS = {
       "window_years": 15
     },
     "dxy": {
-      "mean": 94.45714058355438,
-      "std": 8.447083626744345,
+      "mean": 94.45712732095491,
+      "std": 8.447075167357848,
       "n": 3770,
       "window_years": 15
     },
@@ -3926,9 +3927,9 @@ const BASELINE_STATS = {
       "window_years": 15
     },
     "spx": {
-      "mean": 6411.52422,
-      "std": 633.8295023426975,
-      "n": 500,
+      "mean": 6414.1596606786425,
+      "std": 635.9329649429117,
+      "n": 501,
       "window_years": 2
     },
     "fed_bs": {
@@ -5218,6 +5219,25 @@ function buildMacroNarrative(compositeResult, nodeResult, live) {
   return s1 + ' ' + s2 + ' ' + s3;
 }
 
+// Merge the (possibly shocked) transmission state onto the real live snapshot,
+// for computeCompositeScore's purposes specifically. Only overrides composite
+// fields the 5-driver model can actually derive: vix directly, plus spx/us10y/
+// us2y (which feed curve_slope), all genuinely computed by applyManual's
+// elasticity chain whenever a shock is active -- so a running shock now moves
+// the Equity-valuation and Safe-assets categories, not just Volatility.
+// hy_oas/ig_oas/fed_bs/rrp have no driver anywhere in the 5-variable model and
+// are intentionally left at their real live values even under a shock; that is
+// an honest model limitation, not a bug to route around here.
+// In the no-shock case this is a no-op: s.spx/us10y/us2y/vix already equal
+// liveSource's values (both trace back to the same LIVE_OVERRIDABLE patch in
+// buildBaseState), so nothing changes for the current-conditions path.
+function compositeLiveFromState(s, liveSource) {
+  return Object.assign({}, liveSource || {}, {
+    vix: s.vix, cpi_yoy: s.cpi_yoy, dxy: s.dxy, wti_px: s.wti_px,
+    spx: s.spx, us10y: s.us10y, us2y: s.us2y,
+  });
+}
+
 function runMacroAnalysis() {
   const btn = document.getElementById('run-ai-btn');
   btn.disabled = true;
@@ -5248,13 +5268,9 @@ function runMacroAnalysis() {
   lastNodeMultiplierResult = nodes;
   hasRunMacroAnalysis = true;
 
-  const live = Object.assign({}, currentLiveSource() || {}, {
-    // The 5 NODE_ELASTICITY drivers can be scenario-shocked; always feed the
-    // engine the CURRENT (possibly shocked) value so a running shock still
-    // shows up in the score, matching this button's pre-descope behavior.
-    vix: s.vix, cpi_yoy: s.cpi_yoy, dxy: s.dxy, wti_px: s.wti_px,
-  });
+  const live = compositeLiveFromState(s, currentLiveSource());
   const composite = computeCompositeScore(live);
+  lastCompositeResult = composite;
   const narrative = buildMacroNarrative(composite, nodes, live);
 
   document.getElementById('narrative-box').textContent = narrative;
@@ -5441,11 +5457,36 @@ function openAuditLog() {
         : 'Every conceptual node has at least one live-data-backed driver.')
     : 'Run macro analysis to see live node-coverage.';
 
+  // Composite coverage is only known AFTER a real computeCompositeScore() run,
+  // same gating rationale as macroCoverageNote above. computeCompositeScore
+  // already computes fieldsUsed/fieldsMissing/categoryContributions every run;
+  // until this section existed nothing ever rendered them, so a category could
+  // silently drop out of the average (e.g. a vix data outage removing the
+  // entire Volatility category) with no trace anywhere in the UI.
+  const compositeFieldTotal = lastCompositeResult.fieldsUsed.length + lastCompositeResult.fieldsMissing.length;
+  const compositeCoveredCategories = Object.keys(lastCompositeResult.categoryContributions);
+  const compositeAllCategories = Array.from(new Set(Object.values(BASELINE_STATS.category)));
+  const compositeDroppedCategories = compositeAllCategories.filter(c => !compositeCoveredCategories.includes(c));
+  const compositeCoverageNote = hasRunMacroAnalysis
+    ? ((lastCompositeResult.fieldsMissing.length
+          ? ('<b>' + lastCompositeResult.fieldsMissing.length + ' of ' + compositeFieldTotal + ' composite fields</b> have no live reading: ' +
+             lastCompositeResult.fieldsMissing.join(', ') + '.')
+          : 'All ' + compositeFieldTotal + ' composite fields have a live reading.') +
+       (compositeDroppedCategories.length
+          ? (' As a result, <b>' + compositeDroppedCategories.join(', ') + '</b> ' +
+             (compositeDroppedCategories.length > 1 ? 'are' : 'is') +
+             ' silently dropped from this run’s category average — the score above reflects ' +
+             compositeCoveredCategories.length + ' of ' + compositeAllCategories.length + ' stress categories, not all ' + compositeAllCategories.length + '.')
+          : ' All ' + compositeAllCategories.length + ' stress categories are represented in the score above.'))
+    : 'Run macro analysis to see live composite field/category coverage.';
+
   const macroEngineSection =
     '<h3>Macro engine methodology</h3><p class="audit-note">Node-level current-conditions readings below are computed from real driver deviations run through the existing, individually-sourced <code>NODE_ELASTICITY</code> matrix (not AI, not PCA). ' +
     'The health score above is a hierarchical, equal-weighted composite over 7 fields in 5 categories (Credit: HY/IG spreads; Volatility: VIX; Equity valuation: SPX; Funding: Fed balance sheet, RRP; Safe assets: yield curve slope) &mdash; each field is sign-aligned to a fixed &ldquo;more stress&rdquo;/&ldquo;less stress&rdquo; convention and z-scored against its own historical baseline, averaged within category, then averaged across categories. This replaced an earlier PCA-weighted version that was found inverted under real stress and disabled; see ' +
-    '<code>docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md</code> for the full methodology and why PCA-discovered weights were abandoned.</p>' +
-    '<h3>Macro engine node coverage</h3><p class="audit-note">' + macroCoverageNote + '</p>';
+    '<code>docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md</code> for the full methodology and why PCA-discovered weights were abandoned. ' +
+    'The mean/std each field is scored against was last computed <b>' + (BASELINE_STATS.generated_at || 'unknown date') + '</b> (<code>backfill_baseline.py</code>, refreshed automatically once a year by <code>annual-baseline-refresh.yml</code> — a much slower cadence than the daily live-data cron, since a 15yr/2yr mean/std drifts slowly), so a long enough gap since that date is itself a caveat on every z-score below.</p>' +
+    '<h3>Macro engine node coverage</h3><p class="audit-note">' + macroCoverageNote + '</p>' +
+    '<h3>Macro engine composite coverage</h3><p class="audit-note">' + compositeCoverageNote + '</p>';
 
   const html =
     '<div class="audit-wrap">' +

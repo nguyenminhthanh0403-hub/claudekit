@@ -21,6 +21,15 @@ def _extract_js_snippet(html):
     return html[start:end]
 
 
+def _extract_composite_live_from_state(html):
+    # Pure, dependency-free -- merges a (possibly shocked) state object onto a
+    # real live snapshot for computeCompositeScore's purposes. See its own
+    # doc comment in bullion_mkultra.html for why spx/us10y/us2y are included.
+    start = html.index("function compositeLiveFromState(")
+    end = html.index("function runMacroAnalysis(")
+    return html[start:end]
+
+
 def _extract_js_snippet_through_node_mults(html):
     # Extract minimal needed pieces: NE and constants (needed by NODE_ELASTICITY),
     # currentLiveSource and SIMULATED_DRIVER_BASE (needed by DRIVERS init),
@@ -236,6 +245,90 @@ process.stdout.write(JSON.stringify(computeCompositeScore(live)));
             "leadingCategory must be the category with the largest POSITIVE "
             "contribution (Credit, +0.3ish), not the largest-magnitude one "
             "(Equity valuation, -3 -- strongly calming, not stressing).")
+
+
+@unittest.skipUnless(shutil.which("node"), "node not on PATH")
+class TestCompositeLiveFromStateParity(unittest.TestCase):
+    # Regression coverage for the shock-path blind spot: before this fix,
+    # runMacroAnalysis fed computeCompositeScore a `live` object that only
+    # ever overrode vix/cpi_yoy/dxy/wti_px from the (possibly shocked) state
+    # -- and cpi_yoy/dxy/wti_px aren't even composite fields, so only vix
+    # actually mattered. Meanwhile applyManual genuinely derives shocked
+    # spx/us10y/us2y through the sourced elasticity matrix, and those never
+    # reached the score. A user running "Rate Hike" or a manual shock would
+    # see node colors and the narrative update, but the headline health score
+    # would barely move, because Equity-valuation and Safe-assets (curve
+    # slope) stayed pinned to real-world live data regardless of the shock.
+    def setUp(self):
+        with open(MAP_PATH) as f:
+            html = f.read()
+        self.snippet = _extract_js_snippet(html) + _extract_composite_live_from_state(html)
+
+    def _synthetic_baseline_prelude(self):
+        return """
+BASELINE_STATS.stress_sign = {hy_oas:1, ig_oas:1, vix:1, spx:-1, fed_bs:-1, rrp:-1, curve_slope:-1};
+BASELINE_STATS.category = {hy_oas:'Credit', ig_oas:'Credit', vix:'Volatility', spx:'Equity valuation', fed_bs:'Funding', rrp:'Funding', curve_slope:'Safe assets'};
+"""
+
+    def test_merge_takes_shocked_spx_and_curve_fields_from_state_not_live_source(self):
+        script = self.snippet + """
+const liveSource = { spx: 1000, us10y: 1.0, us2y: 1.0, vix: 10, hy_oas: 3.0 };
+const s = { spx: 2000, us10y: 5.0, us2y: 1.0, vix: 40, cpi_yoy: 3.0, dxy: 100, wti_px: 80 };
+const merged = compositeLiveFromState(s, liveSource);
+process.stdout.write(JSON.stringify(merged));
+"""
+        result = _run_node(script)
+        # Shocked fields come from s (the transmission-applied state) ...
+        self.assertEqual(result["spx"], 2000)
+        self.assertEqual(result["us10y"], 5.0)
+        self.assertEqual(result["vix"], 40)
+        # ... while fields the 5-driver model has no way to derive (hy_oas,
+        # ig_oas, fed_bs, rrp) are left untouched from the real live snapshot.
+        self.assertEqual(result["hy_oas"], 3.0)
+
+    def test_shock_derived_spx_now_moves_the_composite_score(self):
+        # THE regression test for the bug this fix closes. liveSource sits at
+        # a neutral (score ~50) real-world snapshot; `s` represents a shock
+        # that has crashed spx and inverted the curve, exactly what
+        # applyManual computes for a real rate-hike/vix-spike shock. Before
+        # this fix, that shock would never reach the score at all.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const liveSource = {};
+Object.keys(BASELINE_STATS.stress_sign).forEach(f => {
+  liveSource[f] = BASELINE_STATS.fields[f].mean;
+});
+const s = Object.assign({}, liveSource, {
+  vix: liveSource.vix,
+  cpi_yoy: 2.4, dxy: 104.2, wti_px: 78.4,
+  spx: BASELINE_STATS.fields.spx.mean * 0.65,
+  us10y: 3.0, us2y: 4.5, // inverted curve -> curve_slope well below its mean
+});
+const merged = compositeLiveFromState(s, liveSource);
+process.stdout.write(JSON.stringify(computeCompositeScore(merged)));
+"""
+        result = _run_node(script)
+        self.assertLess(result["score"], 40,
+            "A shock that crashes spx and inverts the curve must actually move "
+            "the composite score once merged through compositeLiveFromState -- "
+            "before this fix, spx/us10y/us2y from a shocked state never reached "
+            "computeCompositeScore, so this scenario would still score ~50.")
+
+    def test_no_shock_case_is_a_no_op(self):
+        # When state.shock is null, applyTransmission returns `state` itself,
+        # whose spx/us10y/us2y/vix already trace back to the same
+        # LIVE_OVERRIDABLE-patched values as currentLiveSource() (see
+        # buildBaseState). So merging them in must change nothing versus
+        # feeding liveSource straight through.
+        script = self.snippet + """
+const liveSource = { spx: 5312, us10y: 4.28, us2y: 4.42, vix: 16.8, cpi_yoy: 2.4, dxy: 104.2, wti_px: 78.4, hy_oas: 3.1 };
+const s = Object.assign({}, liveSource); // no-shock case: s === liveSource's values
+const merged = compositeLiveFromState(s, liveSource);
+process.stdout.write(JSON.stringify(merged));
+"""
+        result = _run_node(script)
+        expected = {"spx": 5312, "us10y": 4.28, "us2y": 4.42, "vix": 16.8,
+                    "cpi_yoy": 2.4, "dxy": 104.2, "wti_px": 78.4, "hy_oas": 3.1}
+        self.assertEqual(result, expected)
 
 
 @unittest.skipUnless(shutil.which("node"), "node not on PATH")
