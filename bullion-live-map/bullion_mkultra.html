@@ -1227,8 +1227,8 @@ const NODES = [
     expert:[
       'Near-zero long-run correlation to equities, which is the basis of the diversification case.',
       'Key drivers: real rates (inverse), USD (inverse), inflation expectations, geopolitics.',
-      'Central-bank gold demand hit 1,037 tonnes in 2023. Real rates (TIPS) dominate.',
-      'Source: World Gold Council (correlation studies and demand trends); the dollar link on this map is fitted separately.'] },
+      'Central banks have been structural net buyers of gold in most years for over a decade, a shift in reserve composition tracked live here across the largest public holders. Real rates (TIPS) still dominate day-to-day price moves.',
+      'Source: IMF International Reserves and Foreign Currency Liquidity (IRFCL); the dollar link on this map is fitted separately.'] },
   { id:'oil', label:'Oil Price (WTI)', group:'commodity',
     beginner:[
       'Energy is an input cost for nearly everything.',
@@ -4576,7 +4576,7 @@ function updateMetrics() {
 // badge (renderLiveBadge below), so live and fake numbers are never silently
 // blurred together — the same provenance-tier honesty mechanism used
 // everywhere else on this map.
-const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500', nfci:'NFCI', hy_oas:'HY OAS', ig_oas:'IG OAS', sofr:'SOFR', rrp:'RRP', tbill_3m:'3M Bill', mortgage_30y:'30Y Mortgage', m2:'M2', fed_bs:'Fed B/S', xlk:'Tech (XLK)', xlf:'Financials (XLF)', xle:'Energy (XLE)', xlp:'Staples (XLP)' };
+const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500', nfci:'NFCI', hy_oas:'HY OAS', ig_oas:'IG OAS', sofr:'SOFR', rrp:'RRP', tbill_3m:'3M Bill', mortgage_30y:'30Y Mortgage', m2:'M2', fed_bs:'Fed B/S', xlk:'Tech (XLK)', xlf:'Financials (XLF)', xle:'Energy (XLE)', xlp:'Staples (XLP)', cb_gold_reserves:'CB Gold (Top 11)' };
 
 // ─── LIVE READINGS IN THE DETAIL PANEL (ported from Mk17) ───────────────────
 // data.json carries 23 fields; 22 of the 39 nodes bind to one, so a node can
@@ -4595,12 +4595,13 @@ const LIVE_FMT = {
   fed_bs:v=>'$'+Math.round(+v).toLocaleString()+'bn',
   xlk:v=>'$'+(+v).toFixed(2), xlf:v=>'$'+(+v).toFixed(2),
   xle:v=>'$'+(+v).toFixed(2), xlp:v=>'$'+(+v).toFixed(2),
+  cb_gold_reserves:v=>Math.round(+v).toLocaleString()+'t',
 };
 const NODE_LIVE_FIELD = {
   vix: ['vix', 'nfci'], credit: ['hy_oas', 'ig_oas'], repo: ['sofr', 'rrp'],
   mortgage: ['mortgage_30y'], m2: ['m2'], fed: ['fed_bs'], tbills: ['tbill_3m'],
   tech: ['xlk'], fins: ['xlf'], energy: ['xle'], defn: ['xlp'],
-  yield: ['us10y', 'us2y'], equit: ['spx'], gold: ['gold_px'], usd: ['dxy'], oil: ['wti_px'],
+  yield: ['us10y', 'us2y'], equit: ['spx'], gold: ['gold_px', 'cb_gold_reserves'], usd: ['dxy'], oil: ['wti_px'],
   // Beyond mk17's map: these three bind to fields data.json already carries, so
   // the node shows a current reading next to its dated hand-typed figure.
   nfp: ['nfp_mom'], cpi: ['cpi_yoy'], ffr: ['ffr'],
