@@ -5531,8 +5531,8 @@ function openAuditLog() {
 
   const macroEngineSection =
     '<h3>Macro engine methodology</h3><p class="audit-note">Node-level current-conditions readings below are computed from real driver deviations run through the existing, individually-sourced <code>NODE_ELASTICITY</code> matrix (not AI, not PCA). ' +
-    'A separate PCA-weighted composite health score was built but is currently <b>disabled</b>: a final review found it inverted under real stress, and a proposed fix was proven mathematically impossible (PCA is invariant to per-column sign flips). See ' +
-    '<code>docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md</code> for the full diagnosis. No health score or bar is shown pending a methodology revisit.</p>' +
+    'The health score above is a hierarchical, equal-weighted composite over 7 fields in 5 categories (Credit: HY/IG spreads; Volatility: VIX; Equity valuation: SPX; Funding: Fed balance sheet, RRP; Safe assets: yield curve slope) &mdash; each field is sign-aligned to a fixed &ldquo;more stress&rdquo;/&ldquo;less stress&rdquo; convention and z-scored against its own historical baseline, averaged within category, then averaged across categories. This replaced an earlier PCA-weighted version that was found inverted under real stress and disabled; see ' +
+    '<code>docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md</code> for the full methodology and why PCA-discovered weights were abandoned.</p>' +
     '<h3>Macro engine node coverage</h3><p class="audit-note">' + macroCoverageNote + '</p>';
 
   const html =
