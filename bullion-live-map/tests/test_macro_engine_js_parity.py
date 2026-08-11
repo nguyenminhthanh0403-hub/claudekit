@@ -77,40 +77,40 @@ class TestComputeCompositeScoreParity(unittest.TestCase):
         with open(MAP_PATH) as f:
             self.snippet = _extract_js_snippet(f.read())
 
-    def test_all_fields_at_their_own_mean_is_a_valid_measured_score(self):
-        # NOTE: this does NOT assert score==50. Verified empirically during
-        # implementation (see the macro-engine design doc's addendum) that
-        # "every field simultaneously at its own individual baseline mean"
-        # does not reliably land near the historical median: MEAN_REVERTING
-        # fields are z-scored against their full FULL_WINDOW_YEARS sample,
-        # which for several fields spans a materially different rate regime
-        # (near-zero rates for much of that window vs. the current tightening
-        # cycle) than the composite's own RECENT_WINDOW_YEARS row matrix. A
-        # field sitting at its own multi-year average is not the same as the
-        # SYSTEM being at a historically typical combined state -- some
-        # fields are legitimately in a different regime than their own long
-        # history right now, and that's real data, not a bug. So this test
-        # only checks the mechanism is sound (valid bounded score, correct
-        # tier when all fields are supplied), not a specific target value.
-        script = self.snippet + """
+    def _synthetic_baseline_prelude(self):
+        # The live BASELINE_STATS block spliced into bullion_mkultra.html
+        # won't have stress_sign/category until Task 7 regenerates it, so
+        # these tests inject a synthetic BASELINE_STATS-shaped object with
+        # exactly the 7 composite fields, matching backfill_baseline.py's
+        # EXPECTED_STRESS_SIGN/COMPOSITE_CATEGORY values.
+        return """
+BASELINE_STATS.stress_sign = {hy_oas:1, ig_oas:1, vix:1, spx:-1, fed_bs:-1, rrp:-1, curve_slope:-1};
+BASELINE_STATS.category = {hy_oas:'Credit', ig_oas:'Credit', vix:'Volatility', spx:'Equity valuation', fed_bs:'Funding', rrp:'Funding', curve_slope:'Safe assets'};
+"""
+
+    def test_all_fields_at_their_own_mean_scores_near_neutral(self):
+        # Unlike the old PCA version, every field independently sign-aligned
+        # and z-scored against its own mean has no cross-field regime
+        # heterogeneity concern -- "every field at its own baseline mean"
+        # IS the neutral point by construction, so this can assert a
+        # specific target (unlike the old test, which explicitly could not).
+        script = self.snippet + self._synthetic_baseline_prelude() + """
 const live = {};
-for (const f of Object.keys(BASELINE_STATS.pc1_loadings)) {
+for (const f of Object.keys(BASELINE_STATS.stress_sign)) {
   live[f] = BASELINE_STATS.fields[f].mean;
 }
 process.stdout.write(JSON.stringify(computeCompositeScore(live)));
 """
         result = _run_node(script)
-        self.assertGreaterEqual(result["score"], 0)
-        self.assertLessEqual(result["score"], 100)
+        self.assertAlmostEqual(result["score"], 50, delta=1)
         self.assertEqual(result["tier"], "measured")
         self.assertEqual(len(result["fieldsMissing"]), 0)
 
     def test_missing_fields_degrade_tier_to_directional(self):
-        script = self.snippet + """
-const fields = Object.keys(BASELINE_STATS.pc1_loadings);
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
 const live = {};
-// Only supply 2 of the composite fields -> well under any reasonable
-// completeness threshold.
+// Only supply 2 of the 7 composite fields -- well under the 6-of-7 bar.
 live[fields[0]] = BASELINE_STATS.fields[fields[0]].mean;
 live[fields[1]] = BASELINE_STATS.fields[fields[1]].mean;
 process.stdout.write(JSON.stringify(computeCompositeScore(live)));
@@ -118,42 +118,98 @@ process.stdout.write(JSON.stringify(computeCompositeScore(live)));
         result = _run_node(script)
         self.assertEqual(result["tier"], "directional")
 
-    def test_percentile_boundaries_map_to_score_extremes(self):
-        # The one invariant that IS guaranteed regardless of field regime
-        # heterogeneity: pushing EVERY composite field simultaneously to its
-        # most-stressed clip (z=+3 in the direction its loading treats as
-        # stress) produces a composite value that upper-bounds anything any
-        # real historical day achieved (real days rarely have all fields
-        # simultaneously at their most extreme together) -- so it must
-        # score at or below the true worst historical day, i.e. score <= 10.
-        # Symmetrically, the least-stressed simultaneous clip must score
-        # >= 90. This does NOT try to hit BASELINE_STATS.composite_percentiles'
-        # exact min/max (that would require knowing which specific field
-        # combination actually produced the historical extreme, which a
-        # single-field or naive solve can't guarantee) -- it only relies on
-        # "all fields simultaneously maximally stressed" being at least as
-        # extreme as anything observed, which is true by construction of
-        # the clip bound itself, not dependent on any field's regime.
-        script = self.snippet + """
-const fields = Object.keys(BASELINE_STATS.pc1_loadings);
-function liveAtExtreme(direction) {
-  // direction = +1 for max stress, -1 for min stress.
-  const live = {};
-  fields.forEach(f => {
-    const stat = BASELINE_STATS.fields[f];
-    const loading = BASELINE_STATS.pc1_loadings[f];
-    const zSign = (loading >= 0 ? 1 : -1) * direction;
-    live[f] = stat.mean + zSign * 3 * stat.std;
-  });
-  return live;
-}
-const hi = computeCompositeScore(liveAtExtreme(1));
-const lo = computeCompositeScore(liveAtExtreme(-1));
-process.stdout.write(JSON.stringify({ lo, hi }));
+    def test_all_fields_at_max_stress_clip_scores_near_zero(self):
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
+const live = {};
+fields.forEach(f => {
+  const stat = BASELINE_STATS.fields[f];
+  const sign = BASELINE_STATS.stress_sign[f];
+  // Push every field 3 std-devs in ITS OWN stress direction.
+  live[f] = stat.mean + sign * 3 * stat.std;
+});
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
 """
         result = _run_node(script)
-        self.assertGreaterEqual(result["lo"]["score"], 90)
-        self.assertLessEqual(result["hi"]["score"], 10)
+        self.assertLessEqual(result["score"], 5)
+
+    def test_all_fields_at_min_stress_clip_scores_near_hundred(self):
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
+const live = {};
+fields.forEach(f => {
+  const stat = BASELINE_STATS.fields[f];
+  const sign = BASELINE_STATS.stress_sign[f];
+  live[f] = stat.mean - sign * 3 * stat.std;
+});
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertGreaterEqual(result["score"], 95)
+
+    def test_category_with_zero_present_fields_is_skipped_not_zeroed(self):
+        # Volatility's only member is vix. Omitting vix from `live` entirely
+        # must drop Volatility from the average, not silently treat it as a
+        # neutral (z=0) contributor -- a neutral synthetic vote would still
+        # subtly pull the score, which is exactly the kind of unstated
+        # imputation this fix's category-weighting was designed to avoid.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign).filter(f => f !== 'vix');
+const live = {};
+fields.forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertNotIn("Volatility", result["categoryContributions"])
+        self.assertAlmostEqual(result["score"], 50, delta=1)
+
+    def test_synthetic_crisis_scores_low_not_high(self):
+        # THE regression test for the original bug. VIX 45, HY spreads to
+        # 8%, SPX -35% from mean must NOT score "Healthy" -- this exact
+        # scenario scored 100/"Healthy" under the old PCA version. Verified
+        # by hand during plan-writing (executed against this project's real
+        # BASELINE_STATS.fields values, not just reasoned about): this
+        # scenario now scores 6/"Elevated stress" under the new formula.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const live = {
+  hy_oas: 8.0,
+  ig_oas: BASELINE_STATS.fields.ig_oas.mean + 3 * BASELINE_STATS.fields.ig_oas.std,
+  vix: 45,
+  spx: BASELINE_STATS.fields.spx.mean * 0.65,
+  fed_bs: BASELINE_STATS.fields.fed_bs.mean - 2 * BASELINE_STATS.fields.fed_bs.std,
+  rrp: BASELINE_STATS.fields.rrp.mean - 2 * BASELINE_STATS.fields.rrp.std,
+  curve_slope: -1.0,
+};
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertLess(result["score"], 45,
+            "Synthetic crisis (VIX 45, HY 8%, SPX -35%) must score below the "
+            "'Moderate stress' threshold -- scoring 'Healthy' here is exactly "
+            "the bug this fix exists to close.")
+
+    def test_calm_baseline_scores_healthy_not_stressed(self):
+        # The counterpart regression case: the actual calm market day that
+        # scored 18/"Elevated stress" under the old PCA version must now
+        # land in "Healthy" (score > 70) -- never inverted. Every field
+        # nudged 1.5 std toward calm (verified by hand against this
+        # project's real BASELINE_STATS.fields values during plan-writing:
+        # this exact nudge produces score=75, comfortably inside "Healthy"
+        # with real, not cherry-picked, margin).
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const live = {};
+Object.keys(BASELINE_STATS.stress_sign).forEach(f => {
+  const stat = BASELINE_STATS.fields[f];
+  const sign = BASELINE_STATS.stress_sign[f];
+  live[f] = stat.mean - sign * 1.5 * stat.std;
+});
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertGreater(result["score"], 70,
+            "A day with every field nudged 1.5 std toward calm must score "
+            "'Healthy' (>70) -- this is the inverse of the original bug's "
+            "failure mode (a calm day scoring 18/'Elevated stress').")
 
 
 @unittest.skipUnless(shutil.which("node"), "node not on PATH")

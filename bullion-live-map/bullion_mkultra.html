@@ -4060,68 +4060,38 @@ const BASELINE_STATS = {
 };
     // ─── BASELINE-STATS-END ────────────────────────────────────────────────
 
-const COMPOSITE_CATEGORY = {
-  hy_oas: 'Credit', ig_oas: 'Credit',
-  spx: 'Equity valuation',
-  sofr: 'Funding', tbill_3m: 'Funding', rrp: 'Funding', fed_bs: 'Funding',
-  us10y: 'Safe assets', us2y: 'Safe assets', curve_slope: 'Safe assets',
-  vix: 'Volatility',
-};
-const COMPOSITE_MIN_FIELDS_FOR_MEASURED = 9; // of 11 total
+const COMPOSITE_MIN_FIELDS_FOR_MEASURED = 6; // of 7 total
 
 function _clip3(z) { return Math.max(-3, Math.min(3, z)); }
 
-function _percentileRank(value, table) {
-  // table is sorted ascending, 101 points (0th..100th percentile).
-  if (value <= table[0]) return 0;
-  if (value >= table[table.length - 1]) return 100;
-  for (let p = 1; p < table.length; p++) {
-    if (value <= table[p]) {
-      const lo = table[p - 1], hi = table[p];
-      const frac = hi > lo ? (value - lo) / (hi - lo) : 0;
-      return (p - 1) + frac;
-    }
-  }
-  return 100;
-}
-
-// NOT CURRENTLY CALLED from the UI (see runMacroAnalysis) -- disabled
-// 2026-08-11 after a final whole-branch review found the composite score
-// backwards under real stress. Root cause: PCA fit over the only window
-// where all 11 composite fields have comparable history (~2yr, bounded by
-// two credit-spread series' short FRED retention) puts ~90% of its weight
-// on nominal rate levels, not stress -- VIX/SPX/credit spreads contribute
-// ~0%, because that window had no real stress episode for them to
-// correlate around. A sign-alignment fix was attempted and proven to be a
-// mathematical no-op (PCA is invariant to per-column sign flips). Fixing
-// this needs either a materially different fitting window or a
-// non-PCA-discovered weighting scheme -- see
-// docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md and
-// this session's final-review discussion for the full diagnosis before
-// re-enabling. The function itself is left intact and correct for
-// whichever fix gets chosen.
 function computeCompositeScore(live) {
-  const fields = Object.keys(BASELINE_STATS.pc1_loadings);
+  const fields = Object.keys(BASELINE_STATS.stress_sign);
   const liveWithSlope = Object.assign({}, live);
   if (typeof live.us10y === 'number' && typeof live.us2y === 'number') {
     liveWithSlope.curve_slope = live.us10y - live.us2y;
   }
   const fieldsUsed = [], fieldsMissing = [];
-  const categoryContributions = {};
-  let composite = 0;
+  const categorySums = {}, categoryCounts = {};
   fields.forEach(f => {
     const stat = BASELINE_STATS.fields[f];
     const v = liveWithSlope[f];
     if (typeof v !== 'number' || !stat || !stat.std) { fieldsMissing.push(f); return; }
     fieldsUsed.push(f);
     const z = _clip3((v - stat.mean) / stat.std);
-    const contribution = BASELINE_STATS.pc1_loadings[f] * z;
-    composite += contribution;
-    const cat = COMPOSITE_CATEGORY[f];
-    categoryContributions[cat] = (categoryContributions[cat] || 0) + contribution;
+    const signedZ = BASELINE_STATS.stress_sign[f] * z;
+    const cat = BASELINE_STATS.category[f];
+    categorySums[cat] = (categorySums[cat] || 0) + signedZ;
+    categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
   });
-  const percentile = _percentileRank(composite, BASELINE_STATS.composite_percentiles);
-  const score = Math.round(100 - percentile);
+  const categoryContributions = {};
+  Object.keys(categorySums).forEach(cat => {
+    categoryContributions[cat] = categorySums[cat] / categoryCounts[cat];
+  });
+  const presentCategories = Object.values(categoryContributions);
+  const avgZ = presentCategories.length
+    ? presentCategories.reduce((a, b) => a + b, 0) / presentCategories.length
+    : 0;
+  const score = Math.round(Math.max(0, Math.min(100, 50 - (avgZ / 3) * 50)));
   const tier = fieldsUsed.length >= COMPOSITE_MIN_FIELDS_FOR_MEASURED ? 'measured' : 'directional';
   let leadingCategory = null, leadingAbs = -1;
   Object.entries(categoryContributions).forEach(([cat, v]) => {
