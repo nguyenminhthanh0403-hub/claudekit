@@ -888,11 +888,11 @@
 
     <div>
       <div class="drawer-label">Macro analysis</div>
-      <div class="health-score-row hidden">
+      <div class="health-score-row">
         <span class="health-score-num" id="health-num">&mdash;</span>
         <span style="font-size:11px;color:var(--text-dim)" id="health-label">Run macro analysis</span>
       </div>
-      <div class="health-bar-wrap hidden">
+      <div class="health-bar-wrap">
         <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
       </div>
       <div class="narrative-box" id="narrative-box">Tap "Run macro analysis" for a quantitative read on current conditions.</div>
@@ -5278,14 +5278,11 @@ function renderImpacts(mults, whyMap, label) {
   document.getElementById('impacts-section').classList.remove('hidden');
 }
 
-function buildMacroNarrative(nodeResult, live) {
-  // The composite health score is currently disabled (see
-  // computeCompositeScore's own comment and
-  // docs/superpowers/plans/2026-08-09-bullion-mkultra-macro-engine.md for
-  // the full diagnosis) -- this narrative no longer references it. Two
-  // sentences instead of the original three: CPI/NFP context, then the
-  // node-level headwind/support takeaway (both independent of the
-  // composite score).
+function buildMacroNarrative(compositeResult, nodeResult, live) {
+  const s1 = `Financial conditions read ${compositeResult.score}/100 (` +
+    (compositeResult.score > 70 ? 'Healthy' : compositeResult.score > 45 ? 'Moderate stress' : 'Elevated stress') +
+    `), driven primarily by ${(compositeResult.leadingCategory || 'a mix of factors').toLowerCase()}.`;
+
   const cpi = live.cpi_yoy, nfp = live.nfp_mom;
   const cpiTxt = (typeof cpi === 'number')
     ? `Core CPI is running at ${cpi.toFixed(1)}% against the Fed's 2% target`
@@ -5293,20 +5290,20 @@ function buildMacroNarrative(nodeResult, live) {
   const nfpTxt = (typeof nfp === 'number')
     ? (nfp > 100 ? 'payrolls are trending firm' : (nfp < 0 ? 'payrolls are contracting' : 'payrolls are roughly flat'))
     : 'payroll data is unavailable';
-  const s1 = `${cpiTxt}; ${nfpTxt}.`;
+  const s2 = `${cpiTxt}; ${nfpTxt}.`;
 
   const entries = Object.entries(nodeResult.mults);
-  let s2;
+  let s3;
   if (entries.length === 0) {
-    s2 = 'No live driver is currently far enough from its historical baseline to move any node materially.';
+    s3 = 'No live driver is currently far enough from its historical baseline to move any node materially.';
   } else {
     entries.sort((a, b) => a[1] - b[1]);
     const worst = entries[0], best = entries[entries.length - 1];
     const pctTxt = v => (v >= 0 ? '+' : '') + (v * 100).toFixed(0) + '%';
-    s2 = `The largest current headwind is to ${worst[0].replace(/_/g, ' ')} (${pctTxt(worst[1])})` +
+    s3 = `The largest current headwind is to ${worst[0].replace(/_/g, ' ')} (${pctTxt(worst[1])})` +
       (best[0] !== worst[0] ? `, while ${best[0].replace(/_/g, ' ')} shows the most support (${pctTxt(best[1])}).` : '.');
   }
-  return s1 + ' ' + s2;
+  return s1 + ' ' + s2 + ' ' + s3;
 }
 
 function runMacroAnalysis() {
@@ -5339,10 +5336,23 @@ function runMacroAnalysis() {
   lastNodeMultiplierResult = nodes;
   hasRunMacroAnalysis = true;
 
-  const live = { cpi_yoy: s.cpi_yoy, nfp_mom: s.nfp_mom };
-  const narrative = buildMacroNarrative(nodes, live);
+  const live = Object.assign({}, window.BULLION_LIVE_DATA || {}, {
+    // The 5 NODE_ELASTICITY drivers can be scenario-shocked; always feed the
+    // engine the CURRENT (possibly shocked) value so a running shock still
+    // shows up in the score, matching this button's pre-descope behavior.
+    vix: s.vix, cpi_yoy: s.cpi_yoy, dxy: s.dxy, wti_px: s.wti_px,
+  });
+  const composite = computeCompositeScore(live);
+  const narrative = buildMacroNarrative(composite, nodes, live);
 
   document.getElementById('narrative-box').textContent = narrative;
+  document.getElementById('health-num').textContent = composite.score;
+  document.getElementById('health-label').textContent =
+    (composite.score > 70 ? 'Healthy' : composite.score > 45 ? 'Moderate stress' : 'Elevated stress') +
+    (composite.tier === 'directional' ? ' (directional \u2014 limited live data)' : '');
+  const barColor = composite.score > 70 ? '#7bbf8e' : composite.score > 45 ? '#e0b15a' : '#e0654f';
+  document.getElementById('health-bar').style.width = composite.score + '%';
+  document.getElementById('health-bar').style.background = barColor;
   nodeMultipliers = nodes.mults;
   renderImpacts(nodeMultipliers, null,
     state.shock ? 'Scenario node impact multipliers' : 'Current-conditions node impact multipliers');

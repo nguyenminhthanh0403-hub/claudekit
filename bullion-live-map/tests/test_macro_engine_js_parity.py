@@ -326,39 +326,39 @@ class TestBuildMacroNarrativeParity(unittest.TestCase):
         with open(MAP_PATH) as f:
             self.snippet = _extract_js_snippet_through_node_mults(f.read())
 
-    def test_narrative_has_exactly_two_sentences_and_cites_real_cpi(self):
+    def test_narrative_has_exactly_three_sentences_and_cites_real_cpi_and_score(self):
         script = """
 let selectedHistoryDate = null, useLiveData = false;
 """ + self.snippet + """
+BASELINE_STATS.stress_sign = {hy_oas:1, ig_oas:1, vix:1, spx:-1, fed_bs:-1, rrp:-1, curve_slope:-1};
+BASELINE_STATS.category = {hy_oas:'Credit', ig_oas:'Credit', vix:'Volatility', spx:'Equity valuation', fed_bs:'Funding', rrp:'Funding', curve_slope:'Safe assets'};
 const live = {};
-Object.keys(BASELINE_STATS.pc1_loadings).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+Object.keys(BASELINE_STATS.stress_sign).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
 live.cpi_yoy = 2.6;
 live.nfp_mom = 150;
+const composite = computeCompositeScore(live);
 const driverValues = {};
 DRIVERS.forEach(d => { driverValues[d.key] = BASELINE_STATS.fields[d.key].mean; });
 const nodes = computeNodeMultipliers(driverValues);
-const narrative = buildMacroNarrative(nodes, live);
-process.stdout.write(JSON.stringify({ narrative, sentences: narrative.split(/(?<=[.])\\s+/).length }));
+const narrative = buildMacroNarrative(composite, nodes, live);
+process.stdout.write(JSON.stringify({ narrative, sentences: narrative.split(/(?<=[.])\\s+/).length, score: composite.score }));
 """
         result = _run_node(script)
-        self.assertEqual(result["sentences"], 2)
+        self.assertEqual(result["sentences"], 3)
         self.assertIn("2.6", result["narrative"])
+        self.assertIn(str(result["score"]), result["narrative"])
 
     def test_narrative_with_populated_mults_names_worst_and_best_nodes(self):
-        # Test the primary use case: when node multipliers are populated,
-        # the second sentence should correctly identify the worst node as
-        # "headwind" and the best node as "support". This test verifies PAIRING:
-        # that the worst node (Tech_Equities: -60%) is associated with "headwind"
-        # and the best node (USD_Strength: +45%) is associated with "support".
         script = """
 let selectedHistoryDate = null, useLiveData = false;
 """ + self.snippet + """
+BASELINE_STATS.stress_sign = {hy_oas:1, ig_oas:1, vix:1, spx:-1, fed_bs:-1, rrp:-1, curve_slope:-1};
+BASELINE_STATS.category = {hy_oas:'Credit', ig_oas:'Credit', vix:'Volatility', spx:'Equity valuation', fed_bs:'Funding', rrp:'Funding', curve_slope:'Safe assets'};
 const live = {};
-Object.keys(BASELINE_STATS.pc1_loadings).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+Object.keys(BASELINE_STATS.stress_sign).forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
 live.cpi_yoy = 3.2;
 live.nfp_mom = -50;
-// Synthetic populated nodeResult: Tech_Equities has the worst (most negative) impact,
-// USD_Strength has the best (most positive) impact.
+const composite = computeCompositeScore(live);
 const nodes = {
   mults: {
     "Tech_Equities": -0.60,
@@ -368,7 +368,7 @@ const nodes = {
   },
   noDataNodes: ["Russia", "Geopolitics"]
 };
-const narrative = buildMacroNarrative(nodes, live);
+const narrative = buildMacroNarrative(composite, nodes, live);
 process.stdout.write(JSON.stringify({
   narrative,
   sentences: narrative.split(/(?<=[.])\\s+/).length,
@@ -377,8 +377,8 @@ process.stdout.write(JSON.stringify({
 }));
 """
         result = _run_node(script)
-        self.assertEqual(result["sentences"], 2,
-                         "Narrative must be exactly 2 sentences")
+        self.assertEqual(result["sentences"], 3,
+                         "Narrative must be exactly 3 sentences")
         self.assertTrue(result["hasWorstNodeAsHeadwind"],
                         "Worst node (Tech Equities, -60%) must be paired with 'headwind is to' "
                         "(substring check prevents role-swap regression)")
