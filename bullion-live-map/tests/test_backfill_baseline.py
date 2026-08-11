@@ -8,6 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from backfill_baseline import (
     field_stats, forward_fill, fetch_all_history,
     add_curve_slope, EXPECTED_STRESS_SIGN, COMPOSITE_CATEGORY, COMPOSITE_FIELDS,
+    EXPECTED_BASELINE_FIELDS, missing_baseline_fields,
 )
 
 
@@ -103,6 +104,42 @@ class TestBuildBaseline(unittest.TestCase):
         self.assertNotIn("composite_window_years", baseline)
         for f in ("ffr", "cpi_yoy", "dxy", "wti_px"):
             self.assertIn(f, baseline["fields"])
+
+
+class TestMissingBaselineFields(unittest.TestCase):
+    # Regression coverage for the annual-cron completeness gate: an unattended
+    # run must refuse to write a BASELINE_STATS block that's missing fields a
+    # flaky FRED/Yahoo call dropped, rather than silently shipping a smaller
+    # baseline than last time (same failure class fetch_bullion_data.py's
+    # truncated-write guard exists to prevent for data.json).
+    def _full_synthetic_history(self):
+        from datetime import datetime, timedelta, timezone
+        base = datetime.now(timezone.utc)
+        dates = [(base - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(27, -1, -1)]
+        history = {}
+        for i, f in enumerate(["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y",
+                                "vix", "spx", "fed_bs", "rrp", "ffr", "cpi_yoy", "dxy", "wti_px",
+                                "nfp_mom"]):
+            history[f] = {d: 1.0 + i * 0.1 + 0.01 * n for n, d in enumerate(dates)}
+        return history
+
+    def test_complete_baseline_has_no_missing_fields(self):
+        baseline = build_baseline(self._full_synthetic_history())
+        self.assertEqual(missing_baseline_fields(baseline), [])
+
+    def test_baseline_missing_a_field_is_flagged_not_silently_dropped(self):
+        history = self._full_synthetic_history()
+        del history["hy_oas"]  # simulate a single flaky fetch
+        baseline = build_baseline(history)
+        missing = missing_baseline_fields(baseline)
+        self.assertIn("hy_oas", missing)
+        # Everything else still fetched fine and must not be flagged.
+        self.assertNotIn("vix", missing)
+        self.assertNotIn("curve_slope", missing)
+
+    def test_total_outage_flags_every_expected_field(self):
+        baseline = {"fields": {}}
+        self.assertEqual(sorted(missing_baseline_fields(baseline)), sorted(EXPECTED_BASELINE_FIELDS))
 
 
 class TestSplice(unittest.TestCase):

@@ -1,0 +1,174 @@
+name: Annual Baseline Refresh
+
+# Refreshes the Mk Ultra macro engine's BASELINE_STATS (the 15yr/2yr mean/std
+# every live reading is z-scored against) once a year. Previously this was a
+# slow, occasional, MANUAL-ONLY script (see backfill_baseline.py) with no
+# automation at all -- the daily-data workflow only ever refreshes data.json's
+# live readings, never this statistical baseline. That meant BASELINE_STATS
+# could silently age indefinitely unless someone remembered to rerun it by
+# hand. A 15yr/2yr rolling baseline drifts slowly, so yearly is enough; this
+# is deliberately a much slower cadence than daily-data.yml, not a duplicate
+# of it. workflow_dispatch lets you run it by hand to test or force an
+# off-cycle refresh.
+on:
+  schedule:
+    - cron: "17 11 1 1 *" # 11:17 UTC on Jan 1 every year
+  workflow_dispatch:
+
+# Lets the built-in GITHUB_TOKEN push the bullion_mkultra.html commit back to
+# main and manage the baseline-alarm issue below. Same no-new-secret reasoning
+# as daily-data.yml.
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  refresh-baseline:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Provision FRED API key from secret
+        # Same secret + same either-spelling fallback as daily-data.yml (see
+        # that workflow's comment for why: an unset secret expands to ""
+        # rather than erroring, and the exact 2026-07-20..2026-08-04 outage
+        # that taught this project that lesson is not one to relearn here).
+        env:
+          FRED_API_KEY: ${{ secrets.FRED_API_KEY || secrets.FRED }}
+        run: |
+          if [ -z "$FRED_API_KEY" ]; then
+            echo "Neither the FRED_API_KEY nor the FRED secret is set. Add one under" >&2
+            echo "Settings -> Secrets and variables -> Actions -> New repository secret." >&2
+            exit 1
+          fi
+          mkdir -p "$HOME/.config/bullion"
+          printf '%s\n' "$FRED_API_KEY" > "$HOME/.config/bullion/fred_api_key"
+
+      - name: Refresh BASELINE_STATS
+        # backfill_baseline.py refuses to write (exit 1) if any expected
+        # field's fetch came back incomplete, leaving bullion_mkultra.html's
+        # existing BASELINE_STATS block untouched -- see
+        # missing_baseline_fields() and its docstring.
+        run: python3 bullion-live-map/backfill_baseline.py
+
+      - name: Run the full test suite against the refreshed baseline
+        # A bad splice or a baseline that breaks the composite engine must
+        # never reach main silently -- this is the same class of unattended
+        # write the daily workflow doesn't need to guard this way, since
+        # data.json has no equivalent "does the app still work" test.
+        run: |
+          cd bullion-live-map
+          python3 -m unittest discover -s tests -v
+
+      - name: Commit and push if the baseline changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add bullion-live-map/bullion_mkultra.html
+          if git diff --cached --quiet; then
+            echo "No baseline changes; nothing to commit."
+          else
+            git commit -m "Annual refresh: BASELINE_STATS for $(date -u +%F)"
+            # Rebase before push in case the daily-data workflow (or anything
+            # else) landed a commit on main since this job's checkout.
+            git pull --rebase origin main
+            git push
+          fi
+
+      - name: Ensure the baseline-alarm label exists
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'baseline-alarm',
+                color: 'd93f0b',
+                description: 'Annual BASELINE_STATS refresh workflow is failing',
+              });
+            } catch (err) {
+              if (err.status !== 422) throw err; // 422 = label already exists
+            }
+
+      - name: Report failure to the alarm issue
+        # Deliberately its own 'baseline-alarm' label, not daily-data.yml's
+        # 'pipeline-alarm' -- a failed annual refresh is much lower urgency
+        # (the macro engine keeps working on last year's baseline, and its
+        # age is now surfaced in the audit log) and should not be conflated
+        # with a failed live-data fetch, which is user-visible every day.
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const { data: jobsResponse } = await github.rest.actions.listJobsForWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            const failedStep = jobsResponse.jobs
+              .flatMap(j => j.steps || [])
+              .find(s => s.conclusion === 'failure');
+            const stepName = failedStep ? failedStep.name : 'unknown step';
+            const today = new Date().toISOString().slice(0, 10);
+            const body = `**${today}** — failing step: **${stepName}**\nRun: ${runUrl}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'baseline-alarm',
+            });
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'Annual BASELINE_STATS refresh is failing',
+                body,
+                labels: ['baseline-alarm'],
+                assignees: [context.repo.owner],
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body,
+              });
+            }
+
+      - name: Close the alarm issue on success
+        if: success()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'baseline-alarm',
+            });
+            const today = new Date().toISOString().slice(0, 10);
+            for (const issue of issues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Recovered — the **${today}** run succeeded.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }

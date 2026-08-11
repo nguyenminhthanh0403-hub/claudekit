@@ -11,9 +11,13 @@ an earlier version of this file fit a PCA-derived composite weighting, which
 was removed as part of the composite-score fix. The result is spliced as a
 BASELINE_STATS JS constant into bullion_mkultra.html.
 
-Rerunnable: rerun periodically (e.g. yearly) to keep the baseline current.
-Not part of the daily-data cron — this is a slow, occasional, manual/dev-time
-script, same category as calibrate.py.
+Runs automatically once a year via .github/workflows/annual-baseline-refresh.yml
+(a 15yr/2yr mean/std baseline drifts slowly, so yearly is enough -- this is
+still a separate, much slower cadence than the daily-data cron, which only
+refreshes data.json's live readings). Also freely rerunnable by hand at any
+time -- same manual-invocation shape as calibrate.py, just no longer manual-
+only. Refuses to write a truncated BASELINE_STATS if any field's fetch
+failed (see missing_baseline_fields()), leaving the existing block alone.
 
 See docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md
 """
@@ -47,6 +51,11 @@ TRENDING_FIELDS = ["spx", "fed_bs", "rrp"]
 FORWARD_FILL_FIELDS = ["fed_bs"]
 
 COMPOSITE_FIELDS = ["hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"]
+
+# Every field build_baseline() is supposed to produce stats for. Used to gate
+# the write in __main__ below: a partial fetch (one flaky FRED/Yahoo call)
+# must not silently ship a BASELINE_STATS with fewer fields than last time.
+EXPECTED_BASELINE_FIELDS = MEAN_REVERTING_FIELDS + ["curve_slope"] + TRENDING_FIELDS
 
 # +1: higher raw value means MORE stress. -1: higher raw value means LESS
 # stress. Fixed conceptual judgment calls, not statistically discovered —
@@ -208,6 +217,18 @@ def build_baseline(history):
     }
 
 
+def missing_baseline_fields(baseline):
+    """Which EXPECTED_BASELINE_FIELDS entries build_baseline() failed to produce.
+
+    Empty list means the baseline is complete. Pulled out as its own pure
+    function (rather than inlined in __main__) so the completeness gate is
+    unit-testable without mocking any HTTP calls -- same reasoning as
+    fetch_bullion_data.py separating its fetch loop from its own truncated-
+    write guard.
+    """
+    return [f for f in EXPECTED_BASELINE_FIELDS if f not in baseline["fields"]]
+
+
 def render_js_block(baseline):
     return "const BASELINE_STATS = " + json.dumps(baseline, indent=2) + ";"
 
@@ -237,6 +258,19 @@ if __name__ == "__main__":
     start_date = (datetime.now(timezone.utc) - timedelta(days=365 * FULL_WINDOW_YEARS)).strftime("%Y-%m-%d")
     history = fetch_all_history(key, start_date, end_date)
     baseline = build_baseline(history)
+
+    # A partial fetch must never publish a truncated BASELINE_STATS: once this
+    # runs unattended (the annual GitHub Actions workflow), a flaky minute at
+    # FRED/Yahoo would otherwise silently drop a field's stats and z-score
+    # every reading against a missing baseline. The existing BASELINE_STATS
+    # block, left untouched, is strictly better than a truncated one.
+    missing = missing_baseline_fields(baseline)
+    if missing:
+        print(f"Failed to compute baseline stats for: {', '.join(missing)}", file=sys.stderr)
+        print("Refusing to write a truncated BASELINE_STATS; leaving the existing "
+              "block in bullion_mkultra.html untouched.", file=sys.stderr)
+        sys.exit(1)
+
     js_block = render_js_block(baseline)
     html_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bullion_mkultra.html")
     with open(html_path) as f:
