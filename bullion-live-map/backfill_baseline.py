@@ -2,20 +2,23 @@
 """Backfill a long-run statistical baseline for the Mk Ultra macro engine.
 
 Pulls 15 years of history per FRED/Yahoo series (reusing fetch_bullion_data's
-fetchers), computes per-field mean/std for z-scoring, fits a PCA-derived
-composite weighting (see build_pca in the next task), and splices the result
-as a BASELINE_STATS JS constant into bullion_mkultra.html.
+fetchers), computes per-field mean/std for z-scoring, and emits the
+EXPECTED_STRESS_SIGN/COMPOSITE_CATEGORY maps the composite score's
+hierarchical sign-aligned-z-score calculation reads (that calculation itself
+runs client-side in JS, in computeCompositeScore -- this file only supplies
+its per-field stats and sign/category tables). No PCA fitting happens here;
+an earlier version of this file fit a PCA-derived composite weighting, which
+was removed as part of the composite-score fix. The result is spliced as a
+BASELINE_STATS JS constant into bullion_mkultra.html.
 
 Rerunnable: rerun periodically (e.g. yearly) to keep the baseline current.
 Not part of the daily-data cron — this is a slow, occasional, manual/dev-time
 script, same category as calibrate.py.
 
-See docs/superpowers/specs/2026-08-09-bullion-mkultra-macro-engine-design.md
+See docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md
 """
 import json
-import math
 import os
-import random
 import statistics
 import sys
 import urllib.error
@@ -38,7 +41,9 @@ RECENT_WINDOW_YEARS = 2
 MEAN_REVERTING_FIELDS = ["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y", "vix",
                           "ffr", "cpi_yoy", "dxy", "wti_px", "nfp_mom"]
 TRENDING_FIELDS = ["spx", "fed_bs", "rrp"]
-# Fields whose native cadence has gaps a same-day PCA row matrix can't tolerate.
+# Fields whose native cadence is too sparse for field_stats() to get a
+# reasonably dense sample from directly (see the forward-fill comment in
+# build_baseline() for why fed_bs specifically needs this).
 FORWARD_FILL_FIELDS = ["fed_bs"]
 
 COMPOSITE_FIELDS = ["hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"]
@@ -167,11 +172,13 @@ def build_baseline(history):
     # fields, not from FORWARD_FILL_FIELDS' own dates: a field's own date
     # set trivially already contains itself, so building the grid from
     # FORWARD_FILL_FIELDS alone makes forward_fill() a no-op and leaves
-    # fed_bs on its native weekly cadence. That silently shrinks the
-    # z-scored row intersection in build_zscore_rows down to only the
-    # weekly dates every other field happens to also have a value on
-    # (observed: ~154 rows instead of ~750+ over the fields' overlap
-    # window) -- verified 2026-08-09 against live-fetched history.
+    # fed_bs on its native weekly cadence. That matters because fed_bs is a
+    # TRENDING field (see TRENDING_FIELDS below): its own field_stats() call
+    # is computed over only the last RECENT_WINDOW_YEARS, and without this
+    # forward-fill it would draw that sample from ~104 native-weekly rows
+    # instead of ~729 daily-equivalent ones -- a much noisier mean/std for
+    # its own z-scoring, not a PCA/row-matrix concern (there is no PCA
+    # fitting or shared row matrix in this file anymore).
     all_dates_sorted = sorted({d for f, h in history.items() if f not in FORWARD_FILL_FIELDS for d in h})
     for f in FORWARD_FILL_FIELDS:
         if f in history:

@@ -3208,6 +3208,10 @@ document.getElementById('live-toggle-btn').addEventListener('click', function() 
   state = buildBaseState();
   state.shock = prevShock;
   updateMetrics();
+  // Toggling what "live data" means invalidates any previously-computed
+  // composite score/narrative -- clear it rather than leave a stale read
+  // on screen with no indication it no longer reflects the current source.
+  clearAI();
 });
 document.getElementById('reset-view-btn').addEventListener('click', () => {
   // Full graph reset, regardless of what's currently selected or expanded:
@@ -3994,10 +3998,17 @@ function computeCompositeScore(live) {
     : 0;
   const score = Math.round(Math.max(0, Math.min(100, 50 - (avgZ / 3) * 50)));
   const tier = fieldsUsed.length >= COMPOSITE_MIN_FIELDS_FOR_MEASURED ? 'measured' : 'directional';
-  let leadingCategory = null, leadingAbs = -1;
+  // Pick the category with the largest POSITIVE (stress-contributing)
+  // value, never the largest magnitude -- a strongly calming category
+  // (large negative) must not be named as what's "driving" stress just
+  // because it happens to be the biggest mover. If every present category
+  // is calming (nothing is actually adding stress), leadingCategory stays
+  // null and the narrative falls back to "a mix of factors".
+  let leadingCategory = null, leadingValue = -Infinity;
   Object.entries(categoryContributions).forEach(([cat, v]) => {
-    if (Math.abs(v) > leadingAbs) { leadingAbs = Math.abs(v); leadingCategory = cat; }
+    if (v > leadingValue) { leadingValue = v; leadingCategory = cat; }
   });
+  if (leadingValue <= 0) leadingCategory = null;
   return { score, tier, leadingCategory, categoryContributions, fieldsUsed, fieldsMissing };
 }
 
@@ -5237,7 +5248,7 @@ function runMacroAnalysis() {
   lastNodeMultiplierResult = nodes;
   hasRunMacroAnalysis = true;
 
-  const live = Object.assign({}, window.BULLION_LIVE_DATA || {}, {
+  const live = Object.assign({}, currentLiveSource() || {}, {
     // The 5 NODE_ELASTICITY drivers can be scenario-shocked; always feed the
     // engine the CURRENT (possibly shocked) value so a running shock still
     // shows up in the score, matching this button's pre-descope behavior.
@@ -5848,6 +5859,10 @@ function setupHistoryDatePicker() {
     state = buildBaseState();
     state.shock = prevShock;
     updateMetrics();
+    // Switching dates invalidates any previously-computed composite
+    // score/narrative -- clear it rather than leave a stale read on screen
+    // with no indication it no longer reflects the newly-picked date.
+    clearAI();
   }
 
   input.addEventListener('change', () => applyDate(input.value));

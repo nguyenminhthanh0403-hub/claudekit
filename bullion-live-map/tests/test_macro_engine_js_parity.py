@@ -211,6 +211,32 @@ process.stdout.write(JSON.stringify(computeCompositeScore(live)));
             "'Healthy' (>70) -- this is the inverse of the original bug's "
             "failure mode (a calm day scoring 18/'Elevated stress').")
 
+    def test_leading_category_is_largest_positive_not_largest_magnitude(self):
+        # Regression test for the final-review finding: leadingCategory used
+        # to be picked by Math.abs(v), which could name a strongly CALMING
+        # category (large negative contribution) as what's "driving" stress.
+        # Here spx (Equity valuation, sign -1) is pushed 3 std toward calm --
+        # a huge negative contribution (-3) that dwarfs everything else in
+        # magnitude -- while hy_oas (Credit, sign +1) gets only a mild 0.3
+        # std stress nudge (+0.3). Every other field sits at its own mean
+        # (contributes 0). Credit is the only category with a POSITIVE
+        # contribution, so it must be picked -- never Equity valuation,
+        # despite its larger magnitude.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const live = {};
+Object.keys(BASELINE_STATS.stress_sign).forEach(f => {
+  live[f] = BASELINE_STATS.fields[f].mean;
+});
+live.spx = BASELINE_STATS.fields.spx.mean + 3 * BASELINE_STATS.fields.spx.std;
+live.hy_oas = BASELINE_STATS.fields.hy_oas.mean + 0.3 * BASELINE_STATS.fields.hy_oas.std;
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertEqual(result["leadingCategory"], "Credit",
+            "leadingCategory must be the category with the largest POSITIVE "
+            "contribution (Credit, +0.3ish), not the largest-magnitude one "
+            "(Equity valuation, -3 -- strongly calming, not stressing).")
+
 
 @unittest.skipUnless(shutil.which("node"), "node not on PATH")
 class TestComputeNodeMultipliersParity(unittest.TestCase):
