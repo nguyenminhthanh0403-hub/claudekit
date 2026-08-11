@@ -7,8 +7,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
 from backfill_baseline import (
     field_stats, forward_fill, fetch_all_history,
-    add_curve_slope, build_zscore_rows, pca_first_component,
-    orient_loadings, percentile_table,
+    add_curve_slope, EXPECTED_STRESS_SIGN, COMPOSITE_CATEGORY, COMPOSITE_FIELDS,
 )
 
 
@@ -34,51 +33,43 @@ class TestCurveSlope(unittest.TestCase):
         self.assertAlmostEqual(out["curve_slope"]["2020-01-02"], 2.5)
 
 
-class TestZscoreRows(unittest.TestCase):
-    def test_only_dates_with_all_fields_present_are_kept(self):
-        history = {"a": {"d1": 1.0, "d2": 2.0}, "b": {"d1": 10.0}}
-        stats = {"a": {"mean": 1.5, "std": 0.5}, "b": {"mean": 10.0, "std": 1.0}}
-        dates, rows = build_zscore_rows(history, stats, ["a", "b"])
-        self.assertEqual(dates, ["d1"])
-        self.assertEqual(len(rows), 1)
-        self.assertAlmostEqual(rows[0][0], (1.0 - 1.5) / 0.5)
-        self.assertAlmostEqual(rows[0][1], (10.0 - 10.0) / 1.0)
+class TestCompositeSignAndCategoryMaps(unittest.TestCase):
+    def test_composite_fields_is_the_trimmed_seven(self):
+        self.assertEqual(
+            set(COMPOSITE_FIELDS),
+            {"hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"},
+        )
 
+    def test_stress_sign_covers_exactly_the_composite_fields(self):
+        self.assertEqual(set(EXPECTED_STRESS_SIGN.keys()), set(COMPOSITE_FIELDS))
+        for f, sign in EXPECTED_STRESS_SIGN.items():
+            self.assertIn(sign, (1, -1), f"{f} sign must be +1 or -1, got {sign}")
 
-class TestPCA(unittest.TestCase):
-    def test_recovers_dominant_direction_of_perfectly_correlated_fields(self):
-        # Two fields that move in lockstep should load ~equally onto PC1.
-        rows = [[x, x] for x in [-2.0, -1.0, 0.0, 1.0, 2.0]]
-        loadings = pca_first_component(rows, n_iter=200, seed=1)
-        self.assertAlmostEqual(abs(loadings[0]), abs(loadings[1]), places=3)
-        self.assertAlmostEqual(loadings[0] * loadings[1], abs(loadings[0]) * abs(loadings[1]), places=3)
+    def test_stress_sign_values_match_design_spec(self):
+        self.assertEqual(EXPECTED_STRESS_SIGN["hy_oas"], 1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["ig_oas"], 1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["vix"], 1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["spx"], -1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["fed_bs"], -1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["rrp"], -1)
+        self.assertEqual(EXPECTED_STRESS_SIGN["curve_slope"], -1)
 
-    def test_orient_loadings_flips_sign_so_anchor_is_positive(self):
-        loadings = [-0.7, 0.7]
-        oriented = orient_loadings(loadings, ["vix", "other"], anchor_field="vix")
-        self.assertGreater(oriented[0], 0)
-        self.assertLess(oriented[1], 0)
+    def test_category_covers_exactly_the_composite_fields(self):
+        self.assertEqual(set(COMPOSITE_CATEGORY.keys()), set(COMPOSITE_FIELDS))
 
-    def test_orient_loadings_noop_when_anchor_already_positive(self):
-        loadings = [0.7, -0.7]
-        oriented = orient_loadings(loadings, ["vix", "other"], anchor_field="vix")
-        self.assertEqual(oriented, loadings)
-
-
-class TestPercentileTable(unittest.TestCase):
-    def test_table_is_monotonic_nondecreasing_and_spans_min_max(self):
-        values = list(range(1000))
-        table = percentile_table([float(v) for v in values], n_points=101)
-        self.assertEqual(len(table), 101)
-        self.assertEqual(table[0], 0.0)
-        self.assertEqual(table[-1], 999.0)
-        for i in range(1, len(table)):
-            self.assertGreaterEqual(table[i], table[i - 1])
+    def test_category_values_match_design_spec(self):
+        self.assertEqual(COMPOSITE_CATEGORY["hy_oas"], "Credit")
+        self.assertEqual(COMPOSITE_CATEGORY["ig_oas"], "Credit")
+        self.assertEqual(COMPOSITE_CATEGORY["vix"], "Volatility")
+        self.assertEqual(COMPOSITE_CATEGORY["spx"], "Equity valuation")
+        self.assertEqual(COMPOSITE_CATEGORY["fed_bs"], "Funding")
+        self.assertEqual(COMPOSITE_CATEGORY["rrp"], "Funding")
+        self.assertEqual(COMPOSITE_CATEGORY["curve_slope"], "Safe assets")
 
 
 import json
 
-from backfill_baseline import build_baseline, render_js_block, splice_into_html, RECENT_WINDOW_YEARS
+from backfill_baseline import build_baseline, render_js_block, splice_into_html
 
 
 class TestBuildBaseline(unittest.TestCase):
@@ -101,14 +92,17 @@ class TestBuildBaseline(unittest.TestCase):
         baseline = build_baseline(self._synthetic_history())
         self.assertIn("fields", baseline)
         self.assertIn("curve_slope", baseline["fields"])
-        self.assertIn("pc1_loadings", baseline)
-        self.assertEqual(set(baseline["pc1_loadings"].keys()),
-                          {"hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y",
-                           "curve_slope", "vix", "spx", "fed_bs", "rrp"})
-        self.assertEqual(len(baseline["composite_percentiles"]), 101)
+        self.assertIn("stress_sign", baseline)
+        self.assertEqual(set(baseline["stress_sign"].keys()),
+                          {"hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"})
+        self.assertIn("category", baseline)
+        self.assertEqual(set(baseline["category"].keys()),
+                          {"hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"})
+        self.assertNotIn("pc1_loadings", baseline)
+        self.assertNotIn("composite_percentiles", baseline)
+        self.assertNotIn("composite_window_years", baseline)
         for f in ("ffr", "cpi_yoy", "dxy", "wti_px"):
             self.assertIn(f, baseline["fields"])
-        self.assertEqual(baseline["composite_window_years"], RECENT_WINDOW_YEARS)
 
 
 class TestSplice(unittest.TestCase):
@@ -132,7 +126,7 @@ class TestSplice(unittest.TestCase):
 
     def test_render_js_block_is_valid_json_payload(self):
         baseline = {"generated_at": "2026-08-09", "fields": {"vix": {"mean": 18.0, "std": 5.0, "n": 100, "window_years": 15}},
-                    "pc1_loadings": {"vix": 1.0}, "composite_percentiles": [0.0, 1.0]}
+                    "stress_sign": {"vix": 1}, "category": {"vix": "Volatility"}}
         block = render_js_block(baseline)
         self.assertTrue(block.strip().startswith("const BASELINE_STATS ="))
         inner = block.strip()[len("const BASELINE_STATS ="):].rstrip(";").strip()
