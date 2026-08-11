@@ -321,7 +321,7 @@ class TestBuildEnvelope(unittest.TestCase):
                     "nfp_mom", "gold_px", "dxy", "spx",
                     "nfci", "m2", "mortgage_30y", "hy_oas", "ig_oas",
                     "sofr", "tbill_3m", "fed_bs", "rrp",
-                    "xlk", "xlf", "xle", "xlp"}
+                    "xlk", "xlf", "xle", "xlp", "cb_gold_reserves"}
         self.assertEqual(set(FIELD_META), expected)
         for name, meta in FIELD_META.items():
             self.assertIn(meta["cadence"], {"daily", "weekly", "monthly", "fomc"})
@@ -342,6 +342,7 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self.mod = fetch_bullion_data_module
         self._orig_fetch_fred_series = self.mod.fetch_fred_series
         self._orig_fetch_yahoo_symbol = self.mod.fetch_yahoo_symbol
+        self._orig_fetch_imf_basket = self.mod.fetch_imf_gold_reserves_basket
         self._orig_load_key = self.mod.load_key
         self._orig_data_out_path = self.mod.DATA_OUT_PATH
 
@@ -357,6 +358,7 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
     def tearDown(self):
         self.mod.fetch_fred_series = self._orig_fetch_fred_series
         self.mod.fetch_yahoo_symbol = self._orig_fetch_yahoo_symbol
+        self.mod.fetch_imf_gold_reserves_basket = self._orig_fetch_imf_basket
         self.mod.load_key = self._orig_load_key
         self.mod.DATA_OUT_PATH = self._orig_data_out_path
         if os.path.exists(self.tmp_path):
@@ -384,6 +386,8 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self.mod.fetch_yahoo_symbol = (
             lambda symbol, decimals, range_="1y":
                 (1.0, "2026-07-17", "2026-07-17", {}))
+        self.mod.fetch_imf_gold_reserves_basket = (
+            lambda start, end: (1.0, "2026-07-17", "2026-07-17", {}))
 
         with self.assertRaises(SystemExit):
             self.mod.main()
@@ -405,11 +409,138 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
 
         self.mod.fetch_fred_series = fake_fred
         self.mod.fetch_yahoo_symbol = fake_yahoo
+        self.mod.fetch_imf_gold_reserves_basket = (
+            lambda start, end: (25000.0, "2026-07-17", "2026-07-17", {"2026-07-17": 25000.0}))
 
         with self.assertRaises(SystemExit):
             self.mod.main()
 
         self.assertEqual(self._target_file_contents(), self.known_content)
+
+
+from fetch_bullion_data import parse_imf_sdmx, imf_period_to_month_end
+
+
+class TestImfPeriodToMonthEnd(unittest.TestCase):
+    def test_converts_month_period_to_last_day_of_month(self):
+        self.assertEqual(imf_period_to_month_end("2026-M07"), "2026-07-31")
+
+    def test_handles_february_in_a_leap_year(self):
+        self.assertEqual(imf_period_to_month_end("2024-M02"), "2024-02-29")
+
+    def test_unrecognised_shape_returns_none(self):
+        self.assertIsNone(imf_period_to_month_end("2026"))
+        self.assertIsNone(imf_period_to_month_end("2026-Q3"))
+        self.assertIsNone(imf_period_to_month_end(""))
+
+
+class TestParseImfSdmx(unittest.TestCase):
+    PAYLOAD = {
+        "data": {
+            "dataSets": [{
+                "series": {
+                    "0:0:0:0": {
+                        "observations": {
+                            "0": ["261499000", None, 0, None],
+                            "1": ["261499000.5", None, 0, None],
+                        }
+                    }
+                }
+            }],
+            "structures": [{
+                "dimensions": {
+                    "observation": [{
+                        "id": "TIME_PERIOD",
+                        "values": [{"value": "2026-M06"}, {"value": "2026-M07"}],
+                    }]
+                }
+            }],
+        }
+    }
+
+    def test_returns_troy_oz_keyed_by_month_end_date(self):
+        history = parse_imf_sdmx(self.PAYLOAD)
+        self.assertEqual(history, {
+            "2026-06-30": 261499000.0,
+            "2026-07-31": 261499000.5,
+        })
+
+    def test_missing_series_key_returns_empty(self):
+        payload = {"data": {"dataSets": [{}], "structures": [{"dimensions": {"observation": [{"values": []}]}}]}}
+        self.assertEqual(parse_imf_sdmx(payload), {})
+
+    def test_null_observation_value_is_skipped(self):
+        payload = {
+            "data": {
+                "dataSets": [{"series": {"0:0:0:0": {"observations": {
+                    "0": [None, None, 0, None],
+                    "1": ["100.0", None, 0, None],
+                }}}}],
+                "structures": [{"dimensions": {"observation": [{
+                    "values": [{"value": "2026-M06"}, {"value": "2026-M07"}],
+                }]}}],
+            }
+        }
+        self.assertEqual(parse_imf_sdmx(payload), {"2026-07-31": 100.0})
+
+    def test_completely_malformed_payload_returns_empty(self):
+        self.assertEqual(parse_imf_sdmx({}), {})
+        self.assertEqual(parse_imf_sdmx({"data": {}}), {})
+
+
+import fetch_bullion_data as fbd_module
+from fetch_bullion_data import fetch_imf_gold_reserves_basket, IMF_GOLD_COUNTRIES
+
+
+class TestFetchImfGoldReservesBasket(unittest.TestCase):
+    def setUp(self):
+        self._orig = fbd_module.fetch_imf_country_series
+
+    def tearDown(self):
+        fbd_module.fetch_imf_country_series = self._orig
+
+    def test_sums_all_countries_for_their_common_latest_date(self):
+        def fake(country, start, end):
+            # every country reports through 2026-07-31; two also have a
+            # stale August partial that must NOT be included since not
+            # every country has it yet
+            hist = {"2026-06-30": 100.0, "2026-07-31": 200.0}
+            if country in ("USA", "DEU"):
+                hist["2026-08-15"] = 999.0
+            return hist
+        fbd_module.fetch_imf_country_series = fake
+
+        value, ref, pub, history = fetch_imf_gold_reserves_basket("2026-01-01", "2026-08-20")
+
+        n = len(IMF_GOLD_COUNTRIES)
+        self.assertEqual(ref, "2026-07-31")
+        self.assertEqual(pub, ref, "IMF exposes no separate publication date")
+        self.assertAlmostEqual(value, round(200.0 * n / fbd_module.TROY_OZ_PER_TONNE, 1))
+        self.assertNotIn("2026-08-15", history)
+        self.assertAlmostEqual(history["2026-06-30"], round(100.0 * n / fbd_module.TROY_OZ_PER_TONNE, 1))
+
+    def test_any_single_country_failure_fails_the_whole_basket(self):
+        def fake(country, start, end):
+            if country == "RUS":
+                return {}
+            return {"2026-06-30": 100.0}
+        fbd_module.fetch_imf_country_series = fake
+
+        value, ref, pub, history = fetch_imf_gold_reserves_basket("2026-01-01", "2026-08-20")
+        self.assertIsNone(value)
+        self.assertIsNone(ref)
+        self.assertIsNone(pub)
+        self.assertEqual(history, {})
+
+    def test_no_common_date_across_countries_fails_closed(self):
+        def fake(country, start, end):
+            # every country has data, but no two dates overlap
+            return {f"2026-0{IMF_GOLD_COUNTRIES.index(country) % 9 + 1}-28": 100.0}
+        fbd_module.fetch_imf_country_series = fake
+
+        value, ref, pub, history = fetch_imf_gold_reserves_basket("2026-01-01", "2026-08-20")
+        self.assertIsNone(value)
+        self.assertEqual(history, {})
 
 
 if __name__ == "__main__":

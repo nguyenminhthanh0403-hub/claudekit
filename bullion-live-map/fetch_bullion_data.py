@@ -13,6 +13,7 @@ Get a free FRED key at https://fred.stlouisfed.org/docs/api/api_key.html
 then save it with:
   mkdir -p ~/.config/bullion && echo YOUR_KEY_HERE > ~/.config/bullion/fred_api_key
 """
+import calendar
 import json
 import os
 import sys
@@ -59,6 +60,21 @@ YAHOO_SYMBOLS = {
     "XLP":       ("xlp", 2),
 }
 
+# IMF SDMX 3.0 IRFCL dataflow has no world-aggregate entity for gold
+# reserves (COUNTRY=G001 returns zero series for this indicator, confirmed
+# against the live API 2026-08-11) -- this basket of the largest verified
+# public holders is the closest available approximation to a global total.
+# IRFCLDT1_IRFCL56V_FTO is "Official reserve assets, gold volume" in troy
+# ounces; S1XS1311 ("Monetary Authorities and Central Government excl.
+# Social Security") is the sector code with data for every country below --
+# the narrower S1X ("Monetary authorities" alone) misses the USA, whose
+# gold is held by the Treasury rather than the Fed.
+IMF_GOLD_BASE_URL = "https://api.imf.org/external/sdmx/3.0/data/dataflow/IMF.STA/IRFCL/12.0.0"
+IMF_GOLD_INDICATOR = "IRFCLDT1_IRFCL56V_FTO"
+IMF_GOLD_SECTOR = "S1XS1311"
+IMF_GOLD_COUNTRIES = ["USA", "DEU", "ITA", "FRA", "CHN", "RUS", "CHE", "IND", "JPN", "TUR", "NLD"]
+TROY_OZ_PER_TONNE = 32150.7466
+
 # Cadence tolerances, in days, applied to a field's PUBLICATION date — never
 # its reference date. June CPI references 2026-06-01 but publishes 2026-07-14;
 # judged on reference date it looks broken, judged on publication it is on
@@ -75,8 +91,16 @@ CADENCE_TOLERANCE_DAYS = {
 # wti_px publishes on a structurally longer lag than the other dailies — it sat
 # at 5 days while perfectly healthy, so the 7-day default would have produced a
 # false alarm immediately.
+#
+# cb_gold_reserves sums 11 countries with independent national reporting
+# lags. Observed 2026-08-11: the slowest of the 11 sat at 43 days (still
+# on end-of-June data, fetched mid-August) while every country was
+# reporting normally -- the 45-day monthly default would false-alarm on a
+# single day's routine slip. 60 gives roughly the same cushion ratio
+# wti_px's override gives over ITS observed lag.
 FIELD_TOLERANCE_OVERRIDE = {
     "wti_px": 10,
+    "cb_gold_reserves": 60,
 }
 
 SCHEMA_VERSION = 2
@@ -109,6 +133,8 @@ FIELD_META = {
     "xlf":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLF"},
     "xle":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLE"},
     "xlp":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLP"},
+    "cb_gold_reserves": {"class": "measured", "cadence": "monthly",
+                          "source": "IMF IRFCL (top-11 public holders, summed)"},
 }
 
 
@@ -168,7 +194,13 @@ SOURCE_NOTE = (
     "gold_px/dxy/spx and the Mk17 sector ETFs XLK/XLF/XLE/XLP: Yahoo Finance "
     "chart API — unofficial and undocumented, unlike FRED; could change or "
     "rate-limit without notice. FOMC hike/cut odds have no free source and "
-    "remain simulated."
+    "remain simulated. "
+    "cb_gold_reserves: IMF IRFCL (International Reserves and Foreign "
+    "Currency Liquidity), summed across the 11 largest public holders "
+    "(USA, Germany, Italy, France, China, Russia, Switzerland, India, "
+    "Japan, Turkiye, Netherlands) -- IMF publishes no single world-"
+    "aggregate entity for this indicator, so this is the largest holders, "
+    "not a true global total."
 )
 
 
@@ -383,6 +415,131 @@ def fetch_yahoo_symbol(symbol, decimals, range_="1y"):
     return (value, ref, pub, hist)
 
 
+def imf_period_to_month_end(period):
+    """Convert an SDMX 'YYYY-Mmm' monthly period to its ISO month-end date.
+
+    Returns None for anything not in this exact shape -- FREQUENCY is
+    pinned to M in the query this feeds, but a future API/DSD change
+    should fail the parse rather than silently mis-date a value.
+    """
+    if len(period) != 8 or period[4] != "-" or period[5] != "M":
+        return None
+    try:
+        year = int(period[:4])
+        month = int(period[6:8])
+    except ValueError:
+        return None
+    if not 1 <= month <= 12:
+        return None
+    last_day = calendar.monthrange(year, month)[1]
+    return f"{year:04d}-{month:02d}-{last_day:02d}"
+
+
+def parse_imf_sdmx(data):
+    """Pure parse of one country's IMF SDMX 3.0 gold-reserves response.
+
+    Returns {date_iso: troy_oz} keyed by the LAST day of each reported
+    month (a stock figure is naturally "as of period end"), or {} for any
+    missing/unrecognised shape or null value -- mirrors
+    parse_fred_observations/parse_yahoo_chart's pure-parse-returns-empty-
+    on-failure convention. No exception is raised here.
+    """
+    try:
+        structures = data["data"]["structures"][0]
+        period_values = structures["dimensions"]["observation"][0]["values"]
+        series = data["data"]["dataSets"][0].get("series")
+    except (KeyError, IndexError, TypeError):
+        return {}
+    if not series:
+        return {}
+
+    history = {}
+    for s in series.values():
+        for idx, obs in s.get("observations", {}).items():
+            if not obs or obs[0] is None:
+                continue
+            try:
+                oz = float(obs[0])
+                period = period_values[int(idx)]["value"]
+            except (KeyError, IndexError, TypeError, ValueError):
+                continue
+            date_iso = imf_period_to_month_end(period)
+            if date_iso is not None:
+                history[date_iso] = oz
+    return history
+
+
+def fetch_imf_country_series(country, start, end):
+    """Network wrapper: one country's monthly gold-reserves history, in troy oz.
+
+    Returns {date_iso: troy_oz}, or {} on any HTTP error or unparseable
+    response -- same non-raising convention as fetch_fred_series/
+    fetch_yahoo_symbol, so one bad country fails the basket closed (see
+    fetch_imf_gold_reserves_basket) instead of crashing the whole run.
+
+    Uses the SDMX 3.0 `c[TIME_PERIOD]=ge:...` filter, not the `startPeriod`
+    query param the SDMX docs describe -- verified against the live API
+    2026-08-11 that this dataflow silently ignores `startPeriod` entirely
+    (always returns the full history back to 2000 regardless of its value)
+    while `c[TIME_PERIOD]` correctly bounds the response.
+    """
+    start_period = start[:7]  # "YYYY-MM-DD" -> "YYYY-MM"
+    url = (f"{IMF_GOLD_BASE_URL}/{country}.{IMF_GOLD_INDICATOR}.{IMF_GOLD_SECTOR}.M"
+           f"?c%5BTIME_PERIOD%5D=ge:{start_period}")
+    try:
+        data = http_get_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  IMF {country}: fetch failed ({e})", file=sys.stderr)
+        return {}
+    hist = parse_imf_sdmx(data)
+    if not hist:
+        print(f"  IMF {country}: unexpected response shape or no usable data", file=sys.stderr)
+    return hist
+
+
+def fetch_imf_gold_reserves_basket(start, end):
+    """Sum central-bank gold reserves (tonnes) across IMF_GOLD_COUNTRIES.
+
+    IMF's IRFCL dataflow has no world-aggregate entity for gold reserves
+    (confirmed against the live API 2026-08-11) -- this basket of the
+    largest public holders is the closest available approximation to a
+    global total. Any single country's fetch failing fails the whole
+    field closed (returns the all-None tuple) rather than silently
+    shipping an under-counted sum with no indication a holder is missing.
+
+    Returns (latest_tonnes, ref_date, published, history) in the same
+    shape fetch_fred_series/fetch_yahoo_symbol produce. ref_date and
+    published are identical -- IMF's SDMX response carries no separate
+    publication/vintage date, only a reference period, the same situation
+    parse_yahoo_chart documents for a daily close -- and are set to the
+    LATEST month every basket country has reported through: summing past
+    that point would mix a stale country's old figure into an otherwise-
+    current total.
+    """
+    per_country = {}
+    for country in IMF_GOLD_COUNTRIES:
+        hist = fetch_imf_country_series(country, start, end)
+        if not hist:
+            print(f"  IMF gold-reserves basket: {country} missing, "
+                  f"failing the whole field", file=sys.stderr)
+            return (None, None, None, {})
+        per_country[country] = hist
+
+    common_dates = set.intersection(*(set(h) for h in per_country.values()))
+    if not common_dates:
+        print("  IMF gold-reserves basket: no common reporting date across "
+              "all countries", file=sys.stderr)
+        return (None, None, None, {})
+
+    history = {}
+    for date_iso in common_dates:
+        total_oz = sum(per_country[c][date_iso] for c in IMF_GOLD_COUNTRIES)
+        history[date_iso] = round(total_oz / TROY_OZ_PER_TONNE, 1)
+
+    latest_ref = max(history)
+    return (history[latest_ref], latest_ref, latest_ref, history)
+
+
 def main():
     key = load_key()
     today = datetime.now(timezone.utc).date()
@@ -405,6 +562,12 @@ def main():
             latest_out[field] = {"value": value, "ref_date": ref, "published": pub}
         for date_str, val in hist.items():
             history_by_date.setdefault(date_str, {})[field] = val
+
+    imf_value, imf_ref, imf_pub, imf_hist = fetch_imf_gold_reserves_basket(start, end)
+    if imf_value is not None:
+        latest_out["cb_gold_reserves"] = {"value": imf_value, "ref_date": imf_ref, "published": imf_pub}
+    for date_str, val in imf_hist.items():
+        history_by_date.setdefault(date_str, {})["cb_gold_reserves"] = val
 
     if not history_by_date:
         print("No fields fetched successfully; leaving existing data.json untouched.", file=sys.stderr)
