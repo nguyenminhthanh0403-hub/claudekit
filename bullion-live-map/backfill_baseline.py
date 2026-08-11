@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from fetch_bullion_data import (
     FRED_SERIES, YAHOO_SYMBOLS, KEY_PATH, fetch_yahoo_symbol,
     http_get_json, fred_url, parse_fred_observations,
+    fetch_imf_gold_reserves_basket,
 )
 
 FULL_WINDOW_YEARS = 15
@@ -44,11 +45,17 @@ RECENT_WINDOW_YEARS = 2
 # the plan for why.
 MEAN_REVERTING_FIELDS = ["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y", "vix",
                           "ffr", "cpi_yoy", "dxy", "wti_px", "nfp_mom"]
-TRENDING_FIELDS = ["spx", "fed_bs", "rrp"]
+# cb_gold_reserves: a 2011-2025 pull of the basket total rose every single
+# year (20,470t -> 25,196t) -- central banks have been structural net
+# buyers for over a decade, the same reason spx/fed_bs are trending
+# rather than mean-reverting (verified 2026-08-11, see
+# docs/superpowers/plans/2026-08-12-bullion-mkultra-imf-gold-reserves.md).
+TRENDING_FIELDS = ["spx", "fed_bs", "rrp", "cb_gold_reserves"]
 # Fields whose native cadence is too sparse for field_stats() to get a
 # reasonably dense sample from directly (see the forward-fill comment in
-# build_baseline() for why fed_bs specifically needs this).
-FORWARD_FILL_FIELDS = ["fed_bs"]
+# build_baseline() for why fed_bs specifically needs this). cb_gold_reserves'
+# native monthly cadence is even sparser than fed_bs's weekly one.
+FORWARD_FILL_FIELDS = ["fed_bs", "cb_gold_reserves"]
 
 COMPOSITE_FIELDS = ["hy_oas", "ig_oas", "vix", "spx", "fed_bs", "rrp", "curve_slope"]
 
@@ -142,6 +149,8 @@ def fetch_all_history(key, start, end):
     for symbol, (field, decimals) in YAHOO_SYMBOLS.items():
         _, _, _, hist = fetch_yahoo_symbol(symbol, decimals, range_=f"{FULL_WINDOW_YEARS}y")
         out[field] = {d: v for d, v in hist.items() if start <= d <= end}
+    _, _, _, imf_hist = fetch_imf_gold_reserves_basket(start, end)
+    out["cb_gold_reserves"] = imf_hist
     return out
 
 

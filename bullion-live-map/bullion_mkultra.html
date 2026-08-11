@@ -3927,8 +3927,8 @@ const BASELINE_STATS = {
       "window_years": 15
     },
     "spx": {
-      "mean": 6414.1596606786425,
-      "std": 635.9329649429117,
+      "mean": 6414.144291417166,
+      "std": 635.9012102766312,
       "n": 501,
       "window_years": 2
     },
@@ -3939,9 +3939,15 @@ const BASELINE_STATS = {
       "window_years": 2
     },
     "rrp": {
-      "mean": 103.00965794768612,
-      "std": 114.30114741808256,
-      "n": 497,
+      "mean": 102.80522088353413,
+      "std": 114.27724940590109,
+      "n": 498,
+      "window_years": 2
+    },
+    "cb_gold_reserves": {
+      "mean": 25137.162277091906,
+      "std": 45.4269529653948,
+      "n": 729,
       "window_years": 2
     }
   },
@@ -5994,7 +6000,7 @@ document.getElementById('audit-log-btn').addEventListener('click', openAuditLog)
 // comments and asserts the same cases as the Python suite — renaming or
 // removing the markers breaks that test, which is intended.
 const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, fomc: null };
-const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10 };
+const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10, cb_gold_reserves: 60 };
 
 function freshnessVerdict(cadence, published, today, overrideDays) {
   if (published == null || cadence === 'fomc') return { state: 'unknown', ageDays: null };

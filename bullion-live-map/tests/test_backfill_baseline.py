@@ -8,7 +8,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from backfill_baseline import (
     field_stats, forward_fill, fetch_all_history,
     add_curve_slope, EXPECTED_STRESS_SIGN, COMPOSITE_CATEGORY, COMPOSITE_FIELDS,
-    EXPECTED_BASELINE_FIELDS, missing_baseline_fields,
+    EXPECTED_BASELINE_FIELDS, missing_baseline_fields, RECENT_WINDOW_YEARS,
 )
 
 
@@ -105,6 +105,53 @@ class TestBuildBaseline(unittest.TestCase):
         for f in ("ffr", "cpi_yoy", "dxy", "wti_px"):
             self.assertIn(f, baseline["fields"])
 
+    def test_cb_gold_reserves_is_trending_and_forward_filled(self):
+        from datetime import datetime, timedelta, timezone
+        base = datetime.now(timezone.utc)
+        dense_dates = [(base - timedelta(days=d)).strftime("%Y-%m-%d") for d in range(27, -1, -1)]
+        history = self._synthetic_history()
+        # cb_gold_reserves only reports on every 10th dense date, mirroring
+        # its real monthly sparsity against the other fields' daily grid.
+        sparse_dates = dense_dates[::10]
+        history["cb_gold_reserves"] = {d: 25000.0 for d in sparse_dates}
+
+        baseline = build_baseline(history)
+
+        stats = baseline["fields"]["cb_gold_reserves"]
+        self.assertEqual(stats["window_years"], RECENT_WINDOW_YEARS)
+        self.assertGreater(stats["n"], len(sparse_dates),
+                            "forward-fill should carry cb_gold_reserves onto the dense grid")
+
+
+class TestFetchAllHistoryIncludesImfBasket(unittest.TestCase):
+    def test_fetch_all_history_calls_the_imf_basket_fetcher(self):
+        # FRED_SERIES/YAHOO_SYMBOLS are stubbed to empty so this test makes
+        # no real network calls for those loops (a dummy key would otherwise
+        # trip real FRED HTTP errors and a real Yahoo fetch for every
+        # symbol) -- only the IMF basket wiring is under test here.
+        import backfill_baseline as bb_module
+        orig_imf = bb_module.fetch_imf_gold_reserves_basket
+        orig_fred = bb_module.FRED_SERIES
+        orig_yahoo = bb_module.YAHOO_SYMBOLS
+        called = {}
+
+        def fake(start, end):
+            called["args"] = (start, end)
+            return (25000.0, "2026-06-30", "2026-06-30", {"2026-06-30": 25000.0})
+
+        bb_module.fetch_imf_gold_reserves_basket = fake
+        bb_module.FRED_SERIES = {}
+        bb_module.YAHOO_SYMBOLS = {}
+        try:
+            out = bb_module.fetch_all_history("dummy-key", "2011-01-01", "2026-08-12")
+        finally:
+            bb_module.fetch_imf_gold_reserves_basket = orig_imf
+            bb_module.FRED_SERIES = orig_fred
+            bb_module.YAHOO_SYMBOLS = orig_yahoo
+
+        self.assertEqual(called["args"], ("2011-01-01", "2026-08-12"))
+        self.assertEqual(out, {"cb_gold_reserves": {"2026-06-30": 25000.0}})
+
 
 class TestMissingBaselineFields(unittest.TestCase):
     # Regression coverage for the annual-cron completeness gate: an unattended
@@ -119,7 +166,7 @@ class TestMissingBaselineFields(unittest.TestCase):
         history = {}
         for i, f in enumerate(["hy_oas", "ig_oas", "sofr", "tbill_3m", "us10y", "us2y",
                                 "vix", "spx", "fed_bs", "rrp", "ffr", "cpi_yoy", "dxy", "wti_px",
-                                "nfp_mom"]):
+                                "nfp_mom", "cb_gold_reserves"]):
             history[f] = {d: 1.0 + i * 0.1 + 0.01 * n for n, d in enumerate(dates)}
         return history
 
