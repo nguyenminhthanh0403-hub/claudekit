@@ -8,7 +8,7 @@
 `applyLayerFilter()`, around line 3230) lets a viewer tap any of the 12 domain layers
 (Regulators, Sovereign/Fiscal, Central Bank, Commercial Banking, Shadow/Non-bank, Capital
 Markets, Equity Sectors, Economic Data, Sentiment/Vol, FX/Currency, Commodities, Geopolitics —
-41 nodes total) on or off. It's in-memory only (`activeLayers`, a `Set`) — it resets on reload,
+39 nodes total, verified via `grep -c "^  { id:'"`) on or off. It's in-memory only (`activeLayers`, a `Set`) — it resets on reload,
 can't be bookmarked, and can't be handed to someone else.
 
 The user wants to go further: build their own version of the map — e.g. "I don't want the
@@ -17,8 +17,9 @@ specific version rather than re-toggling it every visit.
 
 **Finding surfaced during brainstorming, load-bearing for scope below:** the composite health
 score (`computeCompositeScore`, line 3987) only reads 7 fields (`hy_oas`, `ig_oas`, `vix`, `spx`,
-`fed_bs`, `rrp`, derived `curve_slope`), which trace back to exactly 5 nodes (`credit`, `vix`,
-`equit`, `fed`, `repo`, `yield`, via `NODE_LIVE_FIELD`, line 4609). Hiding the `indicator` layer
+`fed_bs`, `rrp`, derived `curve_slope`), which trace back to exactly 6 nodes (`credit`, `vix`,
+`equit`, `fed`, `repo`, `yield`, via `NODE_LIVE_FIELD`, line 4609 — verified by resolving each
+field through that map). Hiding the `indicator` layer
 (the user's own "economy" example — CPI, NFP) or any of `geo`/`commodity`/`sectors` has **no
 effect on the score today**, regardless of what this feature does — that's a pre-existing scope
 limit, not something to fix here.
@@ -39,7 +40,7 @@ every visit.
 
 - Does not change what `data.json` contains or how it's fetched — `fetch_bullion_data.py` and the
   GitHub Actions cron are untouched. This is a client-side render/score-input filter only.
-- Does not fix the composite score's limited field coverage (5 of 41 nodes) — recorded as a known
+- Does not fix the composite score's limited field coverage (6 of 39 nodes) — recorded as a known
   pre-existing limit, not in scope to expand.
 - Does not support multi-hop indirect-link synthesis (chains through two or more hidden nodes) —
   one hop only, see below.
@@ -93,7 +94,7 @@ every visit.
   its backing node is in `excludedNodes`, route it into the existing `fieldsMissing` path — same
   `tier`/`leadingCategory` logic as a real data outage, no new branches.
 - Narrative text already handles partial `fieldsMissing`; no changes needed there.
-- As noted above, hiding any node outside that set of 5 has no effect on the score — expected, not
+- As noted above, hiding any node outside that set of 6 has no effect on the score — expected, not
   a bug.
 
 ### Error handling & edge cases
