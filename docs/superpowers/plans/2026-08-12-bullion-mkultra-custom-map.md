@@ -417,6 +417,13 @@ const reverseFromNodeLiveField = {};
 Object.entries(NODE_LIVE_FIELD).forEach(([node, fields]) => {
   fields.forEach(f => { reverseFromNodeLiveField[f] = node; });
 });
+// curve_slope is derived (computeCompositeScore computes it from
+// live.us10y - live.us2y) -- it never appears as a literal key in
+// NODE_LIVE_FIELD, so its expected backing node is derived the same way:
+// from where us10y/us2y themselves resolve, when they agree.
+if (reverseFromNodeLiveField.us10y && reverseFromNodeLiveField.us10y === reverseFromNodeLiveField.us2y) {
+  reverseFromNodeLiveField.curve_slope = reverseFromNodeLiveField.us10y;
+}
 const mismatches = [];
 Object.entries(FIELD_TO_NODE).forEach(([field, node]) => {
   if (reverseFromNodeLiveField[field] !== node) {
