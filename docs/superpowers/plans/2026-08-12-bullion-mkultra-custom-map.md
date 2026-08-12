@@ -88,12 +88,13 @@ class TestExcludedIdsParity(unittest.TestCase):
         # End marker is the very next existing line after this task's
         # insertion point (line 1733 today) -- self-contained, doesn't
         # depend on any other task having run yet.
+        # _extract_between's slice already starts at start_marker, so no
+        # re-prepending is needed here.
         self.snippet = _extract_between(
             html,
             "function serializeExcludedIds(",
             "let allExpanded = false;",
         )
-        self.snippet = "function serializeExcludedIds(" + self.snippet
 
     def test_serialize_sorts_and_joins(self):
         script = self.snippet + """
@@ -208,12 +209,13 @@ class TestIndirectCandidatesParity(unittest.TestCase):
             html = f.read()
         # End marker is the existing comment immediately after this task's
         # insertion point -- self-contained, doesn't depend on Task 1.
+        # _extract_between's slice already starts at start_marker, so no
+        # re-prepending is needed here (same fix as Task 1's setUp).
         self.snippet = _extract_between(
             html,
             "function computeIndirectCandidates(",
             "function findLinkBetween(a, b) {",
         )
-        self.snippet = "function computeIndirectCandidates(" + self.snippet
 
     def test_degree_one_node_produces_no_candidates(self):
         script = self.snippet + """
