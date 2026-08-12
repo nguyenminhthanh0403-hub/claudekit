@@ -1941,6 +1941,7 @@ const Renderer = (function () {
   // same way node meshes are driven.
   let linkObjs = [];
   let linkBaseVisible = {}, linkLayerVis = {};
+  let currentExcludedNodesSet = new Set();
 
   // Keyboard a11y (Phase 4): one real, off-screen <button> per node so Tab +
   // Enter/Space works without a mouse or touch, mirroring Mk15's
@@ -2095,6 +2096,49 @@ const Renderer = (function () {
       linkObjs.push({ group, mat, baseOpacity, source: l.s, target: l.t, sourceGroup: s.group, targetGroup: t.group, index: idx });
       linkBaseVisible[idx] = true;
       linkLayerVis[idx] = true;
+    });
+  }
+
+  // Synthetic dashed connectors for hidden low-degree nodes (Task 2's
+  // computeIndirectCandidates). Built once, same as real links -- visibility
+  // toggles per setNodeFilter call, geometry never rebuilt at runtime.
+  // Deliberately simpler than buildLinkObjects: no arrowhead (not a causal
+  // claim, just "these are still connected"), always dashed, neutral color,
+  // fixed opacity matching the existing UNVERIFIED tier.
+  let indirectLinkObjs = [];
+  function buildIndirectLinkObjects(candidates) {
+    indirectLinkObjs = [];
+    const RADIAL_SEGS = 6;
+    const color = new THREE.Color('#8891a6'); // same neutral fallback recolor() uses for untinted nodes
+    const tubeR = 0.45; // matches w:1 real links
+    const baseOpacity = 0.40; // matches CONF.UNVERIFIED's baseOpacity in buildLinkObjects
+    candidates.forEach((c, idx) => {
+      const s = nodesDataIndex[c.s], t = nodesDataIndex[c.t];
+      if (!s || !t) return;
+      const srcPos = new THREE.Vector3(s.x, s.y, s.z);
+      const tgtPos = new THREE.Vector3(t.x, t.y, t.z);
+      const chordLen = srcPos.distanceTo(tgtPos);
+      const midDir = srcPos.clone().add(tgtPos).multiplyScalar(0.5).normalize();
+      const avgR = (srcPos.length() + tgtPos.length()) / 2;
+      const bulge = Math.min(chordLen * 0.32, SPHERE_R * 0.9);
+      const control = midDir.multiplyScalar(avgR + bulge);
+      const curve = new THREE.QuadraticBezierCurve3(srcPos, control, tgtPos);
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: baseOpacity });
+      const group = new THREE.Group();
+      const DASHES = 7;
+      for (let i = 0; i < DASHES; i += 2) {
+        const t0 = i / DASHES, t1 = Math.min((i + 0.7) / DASHES, 1);
+        const sub = subCurve(curve, t0, t1, 4);
+        group.add(new THREE.Mesh(new THREE.TubeGeometry(sub, 4, tubeR, RADIAL_SEGS, false), mat));
+      }
+      // Hidden until a filter asks for it: nothing is excluded at boot, and
+      // build()'s own first renderLoop() frame runs before applyVisibility()
+      // gets a chance to call applyIndirectVisibility().
+      group.visible = false;
+      scene.add(group);
+      indirectLinkObjs.push({
+        group, mat, baseOpacity, source: c.s, target: c.t, via: c.via, index: idx,
+      });
     });
   }
 
@@ -2617,6 +2661,7 @@ const Renderer = (function () {
     });
 
     buildLinkObjects();
+    buildIndirectLinkObjects(computeIndirectCandidates(nodesArr.map(n => n.id), LINKS));
     buildA11yList(nodesArr);
     buildLabels(nodesArr);
 
@@ -2667,6 +2712,7 @@ const Renderer = (function () {
       linkBaseVisible[lo.index] = visibleIdSet.has(lo.source) && visibleIdSet.has(lo.target);
       applyLinkVisibility(lo);
     });
+    applyIndirectVisibility();
     // Reveal burst: a newly-shown satellite snaps to its expanded hub's
     // position, then eases out to its own sphere slot — mirrors Mk15's
     // "snap to origin, transition out with an overshoot ease" (applyVisibility).
@@ -2739,18 +2785,33 @@ const Renderer = (function () {
     if (sunGlow) sunGlow.material.color.copy(c);
   }
 
-  function setLayerFilter(activeLayersSet) {
+  function setNodeFilter(excludedNodesSet) {
     if (!ready) return;
+    currentExcludedNodesSet = excludedNodesSet;
     Object.keys(meshById).forEach(id => {
       const d = nodesDataIndex[id];
-      layerVis[id] = !d || activeLayersSet.has(d.group);
+      layerVis[id] = !d || !excludedNodesSet.has(id);
       applyMeshVisibility(id);
     });
-    // A link is only shown when BOTH endpoints' groups are active, mirroring
-    // Mk15's `activeLayers.has(d.source.group) && activeLayers.has(d.target.group)`.
     linkObjs.forEach(lo => {
-      linkLayerVis[lo.index] = activeLayersSet.has(lo.sourceGroup) && activeLayersSet.has(lo.targetGroup);
+      linkLayerVis[lo.index] = !excludedNodesSet.has(lo.source) && !excludedNodesSet.has(lo.target);
       applyLinkVisibility(lo);
+    });
+    applyIndirectVisibility();
+  }
+
+  // An indirect connector shows only when its `via` node is hidden AND both
+  // its real endpoints are currently visible per BOTH the node filter and the
+  // hub/satellite expand-collapse state (`baseVisible`, populated by
+  // setVisibility) -- so it never appears pointing at a node that's merely
+  // collapsed, not actually excluded.
+  function applyIndirectVisibility() {
+    indirectLinkObjs.forEach(lo => {
+      const filterVisible = currentExcludedNodesSet.has(lo.via)
+        && !currentExcludedNodesSet.has(lo.source)
+        && !currentExcludedNodesSet.has(lo.target);
+      const baseVis = !!(baseVisible[lo.source] && baseVisible[lo.target]);
+      lo.group.visible = filterVisible && baseVis;
     });
   }
 
@@ -2779,7 +2840,7 @@ const Renderer = (function () {
 
   return {
     build, redraw, setVisibility, focus, clearFocus: clearFocusImpl,
-    setLayerFilter, recolor, resetView, focusCameraOn, setOrbState,
+    setNodeFilter, recolor, resetView, focusCameraOn, setOrbState,
     nodeById: id => nodesDataIndex[id],
     nodes: () => nodesData,
     onNodeActivate: fn => cbActivate.push(fn),
@@ -3310,7 +3371,7 @@ function buildLegend() {
   });
 }
 function applyLayerFilter() {
-  Renderer.setLayerFilter(activeLayers);
+  Renderer.setNodeFilter(excludedNodes);
 }
 
 // ── Resize handling ─────────────────────────────────────────────────────
