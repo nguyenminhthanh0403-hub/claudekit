@@ -321,10 +321,11 @@ class TestBuildEnvelope(unittest.TestCase):
                     "nfp_mom", "gold_px", "dxy", "spx",
                     "nfci", "m2", "mortgage_30y", "hy_oas", "ig_oas",
                     "sofr", "tbill_3m", "fed_bs", "rrp",
-                    "xlk", "xlf", "xle", "xlp", "cb_gold_reserves"}
+                    "xlk", "xlf", "xle", "xlp", "cb_gold_reserves",
+                    "usd_reserve_share"}
         self.assertEqual(set(FIELD_META), expected)
         for name, meta in FIELD_META.items():
-            self.assertIn(meta["cadence"], {"daily", "weekly", "monthly", "fomc"})
+            self.assertIn(meta["cadence"], {"daily", "weekly", "monthly", "quarterly", "fomc"})
             self.assertTrue(meta["source"])
 
 
@@ -343,6 +344,7 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self._orig_fetch_fred_series = self.mod.fetch_fred_series
         self._orig_fetch_yahoo_symbol = self.mod.fetch_yahoo_symbol
         self._orig_fetch_imf_basket = self.mod.fetch_imf_gold_reserves_basket
+        self._orig_fetch_cofer = self.mod.fetch_usd_reserve_share
         self._orig_load_key = self.mod.load_key
         self._orig_data_out_path = self.mod.DATA_OUT_PATH
 
@@ -359,6 +361,7 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self.mod.fetch_fred_series = self._orig_fetch_fred_series
         self.mod.fetch_yahoo_symbol = self._orig_fetch_yahoo_symbol
         self.mod.fetch_imf_gold_reserves_basket = self._orig_fetch_imf_basket
+        self.mod.fetch_usd_reserve_share = self._orig_fetch_cofer
         self.mod.load_key = self._orig_load_key
         self.mod.DATA_OUT_PATH = self._orig_data_out_path
         if os.path.exists(self.tmp_path):
@@ -388,6 +391,8 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
                 (1.0, "2026-07-17", "2026-07-17", {}))
         self.mod.fetch_imf_gold_reserves_basket = (
             lambda start, end: (1.0, "2026-07-17", "2026-07-17", {}))
+        self.mod.fetch_usd_reserve_share = (
+            lambda start, end: (1.0, "2026-07-17", "2026-07-17", {}))
 
         with self.assertRaises(SystemExit):
             self.mod.main()
@@ -411,6 +416,8 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self.mod.fetch_yahoo_symbol = fake_yahoo
         self.mod.fetch_imf_gold_reserves_basket = (
             lambda start, end: (25000.0, "2026-07-17", "2026-07-17", {"2026-07-17": 25000.0}))
+        self.mod.fetch_usd_reserve_share = (
+            lambda start, end: (57.0, "2026-07-17", "2026-07-17", {"2026-07-17": 57.0}))
 
         with self.assertRaises(SystemExit):
             self.mod.main()
@@ -418,20 +425,26 @@ class TestMainRefusesIncompleteWrites(unittest.TestCase):
         self.assertEqual(self._target_file_contents(), self.known_content)
 
 
-from fetch_bullion_data import parse_imf_sdmx, imf_period_to_month_end
+from fetch_bullion_data import parse_imf_sdmx, imf_period_to_end_date
 
 
-class TestImfPeriodToMonthEnd(unittest.TestCase):
+class TestImfPeriodToEndDate(unittest.TestCase):
     def test_converts_month_period_to_last_day_of_month(self):
-        self.assertEqual(imf_period_to_month_end("2026-M07"), "2026-07-31")
+        self.assertEqual(imf_period_to_end_date("2026-M07"), "2026-07-31")
 
     def test_handles_february_in_a_leap_year(self):
-        self.assertEqual(imf_period_to_month_end("2024-M02"), "2024-02-29")
+        self.assertEqual(imf_period_to_end_date("2024-M02"), "2024-02-29")
+
+    def test_converts_quarter_period_to_last_day_of_quarter(self):
+        self.assertEqual(imf_period_to_end_date("2026-Q1"), "2026-03-31")
+        self.assertEqual(imf_period_to_end_date("2026-Q2"), "2026-06-30")
+        self.assertEqual(imf_period_to_end_date("2026-Q3"), "2026-09-30")
+        self.assertEqual(imf_period_to_end_date("2026-Q4"), "2026-12-31")
 
     def test_unrecognised_shape_returns_none(self):
-        self.assertIsNone(imf_period_to_month_end("2026"))
-        self.assertIsNone(imf_period_to_month_end("2026-Q3"))
-        self.assertIsNone(imf_period_to_month_end(""))
+        self.assertIsNone(imf_period_to_end_date("2026"))
+        self.assertIsNone(imf_period_to_end_date("2026-Q5"))
+        self.assertIsNone(imf_period_to_end_date(""))
 
 
 class TestParseImfSdmx(unittest.TestCase):
@@ -539,6 +552,69 @@ class TestFetchImfGoldReservesBasket(unittest.TestCase):
         fbd_module.fetch_imf_country_series = fake
 
         value, ref, pub, history = fetch_imf_gold_reserves_basket("2026-01-01", "2026-08-20")
+        self.assertIsNone(value)
+        self.assertEqual(history, {})
+
+
+from fetch_bullion_data import fetch_usd_reserve_share
+
+
+class TestFetchUsdReserveShare(unittest.TestCase):
+    def setUp(self):
+        self._orig = fbd_module.http_get_json
+
+    def tearDown(self):
+        fbd_module.http_get_json = self._orig
+
+    PAYLOAD = {
+        "data": {
+            "dataSets": [{
+                "series": {
+                    "0:0:0:0:0": {
+                        "observations": {
+                            "0": ["58.3839225769043", None, 0, None],
+                            "1": ["57.130786895752", None, 0, None],
+                        }
+                    }
+                }
+            }],
+            "structures": [{
+                "dimensions": {
+                    "observation": [{
+                        "values": [{"value": "2025-Q4"}, {"value": "2026-Q1"}],
+                    }]
+                }
+            }],
+        }
+    }
+
+    def test_returns_latest_rounded_percentage(self):
+        fbd_module.http_get_json = lambda url: self.PAYLOAD
+
+        value, ref, pub, history = fetch_usd_reserve_share("2025-01-01", "2026-08-12")
+
+        self.assertEqual(value, 57.1)
+        self.assertEqual(ref, "2026-03-31")
+        self.assertEqual(pub, ref, "COFER exposes no separate publication date")
+        self.assertEqual(history, {"2025-12-31": 58.4, "2026-03-31": 57.1})
+
+    def test_http_error_returns_all_none(self):
+        def raise_timeout(url):
+            raise TimeoutError("boom")
+        fbd_module.http_get_json = raise_timeout
+
+        value, ref, pub, history = fetch_usd_reserve_share("2025-01-01", "2026-08-12")
+
+        self.assertIsNone(value)
+        self.assertIsNone(ref)
+        self.assertIsNone(pub)
+        self.assertEqual(history, {})
+
+    def test_malformed_response_returns_all_none(self):
+        fbd_module.http_get_json = lambda url: {}
+
+        value, ref, pub, history = fetch_usd_reserve_share("2025-01-01", "2026-08-12")
+
         self.assertIsNone(value)
         self.assertEqual(history, {})
 

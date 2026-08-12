@@ -75,6 +75,18 @@ IMF_GOLD_SECTOR = "S1XS1311"
 IMF_GOLD_COUNTRIES = ["USA", "DEU", "ITA", "FRA", "CHN", "RUS", "CHE", "IND", "JPN", "TUR", "NLD"]
 TROY_OZ_PER_TONNE = 32150.7466
 
+# IMF COFER (Currency Composition of Official Foreign Exchange Reserves).
+# Unlike IRFCL gold reserves, IMF DOES publish a genuine COUNTRY=G001
+# ("World") series for COFER (confirmed against the live API 2026-08-12),
+# so this is a single fetch, not a per-country basket. AFXRA = "Allocated
+# foreign exchange reserves"; CI_USD = "Claims in US dollar";
+# SHRO_PT = "Shares" -- already a plain percentage (e.g. 58.38, not
+# 0.5838), no unit conversion needed.
+IMF_COFER_BASE_URL = "https://api.imf.org/external/sdmx/3.0/data/dataflow/IMF.STA/COFER/7.0.1"
+IMF_COFER_INDICATOR = "AFXRA"
+IMF_COFER_CURRENCY = "CI_USD"
+IMF_COFER_TRANSFORM = "SHRO_PT"
+
 # Cadence tolerances, in days, applied to a field's PUBLICATION date — never
 # its reference date. June CPI references 2026-06-01 but publishes 2026-07-14;
 # judged on reference date it looks broken, judged on publication it is on
@@ -85,6 +97,12 @@ CADENCE_TOLERANCE_DAYS = {
     "weekly":  10,   # NFCI (Wed), WALCL/H.4.1 (Thu), Freddie PMMS (Thu) post ~7d
                      # apart; 10 = 7 + slack for a holiday or a one-week slip.
     "monthly": 45,   # observed 6d and 18d; silent for 45d means genuinely broken
+    # First calibration from a single observation (2026-08-11: the latest
+    # available COFER quarter was 134 days old under normal, healthy
+    # operation) -- revisit once more quarters have been observed in
+    # production, the same way monthly's 45d was calibrated from multiple
+    # fields over time.
+    "quarterly": 180,
     "fomc":    None, # simulated, never judged
 }
 
@@ -135,6 +153,8 @@ FIELD_META = {
     "xlp":          {"class": "measured", "cadence": "daily",   "source": "Yahoo XLP"},
     "cb_gold_reserves": {"class": "measured", "cadence": "monthly",
                           "source": "IMF IRFCL (top-11 public holders, summed)"},
+    "usd_reserve_share": {"class": "measured", "cadence": "quarterly",
+                           "source": "IMF COFER (allocated reserves, USD share)"},
 }
 
 
@@ -200,7 +220,10 @@ SOURCE_NOTE = (
     "(USA, Germany, Italy, France, China, Russia, Switzerland, India, "
     "Japan, Turkiye, Netherlands) -- IMF publishes no single world-"
     "aggregate entity for this indicator, so this is the largest holders, "
-    "not a true global total."
+    "not a true global total. "
+    "usd_reserve_share: IMF COFER (Currency Composition of Official "
+    "Foreign Exchange Reserves), share of allocated reserves held in USD, "
+    "world aggregate."
 )
 
 
@@ -415,24 +438,38 @@ def fetch_yahoo_symbol(symbol, decimals, range_="1y"):
     return (value, ref, pub, hist)
 
 
-def imf_period_to_month_end(period):
-    """Convert an SDMX 'YYYY-Mmm' monthly period to its ISO month-end date.
+def imf_period_to_end_date(period):
+    """Convert an SDMX 'YYYY-Mmm' or 'YYYY-Qn' period to its ISO period-end date.
 
-    Returns None for anything not in this exact shape -- FREQUENCY is
-    pinned to M in the query this feeds, but a future API/DSD change
-    should fail the parse rather than silently mis-date a value.
+    Handles both monthly (IRFCL gold reserves) and quarterly (COFER)
+    periods -- the rest of the SDMX response shape is otherwise identical
+    between these two IMF dataflows (confirmed against the live API
+    2026-08-12), so a single period converter lets parse_imf_sdmx serve
+    both rather than forking a near-duplicate parser. Returns None for
+    anything not in one of these two exact shapes.
     """
-    if len(period) != 8 or period[4] != "-" or period[5] != "M":
-        return None
-    try:
-        year = int(period[:4])
-        month = int(period[6:8])
-    except ValueError:
-        return None
-    if not 1 <= month <= 12:
-        return None
-    last_day = calendar.monthrange(year, month)[1]
-    return f"{year:04d}-{month:02d}-{last_day:02d}"
+    if len(period) == 8 and period[4] == "-" and period[5] == "M":
+        try:
+            year = int(period[:4])
+            month = int(period[6:8])
+        except ValueError:
+            return None
+        if not 1 <= month <= 12:
+            return None
+        last_day = calendar.monthrange(year, month)[1]
+        return f"{year:04d}-{month:02d}-{last_day:02d}"
+    if len(period) == 7 and period[4] == "-" and period[5] == "Q":
+        try:
+            year = int(period[:4])
+            quarter = int(period[6])
+        except ValueError:
+            return None
+        if not 1 <= quarter <= 4:
+            return None
+        month = quarter * 3
+        last_day = calendar.monthrange(year, month)[1]
+        return f"{year:04d}-{month:02d}-{last_day:02d}"
+    return None
 
 
 def parse_imf_sdmx(data):
@@ -463,7 +500,7 @@ def parse_imf_sdmx(data):
                 period = period_values[int(idx)]["value"]
             except (KeyError, IndexError, TypeError, ValueError):
                 continue
-            date_iso = imf_period_to_month_end(period)
+            date_iso = imf_period_to_end_date(period)
             if date_iso is not None:
                 history[date_iso] = oz
     return history
@@ -540,6 +577,37 @@ def fetch_imf_gold_reserves_basket(start, end):
     return (history[latest_ref], latest_ref, latest_ref, history)
 
 
+def fetch_usd_reserve_share(start, end):
+    """Network wrapper: USD share of allocated global FX reserves, in percent.
+
+    Reuses parse_imf_sdmx directly -- COFER's SDMX response shape is
+    identical to IRFCL's (confirmed against the live API 2026-08-12), and
+    IMF publishes a genuine COUNTRY=G001 ("World") series for COFER, unlike
+    IRFCL gold reserves, so no per-country basket/sum is needed here.
+
+    Returns (latest_value, ref_date, published, history) in the same shape
+    every other fetcher produces, or (None, None, None, {}) on any HTTP
+    error or unparseable response -- same non-raising convention as the
+    rest of this file. ref_date and published are identical: COFER exposes
+    no separate publication/vintage date, same situation as IRFCL.
+    """
+    start_period = start[:7]  # "YYYY-MM-DD" -> "YYYY-MM"
+    url = (f"{IMF_COFER_BASE_URL}/G001.{IMF_COFER_INDICATOR}.{IMF_COFER_CURRENCY}."
+           f"{IMF_COFER_TRANSFORM}.Q?c%5BTIME_PERIOD%5D=ge:{start_period}")
+    try:
+        data = http_get_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  IMF COFER: fetch failed ({e})", file=sys.stderr)
+        return (None, None, None, {})
+    hist = parse_imf_sdmx(data)
+    if not hist:
+        print("  IMF COFER: unexpected response shape or no usable data", file=sys.stderr)
+        return (None, None, None, {})
+    rounded = {d: round(v, 1) for d, v in hist.items()}
+    latest_ref = max(rounded)
+    return (rounded[latest_ref], latest_ref, latest_ref, rounded)
+
+
 def main():
     key = load_key()
     today = datetime.now(timezone.utc).date()
@@ -568,6 +636,12 @@ def main():
         latest_out["cb_gold_reserves"] = {"value": imf_value, "ref_date": imf_ref, "published": imf_pub}
     for date_str, val in imf_hist.items():
         history_by_date.setdefault(date_str, {})["cb_gold_reserves"] = val
+
+    cofer_value, cofer_ref, cofer_pub, cofer_hist = fetch_usd_reserve_share(start, end)
+    if cofer_value is not None:
+        latest_out["usd_reserve_share"] = {"value": cofer_value, "ref_date": cofer_ref, "published": cofer_pub}
+    for date_str, val in cofer_hist.items():
+        history_by_date.setdefault(date_str, {})["usd_reserve_share"] = val
 
     if not history_by_date:
         print("No fields fetched successfully; leaving existing data.json untouched.", file=sys.stderr)
