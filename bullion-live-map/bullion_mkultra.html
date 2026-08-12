@@ -1730,7 +1730,25 @@ function netSignForPath(path) {
 let expandedHubs = new Set();   // hub ids the user has clicked open
 let beginnerMode = true;        // simplified canvas + plain-language node text; default for new visitors
 let openDetailNode = null;      // the node whose detail panel is currently open, so it can re-render on mode switch
-let activeLayers = new Set(LAYER_ORDER); // layer filter state
+// ── Custom-map node filter (replaces the old activeLayers group filter) ───
+// A node/link is hidden iff its id is in this set. Default: nothing hidden.
+// Kept in sync with the URL's ?hide= param -- see syncExcludedToURL/
+// loadExcludedFromURL (Task 5), wired up in the boot sequence.
+let excludedNodes = new Set();
+
+function serializeExcludedIds(excludedSet) {
+  return [...excludedSet].sort().join(',');
+}
+
+function parseExcludedIds(hideParam, validIds) {
+  const valid = new Set(validIds);
+  const result = new Set();
+  if (!hideParam) return result;
+  hideParam.split(',').forEach(id => {
+    if (valid.has(id)) result.add(id);
+  });
+  return result;
+}
 
 let allExpanded = false; // true only while "Expand All" is active
 
