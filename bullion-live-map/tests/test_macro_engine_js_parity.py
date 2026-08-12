@@ -54,7 +54,7 @@ def _extract_js_snippet_through_node_mults(html):
     parts.append(html[drivers_start:elasticity_end])
 
     # Include computeCompositeScore
-    composite_start = html.index("function computeCompositeScore(live)")
+    composite_start = html.index("function computeCompositeScore(")
     composite_end = html.index("const NODE_ELASTICITY = {")
     parts.append(html[composite_start:composite_end])
 
@@ -245,6 +245,86 @@ process.stdout.write(JSON.stringify(computeCompositeScore(live)));
             "leadingCategory must be the category with the largest POSITIVE "
             "contribution (Credit, +0.3ish), not the largest-magnitude one "
             "(Equity valuation, -3 -- strongly calming, not stressing).")
+
+    def test_hiding_a_backing_node_drops_its_field_from_fieldsUsed(self):
+        # credit backs both hy_oas and ig_oas (NODE_LIVE_FIELD: credit -> ['hy_oas','ig_oas']).
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
+const live = {};
+fields.forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+const withoutCredit = computeCompositeScore(live, new Set(['credit']));
+process.stdout.write(JSON.stringify(withoutCredit));
+"""
+        result = _run_node(script)
+        self.assertNotIn('hy_oas', result['fieldsUsed'])
+        self.assertNotIn('ig_oas', result['fieldsUsed'])
+        self.assertIn('hy_oas', result['fieldsMissing'])
+        self.assertIn('ig_oas', result['fieldsMissing'])
+
+    def test_hiding_a_non_backing_node_has_no_effect(self):
+        # 'geo' backs no composite field at all.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
+const live = {};
+fields.forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+const withGeoHidden = computeCompositeScore(live, new Set(['geo']));
+const withNothingHidden = computeCompositeScore(live, new Set());
+process.stdout.write(JSON.stringify([withGeoHidden.fieldsUsed.sort(), withNothingHidden.fieldsUsed.sort()]));
+"""
+        result = _run_node(script)
+        self.assertEqual(result[0], result[1])
+
+    def test_no_excludedNodes_argument_behaves_as_before(self):
+        # Backward-compatible: an omitted second arg must not throw and must
+        # behave identically to an empty set.
+        script = self.snippet + self._synthetic_baseline_prelude() + """
+const fields = Object.keys(BASELINE_STATS.stress_sign);
+const live = {};
+fields.forEach(f => { live[f] = BASELINE_STATS.fields[f].mean; });
+process.stdout.write(JSON.stringify(computeCompositeScore(live)));
+"""
+        result = _run_node(script)
+        self.assertEqual(len(result['fieldsMissing']), 0)
+
+
+@unittest.skipUnless(shutil.which("node"), "node not on PATH")
+class TestFieldToNodeConsistency(unittest.TestCase):
+    def test_field_to_node_matches_node_live_field(self):
+        with open(MAP_PATH) as f:
+            html = f.read()
+        ftn_start = html.index("const FIELD_TO_NODE = ")
+        ftn_end = html.index("};", ftn_start) + 2
+        field_to_node_src = html[ftn_start:ftn_end]
+
+        nlf_start = html.index("const NODE_LIVE_FIELD = {")
+        nlf_end = html.index("};", nlf_start) + 2
+        node_live_field_src = html[nlf_start:nlf_end]
+
+        script = field_to_node_src + "\n" + node_live_field_src + """
+const reverseFromNodeLiveField = {};
+Object.entries(NODE_LIVE_FIELD).forEach(([node, fields]) => {
+  fields.forEach(f => { reverseFromNodeLiveField[f] = node; });
+});
+// curve_slope is a derived composite-score field (computeCompositeScore
+// computes it as live.us10y - live.us2y) -- it never appears as a literal
+// key inside any NODE_LIVE_FIELD array, so it has no direct reverse-map
+// entry. Its expected node is the node backing BOTH of its inputs; deriving
+// it that way (rather than hardcoding 'yield') still catches real drift --
+// e.g. if us10y/us2y ever resolved to different nodes, or FIELD_TO_NODE's
+// curve_slope entry pointed somewhere else.
+if (reverseFromNodeLiveField.us10y && reverseFromNodeLiveField.us10y === reverseFromNodeLiveField.us2y) {
+  reverseFromNodeLiveField.curve_slope = reverseFromNodeLiveField.us10y;
+}
+const mismatches = [];
+Object.entries(FIELD_TO_NODE).forEach(([field, node]) => {
+  if (reverseFromNodeLiveField[field] !== node) {
+    mismatches.push({field, expected: node, actual: reverseFromNodeLiveField[field]});
+  }
+});
+process.stdout.write(JSON.stringify(mismatches));
+"""
+        result = _run_node(script)
+        self.assertEqual(result, [], f"FIELD_TO_NODE drifted from NODE_LIVE_FIELD: {result}")
 
 
 @unittest.skipUnless(shutil.which("node"), "node not on PATH")

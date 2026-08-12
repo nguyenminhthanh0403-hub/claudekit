@@ -4035,7 +4035,20 @@ const COMPOSITE_MIN_FIELDS_FOR_MEASURED = 6; // of 7 total
 
 function _clip3(z) { return Math.max(-3, Math.min(3, z)); }
 
-function computeCompositeScore(live) {
+// Explicit, hand-kept map from a composite-score field to the node whose
+// visibility should gate it -- kept local (not derived from NODE_LIVE_FIELD,
+// which is defined ~700 lines later) so this function stays self-contained
+// and doesn't create a forward-reference. TestFieldToNodeConsistency in
+// tests/test_macro_engine_js_parity.py cross-checks this against the real
+// NODE_LIVE_FIELD map on every test run, so drift between the two is caught,
+// not silent.
+const FIELD_TO_NODE = {
+  hy_oas: 'credit', ig_oas: 'credit', vix: 'vix', spx: 'equit',
+  fed_bs: 'fed', rrp: 'repo', curve_slope: 'yield',
+};
+
+function computeCompositeScore(live, excludedNodes) {
+  const excluded = excludedNodes || new Set();
   const fields = Object.keys(BASELINE_STATS.stress_sign);
   const liveWithSlope = Object.assign({}, live);
   if (typeof live.us10y === 'number' && typeof live.us2y === 'number') {
@@ -4046,6 +4059,8 @@ function computeCompositeScore(live) {
   fields.forEach(f => {
     const stat = BASELINE_STATS.fields[f];
     const v = liveWithSlope[f];
+    const backingNode = FIELD_TO_NODE[f];
+    if (backingNode && excluded.has(backingNode)) { fieldsMissing.push(f); return; }
     if (typeof v !== 'number' || !stat || !stat.std) { fieldsMissing.push(f); return; }
     fieldsUsed.push(f);
     const z = _clip3((v - stat.mean) / stat.std);
@@ -5336,7 +5351,7 @@ function runMacroAnalysis() {
   hasRunMacroAnalysis = true;
 
   const live = compositeLiveFromState(s, currentLiveSource());
-  const composite = computeCompositeScore(live);
+  const composite = computeCompositeScore(live, excludedNodes);
   lastCompositeResult = composite;
   const narrative = buildMacroNarrative(composite, nodes, live);
 
