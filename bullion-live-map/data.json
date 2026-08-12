@@ -19,10 +19,10 @@
     "dxy": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-11",
-      "ref_date": "2026-08-11",
+      "published": "2026-08-12",
+      "ref_date": "2026-08-12",
       "source": "Yahoo DX-Y.NYB",
-      "value": 99.81
+      "value": 99.87
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -35,18 +35,18 @@
     "ffr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-10",
-      "ref_date": "2026-08-07",
+      "published": "2026-08-11",
+      "ref_date": "2026-08-10",
       "source": "FRED DFF",
       "value": 3.63
     },
     "gold_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-11",
-      "ref_date": "2026-08-11",
+      "published": "2026-08-12",
+      "ref_date": "2026-08-12",
       "source": "Yahoo GC=F",
-      "value": 4428.5
+      "value": 4448.6
     },
     "hy_oas": {
       "cadence": "daily",
@@ -123,26 +123,34 @@
     "tbill_3m": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-10",
-      "ref_date": "2026-08-07",
+      "published": "2026-08-11",
+      "ref_date": "2026-08-10",
       "source": "FRED DTB3",
-      "value": 3.72
+      "value": 3.74
     },
     "us10y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-10",
-      "ref_date": "2026-08-07",
+      "published": "2026-08-11",
+      "ref_date": "2026-08-10",
       "source": "FRED DGS10",
-      "value": 4.65
+      "value": 4.72
     },
     "us2y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-08-10",
-      "ref_date": "2026-08-07",
+      "published": "2026-08-11",
+      "ref_date": "2026-08-10",
       "source": "FRED DGS2",
-      "value": 4.19
+      "value": 4.25
+    },
+    "usd_reserve_share": {
+      "cadence": "quarterly",
+      "class": "measured",
+      "published": "2026-03-31",
+      "ref_date": "2026-03-31",
+      "source": "IMF COFER (allocated reserves, USD share)",
+      "value": 57.1
     },
     "vix": {
       "cadence": "daily",
@@ -174,7 +182,7 @@
       "published": "2026-08-11",
       "ref_date": "2026-08-11",
       "source": "Yahoo XLF",
-      "value": 57.81
+      "value": 57.8
     },
     "xlk": {
       "cadence": "daily",
@@ -193,26 +201,12 @@
       "value": 84.69
     }
   },
-  "generated_at": "2026-08-11T20:16:45Z",
+  "generated_at": "2026-08-12T06:34:45Z",
   "history": {
     "2025-08-01": {
       "cpi_yoy": 3.1,
       "m2": 22092.5,
       "nfp_mom": -70.0
-    },
-    "2025-08-11": {
-      "dxy": 98.52,
-      "ffr": 4.33,
-      "gold_px": 3353.1,
-      "hy_oas": 2.94,
-      "ig_oas": 0.8,
-      "rrp": 82.2,
-      "sofr": 4.34,
-      "tbill_3m": 4.15,
-      "us10y": 4.27,
-      "us2y": 3.76,
-      "vix": 16.2,
-      "wti_px": 65.03
     },
     "2025-08-12": {
       "dxy": 98.1,
@@ -2293,6 +2287,7 @@
       "tbill_3m": 3.57,
       "us10y": 4.18,
       "us2y": 3.47,
+      "usd_reserve_share": 56.4,
       "vix": 14.9,
       "wti_px": 57.26,
       "xle": 44.71,
@@ -3597,6 +3592,7 @@
       "tbill_3m": 3.61,
       "us10y": 4.3,
       "us2y": 3.79,
+      "usd_reserve_share": 57.1,
       "vix": 25.2,
       "wti_px": 102.86,
       "xle": 61.26,
@@ -5495,14 +5491,24 @@
       "xlk": 187.97,
       "xlp": 85.12
     },
+    "2026-08-08": {
+      "ffr": 3.63
+    },
+    "2026-08-09": {
+      "ffr": 3.63
+    },
     "2026-08-10": {
       "dxy": 99.81,
+      "ffr": 3.63,
       "gold_px": 4361.8,
       "hy_oas": 2.7,
       "ig_oas": 0.78,
       "rrp": 1.0,
       "sofr": 3.63,
       "spx": 7753.11,
+      "tbill_3m": 3.74,
+      "us10y": 4.72,
+      "us2y": 4.25,
       "vix": 15.5,
       "xle": 60.18,
       "xlf": 57.81,
@@ -5510,14 +5516,18 @@
       "xlp": 84.95
     },
     "2026-08-11": {
-      "dxy": 99.81,
-      "gold_px": 4428.5,
+      "dxy": 99.82,
+      "gold_px": 4383.0,
       "rrp": 1.2,
       "spx": 7728.2,
       "xle": 60.93,
-      "xlf": 57.81,
+      "xlf": 57.8,
       "xlk": 186.09,
       "xlp": 84.69
+    },
+    "2026-08-12": {
+      "dxy": 99.87,
+      "gold_px": 4448.6
     }
   },
   "schema": 2
