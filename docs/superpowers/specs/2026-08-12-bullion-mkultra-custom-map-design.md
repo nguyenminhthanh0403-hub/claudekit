@@ -24,10 +24,17 @@ field through that map). Hiding the `indicator` layer
 effect on the score today**, regardless of what this feature does — that's a pre-existing scope
 limit, not something to fix here.
 
-**Also surfaced:** the graph has real hub nodes — `equit` (15 links), `ffr` (14), `banks` (13),
-`yield` (11), `credit` (11), `repo` (9) (measured directly from `LINKS`/`PLUMBING_LINKS`). Naive
-"reconnect everything around a hidden node" logic would explode into ~100 synthetic links for a
-hub removal — addressed in the design below.
+**Also surfaced:** the graph has real hub nodes — `equit` (14 links), `ffr` (12), `credit` (11),
+`banks` (10), `yield` (9), `oil` (8), `tsy` (7) — measured by merging `PLUMBING_LINKS` into
+`LINKS` via the same supersede-or-append rule the app itself runs at load time (a naive count of
+`LINKS` alone undercounts and gives the wrong degree for several nodes — see
+[[bullion-two-link-arrays]]), then computing degree over the merged 93-edge graph. Naive "reconnect
+everything around a hidden node" logic would explode into a two-digit number of synthetic links for
+a hub removal — addressed in the design below. Separately, 16 of the 39 nodes have degree ≤3 and
+are the actual candidates for indirect-link synthesis (`cftc`, `nfp`, `etf` at degree 1 — these
+produce zero synthetic pairs since a single edge has no pair to connect; `gse`, `fdic`, `sec`,
+`tech`, `defn`, `dxy_fx`, `options`, `energy` at degree 2 — one synthetic pair each; `fins`, `hf`,
+`russia`, `tbills`, `house` at degree 3 — up to three synthetic pairs each).
 
 ## Goal
 
