@@ -1669,6 +1669,39 @@ const neighborsOf = {};
 NODES.forEach(n => neighborsOf[n.id] = new Set());
 LINKS.forEach(l => { neighborsOf[l.s].add(l.t); neighborsOf[l.t].add(l.s); });
 
+// ── Indirect-link candidates for the custom-map feature ────────────────────
+// Static and precomputable: the pairs a hidden low-degree node WOULD connect
+// don't depend on which nodes happen to be hidden right now, only on the
+// fixed LINKS/PLUMBING_LINKS graph. Computed once at load; the renderer just
+// toggles which of these are visible based on the live excludedNodes state.
+// Hub nodes (>3 neighbors) are skipped entirely -- a hub's full neighbor-pair
+// closure would be a two-digit-plus link explosion, not a helpful "indirect
+// connection" visual (see the design doc's degree count).
+function computeIndirectCandidates(nodeIds, links) {
+  const neighbors = {};
+  nodeIds.forEach(id => { neighbors[id] = new Set(); });
+  links.forEach(l => {
+    if (!neighbors[l.s] || !neighbors[l.t]) return;
+    neighbors[l.s].add(l.t);
+    neighbors[l.t].add(l.s);
+  });
+  const hasDirectLink = (a, b) => links.some(l =>
+    (l.s === a && l.t === b) || (l.s === b && l.t === a));
+  const candidates = [];
+  nodeIds.forEach(via => {
+    const nbrs = [...neighbors[via]];
+    if (nbrs.length === 0 || nbrs.length > 3) return;
+    for (let i = 0; i < nbrs.length; i++) {
+      for (let j = i + 1; j < nbrs.length; j++) {
+        const a = nbrs[i], b = nbrs[j];
+        if (hasDirectLink(a, b)) continue;
+        candidates.push({ s: a, t: b, via });
+      }
+    }
+  });
+  return candidates;
+}
+
 // ── Chain-reaction hypothesis: multi-hop connections between two nodes ─────
 // Pure traversal over the already-merged LINKS array (PLUMBING_LINKS has
 // already superseded/appended into it above this point). Undirected search --
