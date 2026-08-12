@@ -22,7 +22,7 @@
       "published": "2026-08-12",
       "ref_date": "2026-08-12",
       "source": "Yahoo DX-Y.NYB",
-      "value": 99.87
+      "value": 99.86
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -46,7 +46,7 @@
       "published": "2026-08-12",
       "ref_date": "2026-08-12",
       "source": "Yahoo GC=F",
-      "value": 4448.6
+      "value": 4469.8
     },
     "hy_oas": {
       "cadence": "daily",
@@ -201,7 +201,7 @@
       "value": 84.69
     }
   },
-  "generated_at": "2026-08-12T06:34:45Z",
+  "generated_at": "2026-08-12T11:05:44Z",
   "history": {
     "2025-08-01": {
       "cpi_yoy": 3.1,
@@ -942,6 +942,7 @@
       "tbill_3m": 3.86,
       "us10y": 4.16,
       "us2y": 3.6,
+      "usd_reserve_share": 56.6,
       "vix": 16.3,
       "wti_px": 63.17,
       "xle": 44.67,
@@ -5526,8 +5527,8 @@
       "xlp": 84.69
     },
     "2026-08-12": {
-      "dxy": 99.87,
-      "gold_px": 4448.6
+      "dxy": 99.86,
+      "gold_px": 4469.8
     }
   },
   "schema": 2
