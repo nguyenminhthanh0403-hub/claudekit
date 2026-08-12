@@ -1207,7 +1207,7 @@ const NODES = [
     expert:[
       'DXY is trade-weighted against six currencies (EUR 57.6%, JPY 13.6%, GBP 11.9%, CAD, SEK, CHF). The weights are fixed by the index rules, not re-estimated.',
       'A strong dollar tightens global financial conditions.',
-      'The dollar remains the dominant reserve currency, though its share of allocated global FX reserves has been on a slow structural decline for over two decades -- tracked live here.',
+      'The dollar remains the dominant reserve currency, though its share of allocated global FX reserves has been on a slow structural decline for over two decades — tracked live here.',
       'Source: ICE (DXY index weights); IMF COFER (allocated reserve currency shares).',
       'Roughly 40 to 50% of trade invoices were in USD as of 2022 (no live source for this figure).',
       'Source: BIS (trade invoicing currency shares, 2022).'] },
@@ -4587,7 +4587,7 @@ function updateMetrics() {
 const LIVE_FIELD_LABEL = { us2y:'US2Y', us10y:'US10Y', vix:'VIX', cpi_yoy:'Core CPI', wti_px:'WTI Oil', ffr:'Fed Funds Rate', nfp_mom:'NFP', gold_px:'Gold', dxy:'Dollar (DXY)', spx:'S&P 500', nfci:'NFCI', hy_oas:'HY OAS', ig_oas:'IG OAS', sofr:'SOFR', rrp:'RRP', tbill_3m:'3M Bill', mortgage_30y:'30Y Mortgage', m2:'M2', fed_bs:'Fed B/S', xlk:'Tech (XLK)', xlf:'Financials (XLF)', xle:'Energy (XLE)', xlp:'Staples (XLP)', cb_gold_reserves:'CB Gold (Top 11)', usd_reserve_share:'USD Reserve Share' };
 
 // ─── LIVE READINGS IN THE DETAIL PANEL (ported from Mk17) ───────────────────
-// data.json carries 23 fields; 22 of the 39 nodes bind to one, so a node can
+// data.json carries 25 fields; 22 of the 39 nodes bind to one, so a node can
 // show what it is actually reading right now instead of only a hand-typed
 // figure that ages. NFCI rides the vix node (both are stress readings) — it
 // adds no graph edge, so the node count stays 39 and the board is unchanged.
@@ -6009,7 +6009,7 @@ document.getElementById('audit-log-btn').addEventListener('click', openAuditLog)
 // it is on time. tests/freshness_test.html extracts this block by its marker
 // comments and asserts the same cases as the Python suite — renaming or
 // removing the markers breaks that test, which is intended.
-const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, quarterly: 180, fomc: null };
+const CADENCE_TOLERANCE_DAYS = { daily: 7, weekly: 10, monthly: 45, quarterly: 210, fomc: null };
 const FIELD_TOLERANCE_OVERRIDE = { wti_px: 10, cb_gold_reserves: 60 };
 
 function freshnessVerdict(cadence, published, today, overrideDays) {

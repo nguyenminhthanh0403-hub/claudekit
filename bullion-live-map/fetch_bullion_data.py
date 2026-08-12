@@ -97,12 +97,19 @@ CADENCE_TOLERANCE_DAYS = {
     "weekly":  10,   # NFCI (Wed), WALCL/H.4.1 (Thu), Freddie PMMS (Thu) post ~7d
                      # apart; 10 = 7 + slack for a holiday or a one-week slip.
     "monthly": 45,   # observed 6d and 18d; silent for 45d means genuinely broken
-    # First calibration from a single observation (2026-08-11: the latest
-    # available COFER quarter was 134 days old under normal, healthy
-    # operation) -- revisit once more quarters have been observed in
+    # COFER's `published` is set equal to `ref_date` (no separate
+    # publication date), so its reported age grows every day from a
+    # quarter's end until the NEXT quarter's data replaces it -- it never
+    # resets shortly after release the way FRED's `published` dates do.
+    # Worst case, right before the next release: IMF's publication lag
+    # after a quarter's own end, PLUS a full ~91-day quarter (we must wait
+    # for the entire next quarter to complete before it can be released).
+    # 180 was calibrated from a single mid-cycle snapshot (2026-08-11: 134
+    # days) and undershoots that structural worst case; 210 covers it with
+    # slack. Revisit once more release cycles have been observed in
     # production, the same way monthly's 45d was calibrated from multiple
     # fields over time.
-    "quarterly": 180,
+    "quarterly": 210,
     "fomc":    None, # simulated, never judged
 }
 
@@ -473,10 +480,16 @@ def imf_period_to_end_date(period):
 
 
 def parse_imf_sdmx(data):
-    """Pure parse of one country's IMF SDMX 3.0 gold-reserves response.
+    """Pure parse of an IMF SDMX 3.0 response's single data series into
+    {date_iso: raw_numeric_value}.
 
-    Returns {date_iso: troy_oz} keyed by the LAST day of each reported
-    month (a stock figure is naturally "as of period end"), or {} for any
+    Shared by both the per-country IRFCL gold-reserves fetcher and the
+    COFER world-aggregate fetcher -- the numeric unit (troy ounces vs.
+    percent) and whether the series represents one country or a world
+    aggregate are the caller's concern, not this parser's.
+
+    date_iso is keyed by the LAST day of each reported period (a stock
+    figure is naturally "as of period end"); returns {} for any
     missing/unrecognised shape or null value -- mirrors
     parse_fred_observations/parse_yahoo_chart's pure-parse-returns-empty-
     on-failure convention. No exception is raised here.
@@ -591,7 +604,15 @@ def fetch_usd_reserve_share(start, end):
     rest of this file. ref_date and published are identical: COFER exposes
     no separate publication/vintage date, same situation as IRFCL.
     """
-    start_period = start[:7]  # "YYYY-MM-DD" -> "YYYY-MM"
+    # Snap to the start of the quarter containing `start`'s month: a plain
+    # "YYYY-MM" truncation (as fetch_imf_country_series uses for its monthly
+    # dataflow) can silently drop the earliest in-range quarter here, since
+    # this dataflow is quarterly -- e.g. ge:2025-08 returns only
+    # ['2025-Q4','2026-Q1'], skipping 2025-Q3 (July-September), which is
+    # legitimately within an August-starting window.
+    start_year, start_month = int(start[:4]), int(start[5:7])
+    quarter_start_month = ((start_month - 1) // 3) * 3 + 1
+    start_period = f"{start_year:04d}-{quarter_start_month:02d}"
     url = (f"{IMF_COFER_BASE_URL}/G001.{IMF_COFER_INDICATOR}.{IMF_COFER_CURRENCY}."
            f"{IMF_COFER_TRANSFORM}.Q?c%5BTIME_PERIOD%5D=ge:{start_period}")
     try:

@@ -618,6 +618,25 @@ class TestFetchUsdReserveShare(unittest.TestCase):
         self.assertIsNone(value)
         self.assertEqual(history, {})
 
+    def test_start_mid_quarter_snaps_filter_to_quarter_start(self):
+        # start="2025-08-15" falls in Q3 (Jul-Sep); a naive "YYYY-MM"
+        # truncation would filter ge:2025-08 and silently skip 2025-Q3
+        # (July-September), which is legitimately in range. The filter must
+        # snap back to the quarter's true start month, 2025-07.
+        captured_urls = []
+
+        def fake_http_get_json(url):
+            captured_urls.append(url)
+            return self.PAYLOAD
+
+        fbd_module.http_get_json = fake_http_get_json
+
+        fetch_usd_reserve_share("2025-08-15", "2026-08-12")
+
+        self.assertEqual(len(captured_urls), 1)
+        self.assertIn("c%5BTIME_PERIOD%5D=ge:2025-07", captured_urls[0])
+        self.assertNotIn("ge:2025-08", captured_urls[0])
+
 
 if __name__ == "__main__":
     unittest.main()
