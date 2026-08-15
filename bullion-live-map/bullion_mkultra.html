@@ -619,6 +619,11 @@
   .glossary-view dt { font-weight: 600; color: var(--gold); margin-top: 7px; }
   .glossary-view dt:first-child { margin-top: 0; }
   .glossary-view dd { margin: 1px 0 0 0; color: var(--text-dim); line-height: 1.4; }
+  .glossary-view.hidden { display: none; }
+  .node-picker-layer-title { font-weight:600; margin:10px 0 4px; color:var(--text-dim); font-size:12px; }
+  .node-picker-layer-title:first-child { margin-top:0; }
+  .node-picker-row { display:flex; align-items:center; gap:6px; padding:2px 0; cursor:pointer; }
+  .node-picker-row input { cursor:pointer; }
 
   /* Clickable / hoverable acronym terms inside bullets */
   .gterm { text-decoration: none; border-bottom: 1px dotted var(--gold-dim); cursor: help; color: inherit; position: relative; outline: none; }
@@ -920,6 +925,11 @@
     <div>
       <div class="drawer-label">Acronym glossary <span class="drawer-tag" id="glossary-toggle">show</span></div>
       <div class="glossary-view hidden" id="glossary-box"></div>
+    </div>
+
+    <div>
+      <div class="drawer-label">Customize your map <span class="drawer-tag" id="node-picker-toggle">show</span></div>
+      <div class="glossary-view hidden" id="node-picker-box"></div>
     </div>
 
     <div>
@@ -3431,6 +3441,51 @@ function refreshLegendClasses() {
     item.className = 'legend-item ' + legendLayerClass(g);
   });
 }
+
+function buildNodePicker() {
+  const box = document.getElementById('node-picker-box');
+  box.innerHTML = LAYER_ORDER.map(g => {
+    const layerNodes = NODES.filter(n => n.group === g);
+    if (layerNodes.length === 0) return '';
+    const rows = layerNodes.map(n => `
+      <label class="node-picker-row" data-node-row="${n.id}">
+        <input type="checkbox" data-node-id="${n.id}" ${excludedNodes.has(n.id) ? '' : 'checked'}>
+        <span class="legend-dot" style="background:${GROUP_COLOR[g]}"></span>${n.label}
+      </label>`).join('');
+    return `<div class="node-picker-layer-title">${LAYER_LABELS[g]}</div>${rows}`;
+  }).join('');
+  box.querySelectorAll('input[data-node-id]').forEach(cb => {
+    cb.addEventListener('change', () => {
+      toggleNodeExcluded(cb.getAttribute('data-node-id'));
+    });
+  });
+}
+
+function toggleNodeExcluded(id) {
+  if (excludedNodes.has(id)) excludedNodes.delete(id); else excludedNodes.add(id);
+  applyNodeFilter();
+  syncExcludedToURL();
+  refreshLegendClasses();
+}
+
+// Re-reads excludedNodes into the already-built checkbox DOM (cheaper than a
+// full buildNodePicker() rebuild) -- called whenever the legend's bulk layer
+// toggle changes excludedNodes out from under this drawer.
+function refreshNodePickerCheckboxes() {
+  const box = document.getElementById('node-picker-box');
+  if (!box) return;
+  box.querySelectorAll('input[data-node-id]').forEach(cb => {
+    cb.checked = !excludedNodes.has(cb.getAttribute('data-node-id'));
+  });
+}
+
+function toggleNodePickerDrawer() {
+  const box = document.getElementById('node-picker-box');
+  const btn = document.getElementById('node-picker-toggle');
+  box.classList.toggle('hidden');
+  btn.textContent = box.classList.contains('hidden') ? 'show' : 'hide';
+}
+document.getElementById('node-picker-toggle').addEventListener('click', toggleNodePickerDrawer);
 
 // ── Resize handling ─────────────────────────────────────────────────────
 // Resizing used to call buildGraph(), which re-randomized every node's
@@ -6207,6 +6262,7 @@ fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout m
 buildGraph().catch(err => console.error('Mk Ultra: initial buildGraph failed', err));
 loadExcludedFromURL();
 buildLegend();
+buildNodePicker();
 updateMetrics();
 validateProvenance();
 document.getElementById('audit-log-btn').addEventListener('click', openAuditLog);
