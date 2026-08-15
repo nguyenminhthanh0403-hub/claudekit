@@ -321,6 +321,7 @@
   }
   .legend-item { display: flex; align-items: center; gap: 5px; cursor: pointer; color: var(--text-dim); }
   .legend-item.off { opacity: 0.35; }
+  .legend-item.partial { opacity: 0.65; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   .legend-box, #legend-box { }
   .legend-item.static { cursor: default; width: 100%; }
@@ -1885,7 +1886,7 @@ function layoutColumns(portrait) {
 // log, backtest, AI analysis, live-data fetch, legend, glossary, coach — never
 // touches node/link geometry itself. It only ever reached into the render
 // layer through ~6 call sites (applyVisibility, focusNode/clearFocus,
-// applyLayerFilter, updateGraph, navigateTo, the reset-view button), and those
+// applyNodeFilter, updateGraph, navigateTo, the reset-view button), and those
 // always went through d3 selections on window._mk5Node/_mk5Link/_mk5NodesData.
 // `Renderer` replaces that surface with a small adapter object so the render
 // layer itself (now Three.js/WebGL instead of D3/SVG) can be swapped without
@@ -2934,7 +2935,7 @@ async function buildGraph() {
   await Renderer.build(nodesData);
 
   applyVisibility();
-  applyLayerFilter();
+  applyNodeFilter();
   buildBoard(); // populate the 2D Overview tab from the same nodesData
 }
 
@@ -3374,23 +3375,61 @@ function buildLegend() {
        <div class="legend-item static"><span class="legend-line" style="background:var(--text-dim);opacity:0.55"></span>Directional &mdash; sourced mechanism</div>
        <div class="legend-item static"><span class="legend-line" style="background:repeating-linear-gradient(90deg,var(--text-dim) 0 4px,transparent 4px 8px);opacity:0.55"></span>Dashed = unverified</div>
      </div>
-     <div class="legend-causal-title">Layers (tap to filter)</div>`;
-  el.innerHTML = causalKey + LAYER_ORDER.map(g =>
-    `<div class="legend-item" data-group="${g}">
+     <div class="legend-causal-title">Layers (tap to hide)</div>`;
+  el.innerHTML = causalKey + LAYER_ORDER.map(g => {
+    const cls = legendLayerClass(g);
+    return `<div class="legend-item ${cls}" data-group="${g}">
        <div class="legend-dot" style="background:${GROUP_COLOR[g]}"></div>${LAYER_LABELS[g]}
-     </div>`
-  ).join('');
-  el.querySelectorAll('.legend-item').forEach(item => {
+     </div>`;
+  }).join('');
+  el.querySelectorAll('.legend-item[data-group]').forEach(item => {
     item.addEventListener('click', () => {
       const g = item.getAttribute('data-group');
-      if (activeLayers.has(g)) activeLayers.delete(g); else activeLayers.add(g);
-      item.classList.toggle('off', !activeLayers.has(g));
-      applyLayerFilter();
+      toggleLayerExcluded(g);
+      item.className = 'legend-item ' + legendLayerClass(g);
+      applyNodeFilter();
+      syncExcludedToURL();
+      if (typeof refreshNodePickerCheckboxes === 'function') refreshNodePickerCheckboxes(); // Task 7
     });
   });
 }
-function applyLayerFilter() {
+
+// A layer is "off" when every one of its nodes is excluded, "partial" when
+// some (but not all) are, and unstyled (full opacity) when none are.
+function legendLayerClass(group) {
+  const layerNodeIds = NODES.filter(n => n.group === group).map(n => n.id);
+  const excludedCount = layerNodeIds.filter(id => excludedNodes.has(id)).length;
+  if (excludedCount === 0) return '';
+  if (excludedCount === layerNodeIds.length) return 'off';
+  return 'partial';
+}
+
+// Bulk-toggle: if the layer is currently fully or partially visible, hide
+// every node in it; if it's fully hidden, show every node in it. (A partial
+// layer's click always goes to "hide the rest", not "show the rest" -- one
+// click, one predictable direction, no separate three-state cycle to learn.)
+function toggleLayerExcluded(group) {
+  const layerNodeIds = NODES.filter(n => n.group === group).map(n => n.id);
+  const allExcluded = layerNodeIds.every(id => excludedNodes.has(id));
+  if (allExcluded) {
+    layerNodeIds.forEach(id => excludedNodes.delete(id));
+  } else {
+    layerNodeIds.forEach(id => excludedNodes.add(id));
+  }
+}
+
+function applyNodeFilter() {
   Renderer.setNodeFilter(excludedNodes);
+}
+
+// Re-reads excludedNodes into the already-built legend DOM -- called by
+// Task 7's picker after a single-node change, so the legend's off/partial
+// styling stays correct without a full rebuild.
+function refreshLegendClasses() {
+  document.querySelectorAll('.legend-item[data-group]').forEach(item => {
+    const g = item.getAttribute('data-group');
+    item.className = 'legend-item ' + legendLayerClass(g);
+  });
 }
 
 // ── Resize handling ─────────────────────────────────────────────────────
@@ -6161,7 +6200,7 @@ function renderPipelineAlarm(bar, isLive, prov, nowISO) {
 fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout measures it
 // buildGraph() is async (it awaits the Three.js dynamic import inside
 // Renderer.build()) — everything below fires immediately without waiting on
-// it, same as it always did; applyVisibility()/applyLayerFilter()/updateGraph()
+// it, same as it always did; applyVisibility()/applyNodeFilter()/updateGraph()
 // all no-op harmlessly via their `if (!Renderer.isReady())` guards until the
 // scene actually exists, then buildGraph()'s own tail re-asserts state once it
 // resolves (see Renderer.build()/buildGraph() above).
