@@ -800,6 +800,10 @@
 </div>
 
 <div id="legend-box"></div>
+<button class="btn" id="copy-link-btn" title="Copy a link to this exact custom view">Copy link</button>
+<input type="text" id="copy-link-fallback" class="hidden" readonly
+       style="width:100%;margin-top:4px;font-size:11px"
+       aria-label="Copy this link manually">
 
 <div id="narration-caption" class="hidden persona-alfred" aria-live="polite"></div>
 
@@ -1781,6 +1785,20 @@ function parseExcludedIds(hideParam, validIds) {
     if (valid.has(id)) result.add(id);
   });
   return result;
+}
+
+function loadExcludedFromURL() {
+  const params = new URLSearchParams(location.search);
+  excludedNodes = parseExcludedIds(params.get('hide'), NODES.map(n => n.id));
+}
+
+function syncExcludedToURL() {
+  const params = new URLSearchParams(location.search);
+  const serialized = serializeExcludedIds(excludedNodes);
+  if (serialized) params.set('hide', serialized); else params.delete('hide');
+  const newSearch = params.toString();
+  const newUrl = location.pathname + (newSearch ? '?' + newSearch : '') + location.hash;
+  history.replaceState(null, '', newUrl);
 }
 
 let allExpanded = false; // true only while "Expand All" is active
@@ -5987,10 +6005,33 @@ buildGlossaryHTML();
 buildTrendsHTML();
 buildMetricGuideHTML();
 buildManualRows();
+
+function copyShareLink() {
+  const url = location.href;
+  const fallback = document.getElementById('copy-link-fallback');
+  const btn = document.getElementById('copy-link-btn');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(url).then(() => {
+      const original = btn.textContent;
+      btn.textContent = 'Copied!';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    }).catch(() => showFallback(url, fallback));
+  } else {
+    showFallback(url, fallback);
+  }
+}
+function showFallback(url, fallback) {
+  fallback.value = url;
+  fallback.classList.remove('hidden');
+  fallback.focus();
+  fallback.select();
+}
+
 document.getElementById('trends-toggle').addEventListener('click', toggleTrends);
 document.getElementById('metricguide-toggle').addEventListener('click', toggleMetricGuide);
 document.getElementById('manual-toggle').addEventListener('click', toggleManual);
 document.getElementById('manual-reset-btn').addEventListener('click', resetManual);
+document.getElementById('copy-link-btn').addEventListener('click', copyShareLink);
 
 // A preset scenario overrides manual mode, so clear the sliders back to baseline
 // rather than leaving stale numbers on screen that no longer drive anything.
@@ -6124,6 +6165,7 @@ fitAppToViewport();   // clamp the stage to one screen BEFORE the first layout m
 // scene actually exists, then buildGraph()'s own tail re-asserts state once it
 // resolves (see Renderer.build()/buildGraph() above).
 buildGraph().catch(err => console.error('Mk Ultra: initial buildGraph failed', err));
+loadExcludedFromURL();
 buildLegend();
 updateMetrics();
 validateProvenance();
