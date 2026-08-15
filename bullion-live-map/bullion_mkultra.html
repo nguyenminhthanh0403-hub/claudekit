@@ -571,6 +571,7 @@
      UI needs its own rule; the id-level `display: flex` on .health-score-row
      also has to be beaten, hence naming both selectors explicitly. */
   .health-score-row.hidden, .health-bar-wrap.hidden { display: none; }
+  #all-hidden-message.hidden { display: none; }
   .health-score-num { font-size: 19px; font-weight: 600; color: var(--gold); }
   .health-bar-wrap { margin: 2px 0 4px; }
   .health-bar-bg { height: 7px; background: var(--bg-deep); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
@@ -807,6 +808,7 @@
 </div>
 
 <div id="legend-box"></div>
+<div id="all-hidden-message" class="hidden sim-note" style="margin-top:8px">Nothing to show — try clearing some hidden layers.</div>
 <button class="btn" id="copy-link-btn" title="Copy a link to this exact custom view">Copy link</button>
 <input type="text" id="copy-link-fallback" class="hidden" readonly
        style="width:100%;margin-top:4px;font-size:11px"
@@ -3430,6 +3432,8 @@ function toggleLayerExcluded(group) {
 
 function applyNodeFilter() {
   Renderer.setNodeFilter(excludedNodes);
+  const msg = document.getElementById('all-hidden-message');
+  if (msg) msg.classList.toggle('hidden', excludedNodes.size < NODES.length);
 }
 
 // Re-reads excludedNodes into the already-built legend DOM -- called by
