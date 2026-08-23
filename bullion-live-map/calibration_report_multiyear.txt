@@ -1,3 +1,14 @@
+# SCOPE NOTE (added during final review, 2026-08-23): only the 6 previously
+# n<30 links (cpi->fomc, nfp->fomc, oil->cpi, ffr->m2, m2->cpi, m2->gold)
+# were triaged from this report into bullion_mkultra.html. Every other
+# verdict delta versus the existing data.json-based calibration_report.txt
+# (including several downgrades and outright sign reversals — e.g. usd->oil
+# flips from +0.0273/t=+4.7 on the 365-day window to -0.0049/t=-3.4 here) is
+# KNOWN and DELIBERATELY UNTOUCHED: a 6-year window is not automatically
+# more authoritative than the recent one, since it straddles different rate
+# regimes (COVID, the 2022 hiking cycle). Triaging those deltas is a
+# separate, not-yet-scoped follow-up.
+#
 Bullion calibration — train split 1752 days (first 80% of 2190); first-difference OLS.
 === ELASTICITY CELLS ===
 
