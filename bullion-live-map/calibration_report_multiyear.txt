@@ -1,0 +1,72 @@
+Bullion calibration — train split 1752 days (first 80% of 2190); first-difference OLS.
+=== ELASTICITY CELLS ===
+
+ffr    -> us2y       n=1197  span=1.25  slope=-0.0096756  hand=+0.92  r=-0.01  t=-0.3  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+ffr    -> us10y      n=1197  span=1.25  slope=+0.019637  hand=+0.42  r=+0.02  t=+0.6  =>  DIRECTIONAL (|t|=0.6 not significant)
+ffr    -> spx_pct    n=1203  span=1.25  slope=-0.019352  hand=-0.045  r=-0.09  t=-3.2  =>  MEASURED (sign matches, |t|=3.2, span=1.25)
+ffr    -> gold_pct   n=1204  span=1.25  slope=+0.0061387  hand=-0.03  r=+0.03  t=+1.2  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+ffr    -> dxy_add    n=1205  span=1.25  slope=+0.45082  hand=+2.2  r=+0.05  t=+1.8  =>  DIRECTIONAL (|t|=1.8 not significant)
+vix    -> spx_pct    n=1203  span=34  slope=-0.0044905  hand=-0.0085  r=-0.77  t=-41.4  =>  MEASURED (sign matches, |t|=41.4, span=34)
+vix    -> us10y      n=1195  span=34  slope=-0.00076253  hand=-0.009  r=-0.02  t=-0.8  =>  DIRECTIONAL (|t|=0.8 not significant)
+vix    -> gold_pct   n=1204  span=34  slope=-0.00022306  hand=+0.0045  r=-0.04  t=-1.5  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+vix    -> dxy_add    n=1205  span=34  slope=+0.031365  hand=+0.08  r=+0.13  t=+4.5  =>  MEASURED (sign matches, |t|=4.5, span=34)
+dxy    -> gold_pct   n=1204  span=4.18  slope=-0.009495  hand=-0.0075  r=-0.45  t=-17.2  =>  MEASURED (sign matches, |t|=17.2, span=4.18)
+dxy    -> wti_pct    n=1197  span=4.18  slope=-0.0049528  hand=-0.0055  r=-0.10  t=-3.4  =>  MEASURED (sign matches, |t|=3.4, span=4.18)
+dxy    -> spx_pct    n=1203  span=4.18  slope=-0.0060219  hand=-0.002  r=-0.25  t=-9.0  =>  MEASURED (sign matches, |t|=9.0, span=4.18)
+wti_px -> spx_pct    n=1197  span=23  slope=+0.00082163  hand=-0.0009  r=+0.14  t=+4.9  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+wti_px -> us10y      n=1191  span=23  slope=+0.0043767  hand=+0.0035  r=+0.13  t=+4.6  =>  MEASURED (sign matches, |t|=4.6, span=23)
+us10y  -> spx_pct    n=1194  span=0.58  slope=-0.0081264  hand=-0.01  r=-0.05  t=-1.6  =>  DIRECTIONAL (|t|=1.6 not significant)
+us2y   -> spx_pct    n=1194  span=0.91  slope=+0.001427  hand=-0.008  r=+0.01  t=+0.3  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+dxy    -> us10y      n=1195  span=4.18  slope=+0.045481  hand=+0.02  r=+0.34  t=+12.3  =>  MEASURED (sign matches, |t|=12.3, span=4.18)
+vix    -> wti_pct    n=1197  span=34  slope=-0.0019638  hand=-0.004  r=-0.16  t=-5.6  =>  MEASURED (sign matches, |t|=5.6, span=34)
+us10y  -> mortgage_lvl  n=249  span=0.71  slope=+0.30121  hand=+0.9  r=+0.33  t=+5.4  =>  MEASURED (sign matches, |t|=5.4, span=0.71)
+ffr    -> sofr_lvl   n=1195  span=1.25  slope=+0.99805  hand=+1  r=+0.96  t=+115.9  =>  MEASURED (sign matches, |t|=115.9, span=1.25)
+ffr    -> tbill_lvl  n=1197  span=1.25  slope=-0.048054  hand=+0.98  r=-0.07  t=-2.5  =>  DIRECTIONAL (fitted sign disagrees with the hand sign)
+vix    -> hy_oas_lvl  n=463  span=34  slope=+0.021583  hand=+0.02  r=+0.56  t=+14.5  =>  MEASURED (sign matches, |t|=14.5, span=34)
+spx    -> xlk_pct    n=1203  span=797  slope=+0.0002968  hand=+1.1  r=+0.93  t=+84.5  =>  MEASURED (sign matches, |t|=84.5, span=797)
+spx    -> xlf_pct    n=1203  span=797  slope=+0.00019382  hand=+1  r=+0.77  t=+42.0  =>  MEASURED (sign matches, |t|=42.0, span=797)
+spx    -> xle_pct    n=1203  span=797  slope=+0.00016525  hand=+0.9  r=+0.45  t=+17.3  =>  MEASURED (sign matches, |t|=17.3, span=797)
+spx    -> xlp_pct    n=1203  span=797  slope=+9.3802e-05  hand=+0.55  r=+0.56  t=+23.5  =>  MEASURED (sign matches, |t|=23.5, span=797)
+wti_px -> xle_pct    n=1197  span=23  slope=+0.0056418  hand=+0.01  r=+0.57  t=+24.1  =>  MEASURED (sign matches, |t|=24.1, span=23)
+
+=== LINKS === 93 links; 37 with both endpoints in data.json (same-field pairs excluded); |t| > 2 = measured
+
+fed      -> fomc              fed_bs->ffr           n=249 slope=-3.9e-08 t=-0.2 hand=+1 was=directional => DIRECTIONAL (fitted sign disagrees but |t|=0.2 not significant)  [CONFLICT]
+ffr      -> yield                ffr->us10y         n=1197 slope=+0.019637 t=+0.6 hand=+1 was=directional => DIRECTIONAL (tested, |t|=0.6 not significant)
+ffr      -> credit               ffr->hy_oas        n=470 slope=+0.089244 t=+0.7 hand=-1 was=directional => DIRECTIONAL (fitted sign disagrees but |t|=0.7 not significant)  [CONFLICT]
+fed      -> cpi               fed_bs->cpi_yoy       n=  7 slope=+2.0766e-06 t=+3.0 hand=-1 was=directional => DIRECTIONAL (only n=7 usable daily changes (< 30) — the series is too coarse for a daily fit)
+fed      -> repo              fed_bs->sofr          n=245 slope=-9.9013e-08 t=-0.5 hand=+1 was=measured    => DIRECTIONAL (fitted sign disagrees but |t|=0.5 not significant)  [CONFLICT]
+yield    -> credit             us10y->hy_oas        n=448 slope=-0.28526 t=-4.7 hand=-1 was=measured    => MEASURED (sign matches, |t|=4.7)
+yield    -> equit              us10y->spx           n=1194 slope=-0.0081264 t=-1.6 hand=-1 was=measured    => DIRECTIONAL (tested, |t|=1.6 not significant)
+yield    -> fins               us10y->xlf           n=1194 slope=+0.018542 t=+3.2 hand=+1 was=directional => MEASURED (sign matches, |t|=3.2)
+credit   -> equit             hy_oas->spx           n=450 slope=-0.0815 t=-17.0 hand=-1 was=measured    => MEASURED (sign matches, |t|=17.0)
+equit    -> tech                 spx->xlk           n=1203 slope=+0.0002968 t=+84.5 hand=+1 was=measured    => MEASURED (sign matches, |t|=84.5)
+equit    -> fins                 spx->xlf           n=1203 slope=+0.00019382 t=+42.0 hand=+1 was=measured    => MEASURED (sign matches, |t|=42.0)
+equit    -> defn                 spx->xlp           n=1203 slope=+9.3802e-05 t=+23.5 hand=+1 was=directional => MEASURED (sign matches, |t|=23.5)
+ffr      -> tech                 ffr->xlk           n=1203 slope=-0.028459 t=-3.3 hand=-1 was=directional => MEASURED (sign matches, |t|=3.3)
+vix      -> equit                vix->spx           n=1203 slope=-0.0044905 t=-41.4 hand=-1 was=measured    => MEASURED (sign matches, |t|=41.4)
+vix      -> defn                 vix->xlp           n=1203 slope=-0.0019502 t=-17.1 hand=-1 was=measured    => MEASURED (sign matches, |t|=17.1)
+cpi      -> fomc             cpi_yoy->ffr           n= 57 slope=-0.109 t=-1.1 hand=+1 was=directional => DIRECTIONAL (fitted sign disagrees but |t|=1.1 not significant)  [CONFLICT]
+nfp      -> fomc             nfp_mom->ffr           n= 57 slope=+7.4079e-05 t=+0.5 hand=+1 was=directional => DIRECTIONAL (tested, |t|=0.5 not significant)
+ffr      -> usd                  ffr->dxy           n=1205 slope=+0.45082 t=+1.8 hand=+1 was=directional => DIRECTIONAL (tested, |t|=1.8 not significant)
+usd      -> gold                 dxy->gold_px       n=1204 slope=-0.009495 t=-17.2 hand=-1 was=measured    => MEASURED (sign matches, |t|=17.2)
+usd      -> oil                  dxy->wti_px        n=1197 slope=-0.0049528 t=-3.4 hand=+1 was=measured    => MEASURED (data contradicts the hand sign at |t|=3.4: fitted slope=-0.004953)  [FLIP]
+usd      -> equit                dxy->spx           n=1203 slope=-0.0060219 t=-9.0 hand=-1 was=measured    => MEASURED (sign matches, |t|=9.0)
+dxy_fx   -> credit               dxy->hy_oas        n=452 slope=-0.019953 t=-2.4 hand=+1 was=directional => MEASURED (data contradicts the hand sign at |t|=2.4: fitted slope=-0.01995)  [FLIP]
+oil      -> cpi               wti_px->cpi_yoy       n= 38 slope=+0.0057033 t=+0.6 hand=+1 was=directional => DIRECTIONAL (tested, |t|=0.6 not significant)
+vix      -> gold                 vix->gold_px       n=1204 slope=-0.00022306 t=-1.5 hand=+1 was=directional => DIRECTIONAL (fitted sign disagrees but |t|=1.5 not significant)  [CONFLICT]
+oil      -> equit             wti_px->spx           n=1197 slope=+0.00082163 t=+4.9 hand=-1 was=measured    => MEASURED (data contradicts the hand sign at |t|=4.9: fitted slope=+0.0008216)  [FLIP]
+gold     -> tsy              gold_px->us10y         n=1195 slope=-0.00070294 t=-8.9 hand=+1 was=directional => MEASURED (data contradicts the hand sign at |t|=8.9: fitted slope=-0.0007029)  [FLIP]
+ffr      -> m2                   ffr->m2            n= 57 slope=-0.0098219 t=-3.3 hand=-1 was=directional => MEASURED (sign matches, |t|=3.3)
+m2       -> cpi                   m2->cpi_yoy       n= 58 slope=+0.0011811 t=+3.5 hand=+1 was=directional => MEASURED (sign matches, |t|=3.5)
+m2       -> gold                  m2->gold_px       n= 38 slope=+3.3438e-05 t=+0.7 hand=+1 was=directional => DIRECTIONAL (tested, |t|=0.7 not significant)
+yield    -> mortgage           us10y->mortgage_30y  n=249 slope=+0.30121 t=+5.4 hand=+1 was=measured    => MEASURED (sign matches, |t|=5.4)
+ffr      -> mortgage             ffr->mortgage_30y  n=249 slope=+0.11569 t=+1.7 hand=+1 was=directional => DIRECTIONAL (tested, |t|=1.7 not significant)
+mortgage -> credit      mortgage_30y->hy_oas        n= 93 slope=+0.049363 t=+0.3 hand=+1 was=measured    => DIRECTIONAL (tested, |t|=0.3 not significant)
+tsy      -> tbills             us10y->tbill_3m      n=1197 slope=+0.15665 t=+9.7 hand=+1 was=measured    => MEASURED (sign matches, |t|=9.7)
+ffr      -> tbills               ffr->tbill_3m      n=1197 slope=-0.048054 t=-2.5 hand=+1 was=directional => MEASURED (data contradicts the hand sign at |t|=2.5: fitted slope=-0.04805)  [FLIP]
+oil      -> energy            wti_px->xle           n=1197 slope=+0.0056418 t=+24.1 hand=+1 was=measured    => MEASURED (sign matches, |t|=24.1)
+energy   -> equit                xle->spx           n=1203 slope=+0.0081616 t=+18.6 hand=+1 was=directional => MEASURED (sign matches, |t|=18.6)
+vix      -> repo                 vix->sofr          n=1195 slope=+0.0012852 t=+1.5 hand=-1 was=directional => DIRECTIONAL (fitted sign disagrees but |t|=1.5 not significant)  [CONFLICT]
+
+fitted: {'directional': 15, 'measured': 22}   actions: {'clean': 26, 'conflict': 6, 'flip': 5}

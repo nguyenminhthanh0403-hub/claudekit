@@ -339,6 +339,7 @@ def main():
     import sys
     path = sys.argv[1] if len(sys.argv) > 1 else 'data.json'
     html_path = sys.argv[2] if len(sys.argv) > 2 else 'bullion_mkultra.html'
+    report_path = sys.argv[3] if len(sys.argv) > 3 else 'calibration_report.txt'
     doc = json.load(open(path))
     hist = doc['history'] if isinstance(doc, dict) and 'history' in doc else doc
     train = train_split(list(hist.keys()))
@@ -366,7 +367,7 @@ def main():
 
     report = "\n".join(lines) + "\n"
     print(report)
-    open('calibration_report.txt', 'w').write(report)
+    open(report_path, 'w').write(report)
 
 
 if __name__ == '__main__':
