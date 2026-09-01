@@ -53,6 +53,8 @@ YAHOO_SYMBOLS = {
     "GC=F":      ("gold_px", 2),
     "DX-Y.NYB":  ("dxy",     2),
     "^GSPC":     ("spx",     2),
+    "^IXIC":     ("nasdaq",  2),
+    "^DJI":      ("dow",     2),
     # Mk17 sector ETFs
     "XLK":       ("xlk", 2),
     "XLF":       ("xlf", 2),
@@ -144,6 +146,8 @@ FIELD_META = {
     "gold_px": {"class": "measured", "cadence": "daily",   "source": "Yahoo GC=F"},
     "dxy":     {"class": "measured", "cadence": "daily",   "source": "Yahoo DX-Y.NYB"},
     "spx":     {"class": "measured", "cadence": "daily",   "source": "Yahoo ^GSPC"},
+    "nasdaq":  {"class": "measured", "cadence": "daily",   "source": "Yahoo ^IXIC"},
+    "dow":     {"class": "measured", "cadence": "daily",   "source": "Yahoo ^DJI"},
     # Mk17 breadth
     "nfci":         {"class": "measured", "cadence": "weekly",  "source": "FRED NFCI"},
     "m2":           {"class": "measured", "cadence": "monthly", "source": "FRED M2SL"},

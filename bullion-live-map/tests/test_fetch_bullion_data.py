@@ -297,6 +297,12 @@ class TestBuildEnvelope(unittest.TestCase):
         self.assertEqual(f["cadence"], "daily")
         self.assertEqual(f["source"], "Yahoo GC=F")
 
+    def test_nasdaq_and_dow_field_meta(self):
+        self.assertEqual(FIELD_META["nasdaq"],
+                          {"class": "measured", "cadence": "daily", "source": "Yahoo ^IXIC"})
+        self.assertEqual(FIELD_META["dow"],
+                          {"class": "measured", "cadence": "daily", "source": "Yahoo ^DJI"})
+
     def test_omits_fields_that_failed_to_fetch(self):
         env = build_envelope({"gold_px": self.LATEST["gold_px"]}, self.HISTORY,
                              "2026-07-20T10:07:14Z")
@@ -318,7 +324,7 @@ class TestBuildEnvelope(unittest.TestCase):
         # A field fetched but absent from FIELD_META would ship with no
         # provenance, which is the bug this whole change exists to prevent.
         expected = {"us2y", "us10y", "vix", "ffr", "wti_px", "cpi_yoy",
-                    "nfp_mom", "gold_px", "dxy", "spx",
+                    "nfp_mom", "gold_px", "dxy", "spx", "nasdaq", "dow",
                     "nfci", "m2", "mortgage_30y", "hy_oas", "ig_oas",
                     "sofr", "tbill_3m", "fed_bs", "rrp",
                     "xlk", "xlf", "xle", "xlp", "cb_gold_reserves",

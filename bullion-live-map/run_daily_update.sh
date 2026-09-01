@@ -5,7 +5,13 @@ cd "$(dirname "${BASH_SOURCE[0]}")"
 
 python3 fetch_bullion_data.py
 
-git add data.json
+# News is a quality-of-life feature, not load-bearing market data -- a
+# failed fetch here must not block the data.json commit/push above. It
+# leaves the existing news.json in place (see fetch_bullion_news.py) and
+# still surfaces to stderr rather than failing silently.
+python3 fetch_bullion_news.py || echo "News fetch failed; continuing with existing news.json." >&2
+
+git add data.json news.json
 if git diff --cached --quiet; then
   echo "No data changes; skipping commit."
 else
