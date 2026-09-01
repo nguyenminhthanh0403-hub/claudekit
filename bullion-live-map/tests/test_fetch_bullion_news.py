@@ -10,7 +10,9 @@ from fetch_bullion_news import (
     filter_recent,
     filter_listicles,
     tag_sentiment,
+    classify_category,
     build_news_envelope,
+    CATEGORY_LABELS,
 )
 
 SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
@@ -128,6 +130,50 @@ class TestTagSentiment(unittest.TestCase):
         self.assertEqual(tag_sentiment("SELLOFF hits tech stocks"), "bearish")
 
 
+class TestClassifyCategory(unittest.TestCase):
+    def test_federal_policy_keyword(self):
+        self.assertEqual(classify_category("Fed signals rate cut as inflation cools"), "federal")
+
+    def test_technology_keyword(self):
+        self.assertEqual(classify_category("Nvidia chip demand fuels AI data center boom"), "tech")
+
+    def test_healthcare_keyword(self):
+        self.assertEqual(classify_category("FDA approval marks a turning point for BeOne"), "healthcare")
+
+    def test_energy_keyword(self):
+        self.assertEqual(classify_category("Oil prices rise as OPEC weighs supply cuts"), "energy")
+
+    def test_financials_keyword(self):
+        self.assertEqual(classify_category("Goldman Sachs hedge fund unit sees record inflows"), "financials")
+
+    def test_consumer_retail_keyword(self):
+        self.assertEqual(classify_category("Walmart retailer sales beat as holiday shopping starts early"), "consumer")
+
+    def test_industrials_keyword(self):
+        self.assertEqual(classify_category("Boeing factory output ramps up amid supply chain fixes"), "industrials")
+
+    def test_real_estate_keyword(self):
+        self.assertEqual(classify_category("Mortgage rates fall as home sales pick up"), "realestate")
+
+    def test_crypto_keyword(self):
+        self.assertEqual(classify_category("Bitcoin and ethereum rally as crypto ETF inflows surge"), "crypto")
+
+    def test_international_keyword(self):
+        self.assertEqual(classify_category("China sanctions escalate trade war with Europe"), "international")
+
+    def test_no_keyword_match_falls_back_to_other(self):
+        self.assertEqual(classify_category("Is Linde Stock Underperforming the Dow?"), "other")
+
+    def test_case_insensitive(self):
+        self.assertEqual(classify_category("BITCOIN SURGES past new record high"), "crypto")
+
+    def test_every_label_key_has_a_keyword_list_or_is_the_fallback(self):
+        # Every category the classifier can return must resolve to a display
+        # label; "other" is the one deliberate exception with no keyword list.
+        from fetch_bullion_news import CATEGORY_KEYWORDS
+        self.assertEqual(set(CATEGORY_KEYWORDS) | {"other"}, set(CATEGORY_LABELS))
+
+
 class TestBuildNewsEnvelope(unittest.TestCase):
     def test_envelope_shape(self):
         items = [{
@@ -143,6 +189,7 @@ class TestBuildNewsEnvelope(unittest.TestCase):
         self.assertEqual(h["link"], "https://finance.yahoo.com/news/stocks-rally-1.html")
         self.assertEqual(h["published"], "2026-09-01T16:50:13Z")
         self.assertEqual(h["sentiment"], "bullish")
+        self.assertEqual(h["category"], "federal")
 
 
 if __name__ == "__main__":

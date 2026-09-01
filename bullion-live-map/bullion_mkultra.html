@@ -188,7 +188,7 @@
      the map does (see focusNode()/clearFocus() below). */
   .board-card.dimmed { opacity: 0.12; }
 
-  /* Markets tab: 3 index cards + a scrolling headline ticker */
+  /* Markets tab: 3 index cards + a categorized headline list */
   #markets-view {
     flex: 1 1 auto; overflow: auto; padding: 20px;
     display: flex; flex-direction: column; gap: 20px;
@@ -220,36 +220,37 @@
   .market-sparkline polyline.down { stroke: var(--red); }
 
   #markets-news { min-width: 0; }
-  #news-ticker-label {
+  #news-list-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
     color: var(--gold); margin-bottom: 8px;
   }
-  #news-ticker-viewport {
-    overflow: hidden; border: 1px solid var(--border); border-radius: 8px;
-    background: var(--bg-panel2); padding: 10px 0;
+  #news-list {
+    display: flex; flex-direction: column; gap: 18px;
+    border: 1px solid var(--border); border-radius: 8px;
+    background: var(--bg-panel2); padding: 16px;
   }
-  #news-ticker-track { display: flex; white-space: nowrap; width: max-content; }
-  #news-ticker-track.scrolling { animation: news-ticker-scroll 60s linear infinite; }
-  #news-ticker-track.scrolling:hover { animation-play-state: paused; }
-  .news-ticker-run { display: flex; }
-  .news-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 14px; margin-right: 10px; font-size: 12.5px;
-    color: var(--text); text-decoration: none; white-space: nowrap;
-    border-left: 2px solid var(--border);
+  .news-category { border-left: 3px solid var(--cat-color, var(--border)); padding-left: 12px; }
+  .news-category-header {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+    color: var(--cat-color, var(--gold)); margin-bottom: 6px;
   }
-  .news-pill:hover { text-decoration: underline; }
-  .news-pill-tag { font-size: 10px; }
-  .news-pill.sentiment-bullish { border-left-color: var(--green); }
-  .news-pill.sentiment-bullish .news-pill-tag { color: var(--green); }
-  .news-pill.sentiment-bearish { border-left-color: var(--red); }
-  .news-pill.sentiment-bearish .news-pill-tag { color: var(--red); }
-  .news-pill.sentiment-neutral { border-left-color: var(--border); }
-  .news-pill.sentiment-neutral .news-pill-tag { color: var(--text-dim); }
-  @keyframes news-ticker-scroll {
-    from { transform: translateX(0); }
-    to   { transform: translateX(-50%); }
+  .news-category-items { display: flex; flex-direction: column; }
+  .news-item {
+    display: flex; align-items: baseline; gap: 10px;
+    padding: 5px 8px; margin: 0 -8px; border-radius: 6px;
+    color: var(--text); text-decoration: none;
   }
+  .news-item:hover { background: #182034; text-decoration: underline; }
+  .news-item-time {
+    flex: 0 0 auto; min-width: 122px; font-size: 11px; color: var(--text-dim);
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+  }
+  .news-item-sentiment { flex: 0 0 auto; font-size: 11px; width: 12px; text-align: center; }
+  .news-item.sentiment-bullish .news-item-sentiment { color: var(--green); }
+  .news-item.sentiment-bearish .news-item-sentiment { color: var(--red); }
+  .news-item.sentiment-neutral .news-item-sentiment { color: var(--text-dim); }
+  .news-item-headline { flex: 1 1 auto; font-size: 13px; line-height: 1.4; }
+  #news-list-empty { color: var(--text-dim); font-size: 13px; padding: 16px; }
 
   .node-g { cursor: pointer; transition: opacity 0.32s ease; }
   .node-g text { pointer-events: none; user-select: none; }
@@ -885,8 +886,8 @@
   <div id="markets-view" role="tabpanel" aria-label="Markets" hidden>
     <div id="markets-indices"></div>
     <div id="markets-news">
-      <div id="news-ticker-label">Headlines</div>
-      <div id="news-ticker-viewport"><div id="news-ticker-track"></div></div>
+      <div id="news-list-label">Headlines</div>
+      <div id="news-list"></div>
     </div>
   </div>
 </div>
@@ -3331,7 +3332,7 @@ function buildBoard() {
     view.appendChild(col);
   });
 }
-// ─── Markets tab: index cards + news ticker ────────────────────────────────
+// ─── Markets tab: index cards + categorized news list ──────────────────────
 // Deliberately built once, when live data resolves (see the data.json
 // .finally() callback below) rather than on first tab click — window.
 // BULLION_LIVE_DATA/BULLION_LIVE_HISTORY are only reliably populated after
@@ -3428,44 +3429,128 @@ function sentimentGlyph(s) {
   return '•';
 }
 
-function loadNewsTicker() {
-  const track = document.getElementById('news-ticker-track');
+// Display-only labels/colors for the categories fetch_bullion_news.py
+// assigns server-side (CATEGORY_LABELS/CATEGORY_KEYWORDS there is the one
+// place classification happens — this is just presentation, same split as
+// GROUP_COLOR/LAYER_LABELS above for map node groups). Deliberately its own
+// palette, not GROUP_COLOR, so news categories don't visually read as map
+// layers. Order here is display order (federal-and-broad-market first,
+// "other" always last).
+const CATEGORY_ORDER = [
+  'federal', 'tech', 'healthcare', 'energy', 'financials', 'consumer',
+  'industrials', 'realestate', 'crypto', 'international', 'other',
+];
+const CATEGORY_LABELS = {
+  federal: 'Federal Reserve & Policy',
+  tech: 'Technology',
+  healthcare: 'Healthcare',
+  energy: 'Energy',
+  financials: 'Financials & Banking',
+  consumer: 'Consumer & Retail',
+  industrials: 'Industrials',
+  realestate: 'Real Estate',
+  crypto: 'Crypto',
+  international: 'International & Geopolitics',
+  other: 'Other',
+};
+const CATEGORY_COLOR = {
+  federal: '#c9a24a',
+  tech: '#4f8fe0',
+  healthcare: '#4fb894',
+  energy: '#e08a3f',
+  financials: '#8a7fd1',
+  consumer: '#d4638f',
+  industrials: '#a08a6b',
+  realestate: '#b5793f',
+  crypto: '#c060c9',
+  international: '#5fb8c9',
+  other: '#8891a6',
+};
+
+function formatHeadlineTime(iso) {
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleString('en-US', {
+    month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+  });
+}
+
+function buildNewsItem(h) {
+  const a = document.createElement('a');
+  a.className = 'news-item sentiment-' + (h.sentiment || 'neutral');
+  a.href = h.link;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+
+  const time = document.createElement('span');
+  time.className = 'news-item-time';
+  time.textContent = formatHeadlineTime(h.published);
+  a.appendChild(time);
+
+  const tag = document.createElement('span');
+  tag.className = 'news-item-sentiment';
+  tag.textContent = sentimentGlyph(h.sentiment);
+  a.appendChild(tag);
+
+  const headline = document.createElement('span');
+  headline.className = 'news-item-headline';
+  headline.textContent = h.headline;
+  a.appendChild(headline);
+
+  return a;
+}
+
+function loadNewsList() {
+  const list = document.getElementById('news-list');
   fetch('news.json')
     .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
     .then(json => {
       const headlines = json.headlines || [];
+      list.innerHTML = '';
       if (!headlines.length) {
-        track.textContent = 'No recent headlines.';
+        const empty = document.createElement('div');
+        empty.id = 'news-list-empty';
+        empty.textContent = 'No recent headlines.';
+        list.appendChild(empty);
         return;
       }
-      const buildRun = () => {
-        const run = document.createElement('div');
-        run.className = 'news-ticker-run';
-        headlines.forEach(h => {
-          const a = document.createElement('a');
-          a.className = 'news-pill sentiment-' + (h.sentiment || 'neutral');
-          a.href = h.link;
-          a.target = '_blank';
-          a.rel = 'noopener noreferrer';
-          const tag = document.createElement('span');
-          tag.className = 'news-pill-tag';
-          tag.textContent = sentimentGlyph(h.sentiment);
-          a.appendChild(tag);
-          a.appendChild(document.createTextNode(h.headline));
-          run.appendChild(a);
-        });
-        return run;
-      };
-      // The track holds two identical runs back to back; the CSS marquee
-      // animates translateX(-50%) and loops, so it reads as one continuous
-      // scroll instead of snapping back to the start every cycle.
-      track.appendChild(buildRun());
-      track.appendChild(buildRun());
-      track.classList.add('scrolling');
+      // Group by category (server-assigned), each group sorted newest-first;
+      // categories with zero headlines this cycle are simply absent, not
+      // shown with a "no updates" placeholder.
+      const byCategory = {};
+      headlines.forEach(h => {
+        const cat = CATEGORY_LABELS[h.category] ? h.category : 'other';
+        (byCategory[cat] = byCategory[cat] || []).push(h);
+      });
+      CATEGORY_ORDER.forEach(cat => {
+        const items = byCategory[cat];
+        if (!items || !items.length) return;
+        items.sort((a, b) => b.published.localeCompare(a.published));
+
+        const section = document.createElement('div');
+        section.className = 'news-category';
+        section.style.setProperty('--cat-color', CATEGORY_COLOR[cat]);
+
+        const header = document.createElement('div');
+        header.className = 'news-category-header';
+        header.textContent = CATEGORY_LABELS[cat];
+        section.appendChild(header);
+
+        const itemsEl = document.createElement('div');
+        itemsEl.className = 'news-category-items';
+        items.forEach(h => itemsEl.appendChild(buildNewsItem(h)));
+        section.appendChild(itemsEl);
+
+        list.appendChild(section);
+      });
     })
     .catch(err => {
-      console.warn('news.json fetch failed, no headline ticker this session:', err);
-      track.textContent = 'Headlines unavailable.';
+      console.warn('news.json fetch failed, no headline list this session:', err);
+      list.innerHTML = '';
+      const empty = document.createElement('div');
+      empty.id = 'news-list-empty';
+      empty.textContent = 'Headlines unavailable.';
+      list.appendChild(empty);
     });
 }
 // ─── end Markets tab ────────────────────────────────────────────────────────
@@ -6784,7 +6869,7 @@ fetch('data.json')
 // News is independent of data.json — fetched in parallel, not chained after
 // it, so a slow or failed market-data fetch never delays the headline
 // ticker (and vice versa).
-loadNewsTicker();
+loadNewsList();
 </script>
 
 <div id="disclaimer-overlay">

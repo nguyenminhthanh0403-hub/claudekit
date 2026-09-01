@@ -2,11 +2,12 @@
 """Daily news-headline fetch for the Bullion news bar.
 
 Pulls Yahoo Finance's general RSS feed (free, no key) and writes news.json:
-a short list of recent, sentiment-tagged headlines for the Markets tab's
-scrolling ticker. Deliberately does NOT call any LLM/paid API — sentiment is
-a local bullish/bearish keyword scan, same spirit as the map's existing
-runLocalAnalysis JS fallback, just done once here in Python so there is one
-wordlist, not two copies that can drift apart.
+a list of recent headlines, each tagged with a sentiment and a topic
+category, rendered by the Markets tab as a categorized list (not a
+scrolling ticker). Deliberately does NOT call any LLM/paid API — both
+sentiment and category are local keyword scans, same spirit as the map's
+existing runLocalAnalysis JS fallback, just done once here in Python so
+there is one wordlist per signal, not copies that can drift apart.
 
 The raw feed mixes today's real market news with evergreen listicles
 ("best credit cards of 2026") that carry stale pubDates — filter_recent()
@@ -24,7 +25,10 @@ from email.utils import parsedate_to_datetime
 NEWS_RSS_URL = "https://finance.yahoo.com/news/rssindex"
 NEWS_OUT_PATH = "news.json"
 MAX_AGE_HOURS = 48
-MAX_HEADLINES = 20
+# Raised from 20 (the old scrolling-ticker cap) now that headlines render as
+# a categorized list, not a single marquee row -- more items means fuller
+# category sections instead of most sections showing 0-1 headlines.
+MAX_HEADLINES = 40
 
 # A deliberately small, literal keyword scan -- not NLP, not weighted, just
 # enough to separate "clearly up" from "clearly down" headlines. Ties (or no
@@ -40,6 +44,81 @@ BEARISH_WORDS = [
     "crashes", "tumble", "tumbles", "drop", "drops", "falls", "fall",
     "weigh", "weighs",
 ]
+
+# Category taxonomy for the news list, agreed with the user during the
+# redesign brainstorm: 10 topic buckets + a catch-all "other". Same spirit
+# as BULLISH_WORDS/BEARISH_WORDS above -- a literal keyword scan, not NLP;
+# no LLM call, per the original cost constraint. Order matters only as a
+# tie-break (first category reaching the highest keyword-hit count wins);
+# a headline that hits nothing lands in "other" rather than being guessed.
+CATEGORY_LABELS = {
+    "federal": "Federal Reserve & Policy",
+    "tech": "Technology",
+    "healthcare": "Healthcare",
+    "energy": "Energy",
+    "financials": "Financials & Banking",
+    "consumer": "Consumer & Retail",
+    "industrials": "Industrials",
+    "realestate": "Real Estate",
+    "crypto": "Crypto",
+    "international": "International & Geopolitics",
+    "other": "Other",
+}
+CATEGORY_KEYWORDS = {
+    "federal": [
+        "federal reserve", "fomc", "interest rate", "rate cut", "rate hike",
+        "treasury", "inflation", "cpi", "jobs report", "unemployment",
+        "gdp", "powell", "central bank", "fiscal", "congress",
+        "white house", "tariff", "trade war", "government shutdown",
+        "debt ceiling", "social security",
+    ],
+    "tech": [
+        "tech ", "technology", "apple", "microsoft", "google", "alphabet",
+        "meta", "nvidia", " ai ", "ai-driven", "artificial intelligence",
+        "chip", "semiconductor", "software", "app store",
+        "cloud computing", "iphone", "silicon valley", "data center",
+        "cyber",
+    ],
+    "healthcare": [
+        "health", "fda", "drug", "pharma", "biotech", "vaccine",
+        "hospital", "insurer", "medicare", "medicaid", "clinical trial",
+    ],
+    "energy": [
+        "oil", "gas prices", "crude", "opec", "energy", "solar",
+        "wind power", "pipeline", "natural gas", "refinery", "refin",
+        "barrel", "lithium", "battery", "mining",
+    ],
+    "financials": [
+        "bank", "banking", "bancorp", "wall street", "hedge fund",
+        "private equity", "jpmorgan", "goldman sachs", "morgan stanley",
+        "wells fargo", "citigroup", "lender", "loan", "credit union",
+        "insurance company", "visa", "mastercard", "payments",
+    ],
+    "consumer": [
+        "retail", "retailer", "store", "consumer spending", "walmart",
+        "target", "amazon", "e-commerce", "holiday shopping", "restaurant",
+        "airline", "travel", "hotel", "clothing",
+    ],
+    "industrials": [
+        "manufacturing", "factory", "industrial", "boeing", "aerospace",
+        "shipping", "logistics", "supply chain", "steel", "automaker",
+        "auto industry", "tesla",
+    ],
+    "realestate": [
+        "housing", "home sales", "mortgage", "real estate", "homebuilder",
+        "rent", "commercial property", "reit",
+    ],
+    "crypto": [
+        "bitcoin", "crypto", "ethereum", "blockchain", "coinbase",
+        "stablecoin", "nft",
+    ],
+    "international": [
+        "china", "europe", "eu ", "japan", "russia", "ukraine",
+        "geopolitic", "sanctions", "trade deal", "global market",
+        "emerging market", "world bank", "imf", "iran", "middle east",
+        "war ",
+    ],
+}
 
 
 def _parse_pub_date(raw):
@@ -117,6 +196,16 @@ def tag_sentiment(title):
     return "neutral"
 
 
+def classify_category(title):
+    lower = " " + title.lower() + " "
+    best_cat, best_count = "other", 0
+    for cat, words in CATEGORY_KEYWORDS.items():
+        count = sum(1 for w in words if w in lower)
+        if count > best_count:
+            best_cat, best_count = cat, count
+    return best_cat
+
+
 def build_news_envelope(items, generated_at):
     headlines = []
     for i in items:
@@ -125,6 +214,7 @@ def build_news_envelope(items, generated_at):
             "link": i["link"],
             "published": i["published"].strftime("%Y-%m-%dT%H:%M:%SZ"),
             "sentiment": tag_sentiment(i["title"]),
+            "category": classify_category(i["title"]),
         })
     return {"generated_at": generated_at, "headlines": headlines}
 
