@@ -280,6 +280,24 @@ def sync_news_images(items, images_dir, fetch=None):
     return items
 
 
+def prune_dangling_images(images_dir, referenced_filenames):
+    """Delete files under images_dir that aren't referenced by the
+    envelope just built. Without this, news-images/ grows without bound
+    -- every hourly run would leave behind thumbnails for headlines that
+    have since rotated out of the 48h window.
+
+    Returns the list of filenames actually deleted (for logging/tests).
+    """
+    if not os.path.isdir(images_dir):
+        return []
+    deleted = []
+    for name in sorted(os.listdir(images_dir)):
+        if name not in referenced_filenames:
+            os.remove(os.path.join(images_dir, name))
+            deleted.append(name)
+    return deleted
+
+
 def build_news_envelope(items, generated_at):
     headlines = []
     for i in items:

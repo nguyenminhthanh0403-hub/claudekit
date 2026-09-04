@@ -16,6 +16,7 @@ from fetch_bullion_news import (
     classify_category,
     image_filename_for_url,
     sync_news_images,
+    prune_dangling_images,
     build_news_envelope,
     CATEGORY_LABELS,
 )
@@ -317,6 +318,35 @@ class TestSyncNewsImages(unittest.TestCase):
         items = [{"title": "t", "link": "l", "image_url": "https://example.com/c.jpg"}]
         sync_news_images(items, images_dir, fetch=lambda u, t: b"x")
         self.assertTrue(os.path.isdir(images_dir))
+
+
+class TestPruneDanglingImages(unittest.TestCase):
+    def _tmp_images_dir(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        return d
+
+    def test_deletes_unreferenced_files_keeps_referenced_ones(self):
+        images_dir = self._tmp_images_dir()
+        for name in ("keep.jpg", "drop.jpg"):
+            with open(os.path.join(images_dir, name), "wb") as f:
+                f.write(b"x")
+
+        deleted = prune_dangling_images(images_dir, {"keep.jpg"})
+
+        self.assertEqual(deleted, ["drop.jpg"])
+        self.assertTrue(os.path.exists(os.path.join(images_dir, "keep.jpg")))
+        self.assertFalse(os.path.exists(os.path.join(images_dir, "drop.jpg")))
+
+    def test_missing_directory_returns_empty_list(self):
+        self.assertEqual(prune_dangling_images("/no/such/dir", {"a.jpg"}), [])
+
+    def test_empty_referenced_set_deletes_everything(self):
+        images_dir = self._tmp_images_dir()
+        with open(os.path.join(images_dir, "orphan.jpg"), "wb") as f:
+            f.write(b"x")
+        deleted = prune_dangling_images(images_dir, set())
+        self.assertEqual(deleted, ["orphan.jpg"])
 
 
 class TestBuildNewsEnvelope(unittest.TestCase):
