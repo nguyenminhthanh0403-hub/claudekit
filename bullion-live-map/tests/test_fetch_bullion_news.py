@@ -366,6 +366,25 @@ class TestBuildNewsEnvelope(unittest.TestCase):
         self.assertEqual(h["sentiment"], "bullish")
         self.assertEqual(h["category"], "federal")
 
+    def test_envelope_includes_image_when_present(self):
+        items = [{
+            "title": "Stocks rally as Fed signals rate cut",
+            "link": "https://finance.yahoo.com/news/stocks-rally-1.html",
+            "published": datetime(2026, 9, 1, 16, 50, 13, tzinfo=timezone.utc),
+            "image": "news-images/abc123.jpg",
+        }]
+        env = build_news_envelope(items, "2026-09-01T18:00:00Z")
+        self.assertEqual(env["headlines"][0]["image"], "news-images/abc123.jpg")
+
+    def test_envelope_image_is_none_when_absent(self):
+        items = [{
+            "title": "Stocks rally as Fed signals rate cut",
+            "link": "https://finance.yahoo.com/news/stocks-rally-1.html",
+            "published": datetime(2026, 9, 1, 16, 50, 13, tzinfo=timezone.utc),
+        }]
+        env = build_news_envelope(items, "2026-09-01T18:00:00Z")
+        self.assertIsNone(env["headlines"][0]["image"])
+
 
 class TestPathsAreFileRelative(unittest.TestCase):
     """Regression test for a real bug: NEWS_OUT_PATH used to be the bare

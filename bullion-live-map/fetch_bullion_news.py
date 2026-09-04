@@ -307,6 +307,7 @@ def build_news_envelope(items, generated_at):
             "published": i["published"].strftime("%Y-%m-%dT%H:%M:%SZ"),
             "sentiment": tag_sentiment(i["title"]),
             "category": classify_category(i["title"]),
+            "image": i.get("image"),
         })
     return {"generated_at": generated_at, "headlines": headlines}
 
@@ -337,8 +338,17 @@ def main():
     items = filter_listicles(items)
     items = items[:MAX_HEADLINES]
 
+    sync_news_images(items, IMAGES_DIR)
+
     generated_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
     envelope = build_news_envelope(items, generated_at)
+
+    referenced = {
+        h["image"].split("/", 1)[1] for h in envelope["headlines"] if h.get("image")
+    }
+    deleted = prune_dangling_images(IMAGES_DIR, referenced)
+    if deleted:
+        print(f"Pruned {len(deleted)} dangling image(s) from {IMAGES_DIR_NAME}/.")
 
     with open(NEWS_OUT_PATH, "w") as f:
         json.dump(envelope, f, indent=2, sort_keys=True)
