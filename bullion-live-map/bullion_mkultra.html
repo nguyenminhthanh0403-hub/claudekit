@@ -236,11 +236,15 @@
   }
   .news-category-items { display: flex; flex-direction: column; }
   .news-item {
-    display: flex; align-items: baseline; gap: 10px;
+    display: flex; align-items: center; gap: 10px;
     padding: 5px 8px; margin: 0 -8px; border-radius: 6px;
     color: var(--text); text-decoration: none;
   }
   .news-item:hover { background: #182034; text-decoration: underline; }
+  .news-item-thumb {
+    flex: 0 0 auto; width: 36px; height: 24px; border-radius: 3px;
+    object-fit: cover; background: var(--bg-panel2);
+  }
   .news-item-time {
     flex: 0 0 auto; min-width: 122px; font-size: 11px; color: var(--text-dim);
     white-space: nowrap; font-variant-numeric: tabular-nums;
@@ -3491,6 +3495,20 @@ function buildNewsItem(h) {
   tag.className = 'news-item-sentiment';
   tag.textContent = sentimentGlyph(h.sentiment);
   a.appendChild(tag);
+
+  if (h.image) {
+    const thumb = document.createElement('img');
+    thumb.className = 'news-item-thumb';
+    thumb.alt = '';
+    thumb.loading = 'lazy';
+    thumb.onerror = function () { thumb.remove(); };
+    // loading='lazy' must be set before src -- assigning src first starts
+    // the fetch synchronously before the browser sees the lazy attribute
+    // (Firefox bug 1647077; web.dev's lazy-loading guide), silently
+    // defeating lazy-loading with no visible error.
+    thumb.src = h.image;
+    a.appendChild(thumb);
+  }
 
   const headline = document.createElement('span');
   headline.className = 'news-item-headline';
