@@ -15,6 +15,7 @@ is what separates them; it is not optional polish.
 """
 import html
 import json
+import os
 import re
 import sys
 import urllib.error
@@ -23,7 +24,15 @@ from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 
 NEWS_RSS_URL = "https://finance.yahoo.com/news/rssindex"
-NEWS_OUT_PATH = "news.json"
+# Anchored to the script's own directory, not the caller's CWD -- GitHub
+# Actions `run:` steps default CWD to the repo root, so a bare relative
+# path here silently wrote to the wrong location for 3+ days (see the
+# plan doc this fix came from). fetch_bullion_data.py already gets this
+# right; mirror its OUT_DIR pattern instead of inventing a new one.
+OUT_DIR = os.path.dirname(os.path.abspath(__file__))
+NEWS_OUT_PATH = os.path.join(OUT_DIR, "news.json")
+IMAGES_DIR_NAME = "news-images"
+IMAGES_DIR = os.path.join(OUT_DIR, IMAGES_DIR_NAME)
 MAX_AGE_HOURS = 48
 # Raised from 20 (the old scrolling-ticker cap) now that headlines render as
 # a categorized list, not a single marquee row -- more items means fuller

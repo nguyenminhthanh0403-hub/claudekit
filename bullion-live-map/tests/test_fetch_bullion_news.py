@@ -192,5 +192,26 @@ class TestBuildNewsEnvelope(unittest.TestCase):
         self.assertEqual(h["category"], "federal")
 
 
+class TestPathsAreFileRelative(unittest.TestCase):
+    """Regression test for a real bug: NEWS_OUT_PATH used to be the bare
+    string "news.json", which resolves relative to the *caller's* CWD. In
+    GitHub Actions that CWD is the repo root, not bullion-live-map/, so the
+    daily workflow was silently writing to the wrong location for 3+ days
+    (confirmed via git log showing zero daily-bot commits to news.json
+    while data.json, whose script resolves paths the correct way, updated
+    every day). Both path constants must be anchored to the script's own
+    file location, not whatever process invokes it.
+    """
+    def test_news_out_path_resolves_next_to_the_script_not_cwd(self):
+        import fetch_bullion_news as mod
+        expected_dir = os.path.dirname(os.path.abspath(mod.__file__))
+        self.assertEqual(os.path.dirname(mod.NEWS_OUT_PATH), expected_dir)
+
+    def test_images_dir_resolves_next_to_the_script_not_cwd(self):
+        import fetch_bullion_news as mod
+        expected_dir = os.path.dirname(os.path.abspath(mod.__file__))
+        self.assertEqual(os.path.dirname(mod.IMAGES_DIR), expected_dir)
+
+
 if __name__ == "__main__":
     unittest.main()
