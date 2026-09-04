@@ -236,6 +236,50 @@ def image_filename_for_url(url):
     return f"{digest}.{ext}"
 
 
+IMAGE_TIMEOUT = 10
+
+
+def _fetch_image_bytes(url, timeout):
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=timeout) as resp:
+        return resp.read()
+
+
+def sync_news_images(items, images_dir, fetch=None):
+    """Download each item's thumbnail into images_dir under a
+    content-addressed filename, mutating each item with an `image` key
+    (a relative "news-images/<hash>.<ext>" path, or None if the item has
+    no image_url or the download fails). A URL already cached on disk is
+    never re-downloaded. One failed image never raises -- it just leaves
+    that item's `image` as None, matching this whole feature's
+    quality-of-life-not-load-bearing philosophy.
+
+    `fetch` is an injectable (url, timeout) -> bytes callable, defaulting
+    to a real HTTP GET; tests pass a fake to avoid real network calls.
+    """
+    fetch = fetch or _fetch_image_bytes
+    os.makedirs(images_dir, exist_ok=True)
+    for item in items:
+        url = item.get("image_url")
+        if not url:
+            item["image"] = None
+            continue
+        filename = image_filename_for_url(url)
+        dest = os.path.join(images_dir, filename)
+        if not os.path.exists(dest):
+            try:
+                data = fetch(url, IMAGE_TIMEOUT)
+            except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
+                print(f"Image fetch failed for {url} ({e}); skipping thumbnail.",
+                      file=sys.stderr)
+                item["image"] = None
+                continue
+            with open(dest, "wb") as f:
+                f.write(data)
+        item["image"] = f"{IMAGES_DIR_NAME}/{filename}"
+    return items
+
+
 def build_news_envelope(items, generated_at):
     headlines = []
     for i in items:

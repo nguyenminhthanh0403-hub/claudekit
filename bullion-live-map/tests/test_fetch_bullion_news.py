@@ -1,6 +1,9 @@
 import os
+import shutil
 import sys
+import tempfile
 import unittest
+import urllib.error
 from datetime import datetime, timezone
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
@@ -12,6 +15,7 @@ from fetch_bullion_news import (
     tag_sentiment,
     classify_category,
     image_filename_for_url,
+    sync_news_images,
     build_news_envelope,
     CATEGORY_LABELS,
 )
@@ -241,6 +245,78 @@ class TestImageFilenameForUrl(unittest.TestCase):
         name = image_filename_for_url(url)
         self.assertNotIn("/", name)
         self.assertNotIn("?", name)
+
+
+class TestSyncNewsImages(unittest.TestCase):
+    def _tmp_images_dir(self):
+        d = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, d, ignore_errors=True)
+        return d
+
+    def test_downloads_and_sets_relative_image_path(self):
+        images_dir = self._tmp_images_dir()
+        calls = []
+
+        def fake_fetch(url, timeout):
+            calls.append(url)
+            return b"fake-jpeg-bytes"
+
+        items = [{"title": "t", "link": "l", "image_url": "https://example.com/a.jpg"}]
+        sync_news_images(items, images_dir, fetch=fake_fetch)
+
+        self.assertEqual(calls, ["https://example.com/a.jpg"])
+        expected_name = image_filename_for_url("https://example.com/a.jpg")
+        self.assertEqual(items[0]["image"], f"news-images/{expected_name}")
+        with open(os.path.join(images_dir, expected_name), "rb") as f:
+            self.assertEqual(f.read(), b"fake-jpeg-bytes")
+
+    def test_does_not_redownload_an_already_cached_image(self):
+        images_dir = self._tmp_images_dir()
+        url = "https://example.com/b.jpg"
+        name = image_filename_for_url(url)
+        with open(os.path.join(images_dir, name), "wb") as f:
+            f.write(b"already-here")
+
+        def fake_fetch(url, timeout):
+            raise AssertionError("should not re-download a cached image")
+
+        items = [{"title": "t", "link": "l", "image_url": url}]
+        sync_news_images(items, images_dir, fetch=fake_fetch)
+
+        self.assertEqual(items[0]["image"], f"news-images/{name}")
+        with open(os.path.join(images_dir, name), "rb") as f:
+            self.assertEqual(f.read(), b"already-here")
+
+    def test_item_with_no_image_url_gets_none(self):
+        images_dir = self._tmp_images_dir()
+        items = [{"title": "t", "link": "l", "image_url": None}]
+        sync_news_images(items, images_dir, fetch=lambda u, t: b"x")
+        self.assertIsNone(items[0]["image"])
+
+    def test_a_failed_download_sets_none_and_does_not_block_other_items(self):
+        images_dir = self._tmp_images_dir()
+
+        def flaky_fetch(url, timeout):
+            if "bad" in url:
+                raise urllib.error.URLError("boom")
+            return b"good-bytes"
+
+        items = [
+            {"title": "fails", "link": "l1", "image_url": "https://example.com/bad.jpg"},
+            {"title": "works", "link": "l2", "image_url": "https://example.com/good.jpg"},
+        ]
+        sync_news_images(items, images_dir, fetch=flaky_fetch)
+
+        self.assertIsNone(items[0]["image"])
+        self.assertIsNotNone(items[1]["image"])
+
+    def test_creates_images_dir_if_missing(self):
+        parent = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, parent, ignore_errors=True)
+        images_dir = os.path.join(parent, "does", "not", "exist", "yet")
+        items = [{"title": "t", "link": "l", "image_url": "https://example.com/c.jpg"}]
+        sync_news_images(items, images_dir, fetch=lambda u, t: b"x")
+        self.assertTrue(os.path.isdir(images_dir))
 
 
 class TestBuildNewsEnvelope(unittest.TestCase):
