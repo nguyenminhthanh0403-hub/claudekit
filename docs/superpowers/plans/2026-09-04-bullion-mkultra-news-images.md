@@ -734,6 +734,7 @@ on:
 
 permissions:
   contents: write
+  issues: write
 
 jobs:
   update-news:
@@ -766,7 +767,127 @@ jobs:
             git commit -m "Update news headlines for $(date -u +%FT%H:%MZ)"
             git push
           fi
+
+      - name: Check news.json freshness
+        # Checks the *content* of news.json, not the fetch step's exit
+        # code -- exit-code-0-while-writing-to-the-wrong-place is exactly
+        # how the pre-existing bug this plan fixes (see Task 1) went
+        # unnoticed for 3+ days. Threshold is 6h: generous enough that a
+        # couple of missed/flaky hourly runs don't false-alarm, tight
+        # enough to catch a real break same business day. Because this
+        # step runs after this run's own fetch attempt, a normal
+        # overnight/weekend gap never trips it -- if this run's fetch
+        # succeeded, generated_at is seconds old regardless of how long
+        # the previous gap was; it's only stale if fetching has actually
+        # been failing.
+        id: freshness
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from datetime import datetime, timezone
+
+          STALE_AFTER_HOURS = 6
+          try:
+              with open("bullion-live-map/news.json") as f:
+                  generated_at_raw = json.load(f)["generated_at"]
+              generated_at = datetime.strptime(
+                  generated_at_raw, "%Y-%m-%dT%H:%M:%SZ"
+              ).replace(tzinfo=timezone.utc)
+              age_hours = (datetime.now(timezone.utc) - generated_at).total_seconds() / 3600
+              stale = age_hours > STALE_AFTER_HOURS
+              print(f"stale={'true' if stale else 'false'}")
+              print(f"age_hours={age_hours:.1f}")
+          except Exception as e:
+              # Missing file, unparseable JSON, missing/malformed
+              # generated_at -- any of these mean the pipeline is broken,
+              # not just slow.
+              print("stale=true")
+              print(f"age_hours=unknown ({e})")
+          PY
+
+      - name: Ensure the news-pipeline-stale label exists
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'news-pipeline-stale',
+                color: 'd93f0b',
+                description: 'Hourly news fetch has not produced fresh data recently',
+              });
+            } catch (err) {
+              if (err.status !== 422) throw err; // 422 = label already exists
+            }
+
+      - name: Report staleness to the alarm issue
+        if: steps.freshness.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const ageHours = '${{ steps.freshness.outputs.age_hours }}';
+            const now = new Date().toISOString();
+            const body = `**${now}** — news.json is stale (age: ${ageHours}h, threshold: 6h).\nRun: ${runUrl}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'news-pipeline-stale',
+            });
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'News pipeline has gone stale',
+                body,
+                labels: ['news-pipeline-stale'],
+                assignees: [context.repo.owner],
+              });
+            } else {
+              // Each stale run comments rather than opening a duplicate,
+              // same pattern as daily-data.yml's own alarm.
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body,
+              });
+            }
+
+      - name: Close the news-pipeline-stale issue on recovery
+        if: steps.freshness.outputs.stale == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'news-pipeline-stale',
+            });
+            const now = new Date().toISOString();
+            for (const issue of issues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Recovered — news.json is fresh again as of ${now}.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }
 ```
+
+**Interfaces note:** the freshness check's `stale`/`age_hours` step outputs are consumed only by the two steps immediately below it in this same file — nothing outside `news-hourly.yml` depends on them.
 
 - [ ] **Step 2: Trim `daily-data.yml`**
 
@@ -800,11 +921,78 @@ Leave every other step in `daily-data.yml` (FRED key provisioning, `fetch_bullio
 Run: `python3 -c "import yaml; yaml.safe_load(open('.github/workflows/news-hourly.yml'))" && python3 -c "import yaml; yaml.safe_load(open('.github/workflows/daily-data.yml'))"`
 Expected: no output, exit code 0 (both files parse). If `yaml` isn't installed, run `pip install pyyaml` first or use `python3 -c "import json,sys; sys.path.insert(0,'.'); import ruamel.yaml"` as a fallback — either way, confirm both files parse before moving on.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 4: Locally simulate the freshness-check logic against both a fresh and a stale fixture**
+
+The freshness check is inline YAML Python, outside the unittest suite's reach — exercise the exact same logic locally against two fixtures before trusting it in CI:
+
+```bash
+mkdir -p /tmp/freshness-check-sim/bullion-live-map
+cd /tmp/freshness-check-sim
+
+# Fresh fixture: generated_at = now.
+python3 -c "
+import json
+from datetime import datetime, timezone
+json.dump(
+    {'generated_at': datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'), 'headlines': []},
+    open('bullion-live-map/news.json', 'w'),
+)
+"
+python3 - <<'PY'
+import json
+from datetime import datetime, timezone
+
+STALE_AFTER_HOURS = 6
+with open("bullion-live-map/news.json") as f:
+    generated_at_raw = json.load(f)["generated_at"]
+generated_at = datetime.strptime(generated_at_raw, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+age_hours = (datetime.now(timezone.utc) - generated_at).total_seconds() / 3600
+stale = age_hours > STALE_AFTER_HOURS
+print(f"fresh-fixture -> stale={'true' if stale else 'false'} age_hours={age_hours:.2f}")
+PY
+
+# Stale fixture: generated_at = 30 hours ago.
+python3 -c "
+import json
+from datetime import datetime, timezone, timedelta
+old = datetime.now(timezone.utc) - timedelta(hours=30)
+json.dump({'generated_at': old.strftime('%Y-%m-%dT%H:%M:%SZ'), 'headlines': []}, open('bullion-live-map/news.json', 'w'))
+"
+python3 - <<'PY'
+import json
+from datetime import datetime, timezone
+
+STALE_AFTER_HOURS = 6
+with open("bullion-live-map/news.json") as f:
+    generated_at_raw = json.load(f)["generated_at"]
+generated_at = datetime.strptime(generated_at_raw, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+age_hours = (datetime.now(timezone.utc) - generated_at).total_seconds() / 3600
+stale = age_hours > STALE_AFTER_HOURS
+print(f"stale-fixture -> stale={'true' if stale else 'false'} age_hours={age_hours:.2f}")
+PY
+
+# Missing-file case.
+rm bullion-live-map/news.json
+python3 - <<'PY'
+import json
+try:
+    with open("bullion-live-map/news.json") as f:
+        json.load(f)["generated_at"]
+    print("missing-file -> did not raise (unexpected)")
+except Exception as e:
+    print(f"missing-file -> correctly raised: {e}")
+PY
+
+cd - && rm -rf /tmp/freshness-check-sim
+```
+
+Expected: `fresh-fixture -> stale=false age_hours=0.00`, `stale-fixture -> stale=true age_hours=30.00`, `missing-file -> correctly raised: ...`. This confirms the three branches (fresh, genuinely stale, broken/missing) all resolve the way the workflow step expects before it ever runs for real in CI.
+
+- [ ] **Step 5: Commit**
 
 ```bash
 git add .github/workflows/news-hourly.yml .github/workflows/daily-data.yml
-git commit -m "Split news fetching into its own hourly-during-market-hours workflow"
+git commit -m "Split news fetching into its own hourly-during-market-hours workflow with a staleness alarm"
 ```
 
 ---
@@ -923,6 +1111,15 @@ Follow the exact idiom from `docs/superpowers/bullion-mkultra-news-categories-sh
 - [ ] **Step 5: Clean up local scratch state**
 
 The end-to-end run in Step 2 wrote real files into the working tree (`bullion-live-map/news.json`, `bullion-live-map/news-images/`). Decide with the user whether to commit this real snapshot as the first live data (recommended — it's genuine, verified-correct output, the same way the daily bot's own commits work) or discard it (`git checkout -- bullion-live-map/news.json && git clean -fd bullion-live-map/news-images/`) if a fresher one should come from the actual scheduled workflow instead. Do not leave it as uncommitted, undiscarded working-tree state.
+
+- [ ] **Step 6: Confirm the workflow actually runs on schedule, and watch the staleness alarm for real**
+
+This can only be verified after the plan is merged to `main` — GitHub only runs the `schedule:` trigger for workflows on the default branch:
+
+1. After merging, either wait for the next `11 13-21 * * 1-5` window or trigger it manually: `workflow_dispatch` via the GitHub UI, or `curl -X POST -H "Authorization: token $TOKEN" .../actions/workflows/news-hourly.yml/dispatches -d '{"ref":"main"}'` (do not type a real token into this session — same rule as every other credential in this project; run any authenticated call yourself outside Claude Code, or use the UI button).
+2. Poll `https://api.github.com/repos/nguyenminhthanh0403-hub/claudekit/actions/workflows/news-hourly.yml/runs?per_page=3` for `conclusion: success`, then confirm via the jobs API (same idiom used to diagnose the original bug in this plan's "Pre-existing bug" section) that the "Check news.json freshness" step's output was `stale=false`.
+3. Leave it running for a few real days, then spot-check: has `bullion-live-map/news.json`'s `generated_at` actually been advancing hour over hour during market hours (`git log --oneline -- bullion-live-map/news.json` should now show a commit roughly every hour on weekdays, not the "2 commits total, ever" pattern that motivated Task 1)? This is the real proof the original bug is fixed, not just the local simulation in Task 7.
+4. Do not synthetically force a real `news-pipeline-stale` GitHub issue to test the alarm end-to-end (e.g. by temporarily breaking the script in production) — that's a disproportionate way to test a safety net. Task 7's local simulation already proves the alarm's decision logic is correct; trust it, and let the alarm prove itself the only time it matters, which is if a real future regression happens.
 
 ---
 
