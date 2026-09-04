@@ -11,6 +11,7 @@ from fetch_bullion_news import (
     filter_listicles,
     tag_sentiment,
     classify_category,
+    image_filename_for_url,
     build_news_envelope,
     CATEGORY_LABELS,
 )
@@ -206,6 +207,40 @@ class TestClassifyCategory(unittest.TestCase):
         # label; "other" is the one deliberate exception with no keyword list.
         from fetch_bullion_news import CATEGORY_KEYWORDS
         self.assertEqual(set(CATEGORY_KEYWORDS) | {"other"}, set(CATEGORY_LABELS))
+
+
+class TestImageFilenameForUrl(unittest.TestCase):
+    def test_same_url_always_produces_the_same_filename(self):
+        url = "https://media.zenfs.com/en/reuters.com/89fed01bb8c2422ea700c6db81a37382.jpg"
+        self.assertEqual(image_filename_for_url(url), image_filename_for_url(url))
+
+    def test_different_urls_produce_different_filenames(self):
+        a = image_filename_for_url("https://media.zenfs.com/en/a.jpg")
+        b = image_filename_for_url("https://media.zenfs.com/en/b.jpg")
+        self.assertNotEqual(a, b)
+
+    def test_preserves_jpg_extension(self):
+        url = "https://media.zenfs.com/en/24_7_wall_st__718/2353c1676228b59ba3205fd31ecddd52.jpg"
+        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
+
+    def test_preserves_png_extension(self):
+        url = "https://example.com/thumb.png"
+        self.assertTrue(image_filename_for_url(url).endswith(".png"))
+
+    def test_normalizes_jpeg_to_jpg(self):
+        url = "https://example.com/thumb.jpeg"
+        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
+        self.assertFalse(image_filename_for_url(url).endswith(".jpeg"))
+
+    def test_defaults_to_jpg_when_extension_is_unrecognized(self):
+        url = "https://s.yimg.com/uu/api/res/1.2/abc~B/no-extension-here"
+        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
+
+    def test_filename_has_no_path_separators_or_query_junk(self):
+        url = "https://media.zenfs.com/en/reuters.com/89fed01bb8c2422ea700c6db81a37382.jpg?foo=bar"
+        name = image_filename_for_url(url)
+        self.assertNotIn("/", name)
+        self.assertNotIn("?", name)
 
 
 class TestBuildNewsEnvelope(unittest.TestCase):

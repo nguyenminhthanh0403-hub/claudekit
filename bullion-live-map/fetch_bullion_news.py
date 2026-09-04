@@ -13,6 +13,7 @@ The raw feed mixes today's real market news with evergreen listicles
 ("best credit cards of 2026") that carry stale pubDates — filter_recent()
 is what separates them; it is not optional polish.
 """
+import hashlib
 import html
 import json
 import os
@@ -215,6 +216,24 @@ def classify_category(title):
         if count > best_count:
             best_cat, best_count = cat, count
     return best_cat
+
+
+_IMAGE_EXT_RE = re.compile(r"\.(jpe?g|png|gif|webp)(?:$|[?&])", re.I)
+
+
+def image_filename_for_url(url):
+    """Content-addressed filename for a thumbnail URL: a stable hash of
+    the URL plus its real extension, so the same source image always maps
+    to the same file. This is what makes a headline that survives several
+    hourly runs (inside the 48h window) dedupe for free -- the file
+    already exists on disk, nothing is re-downloaded or re-committed.
+    """
+    digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24]
+    match = _IMAGE_EXT_RE.search(url.lower())
+    ext = match.group(1) if match else "jpg"
+    if ext == "jpeg":
+        ext = "jpg"
+    return f"{digest}.{ext}"
 
 
 def build_news_envelope(items, generated_at):
