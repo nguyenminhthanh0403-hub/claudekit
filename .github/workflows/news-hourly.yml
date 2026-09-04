@@ -1,0 +1,176 @@
+name: Hourly News Update
+
+# fetch_bullion_news.py needs a much tighter cadence than the once-daily
+# macro-data fetch: Yahoo's RSS feed churns real headlines every 2-8
+# minutes during market hours and only holds a rolling recent window, so
+# the old once-daily pull was silently missing most of a day's real news
+# (confirmed empirically 2026-09-04 -- see
+# docs/superpowers/plans/2026-09-04-bullion-mkultra-news-images.md).
+# Kept as its own workflow, separate from daily-data.yml, so the FRED
+# macro-data fetch (which genuinely doesn't change hourly) isn't dragged
+# along for the ride, and so the two workflows never race each other's
+# git push on the same files.
+#
+# Market hours only, weekdays: 13:00-21:00 UTC covers the NYSE session
+# (9:30am-4pm ET) with margin on both ends across DST; polling overnight
+# or on weekends would just re-fetch the same recycled feed items.
+# Minute offset off :00 for the same reason daily-data.yml's cron is
+# offset -- GitHub delays jobs scheduled on the hour under load.
+on:
+  schedule:
+    - cron: "11 13-21 * * 1-5"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  update-news:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Fetch news headlines for the Markets tab
+        # Quality-of-life only, not load-bearing market data -- must not
+        # fail this job. A failed RSS fetch leaves the existing news.json
+        # and news-images/ untouched; a failed individual image download
+        # is caught inside sync_news_images and never aborts the run.
+        continue-on-error: true
+        run: python3 bullion-live-map/fetch_bullion_news.py
+
+      - name: Commit and push if news changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A -- bullion-live-map/news.json bullion-live-map/news-images/
+          if git diff --cached --quiet; then
+            echo "No news changes this run; nothing to commit."
+          else
+            git commit -m "Update news headlines for $(date -u +%FT%H:%MZ)"
+            git push
+          fi
+
+      - name: Check news.json freshness
+        # Checks the *content* of news.json, not the fetch step's exit
+        # code -- exit-code-0-while-writing-to-the-wrong-place is exactly
+        # how the pre-existing bug this plan fixes (see Task 1) went
+        # unnoticed for 3+ days. Threshold is 6h: generous enough that a
+        # couple of missed/flaky hourly runs don't false-alarm, tight
+        # enough to catch a real break same business day. Because this
+        # step runs after this run's own fetch attempt, a normal
+        # overnight/weekend gap never trips it -- if this run's fetch
+        # succeeded, generated_at is seconds old regardless of how long
+        # the previous gap was; it's only stale if fetching has actually
+        # been failing.
+        id: freshness
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          from datetime import datetime, timezone
+
+          STALE_AFTER_HOURS = 6
+          try:
+              with open("bullion-live-map/news.json") as f:
+                  generated_at_raw = json.load(f)["generated_at"]
+              generated_at = datetime.strptime(
+                  generated_at_raw, "%Y-%m-%dT%H:%M:%SZ"
+              ).replace(tzinfo=timezone.utc)
+              age_hours = (datetime.now(timezone.utc) - generated_at).total_seconds() / 3600
+              stale = age_hours > STALE_AFTER_HOURS
+              print(f"stale={'true' if stale else 'false'}")
+              print(f"age_hours={age_hours:.1f}")
+          except Exception as e:
+              # Missing file, unparseable JSON, missing/malformed
+              # generated_at -- any of these mean the pipeline is broken,
+              # not just slow.
+              print("stale=true")
+              print(f"age_hours=unknown ({e})")
+          PY
+
+      - name: Ensure the news-pipeline-stale label exists
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              await github.rest.issues.createLabel({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                name: 'news-pipeline-stale',
+                color: 'd93f0b',
+                description: 'Hourly news fetch has not produced fresh data recently',
+              });
+            } catch (err) {
+              if (err.status !== 422) throw err; // 422 = label already exists
+            }
+
+      - name: Report staleness to the alarm issue
+        if: steps.freshness.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+            const ageHours = '${{ steps.freshness.outputs.age_hours }}';
+            const now = new Date().toISOString();
+            const body = `**${now}** — news.json is stale (age: ${ageHours}h, threshold: 6h).\nRun: ${runUrl}`;
+
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'news-pipeline-stale',
+            });
+
+            if (issues.length === 0) {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: 'News pipeline has gone stale',
+                body,
+                labels: ['news-pipeline-stale'],
+                assignees: [context.repo.owner],
+              });
+            } else {
+              // Each stale run comments rather than opening a duplicate,
+              // same pattern as daily-data.yml's own alarm.
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issues[0].number,
+                body,
+              });
+            }
+
+      - name: Close the news-pipeline-stale issue on recovery
+        if: steps.freshness.outputs.stale == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'news-pipeline-stale',
+            });
+            const now = new Date().toISOString();
+            for (const issue of issues) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: `Recovered — news.json is fresh again as of ${now}.`,
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }
