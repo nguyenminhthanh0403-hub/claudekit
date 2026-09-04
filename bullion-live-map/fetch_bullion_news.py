@@ -164,10 +164,12 @@ def parse_rss_items(xml_text):
         published = _parse_pub_date(pub_m.group(1).strip())
         if published is None:
             continue
+        image_m = re.search(r'<media:content[^>]*\burl="([^"]*)"', block)
         items.append({
             "title": html.unescape(title_m.group(1).strip()),
             "link": link_m.group(1).strip(),
             "published": published,
+            "image_url": image_m.group(1).strip() if image_m else None,
         })
     return items
 

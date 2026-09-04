@@ -50,6 +50,24 @@ RFC822_ITEM_RSS = """<?xml version="1.0" encoding="UTF-8"?>
 """
 
 
+RSS_WITH_MEDIA = """<?xml version="1.0" encoding="UTF-8"?>
+<rss xmlns:media="http://search.yahoo.com/mrss/" version="2.0"><channel>
+<item>
+<title>Diesel prices hit an all-time high</title>
+<link>https://finance.yahoo.com/news/diesel-1.html</link>
+<pubDate>2026-09-04T16:01:35Z</pubDate>
+<media:content height="86" url="https://media.zenfs.com/en/24_7_wall_st__718/2353c1676228b59ba3205fd31ecddd52.jpg" width="130"/>
+<media:credit role="publishing company"/>
+</item>
+<item>
+<title>No thumbnail on this one</title>
+<link>https://finance.yahoo.com/news/no-thumb.html</link>
+<pubDate>2026-09-04T16:02:00Z</pubDate>
+</item>
+</channel></rss>
+"""
+
+
 class TestParseRssItems(unittest.TestCase):
     def test_extracts_title_link_and_pubdate(self):
         items = parse_rss_items(SAMPLE_RSS)
@@ -73,6 +91,22 @@ class TestParseRssItems(unittest.TestCase):
         self.assertEqual(len(items), 1)
         self.assertEqual(items[0]["published"],
                           datetime(2026, 9, 1, 16, 50, 13, tzinfo=timezone.utc))
+
+    def test_extracts_media_content_image_url(self):
+        items = parse_rss_items(RSS_WITH_MEDIA)
+        self.assertEqual(
+            items[0]["image_url"],
+            "https://media.zenfs.com/en/24_7_wall_st__718/2353c1676228b59ba3205fd31ecddd52.jpg",
+        )
+
+    def test_image_url_is_none_when_no_media_content_tag(self):
+        items = parse_rss_items(RSS_WITH_MEDIA)
+        self.assertIsNone(items[1]["image_url"])
+
+    def test_image_url_is_none_for_feeds_with_no_media_namespace_at_all(self):
+        # SAMPLE_RSS (existing fixture) has no media:content anywhere.
+        items = parse_rss_items(SAMPLE_RSS)
+        self.assertTrue(all(i["image_url"] is None for i in items))
 
 
 class TestFilterRecent(unittest.TestCase):
