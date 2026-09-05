@@ -1,193 +1,308 @@
 {
-  "generated_at": "2026-09-01T18:11:07Z",
+  "generated_at": "2026-09-05T00:02:31Z",
   "headlines": [
     {
-      "category": "consumer",
-      "headline": "Firearms retailer files Chapter 11 bankruptcy as gun sales drop",
-      "link": "https://finance.yahoo.com/small-business/articles/firearms-retailer-files-chapter-11-153300921.html",
-      "published": "2026-08-31T15:33:00Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "consumer",
-      "headline": "161-year-old kids clothing giant closes 29 more stores",
-      "link": "https://finance.yahoo.com/small-business/articles/161-old-kids-clothing-giant-171700918.html",
-      "published": "2026-08-31T17:17:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Asian Refiners Turn to Argentina as Iran War Disrupts Oil Supply",
-      "link": "https://finance.yahoo.com/energy/articles/asian-refiners-turn-argentina-iran-083535004.html",
-      "published": "2026-08-31T08:35:35Z",
-      "sentiment": "neutral"
-    },
-    {
       "category": "other",
-      "headline": "US Dollar Price Forecast: Hawkish Warsh Lifts DXY as EUR/USD and GBP/USD Fall",
-      "link": "https://finance.yahoo.com/markets/currencies/articles/us-dollar-price-forecast-hawkish-081954940.html",
-      "published": "2026-08-31T08:19:54Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "other",
-      "headline": "Is Linde Stock Underperforming the Dow?",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/linde-stock-underperforming-dow-072651206.html",
-      "published": "2026-08-31T07:26:51Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Huawei H1 profit drop quickens to 36% on rising costs, R&D spending",
-      "link": "https://finance.yahoo.com/technology/articles/huawei-h1-profit-drop-quickens-094221420.html",
-      "published": "2026-08-31T09:42:21Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "crypto",
-      "headline": "Strategy\u2019s Cash Reserve Raises the Stakes for Its Next Bitcoin Filing",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/strategy-cash-raises-stakes-next-090700088.html",
-      "published": "2026-08-31T09:07:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Lithium Miners Cash In as Battery Storage Demand Surges",
-      "link": "https://finance.yahoo.com/energy/articles/lithium-miners-cash-battery-storage-095000735.html",
-      "published": "2026-08-31T09:50:00Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "realestate",
-      "headline": "Mortgage and refinance interest rates today, Monday, August 31, 2026: Purchase rates currently higher than refinance rates",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-monday-august-31-2026-purchase-rates-currently-higher-than-refinance-rates-100000904.html",
-      "published": "2026-08-31T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Best CD rates today, Monday, August 31, 2026: Lock in up to 4.30% APY",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-monday-august-31-2026-lock-in-up-to-430-apy-100000028.html",
-      "published": "2026-08-31T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Oil Prices Likely to Decline in Near Term",
-      "link": "https://www.barrons.com/livecoverage/stock-market-news-today-083126/card/oil-prices-likely-to-decline-in-near-term-Yq2mKHpMTsTkiG5AWGaD?siteid=yhoof2&amp;yptr=yahoo",
-      "published": "2026-08-31T09:03:11Z",
+      "headline": "Campbell Soup Company Q4 2026 Earnings Call Summary",
+      "image": "news-images/421ab9f70f512ce2bd52fdf3.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/campbell-soup-company-q4-2026-165228835.html",
+      "published": "2026-09-03T16:52:28Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "AI data center boom sends PE into the trades",
-      "link": "https://finance.yahoo.com/technology/ai/articles/ai-data-center-boom-sends-100000656.html",
-      "published": "2026-08-31T10:00:00Z",
+      "headline": "HPE CEO on AI boom: 'Customers are buying everything'",
+      "image": "news-images/3a5aeeebd93470dc0bf1e86e.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/article/hpe-ceo-on-ai-boom-customers-are-buying-everything-164808652.html",
+      "published": "2026-09-03T16:48:08Z",
       "sentiment": "neutral"
     },
     {
-      "category": "energy",
-      "headline": "Goldman Sachs Sees Diesel Refining Margins Soaring to $63 a Barrel",
-      "link": "https://finance.yahoo.com/energy/articles/goldman-sachs-sees-diesel-refining-064500319.html",
-      "published": "2026-08-31T06:45:00Z",
-      "sentiment": "bullish"
+      "category": "tech",
+      "headline": "Oracle To Face Earnings Test After Wild Year Riding AI Wave",
+      "image": "news-images/45cf168502fee427a290d46a.jpg",
+      "link": "https://www.investors.com/news/technology/oracle-stock-q1-2027-earnings-ai-openai/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-03T16:57:56Z",
+      "sentiment": "neutral"
     },
     {
-      "category": "energy",
-      "headline": "Oil prices rise and stocks fall after US hits Iranian sites in the Strait of Hormuz",
-      "link": "https://finance.yahoo.com/economy/policy/articles/asian-shares-us-futures-retreat-063215597.html",
-      "published": "2026-08-31T06:32:15Z",
+      "category": "other",
+      "headline": "Lands' End, Inc. Q2 2026 Earnings Call Summary",
+      "image": "news-images/059936b9da33c22ecd7decba.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lands-end-inc-q2-2026-165733875.html",
+      "published": "2026-09-03T16:57:33Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Saia\u2019s tonnage growth steps higher in August as comps ease",
+      "image": "news-images/ea55ac8ecccda410e0916c32.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/saia-tonnage-growth-steps-higher-164241632.html",
+      "published": "2026-09-03T16:42:41Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Stock Market Midday, Sept. 3: Stocks Rally as Treasury Yields Fall, Broadcom Falls Despite Earnings Beat",
+      "image": "news-images/b61f84603b922466db38550b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-midday-sept-3-165403805.html",
+      "published": "2026-09-03T16:54:03Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Vietnamese Rival To Uber, Lyft Plans To Enter U.S. Market This Year",
+      "image": "news-images/b45b65e25172cfce527d65c2.jpg",
+      "link": "https://www.investors.com/news/uber-lyft-vinfast-gsm-rideshare-app-robotaxi/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-03T16:59:17Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Brady Corporation Q4 2026 Earnings Call Summary",
+      "image": "news-images/69e062fbb4e4d14d4cf8f9f6.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/brady-corporation-q4-2026-earnings-170051658.html",
+      "published": "2026-09-03T17:00:51Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Duluth Holdings Inc. Q2 2026 Earnings Call Summary",
+      "image": "news-images/421fc5ef963ba0d4f114e0b1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/duluth-holdings-inc-q2-2026-170202166.html",
+      "published": "2026-09-03T17:02:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Amber International Holding Ltd Q2 2026 Earnings Call Summary",
+      "image": "news-images/7efc48358b8a0ba3f79907f5.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/amber-international-holding-ltd-q2-170324102.html",
+      "published": "2026-09-03T17:03:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Bank of America's new warning should concern stock investors",
+      "image": "news-images/7c0a5e2a5ee1bdbc4c9b2f6f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bank-americas-warning-concern-stock-164700303.html",
+      "published": "2026-09-03T16:47:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Genesco Inc. Q2 2027 Earnings Call Summary",
+      "image": "news-images/7d9a2f9598df7a11d9d521c2.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/genesco-inc-q2-2027-earnings-170650806.html",
+      "published": "2026-09-03T17:06:50Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Now Could Be the Best Time to Buy Nio Stock as It Slumps to 52-Week Lows",
+      "image": "news-images/874c5f1906ca447ec1484e2a.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/now-could-best-time-buy-171119312.html",
+      "published": "2026-09-03T17:11:19Z",
       "sentiment": "bearish"
     },
     {
       "category": "other",
-      "headline": "What Does the S&P 500\u2019s August Gain Say About the Rest of the Year? History\u2019s Answer Is Strikingly Clear.",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/does-p-500-august-gain-091001033.html",
-      "published": "2026-08-31T09:10:01Z",
+      "headline": "Stocks Rally, Yields Retreat after Waller Signals a September Hold",
+      "image": "news-images/23a2e20a7fd85a6f166b74d1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/stocks-rally-yields-retreat-waller-162644511.html",
+      "published": "2026-09-03T16:26:44Z",
       "sentiment": "bullish"
     },
     {
-      "category": "federal",
-      "headline": "\u2018I love the inflation!\u2019: Trump shrugs off rising prices \u2014 here\u2019s what you can do before inflation eats into your savings",
-      "link": "https://finance.yahoo.com/economy/articles/love-inflation-trump-shrugs-off-103500495.html",
-      "published": "2026-08-31T10:35:00Z",
+      "category": "other",
+      "headline": "Ermenegildo Zegna N.V. Q2 2026 Earnings Call Summary",
+      "image": "news-images/0c769369c51c5544d9415585.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/ermenegildo-zegna-n-v-q2-171708694.html",
+      "published": "2026-09-03T17:17:08Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "Moderna\u2019s Cancer Vaccine Rally Sparks Rare Sell Rating and Projected 44% Stock Drop",
+      "image": "news-images/877edf477acaf736ecbdbfe5.jpg",
+      "link": "https://www.barrons.com/articles/moderna-stock-cancer-vaccine-sell-rating-bdcb2ced?siteid=yhoof2&amp;yptr=yahoo",
+      "published": "2026-09-03T16:47:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Jim Cramer Calls CrowdStrike (CRWD) a Cybersecurity Heavy Hitter",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/jim-cramer-calls-crowdstrike-crwd-171714906.html",
+      "published": "2026-09-03T17:17:14Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Jim Cramer Explains Why He Recommends Buying KLA (KLAC) Stock in Small Doses",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-explains-why-recommends-171946329.html",
+      "published": "2026-09-03T17:19:46Z",
       "sentiment": "neutral"
     },
     {
       "category": "energy",
-      "headline": "Stocks Set to Open Lower as Fresh U.S.-Iran Flare-Up Lifts Oil, Jobs Data Awaited",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/stocks-set-open-lower-fresh-103552894.html",
-      "published": "2026-08-31T10:35:52Z",
+      "headline": "Scott Bessent lauds $7B Chevron Venezuela deal as a salve to red-hot gas prices, but will it really work?",
+      "image": "news-images/0c201662234dde7d800816d0.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/scott-bessent-lauds-7b-chevron-172000501.html",
+      "published": "2026-09-03T17:20:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Jim Cramer is Bullish on Palo Alto (PANW) After Earnings Report",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-bullish-palo-alto-172136342.html",
+      "published": "2026-09-03T17:21:36Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Rivian Announced That Its CFO Is Stepping Down. How Investors Should View the Departure.",
+      "image": "news-images/267f98d1cc41eb1f3bd0239d.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/rivian-announced-cfo-stepping-down-162015877.html",
+      "published": "2026-09-03T16:20:15Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Fed's Waller channels his inner John Lennon with a plea to 'give disinflation a chance'",
+      "image": "news-images/1e8fb9a277488aafd78adfa3.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/feds-waller-open-leaving-rates-123302697.html",
+      "published": "2026-09-03T16:20:09Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Ciena Corporation Q3 2026 Earnings Call Summary",
+      "image": "news-images/f8a39e2c1da43c77a3cb7af6.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/ciena-corporation-q3-2026-earnings-172313935.html",
+      "published": "2026-09-03T17:23:13Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "ShipStation Global Brings Freight Into the Same Lane as Parcel",
+      "image": "news-images/15103993c04697d650fb36a8.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/shipstation-global-brings-freight-same-172525059.html",
+      "published": "2026-09-03T17:25:25Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Bank of England must raise interest rates, says chief economist",
+      "image": "news-images/01c75232f2a307e147ed2ee9.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/bank-england-must-raise-interest-165946601.html",
+      "published": "2026-09-03T16:59:46Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Corn Bulls Still Facing Weakness but Pushing Off Early Lows",
+      "image": "news-images/d3b3fdbbdc3f3a5d30e0b534.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/corn-bulls-still-facing-weakness-172537671.html",
+      "published": "2026-09-03T17:25:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Lake Victoria Gold Reports High-Grade Gold Intercepts at Imwelo as It Advances Metallurgical Testing",
+      "image": "news-images/afc4c704e21e9b093919c264.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/lake-victoria-gold-reports-high-161602054.html",
+      "published": "2026-09-03T16:16:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Mortgage rates hit highest level in over a year: Mortgage and refinance interest rates today, Thursday, September 3, 2026",
+      "image": "news-images/60318c9f97e7b5a96dcd066e.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-rates-hit-highest-level-in-over-a-year-mortgage-and-refinance-interest-rates-today-thursday-september-3-2026-100000627.html",
+      "published": "2026-09-03T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "U.S. Bank Shield Visa Card review: 0% APR for 21 months on purchases and balance transfers",
+      "image": "news-images/d72d57b966af58bb27ccd040.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/review/us-bank-shield-visa-card-181913823.html",
+      "published": "2026-09-03T18:19:13Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Social Security: See what's really changing in 2027",
+      "image": "news-images/b2aa999a3f856cdf38e73655.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/social-security-see-whats-really-changing-in-2027-144723278.html",
+      "published": "2026-09-03T14:47:23Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Kalshi Jumps Into the Debt Projection Game",
+      "image": "news-images/8fc6fddf62976e19d1e1ba4f.jpg",
+      "link": "https://www.barrons.com/articles/kalshi-prediction-market-national-debt-projection-7c010e75?siteid=yhoof2&amp;yptr=yahoo",
+      "published": "2026-09-03T17:00:00Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "crypto",
+      "headline": "Bitcoin and ethereum prices today, Thursday, September 3, 2026: Crypto prices lift this morning despite oil costs gaining steam",
+      "image": "news-images/dbada3908ba6b5bd9cbe4b14.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-thursday-september-3-2026-crypto-prices-lift-this-morning-despite-oil-costs-gaining-steam-113526770.html",
+      "published": "2026-09-03T11:35:26Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "The Leadership Habit That Could Be Costing Your Franchise New Recruits",
+      "image": "news-images/f92f06246361caa000abc7b9.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/leadership-habit-could-costing-franchise-170000682.html",
+      "published": "2026-09-03T17:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Silver price today, Thursday, September 3, 2026: Silver prices rise following short-lived airstrikes",
+      "image": "news-images/3e05784970eeca7b5e153614.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-thursday-september-3-2026-silver-prices-rise-following-short-lived-airstrikes-111653911.html",
+      "published": "2026-09-03T11:16:53Z",
       "sentiment": "neutral"
     },
     {
       "category": "international",
-      "headline": "Gold prices today, Monday, August 31, 2026: Gold sinks following U.S. strikes on Iran",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-prices-today-monday-august-31-2026-gold-sinks-following-us-strikes-on-iran-123744944.html",
-      "published": "2026-08-31T12:37:44Z",
+      "headline": "Gold price today, Thursday, September 3, 2026: Gold moves higher on hopes that Iran war reescalation will be short-lived",
+      "image": "news-images/68fe9082ef87f1dc92e19425.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-thursday-september-3-2026-gold-moves-higher-on-hopes-that-iran-war-reescalation-will-be-short-lived-110444019.html",
+      "published": "2026-09-03T11:04:44Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Silver prices today, Monday, August 31, 2026: Silver opens lower as rate-hike expectations rise",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-prices-today-monday-august-31-2026-silver-opens-lower-as-rate-hike-expectations-rise-125201881.html",
-      "published": "2026-08-31T12:52:01Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Visa, Mastercard process first global payments in Syria",
-      "link": "https://finance.yahoo.com/markets/currencies/articles/visa-mastercard-process-first-global-090439469.html",
-      "published": "2026-08-31T09:04:39Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "Bitcoin and ethereum prices today, Monday, August 31, 2026: Higher rate expectations pressure crypto prices lower",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-monday-august-31-2026-higher-rate-expectations-pressure-crypto-prices-lower-132222145.html",
-      "published": "2026-08-31T13:22:22Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Riverview Bancorp Shareholders Back Directors, Pay Plan and 2026 Stock Purchase Plan",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/riverview-bancorp-shareholders-back-directors-090154360.html",
-      "published": "2026-08-31T09:01:54Z",
+      "headline": "Best CD rates today, Thursday, September 3, 2026: Lock in up to 4.30% APY with an 18-month CD",
+      "image": "news-images/313a56bd54af9893005e72ae.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-thursday-september-3-2026-lock-in-up-to-430-apy-with-an-18-month-cd-100000861.html",
+      "published": "2026-09-03T10:00:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Johnson & Johnson Owns Stakes in 15 Stocks. Here's the Best of the Bunch.",
-      "link": "https://finance.yahoo.com/healthcare/articles/johnson-johnson-owns-stakes-15-090400503.html",
-      "published": "2026-08-31T09:04:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "A Bond Finally Paid the Wages His Contractor Never Did. Social Security Put Them in a Different Year.",
-      "link": "https://finance.yahoo.com/healthcare/articles/bond-finally-paid-wages-contractor-090525598.html",
-      "published": "2026-08-31T09:05:25Z",
+      "headline": "Could a Billionaire Tax Lower Your Taxes? Here\u2019s What Experts Say",
+      "image": "news-images/01391632a9d54a5753d7a37e.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/could-billionaire-tax-lower-taxes-170023336.html",
+      "published": "2026-09-03T17:00:23Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "The Stock Market Sounds an Alarm as Investors Get Bad News About President Trump's Economy. History Says This Will Happen Next.",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-sounds-alarm-investors-090800990.html",
-      "published": "2026-08-31T09:08:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Uphold review 2026: One account for crypto, metals, and cash",
-      "link": "https://finance.yahoo.com/personal-finance/investing/review/uphold-review-203900002.html",
-      "published": "2026-08-31T20:39:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Walmart to pay $50m to settle DOJ opioid-dispensing allegations",
-      "link": "https://finance.yahoo.com/healthcare/articles/walmart-pay-50m-settle-doj-090002976.html",
-      "published": "2026-08-31T09:00:02Z",
+      "headline": "Best CD rates today, Friday, September 4, 2026: Up to 4.35% APY return available with 18-month CD",
+      "image": "news-images/d2348a073e140b7d662ab05b.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-friday-september-4-2026-up-to-435-apy-return-available-with-18-month-cd-100000753.html",
+      "published": "2026-09-04T10:00:00Z",
       "sentiment": "neutral"
     }
   ]
