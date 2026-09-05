@@ -37,6 +37,16 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Install Python dependencies
+        # Pillow -- fetch_bullion_news.py re-encodes each downloaded
+        # thumbnail down to a small JPEG (see resize_thumbnail_bytes()).
+        # Required because Yahoo's RSS media:content width/height
+        # attributes describe the embed display size only, not the
+        # actual served file -- the real files run up to several MB and
+        # several thousand px per side, which would otherwise blow up
+        # this repo's size on every run.
+        run: pip install -r bullion-live-map/requirements.txt
+
       - name: Fetch news headlines for the Markets tab
         # Quality-of-life only, not load-bearing market data -- must not
         # fail this job. A failed RSS fetch leaves the existing news.json

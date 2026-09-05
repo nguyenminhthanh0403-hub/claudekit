@@ -1,3 +1,4 @@
+import io
 import os
 import shutil
 import sys
@@ -5,6 +6,8 @@ import tempfile
 import unittest
 import urllib.error
 from datetime import datetime, timezone
+
+from PIL import Image
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 
@@ -15,11 +18,24 @@ from fetch_bullion_news import (
     tag_sentiment,
     classify_category,
     image_filename_for_url,
+    resize_thumbnail_bytes,
     sync_news_images,
     prune_dangling_images,
     build_news_envelope,
     CATEGORY_LABELS,
 )
+
+
+def _tiny_image_bytes(size=(10, 10), mode="RGB", color=(200, 30, 30), fmt="PNG"):
+    """A minimal real, decodable image for tests that exercise the actual
+    download -> decode -> resize -> re-encode pipeline -- fixtures for this
+    code can't just be arbitrary placeholder bytes like b"fake-jpeg-bytes"
+    now that sync_news_images() genuinely decodes what it downloads.
+    """
+    im = Image.new(mode, size, color)
+    out = io.BytesIO()
+    im.save(out, format=fmt)
+    return out.getvalue()
 
 SAMPLE_RSS = """<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0"><channel>
@@ -224,22 +240,18 @@ class TestImageFilenameForUrl(unittest.TestCase):
         b = image_filename_for_url("https://media.zenfs.com/en/b.jpg")
         self.assertNotEqual(a, b)
 
-    def test_preserves_jpg_extension(self):
-        url = "https://media.zenfs.com/en/24_7_wall_st__718/2353c1676228b59ba3205fd31ecddd52.jpg"
-        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
-
-    def test_preserves_png_extension(self):
-        url = "https://example.com/thumb.png"
-        self.assertTrue(image_filename_for_url(url).endswith(".png"))
-
-    def test_normalizes_jpeg_to_jpg(self):
-        url = "https://example.com/thumb.jpeg"
-        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
-        self.assertFalse(image_filename_for_url(url).endswith(".jpeg"))
-
-    def test_defaults_to_jpg_when_extension_is_unrecognized(self):
-        url = "https://s.yimg.com/uu/api/res/1.2/abc~B/no-extension-here"
-        self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
+    def test_always_ends_in_jpg_regardless_of_source_extension(self):
+        # Every cached file is re-encoded as JPEG by resize_thumbnail_bytes()
+        # regardless of the source format, so the filename never reflects
+        # the source URL's own extension -- .png, .jpeg, no-extension-at-all
+        # sources all still cache as .jpg.
+        for url in (
+            "https://media.zenfs.com/en/24_7_wall_st__718/2353c1676228b59ba3205fd31ecddd52.jpg",
+            "https://example.com/thumb.png",
+            "https://example.com/thumb.jpeg",
+            "https://s.yimg.com/uu/api/res/1.2/abc~B/no-extension-here",
+        ):
+            self.assertTrue(image_filename_for_url(url).endswith(".jpg"))
 
     def test_filename_has_no_path_separators_or_query_junk(self):
         url = "https://media.zenfs.com/en/reuters.com/89fed01bb8c2422ea700c6db81a37382.jpg?foo=bar"
@@ -260,7 +272,7 @@ class TestSyncNewsImages(unittest.TestCase):
 
         def fake_fetch(url, timeout):
             calls.append(url)
-            return b"fake-jpeg-bytes"
+            return _tiny_image_bytes()
 
         items = [{"title": "t", "link": "l", "image_url": "https://example.com/a.jpg"}]
         sync_news_images(items, images_dir, fetch=fake_fetch)
@@ -268,8 +280,11 @@ class TestSyncNewsImages(unittest.TestCase):
         self.assertEqual(calls, ["https://example.com/a.jpg"])
         expected_name = image_filename_for_url("https://example.com/a.jpg")
         self.assertEqual(items[0]["image"], f"news-images/{expected_name}")
-        with open(os.path.join(images_dir, expected_name), "rb") as f:
-            self.assertEqual(f.read(), b"fake-jpeg-bytes")
+        # The cached file is the resized/re-encoded output, not the raw
+        # downloaded bytes verbatim -- confirm it's a valid, small JPEG.
+        with Image.open(os.path.join(images_dir, expected_name)) as cached:
+            self.assertEqual(cached.format, "JPEG")
+            self.assertEqual(cached.size, (10, 10))
 
     def test_does_not_redownload_an_already_cached_image(self):
         images_dir = self._tmp_images_dir()
@@ -300,7 +315,7 @@ class TestSyncNewsImages(unittest.TestCase):
         def flaky_fetch(url, timeout):
             if "bad" in url:
                 raise urllib.error.URLError("boom")
-            return b"good-bytes"
+            return _tiny_image_bytes()
 
         items = [
             {"title": "fails", "link": "l1", "image_url": "https://example.com/bad.jpg"},
@@ -311,6 +326,43 @@ class TestSyncNewsImages(unittest.TestCase):
         self.assertIsNone(items[0]["image"])
         self.assertIsNotNone(items[1]["image"])
 
+    def test_undecodable_bytes_sets_none_and_does_not_block_other_items(self):
+        # A URL that "succeeds" at the HTTP level but doesn't return a real
+        # image (an HTML error page, a truncated download, etc.) must not
+        # crash the run -- confirmed via Pillow's own decode failure, not a
+        # hand-picked exception type (see the broad except in sync_news_images).
+        images_dir = self._tmp_images_dir()
+
+        def fetch(url, timeout):
+            if "notanimage" in url:
+                return b"<html>this is not an image</html>"
+            return _tiny_image_bytes()
+
+        items = [
+            {"title": "bad", "link": "l1", "image_url": "https://example.com/notanimage.jpg"},
+            {"title": "good", "link": "l2", "image_url": "https://example.com/real.jpg"},
+        ]
+        sync_news_images(items, images_dir, fetch=fetch)
+
+        self.assertIsNone(items[0]["image"])
+        self.assertIsNotNone(items[1]["image"])
+
+    def test_oversized_source_image_is_downsized_to_max_dimension(self):
+        # Reproduces the real bug this feature was built to fix: Yahoo's
+        # RSS media:content width/height attributes (130x86) describe the
+        # embed display size, not the actual served file -- real files can
+        # be several thousand pixels per side. A cached file must never
+        # exceed IMAGE_MAX_DIMENSION on its longer side.
+        images_dir = self._tmp_images_dir()
+        oversized = _tiny_image_bytes(size=(4000, 3000))
+
+        items = [{"title": "t", "link": "l", "image_url": "https://example.com/huge.jpg"}]
+        sync_news_images(items, images_dir, fetch=lambda u, t: oversized)
+
+        name = image_filename_for_url("https://example.com/huge.jpg")
+        with Image.open(os.path.join(images_dir, name)) as cached:
+            self.assertLessEqual(max(cached.size), 200)
+
     def test_creates_images_dir_if_missing(self):
         parent = tempfile.mkdtemp()
         self.addCleanup(shutil.rmtree, parent, ignore_errors=True)
@@ -318,6 +370,50 @@ class TestSyncNewsImages(unittest.TestCase):
         items = [{"title": "t", "link": "l", "image_url": "https://example.com/c.jpg"}]
         sync_news_images(items, images_dir, fetch=lambda u, t: b"x")
         self.assertTrue(os.path.isdir(images_dir))
+
+
+class TestResizeThumbnailBytes(unittest.TestCase):
+    def test_downsizes_when_larger_than_max_dimension(self):
+        data = _tiny_image_bytes(size=(4000, 2000))
+        out = resize_thumbnail_bytes(data, max_dimension=200)
+        with Image.open(io.BytesIO(out)) as im:
+            self.assertEqual(im.format, "JPEG")
+            self.assertEqual(im.size, (200, 100))  # aspect ratio preserved
+
+    def test_does_not_upscale_smaller_images(self):
+        data = _tiny_image_bytes(size=(10, 10))
+        out = resize_thumbnail_bytes(data, max_dimension=200)
+        with Image.open(io.BytesIO(out)) as im:
+            self.assertEqual(im.size, (10, 10))
+
+    def test_always_outputs_jpeg_even_from_a_png_source(self):
+        data = _tiny_image_bytes(fmt="PNG")
+        out = resize_thumbnail_bytes(data)
+        with Image.open(io.BytesIO(out)) as im:
+            self.assertEqual(im.format, "JPEG")
+
+    def test_flattens_transparency_onto_white_instead_of_black(self):
+        rgba = Image.new("RGBA", (10, 10), (0, 0, 0, 0))  # fully transparent
+        buf = io.BytesIO()
+        rgba.save(buf, format="PNG")
+        out = resize_thumbnail_bytes(buf.getvalue())
+        with Image.open(io.BytesIO(out)) as im:
+            self.assertEqual(im.convert("RGB").getpixel((5, 5)), (255, 255, 255))
+
+    def test_undecodable_bytes_raises_instead_of_returning_garbage(self):
+        with self.assertRaises(Exception):
+            resize_thumbnail_bytes(b"not an image at all")
+
+    def test_extreme_aspect_ratio_clamps_to_1px_instead_of_raising(self):
+        # A naive int(w*scale)/int(h*scale) can round the short side down
+        # to 0, which Image.resize() rejects with a ValueError -- this
+        # must clamp to 1px and still produce a valid thumbnail instead of
+        # silently dropping an otherwise-valid image.
+        data = _tiny_image_bytes(size=(5000, 1))
+        out = resize_thumbnail_bytes(data, max_dimension=200)
+        with Image.open(io.BytesIO(out)) as im:
+            self.assertEqual(im.format, "JPEG")
+            self.assertEqual(im.size, (200, 1))
 
 
 class TestPruneDanglingImages(unittest.TestCase):

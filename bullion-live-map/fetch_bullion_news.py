@@ -15,6 +15,7 @@ is what separates them; it is not optional polish.
 """
 import hashlib
 import html
+import io
 import json
 import os
 import re
@@ -22,6 +23,8 @@ import sys
 import urllib.error
 import urllib.request
 from datetime import datetime, timedelta, timezone
+
+from PIL import Image
 from email.utils import parsedate_to_datetime
 
 NEWS_RSS_URL = "https://finance.yahoo.com/news/rssindex"
@@ -218,25 +221,62 @@ def classify_category(title):
     return best_cat
 
 
-_IMAGE_EXT_RE = re.compile(r"\.(jpe?g|png|gif|webp)(?:$|[?&])", re.I)
-
-
 def image_filename_for_url(url):
     """Content-addressed filename for a thumbnail URL: a stable hash of
-    the URL plus its real extension, so the same source image always maps
-    to the same file. This is what makes a headline that survives several
-    hourly runs (inside the 48h window) dedupe for free -- the file
-    already exists on disk, nothing is re-downloaded or re-committed.
+    the URL, so the same source image always maps to the same cached
+    file. This is what makes a headline that survives several hourly
+    runs (inside the 48h window) dedupe for free -- the file already
+    exists on disk, nothing is re-downloaded or re-committed. Always
+    .jpg -- every cached image is re-encoded as JPEG by
+    resize_thumbnail_bytes() regardless of the source format (Yahoo's
+    RSS media:content width/height attributes describe its own embed
+    display size, not the actual served file -- the real files run up
+    to several MB / several thousand px per side, so re-encoding down to
+    a real thumbnail is load-bearing, not cosmetic), so there's no
+    source extension worth preserving.
     """
     digest = hashlib.sha256(url.encode("utf-8")).hexdigest()[:24]
-    match = _IMAGE_EXT_RE.search(url.lower())
-    ext = match.group(1) if match else "jpg"
-    if ext == "jpeg":
-        ext = "jpg"
-    return f"{digest}.{ext}"
+    return f"{digest}.jpg"
 
 
 IMAGE_TIMEOUT = 10
+IMAGE_MAX_DIMENSION = 200
+IMAGE_QUALITY = 80
+
+
+def resize_thumbnail_bytes(data, max_dimension=IMAGE_MAX_DIMENSION, quality=IMAGE_QUALITY):
+    """Decode arbitrary downloaded image bytes and re-encode as a small
+    JPEG thumbnail, longer side capped at max_dimension (never upscaled).
+    Always outputs JPEG regardless of source format, flattening any
+    transparency onto a white background first (JPEG has no alpha
+    channel; a naive RGB convert on a transparent image can produce a
+    black background instead). Raises Pillow's own exception if `data`
+    isn't a decodable image -- the caller decides how to handle that,
+    this function doesn't swallow it.
+    """
+    with Image.open(io.BytesIO(data)) as im:
+        w, h = im.size
+        if max(w, h) > max_dimension:
+            scale = max_dimension / max(w, h)
+            # max(1, ...): an extreme aspect ratio (e.g. 5000x1) can scale
+            # the short side down to 0px, which Image.resize() rejects
+            # with a ValueError -- clamp to 1px instead of dropping an
+            # otherwise-valid image.
+            new_w = max(1, int(w * scale))
+            new_h = max(1, int(h * scale))
+            im = im.resize((new_w, new_h), Image.LANCZOS)
+
+        if im.mode in ("RGBA", "LA") or (im.mode == "P" and "transparency" in im.info):
+            rgba = im.convert("RGBA")
+            background = Image.new("RGB", rgba.size, (255, 255, 255))
+            background.paste(rgba, mask=rgba.split()[3])
+            im = background
+        else:
+            im = im.convert("RGB")
+
+        out = io.BytesIO()
+        im.save(out, format="JPEG", quality=quality)
+        return out.getvalue()
 
 
 def _fetch_image_bytes(url, timeout):
@@ -248,10 +288,11 @@ def _fetch_image_bytes(url, timeout):
 def sync_news_images(items, images_dir, fetch=None):
     """Download each item's thumbnail into images_dir under a
     content-addressed filename, mutating each item with an `image` key
-    (a relative "news-images/<hash>.<ext>" path, or None if the item has
-    no image_url or the download fails). A URL already cached on disk is
-    never re-downloaded. One failed image never raises -- it just leaves
-    that item's `image` as None, matching this whole feature's
+    (a relative "news-images/<hash>.jpg" path, or None if the item has
+    no image_url, the download fails, or the downloaded bytes aren't a
+    decodable image). A URL already cached on disk is never
+    re-downloaded. One failed image never raises -- it just leaves that
+    item's `image` as None, matching this whole feature's
     quality-of-life-not-load-bearing philosophy.
 
     `fetch` is an injectable (url, timeout) -> bytes callable, defaulting
@@ -268,9 +309,21 @@ def sync_news_images(items, images_dir, fetch=None):
         dest = os.path.join(images_dir, filename)
         if not os.path.exists(dest):
             try:
-                data = fetch(url, IMAGE_TIMEOUT)
+                raw = fetch(url, IMAGE_TIMEOUT)
             except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError) as e:
                 print(f"Image fetch failed for {url} ({e}); skipping thumbnail.",
+                      file=sys.stderr)
+                item["image"] = None
+                continue
+            try:
+                data = resize_thumbnail_bytes(raw)
+            except Exception as e:
+                # Untrusted bytes from an arbitrary external URL -- Pillow's
+                # failure surface for "this isn't a valid/decodable image"
+                # isn't a small fixed set of exception types, so this is
+                # deliberately broad. One bad image must never block the
+                # other headlines in this run.
+                print(f"Image resize failed for {url} ({e}); skipping thumbnail.",
                       file=sys.stderr)
                 item["image"] = None
                 continue
