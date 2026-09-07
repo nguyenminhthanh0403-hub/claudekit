@@ -27,10 +27,10 @@
     "dxy": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-04",
-      "ref_date": "2026-09-04",
+      "published": "2026-09-07",
+      "ref_date": "2026-09-07",
       "source": "Yahoo DX-Y.NYB",
-      "value": 99.16
+      "value": 98.88
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -51,8 +51,8 @@
     "gold_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-04",
-      "ref_date": "2026-09-04",
+      "published": "2026-09-07",
+      "ref_date": "2026-09-07",
       "source": "Yahoo GC=F",
       "value": 4476.6
     },
@@ -217,7 +217,7 @@
       "value": 84.58
     }
   },
-  "generated_at": "2026-09-06T13:33:22Z",
+  "generated_at": "2026-09-07T15:43:41Z",
   "history": {
     "2025-09-01": {
       "cpi_yoy": 3.0,
@@ -232,9 +232,6 @@
       "xlf": 53.07,
       "xlk": 131.43,
       "xlp": 80.87
-    },
-    "2025-09-06": {
-      "ffr": 4.33
     },
     "2025-09-07": {
       "ffr": 4.33
@@ -6040,7 +6037,7 @@
     "2026-09-04": {
       "dow": 53414.25,
       "dxy": 99.16,
-      "gold_px": 4476.6,
+      "gold_px": 4429.8,
       "nasdaq": 26506.99,
       "rrp": 0.7,
       "spx": 7718.6,
@@ -6048,6 +6045,10 @@
       "xlf": 58.1,
       "xlk": 187.28,
       "xlp": 84.58
+    },
+    "2026-09-07": {
+      "dxy": 98.88,
+      "gold_px": 4476.6
     }
   },
   "schema": 2
