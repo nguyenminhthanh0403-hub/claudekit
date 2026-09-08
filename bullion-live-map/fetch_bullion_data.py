@@ -9,6 +9,12 @@ refuses to write anything and exits non-zero instead, leaving the previous
 (complete) data.json in place — a partial file, once written, is
 indistinguishable from a healthy one to the fields that did come through.
 
+fed_decision_kalshi/fed_decision_polymarket are the one exception to that
+all-or-nothing rule: market-implied FOMC odds from Kalshi and Polymarket,
+fetched best-effort in their own isolated try/except in main() so a hiccup
+on either (unofficial, no key, no uptime guarantee) never blocks every other
+field above from publishing.
+
 Get a free FRED key at https://fred.stlouisfed.org/docs/api/api_key.html
 then save it with:
   mkdir -p ~/.config/bullion && echo YOUR_KEY_HERE > ~/.config/bullion/fred_api_key
@@ -112,7 +118,12 @@ CADENCE_TOLERANCE_DAYS = {
     # production, the same way monthly's 45d was calibrated from multiple
     # fields over time.
     "quarterly": 210,
-    "fomc":    None, # simulated, never judged
+    # fed_decision_kalshi/fed_decision_polymarket use this cadence. Neither
+    # "freshness" (there is no publication lag to judge, only a live snapshot)
+    # nor "completeness" (see the `missing` gate in main()) apply to them the
+    # way they do to a published economic statistic -- both checks below key
+    # off this same cadence value.
+    "fomc":    None,
 }
 
 # wti_px publishes on a structurally longer lag than the other dailies — it sat
@@ -166,6 +177,10 @@ FIELD_META = {
                           "source": "IMF IRFCL (top-11 public holders, summed)"},
     "usd_reserve_share": {"class": "measured", "cadence": "quarterly",
                            "source": "IMF COFER (allocated reserves, USD share)"},
+    "fed_decision_kalshi": {"class": "measured", "cadence": "fomc",
+                             "source": "Kalshi KXFED ladder, bucketed against FRED DFEDTARU"},
+    "fed_decision_polymarket": {"class": "measured", "cadence": "fomc",
+                                 "source": "Polymarket 'Fed Decision' event"},
 }
 
 
@@ -224,8 +239,13 @@ SOURCE_NOTE = (
     "(Fed balance sheet, weekly) and RRPONTSYD (overnight RRP). "
     "gold_px/dxy/spx and the Mk17 sector ETFs XLK/XLF/XLE/XLP: Yahoo Finance "
     "chart API — unofficial and undocumented, unlike FRED; could change or "
-    "rate-limit without notice. FOMC hike/cut odds have no free source and "
-    "remain simulated. "
+    "rate-limit without notice. "
+    "fed_decision_kalshi/fed_decision_polymarket: market-implied odds for the "
+    "next FOMC decision, from Kalshi's KXFED threshold ladder and "
+    "Polymarket's 'Fed Decision' bracket event respectively -- both "
+    "unofficial prediction markets, fetched best-effort and isolated from "
+    "every other field (see main()): a failure here never blocks the rest "
+    "of data.json from updating. "
     "cb_gold_reserves: IMF IRFCL (International Reserves and Foreign "
     "Currency Liquidity), summed across the 11 largest public holders "
     "(USA, Germany, Italy, France, China, Russia, Switzerland, India, "
@@ -633,6 +653,203 @@ def fetch_usd_reserve_share(start, end):
     return (rounded[latest_ref], latest_ref, latest_ref, rounded)
 
 
+# ─── FOMC rate-decision odds (Kalshi + Polymarket) ──────────────────────────
+# Isolated from every fetcher above: those are official/stable enough that
+# one failing should abort the whole run (see main()'s docstring). Kalshi and
+# Polymarket are unofficial prediction markets with no uptime guarantee, so a
+# failure here must never block gold_px/dxy/etc. from updating -- both
+# fetchers are called inside their own try/except in main() and their
+# FIELD_META cadence ("fomc") is exempt from the completeness gate.
+KALSHI_API_BASE = "https://api.elections.kalshi.com/trade-api/v2"
+KALSHI_FED_SERIES = "KXFED"
+KALSHI_LADDER_STEP = 0.25  # observed rung spacing (verified against the live API 2026-09-08)
+FRED_TARGET_UPPER_SERIES = "DFEDTARU"  # current target-range upper bound -- the baseline the Kalshi ladder is diffed against
+POLYMARKET_GAMMA_BASE = "https://gamma-api.polymarket.com"
+POLYMARKET_GROUP_TO_BUCKET = {
+    "50+ bps decrease": "cut50plus",
+    "25 bps decrease": "cut25",
+    "No change": "hold",
+    "25 bps increase": "hike25",
+    "50+ bps increase": "hike50plus",
+}
+
+
+def kalshi_market_prob(market):
+    """Yes-probability for one Kalshi market: midpoint of bid/ask, falling
+    back to last trade price when the book is one-sided or empty (thin,
+    far-dated FOMC rungs often have no resting bid)."""
+    def to_float(x):
+        try:
+            return float(x) if x is not None else None
+        except (TypeError, ValueError):
+            return None
+
+    bid, ask = to_float(market.get("yes_bid_dollars")), to_float(market.get("yes_ask_dollars"))
+    if bid is not None and ask is not None and (bid > 0 or ask > 0):
+        return (bid + ask) / 2
+    return to_float(market.get("last_price_dollars"))
+
+
+def parse_kalshi_ladder(markets, current_upper):
+    """Pure parse: one FOMC event's Kalshi threshold markets, plus the
+    current target-upper-bound baseline, -> cut/hold/hike buckets.
+
+    Kalshi has no single "will the Fed cut" market for a meeting -- KXFED is
+    a ladder of binary "will the upper bound end up above $K" contracts, one
+    rung per quarter-point. Each resolves Yes iff the post-meeting rate is
+    strictly above its floor_strike, so consecutive rungs (STEP apart) give
+    P(rate == K) = P(rate > K-STEP) - P(rate > K). The ladder observed in
+    practice already spans far enough that the two open ends carry ~0-1%
+    mass, so they're folded into the outermost bucket rather than tracked
+    separately. Returns None if fewer than 2 usable rungs survive.
+    """
+    rungs = sorted(
+        (float(m["floor_strike"]), kalshi_market_prob(m))
+        for m in markets
+        if m.get("floor_strike") is not None and kalshi_market_prob(m) is not None
+    )
+    if len(rungs) < 2:
+        return None
+    strikes = [r[0] for r in rungs]
+    prob_above = [r[1] for r in rungs]
+
+    def bucket_for(level):
+        delta = round((level - current_upper) / KALSHI_LADDER_STEP)
+        if delta <= -2: return "cut50plus"
+        if delta == -1: return "cut25"
+        if delta == 0:  return "hold"
+        if delta == 1:  return "hike25"
+        return "hike50plus"
+
+    buckets = {"cut50plus": 0.0, "cut25": 0.0, "hold": 0.0, "hike25": 0.0, "hike50plus": 0.0}
+    # Below the lowest rung: P(rate <= strikes[0]).
+    buckets[bucket_for(strikes[0])] += max(1.0 - prob_above[0], 0.0)
+    # Each interior rung: P(rate == strikes[i]) = prob_above[i-1] - prob_above[i].
+    for i in range(1, len(rungs)):
+        buckets[bucket_for(strikes[i])] += max(prob_above[i - 1] - prob_above[i], 0.0)
+    # Above the highest rung: P(rate > strikes[-1]).
+    buckets[bucket_for(strikes[-1] + KALSHI_LADDER_STEP)] += max(prob_above[-1], 0.0)
+    return {k: round(v, 4) for k, v in buckets.items()}
+
+
+def fetch_kalshi_fed_decision(current_upper):
+    """Network wrapper: resolve the next open KXFED event dynamically, fetch
+    its ladder, and bucket it via parse_kalshi_ladder.
+
+    Several KXFED events are open simultaneously (this meeting's ladder plus
+    the next several) -- the event is picked by earliest close_time still in
+    the future rather than a hardcoded ticker like "KXFED-26SEP", which
+    would silently go stale within weeks of shipping (each meeting's ladder
+    closes ~6 weeks after the last one). No API key needed -- Kalshi's
+    markets-read endpoint is anonymous (verified against the live API
+    2026-09-08). Returns None on any failure.
+    """
+    url = f"{KALSHI_API_BASE}/markets?series_ticker={KALSHI_FED_SERIES}&status=open&limit=1000"
+    try:
+        data = http_get_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  Kalshi {KALSHI_FED_SERIES}: fetch failed ({e})", file=sys.stderr)
+        return None
+
+    by_event = {}
+    for m in data.get("markets", []):
+        et = m.get("event_ticker")
+        if et and m.get("close_time"):
+            by_event.setdefault(et, []).append(m)
+    if not by_event:
+        print(f"  Kalshi {KALSHI_FED_SERIES}: no open markets returned", file=sys.stderr)
+        return None
+
+    now = datetime.now(timezone.utc)
+    def close_dt(et):
+        try:
+            return datetime.strptime(by_event[et][0]["close_time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        except ValueError:
+            return None
+
+    future = [(close_dt(et), et) for et in by_event]
+    future = [(c, et) for c, et in future if c and c > now]
+    if not future:
+        print(f"  Kalshi {KALSHI_FED_SERIES}: no future event found", file=sys.stderr)
+        return None
+    close, next_event = min(future, key=lambda ce: ce[0])
+
+    buckets = parse_kalshi_ladder(by_event[next_event], current_upper)
+    if buckets is None:
+        print(f"  Kalshi {next_event}: fewer than 2 usable ladder rungs", file=sys.stderr)
+        return None
+    return {"event": next_event, "meeting_close": close.strftime("%Y-%m-%d"),
+            "current_upper": current_upper, "buckets": buckets}
+
+
+def parse_polymarket_fed_event(event):
+    """Pure parse: one Polymarket 'Fed Decision' event -> bucket probabilities.
+
+    Unlike Kalshi's threshold ladder, Polymarket structures this event as
+    five directly-labelled brackets (POLYMARKET_GROUP_TO_BUCKET) with a
+    first-class Yes price per bracket -- no threshold math needed. The Yes
+    price of an "X happens" market IS its market-implied probability.
+    Returns None if fewer than 3 of the 5 expected brackets parse.
+    """
+    buckets = {}
+    for m in event.get("markets", []):
+        bucket = POLYMARKET_GROUP_TO_BUCKET.get(m.get("groupItemTitle"))
+        if bucket is None:
+            continue
+        try:
+            prices = json.loads(m.get("outcomePrices", "[]"))
+            buckets[bucket] = round(float(prices[0]), 4)
+        except (ValueError, IndexError, TypeError, json.JSONDecodeError):
+            continue
+    return buckets if len(buckets) >= 3 else None
+
+
+def fetch_polymarket_fed_decision():
+    """Network wrapper: find the next open 'Fed Decision in <Month>' event
+    and parse its bracket probabilities via parse_polymarket_fed_event.
+
+    Resolved dynamically the same way as the Kalshi event (earliest endDate
+    still in the future) -- Polymarket also runs one of these events per
+    FOMC meeting under a rotating slug (fed-decision-in-september-762,
+    fed-decision-in-october-..., ...), so a hardcoded slug would go stale
+    the same way a hardcoded Kalshi ticker would. No API key needed --
+    Polymarket's gamma-api is a public read endpoint. Returns None on any
+    failure.
+    """
+    url = f"{POLYMARKET_GAMMA_BASE}/events?tag_slug=fed&closed=false&limit=100"
+    try:
+        events = http_get_json(url)
+    except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, json.JSONDecodeError) as e:
+        print(f"  Polymarket fed events: fetch failed ({e})", file=sys.stderr)
+        return None
+
+    now = datetime.now(timezone.utc)
+    candidates = []
+    for e in events:
+        if not e.get("title", "").startswith("Fed Decision in "):
+            continue
+        end = e.get("endDate")
+        if not end:
+            continue
+        try:
+            end_dt = datetime.strptime(end, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+        except ValueError:
+            continue
+        if end_dt > now:
+            candidates.append((end_dt, e))
+    if not candidates:
+        print("  Polymarket fed events: no future 'Fed Decision' event found", file=sys.stderr)
+        return None
+    end_dt, event = min(candidates, key=lambda c: c[0])
+
+    buckets = parse_polymarket_fed_event(event)
+    if buckets is None:
+        print(f"  Polymarket {event.get('slug')}: fewer than 3 usable brackets", file=sys.stderr)
+        return None
+    return {"event": event.get("slug"), "meeting_close": end_dt.strftime("%Y-%m-%d"), "buckets": buckets}
+# ─── end FOMC rate-decision odds ─────────────────────────────────────────────
+
+
 def main():
     key = load_key()
     today = datetime.now(timezone.utc).date()
@@ -668,6 +885,26 @@ def main():
     for date_str, val in cofer_hist.items():
         history_by_date.setdefault(date_str, {})["usd_reserve_share"] = val
 
+    # Isolated best-effort block: neither fetcher's failure may raise past
+    # here or touch history_by_date/the completeness gate below (see the
+    # cadence="fomc" exemption in FIELD_META and CADENCE_TOLERANCE_DAYS).
+    try:
+        current_upper, _, _, _ = fetch_fred_series(FRED_TARGET_UPPER_SERIES, key, None, 2, start, end)
+        kalshi = fetch_kalshi_fed_decision(current_upper) if current_upper is not None else None
+        if kalshi is not None:
+            latest_out["fed_decision_kalshi"] = {
+                "value": kalshi, "ref_date": today.isoformat(), "published": today.isoformat()}
+    except Exception as e:
+        print(f"  Kalshi FOMC fetch failed, skipping (isolated from the rest of the run): {e}", file=sys.stderr)
+
+    try:
+        polymarket = fetch_polymarket_fed_decision()
+        if polymarket is not None:
+            latest_out["fed_decision_polymarket"] = {
+                "value": polymarket, "ref_date": today.isoformat(), "published": today.isoformat()}
+    except Exception as e:
+        print(f"  Polymarket FOMC fetch failed, skipping (isolated from the rest of the run): {e}", file=sys.stderr)
+
     if not history_by_date:
         print("No fields fetched successfully; leaving existing data.json untouched.", file=sys.stderr)
         sys.exit(1)
@@ -698,7 +935,12 @@ def main():
     # a green CI check. Yesterday's complete file, left untouched, is
     # strictly better than today's truncated one — every run rebuilds the
     # full rolling year from scratch anyway, so skipping a day loses nothing.
-    missing = [f for f in FIELD_META if f not in envelope["fields"]]
+    # fomc-cadence fields (fed_decision_kalshi/fed_decision_polymarket) are
+    # exempt: they're fetched best-effort in their own isolated try/except
+    # above specifically so a Kalshi/Polymarket hiccup never blocks the
+    # official FRED/Yahoo/IMF fields below from publishing.
+    missing = [f for f in FIELD_META
+               if f not in envelope["fields"] and FIELD_META[f]["cadence"] != "fomc"]
     if missing:
         print(f"\nFailed to fetch: {', '.join(missing)}", file=sys.stderr)
         print("Refusing to write a truncated data.json; leaving the existing "

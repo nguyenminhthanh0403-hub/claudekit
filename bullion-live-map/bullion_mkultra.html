@@ -219,6 +219,44 @@
   .market-sparkline polyline.up { stroke: var(--green); }
   .market-sparkline polyline.down { stroke: var(--red); }
 
+  /* Fed rate-decision odds card: sourced fact (market-implied probability),
+     kept visually distinct from the news list and index cards below it, and
+     from the Rate Hike scenario button in the drawer -- that's a simulated
+     what-if, this is a live number, and the two must not be conflated. */
+  .fed-odds-card {
+    background: var(--bg-panel2); border: 1px solid var(--border); border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .fed-odds-title {
+    font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 10px;
+  }
+  .fed-odds-headline { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
+  .fed-odds-source { margin-bottom: 10px; }
+  .fed-odds-source-label {
+    font-size: 11px; color: var(--text-dim); margin-bottom: 4px;
+    display: flex; justify-content: space-between; gap: 8px;
+  }
+  .fed-odds-bar {
+    display: flex; height: 18px; border-radius: 4px; overflow: hidden;
+    background: var(--bg-panel); border: 1px solid var(--border);
+  }
+  .fed-odds-seg { height: 100%; }
+  .fed-odds-seg.cut50plus, .fed-odds-seg.cut25 { background: var(--green); }
+  .fed-odds-seg.hold { background: var(--text-dim); }
+  .fed-odds-seg.hike25, .fed-odds-seg.hike50plus { background: var(--red); }
+  .fed-odds-legend {
+    display: flex; gap: 12px; flex-wrap: wrap; font-size: 11px; color: var(--text-dim); margin-top: 6px;
+  }
+  .fed-odds-legend-dot {
+    display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 4px;
+  }
+  .fed-odds-na { font-size: 12px; color: var(--text-dim); }
+  .fed-odds-caveat {
+    font-size: 12px; color: var(--text-dim); margin-top: 12px; padding-top: 10px;
+    border-top: 1px solid var(--border); line-height: 1.5;
+  }
+
   #markets-news { min-width: 0; }
   #news-list-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
@@ -889,6 +927,7 @@
   <div id="board-view" role="tabpanel" aria-label="Overview board" hidden></div>
   <div id="markets-view" role="tabpanel" aria-label="Markets" hidden>
     <div id="markets-indices"></div>
+    <div id="markets-fed-odds"></div>
     <div id="markets-news">
       <div id="news-list-label">Headlines</div>
       <div id="news-list"></div>
@@ -3425,7 +3464,151 @@ function buildMarketsTab() {
   const container = document.getElementById('markets-indices');
   container.innerHTML = '';
   MARKET_INDICES.forEach(idx => container.appendChild(buildMarketIndexCard(idx)));
+  buildFedOddsCard();
 }
+
+// ─── Fed rate-decision odds card ────────────────────────────────────────────
+// A sourced FACT (what two prediction markets currently price in for the
+// next FOMC decision), kept deliberately separate from the drawer's Rate
+// Hike scenario button, which is a simulated +50bps what-if. Conflating a
+// market-implied probability with a fixed hypothetical risks exactly the
+// overclaiming the caveat at the bottom of this card exists to avoid.
+//
+// The headline text below is template-generated string interpolation over
+// hand-written phrase buckets -- never an LLM call -- matching Mk Ultra's
+// standing no-LLM-calls principle for this live front door (same spirit as
+// the hand-written `why`/`stat` link descriptions in LINKS above).
+const FED_ODDS_BUCKET_ORDER = ['cut50plus', 'cut25', 'hold', 'hike25', 'hike50plus'];
+const FED_ODDS_BUCKET_LABEL = {
+  cut50plus: 'a 50bp+ cut', cut25: 'a 25bp cut', hold: 'no change',
+  hike25: 'a 25bp hike', hike50plus: 'a 50bp+ hike',
+};
+const FED_ODDS_SOURCE_LABEL = { kalshi: 'Kalshi', polymarket: 'Polymarket' };
+
+function fedOddsTopBucket(buckets) {
+  return FED_ODDS_BUCKET_ORDER.reduce((best, b) =>
+    (buckets[b] || 0) > (buckets[best] || 0) ? b : best, FED_ODDS_BUCKET_ORDER[0]);
+}
+
+function formatMeetingDate(iso) {
+  const d = new Date(iso + 'T00:00:00Z');
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
+}
+
+function fedOddsHeadline(kalshi, polymarket) {
+  const meetingIso = (polymarket || kalshi).meeting_close;
+  const meeting = formatMeetingDate(meetingIso);
+  if (kalshi && polymarket) {
+    const topK = fedOddsTopBucket(kalshi.buckets), topP = fedOddsTopBucket(polymarket.buckets);
+    if (topK === topP) {
+      const pctP = Math.round(polymarket.buckets[topP] * 100), pctK = Math.round(kalshi.buckets[topK] * 100);
+      return 'Markets price in ' + FED_ODDS_BUCKET_LABEL[topP] + ' as the most likely outcome of the '
+           + meeting + ' Fed decision — ' + pctP + '% (Polymarket), ' + pctK + '% (Kalshi).';
+    }
+    const pctP = Math.round(polymarket.buckets[topP] * 100), pctK = Math.round(kalshi.buckets[topK] * 100);
+    return 'Prediction markets are split on the ' + meeting + ' Fed decision: Polymarket leans toward '
+         + FED_ODDS_BUCKET_LABEL[topP] + ' (' + pctP + '%), Kalshi toward ' + FED_ODDS_BUCKET_LABEL[topK]
+         + ' (' + pctK + '%).';
+  }
+  const only = polymarket || kalshi;
+  const sourceName = FED_ODDS_SOURCE_LABEL[polymarket ? 'polymarket' : 'kalshi'];
+  const top = fedOddsTopBucket(only.buckets);
+  const pct = Math.round(only.buckets[top] * 100);
+  return sourceName + ' prices in ' + FED_ODDS_BUCKET_LABEL[top] + ' as the most likely outcome of the '
+       + meeting + ' Fed decision (' + pct + '%).';
+}
+
+function buildFedOddsBar(buckets) {
+  const bar = document.createElement('div');
+  bar.className = 'fed-odds-bar';
+  FED_ODDS_BUCKET_ORDER.forEach(b => {
+    const pct = (buckets[b] || 0) * 100;
+    if (pct <= 0) return;
+    const seg = document.createElement('div');
+    seg.className = 'fed-odds-seg ' + b;
+    seg.style.width = pct + '%';
+    seg.title = FED_ODDS_BUCKET_LABEL[b] + ': ' + pct.toFixed(1) + '%';
+    bar.appendChild(seg);
+  });
+  return bar;
+}
+
+function buildFedOddsSource(sourceKey, rec) {
+  const wrap = document.createElement('div');
+  wrap.className = 'fed-odds-source';
+
+  const label = document.createElement('div');
+  label.className = 'fed-odds-source-label';
+  const name = document.createElement('span');
+  name.textContent = FED_ODDS_SOURCE_LABEL[sourceKey];
+  const top = fedOddsTopBucket(rec.buckets);
+  const pctSpan = document.createElement('span');
+  pctSpan.textContent = FED_ODDS_BUCKET_LABEL[top] + ' ' + Math.round(rec.buckets[top] * 100) + '%';
+  label.appendChild(name);
+  label.appendChild(pctSpan);
+  wrap.appendChild(label);
+  wrap.appendChild(buildFedOddsBar(rec.buckets));
+  return wrap;
+}
+
+function buildFedOddsCard() {
+  const container = document.getElementById('markets-fed-odds');
+  container.innerHTML = '';
+
+  const card = document.createElement('div');
+  card.className = 'fed-odds-card';
+
+  const title = document.createElement('div');
+  title.className = 'fed-odds-title';
+  title.textContent = 'Next Fed Decision — Market-Implied Odds';
+  card.appendChild(title);
+
+  const latest = window.BULLION_LIVE_DATA;
+  const kalshi = latest && latest.fed_decision_kalshi;
+  const polymarket = latest && latest.fed_decision_polymarket;
+
+  if (!kalshi && !polymarket) {
+    const na = document.createElement('div');
+    na.className = 'fed-odds-na';
+    na.textContent = 'Live odds unavailable this cycle.';
+    card.appendChild(na);
+    document.getElementById('markets-fed-odds').appendChild(card);
+    return;
+  }
+
+  const headline = document.createElement('div');
+  headline.className = 'fed-odds-headline';
+  headline.textContent = fedOddsHeadline(kalshi, polymarket);
+  card.appendChild(headline);
+
+  if (polymarket) card.appendChild(buildFedOddsSource('polymarket', polymarket));
+  if (kalshi) card.appendChild(buildFedOddsSource('kalshi', kalshi));
+
+  const legend = document.createElement('div');
+  legend.className = 'fed-odds-legend';
+  [['cut25', 'Cut'], ['hold', 'No change'], ['hike25', 'Hike']].forEach(([cls, label]) => {
+    const item = document.createElement('span');
+    const dot = document.createElement('span');
+    dot.className = 'fed-odds-legend-dot ' + cls;
+    dot.style.background = cls === 'hold' ? 'var(--text-dim)' : (cls === 'cut25' ? 'var(--green)' : 'var(--red)');
+    item.appendChild(dot);
+    item.appendChild(document.createTextNode(label));
+    legend.appendChild(item);
+  });
+  card.appendChild(legend);
+
+  const caveat = document.createElement('div');
+  caveat.className = 'fed-odds-caveat';
+  caveat.textContent = 'This is a sourced market price, not a gold forecast. In this project’s own '
+    + 'elasticity fit, the direct ffr→gold link is DIRECTIONAL and not statistically significant '
+    + '(|t|=0.3) — a rate move most likely reaches gold indirectly, through the dollar '
+    + '(dxy→gold_pct is MEASURED at |t|=4.5).';
+  card.appendChild(caveat);
+
+  document.getElementById('markets-fed-odds').appendChild(card);
+}
+// ─── end Fed rate-decision odds card ────────────────────────────────────────
 
 function sentimentGlyph(s) {
   if (s === 'bullish') return '▲';
