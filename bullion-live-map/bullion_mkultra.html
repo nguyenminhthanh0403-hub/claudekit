@@ -113,12 +113,13 @@
   #header-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .btn {
     background: var(--bg-panel2); color: var(--text); border: 1px solid var(--border);
-    border-radius: 6px; padding: 6px 10px; font-size: 11px; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    border-radius: 0; padding: 6px 10px; font-size: 11px; cursor: pointer;
+    text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;
+    transition: background 0.15s, color 0.15s;
     white-space: nowrap;
   }
-  .btn:hover { background: #182034; border-color: #2a3352; }
-  .btn.active { background: rgba(212,184,105,0.15); border-color: var(--gold-dim); color: var(--gold); }
+  .btn:hover { background: #1a1a1a; }
+  .btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   /* margin-bottom (not padding) reserves room for #narration-caption below
      the stage without the caption bar overlapping the sphere/orb: the
@@ -146,11 +147,9 @@
   }
 
   /* View tabs: a small segmented control in the header */
-  #view-tabs { display: flex; margin-right: 4px; }
-  #view-tabs .tab { border-radius: 0; }
-  #view-tabs .tab:not(:first-child) { border-left: none; }
-  #view-tabs .tab:first-child { border-radius: 6px 0 0 6px; }
-  #view-tabs .tab:last-child { border-radius: 0 6px 6px 0; }
+  #view-tabs { display: flex; margin-right: 4px; border: 2px solid var(--border); }
+  #view-tabs .tab { border: none; }
+  #view-tabs .tab:not(:last-child) { border-right: 2px solid var(--border); }
 
   /* 2D Overview board: 7 stage columns of node cards */
   #board-view {
@@ -882,9 +881,9 @@
     </div>
     <div id="header-controls">
       <div id="view-tabs" role="tablist" aria-label="View">
-        <button class="btn tab active" id="tab-3d" role="tab" aria-selected="true">&#9673; 3D Map</button>
-        <button class="btn tab" id="tab-board" role="tab" aria-selected="false">&#9638; Overview</button>
-        <button class="btn tab" id="tab-markets" role="tab" aria-selected="false">&#128200; Markets</button>
+        <button class="btn tab active" id="tab-market" role="tab" aria-selected="true">Market</button>
+        <button class="btn tab" id="tab-analysis" role="tab" aria-selected="false">Analysis</button>
+        <button class="btn tab" id="tab-causal-link" role="tab" aria-selected="false">Causal Link</button>
       </div>
       <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
       <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
@@ -2150,7 +2149,10 @@ const Renderer = (function () {
       '<button class="btn run-btn" id="render-fallback-btn">Open the Overview board</button>';
     stageEl.appendChild(card);
     dismissCoach();
-    document.getElementById('render-fallback-btn').addEventListener('click', () => showView('board'));
+    document.getElementById('render-fallback-btn').addEventListener('click', () => {
+      causalLinkSubView = 'board';
+      showView('causal-link');
+    });
   }
 
   function fire(cbs, ...args) {
@@ -3756,12 +3758,24 @@ document.getElementById('board-view').addEventListener('click', function() {
   closeDetail();
 });
 
+// causalLinkSubView tracks which of Causal Link's two internal renderings
+// (3D constellation, default; 2D board, secondary) is showing -- Task 7
+// wires the toggle button that changes this; this task only introduces the
+// variable and the branch so 'causal-link' has somewhere concrete to read
+// from immediately, rather than leaving showView() half-built until Task 7.
+let causalLinkSubView = '3d';
+
 function showView(which) {
-  const is3d = which === '3d';
+  const showCausal3d = which === 'causal-link' && causalLinkSubView === '3d';
   const stageEl = document.getElementById('stage');
-  stageEl.style.display = is3d ? '' : 'none';
-  document.getElementById('board-view').hidden = which !== 'board';
-  document.getElementById('markets-view').hidden = which !== 'markets';
+  stageEl.style.display = showCausal3d ? '' : 'none';
+  document.getElementById('board-view').hidden = !(which === 'causal-link' && causalLinkSubView === 'board');
+  document.getElementById('markets-view').hidden = which !== 'market';
+  // #analysis-view doesn't exist yet -- Task 5 creates it. Guard the lookup
+  // so Market/Causal Link stay fully functional in the meantime; Task 5
+  // removes this guard once the element is real.
+  const analysisEl = document.getElementById('analysis-view');
+  if (analysisEl) analysisEl.hidden = which !== 'analysis';
   // #legend-and-controls (the link-effect/evidence/layers legend + Copy Link)
   // is `position: fixed`, so without this it stays pinned bottom-left over
   // EVERY tab, not just the 3D map it describes — pre-existing on the
@@ -3769,8 +3783,8 @@ function showView(which) {
   // Markets tab's own bottom-left content collides with it too. Both the
   // legend (3D layer/link-effect key) and Copy Link (encodes 3D node
   // hide/show state in its URL) are meaningless outside the 3D view.
-  document.getElementById('legend-and-controls').hidden = !is3d;
-  const tabs = { '3d': 'tab-3d', 'board': 'tab-board', 'markets': 'tab-markets' };
+  document.getElementById('legend-and-controls').hidden = !showCausal3d;
+  const tabs = { 'market': 'tab-market', 'analysis': 'tab-analysis', 'causal-link': 'tab-causal-link' };
   for (const [name, id] of Object.entries(tabs)) {
     const el = document.getElementById(id);
     const active = name === which;
@@ -3778,23 +3792,23 @@ function showView(which) {
     el.setAttribute('aria-selected', String(active));
   }
   // The persona orb normally lives centred inside #stage (the solar-system
-  // "sun" position), but #stage goes display:none off the 3D tab, which
+  // "sun" position), but #stage goes display:none off the 3D view, which
   // would take the orb down with it. Reparent it to <body> and dock it in
   // the corner (same fallback the 2D map uses) so the narration toggle
-  // stays reachable while browsing the board or markets tab.
+  // stays reachable while browsing any other tab/sub-view.
   const orb = document.getElementById('persona-orb');
   if (orb) {
-    orb.classList.toggle('orb-docked', !is3d);
-    (is3d ? stageEl : document.body).appendChild(orb);
+    orb.classList.toggle('orb-docked', !showCausal3d);
+    (showCausal3d ? stageEl : document.body).appendChild(orb);
   }
   // The 3D canvas sizes itself from #stage; while hidden it can read 0 width,
   // so re-fit it the moment we come back to the map (redraw() no-ops if the
   // scene isn't ready yet).
-  if (is3d) Renderer.redraw();
+  if (showCausal3d) Renderer.redraw();
 }
-document.getElementById('tab-3d').addEventListener('click', () => showView('3d'));
-document.getElementById('tab-markets').addEventListener('click', () => showView('markets'));
-document.getElementById('tab-board').addEventListener('click', () => showView('board'));
+document.getElementById('tab-market').addEventListener('click', () => showView('market'));
+document.getElementById('tab-analysis').addEventListener('click', () => showView('analysis'));
+document.getElementById('tab-causal-link').addEventListener('click', () => showView('causal-link'));
 
 // ── Header controls ─────────────────────────────────────────────────────
 document.getElementById('expand-all-btn').addEventListener('click', () => {
