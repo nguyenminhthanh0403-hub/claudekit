@@ -151,6 +151,18 @@
   #view-tabs .tab { border: none; }
   #view-tabs .tab:not(:last-child) { border-right: 2px solid var(--border); }
 
+  /* Causal Link's own toolbar: 2D/3D sub-view toggle + Live Data/Expand All/
+     Collapse All/Reset View/Audit Log, shown only while the Causal Link tab
+     is active (wired in showView()) instead of living in the always-present
+     #header-controls above. */
+  #causal-link-toolbar {
+    display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    padding: 10px 16px;
+  }
+  /* Same id-specificity-beats-[hidden] issue as #board-view/#markets-view
+     elsewhere in this file — re-assert it here. */
+  #causal-link-toolbar[hidden] { display: none; }
+
   /* 2D Overview board: 7 stage columns of node cards */
   #board-view {
     flex: 1 1 auto; overflow: auto; padding: 16px;
@@ -326,8 +338,8 @@
   #detail-panel {
     position: fixed; top: 0; right: 0; height: 100%;
     width: min(380px, 92vw);
-    background: rgba(9,11,18,0.97); backdrop-filter: blur(10px);
-    border-left: 1px solid var(--border);
+    background: var(--bg-panel);
+    border-left: 3px solid #fff; border-radius: 0;
     transform: translateX(100%);
     transition: transform 0.28s ease;
     z-index: 20;
@@ -437,8 +449,8 @@
      [hidden] rule unless re-asserted here. */
   #legend-and-controls[hidden] { display: none; }
   #legend-box {
-    background: rgba(11,14,22,0.9); backdrop-filter: blur(6px);
-    border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg-panel);
+    border: none; border-top: 3px solid #fff; border-radius: 0;
     padding: 10px 12px; font-size: 11px; max-width: 220px;
     display: flex; flex-wrap: wrap; gap: 6px 10px;
   }
@@ -628,8 +640,8 @@
     #detail-panel {
       width: 100%; height: auto; max-height: 62vh; top: auto; bottom: 0; right: 0;
       transform: translateY(100%);
-      border-left: none; border-top: 1px solid var(--border);
-      border-radius: 16px 16px 0 0;
+      border-left: none; border-top: 3px solid #fff;
+      border-radius: 0;
       box-shadow: 0 -12px 40px rgba(0,0,0,0.5);
     }
     #detail-panel.open { transform: translateY(0); }
@@ -883,13 +895,16 @@
         <button class="btn tab" id="tab-causal-link" role="tab" aria-selected="false">Causal Link</button>
       </div>
       <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
-      <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
-      <button class="btn adv-control" id="expand-all-btn">Expand All</button>
-      <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
-      <button class="btn adv-control" id="reset-view-btn">Reset View</button>
-      <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">&#9888; Audit Log</button>
       <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
     </div>
+  </div>
+  <div id="causal-link-toolbar" hidden>
+    <button class="btn" id="causal-subview-toggle">2D</button>
+    <button class="btn active adv-control" id="live-toggle-btn" title="Switch between live market data and the fully simulated baseline">Live Data</button>
+    <button class="btn adv-control" id="expand-all-btn">Expand All</button>
+    <button class="btn adv-control" id="collapse-all-btn">Collapse All</button>
+    <button class="btn adv-control" id="reset-view-btn">Reset View</button>
+    <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">Audit Log</button>
   </div>
   <div id="stage">
     <svg id="network-svg"></svg>
@@ -2144,6 +2159,7 @@ const Renderer = (function () {
     dismissCoach();
     document.getElementById('render-fallback-btn').addEventListener('click', () => {
       causalLinkSubView = 'board';
+      document.getElementById('causal-subview-toggle').textContent = '3D';
       showView('causal-link');
     });
   }
@@ -3773,6 +3789,7 @@ function showView(which) {
   document.getElementById('board-view').hidden = !(which === 'causal-link' && causalLinkSubView === 'board');
   document.getElementById('markets-view').hidden = which !== 'market';
   document.getElementById('analysis-view').hidden = which !== 'analysis';
+  document.getElementById('causal-link-toolbar').hidden = which !== 'causal-link';
   // #legend-and-controls (the link-effect/evidence/layers legend + Copy Link)
   // is `position: fixed`, so without this it stays pinned bottom-left over
   // EVERY tab, not just the 3D map it describes — pre-existing on the
@@ -3806,6 +3823,13 @@ function showView(which) {
 document.getElementById('tab-market').addEventListener('click', () => showView('market'));
 document.getElementById('tab-analysis').addEventListener('click', () => showView('analysis'));
 document.getElementById('tab-causal-link').addEventListener('click', () => showView('causal-link'));
+// 2D/3D sub-view toggle: label always names the view you'd switch TO, not
+// the one you're currently on.
+document.getElementById('causal-subview-toggle').addEventListener('click', () => {
+  causalLinkSubView = causalLinkSubView === '3d' ? 'board' : '3d';
+  document.getElementById('causal-subview-toggle').textContent = causalLinkSubView === '3d' ? '2D' : '3D';
+  showView('causal-link');
+});
 // Market is the default active tab in the static markup above; without this
 // call the page would land with "Market" highlighted in the nav while the
 // 3D constellation (Causal Link's content) is what's actually still showing,
@@ -6325,7 +6349,7 @@ function openAuditLog() {
   if (!w) { alert('Audit log blocked by popup blocker.'); return; }
   w.document.write(
     '<html><head><title>Bullion \u2014 Audit Log</title><style>' +
-    'body{background:#0d1117;color:#c9d1d9;font:14px/1.6 -apple-system,system-ui,sans-serif;padding:28px;max-width:1100px;margin:auto}' +
+    'body{background:#000;color:#c9d1d9;font:14px/1.6 -apple-system,system-ui,sans-serif;padding:28px;max-width:1100px;margin:auto}' +
     'h2{color:#e6edf3;margin:0 0 4px} h3{color:#e6edf3;margin:28px 0 6px;font-size:15px}' +
     'h3.bad{color:#e0654f} h3.ok{color:#7bbf8e}' +
     '.audit-note{color:#8b949e;font-size:13px;margin:4px 0 12px}' +
