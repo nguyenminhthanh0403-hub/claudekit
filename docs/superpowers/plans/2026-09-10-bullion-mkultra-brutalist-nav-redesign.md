@@ -6,6 +6,8 @@
 
 **Architecture:** Single-file edit, no new files — matches this project's existing one-file-per-map-version convention (mk11 through mkultra all live as standalone HTML). Nine tasks, each a complete working state committed directly to `main`. Tasks 1-2 are global (CSS tokens, icon sweep) and touch many small spots; Tasks 3-8 work tab-by-tab; Task 9 is a whole-app verification pass. No task depends on unmerged work from a later task — each commit leaves the live site fully functional, even mid-redesign.
 
+**Amendment (2026-09-11, added during execution):** Task 8's own review surfaced a real gap in this plan (traced to the spec's Phase 4 description never using the word "restyle," unlike Phases 3/5) — the Analysis tab's internal content (health score, scenario stats, glossary, chain-reaction cards, etc.) and some detail-panel internals were never assigned to any of the original 9 tasks, so nobody ever restyled them; Task 5 correctly scoped itself to a container-only conversion per its own brief, and Task 7 correctly scoped to container ids only. **Task 8b** (inserted below, between Task 8 and Task 9) closes this gap. Task 9 (verification-only, no code changes) could not have caught or fixed this on its own.
+
 **Tech Stack:** Vanilla HTML/CSS/JS (no build step, no framework), Three.js r160 (vendored, untouched by this plan), the project's existing headless-chrome-verification skill (CDP probe) for visual checks, Python `tests/` suite for the non-visual regression check in Task 9.
 
 **Spec:** `docs/superpowers/specs/2026-09-09-bullion-mkultra-brutalist-nav-redesign-design.md`
@@ -938,6 +940,192 @@ Sweeps the disclaimer modal and coach-mark tour bubble to the flat
 brutalist system, and fixes any remaining rounded-corner/gold-as-accent
 leftovers found by a full-file grep. Coach-mark tour behavior, timing
 and copy are unchanged -- visual treatment only.
+
+Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
+EOF
+)"
+```
+
+---
+
+### Task 8b: Analysis-tab and detail-panel internals restyle
+
+**Added 2026-09-11**, mid-execution, after Task 8's review surfaced this gap (see the plan-level Amendment note above). Not part of the original 9-task sequence — inserted between Task 8 and Task 9 because Task 9 has no code-change mechanism and would ship this gap otherwise.
+
+**Files:**
+- Modify: `bullion-live-map/bullion_mkultra.html` (CSS only — every selector below, all inside the existing stylesheet block; no markup or JS changes)
+
+**Interfaces:**
+- Consumes: `--accent`, `--bg-panel`, `--bg-deep`, `--border`, `--text`, `--text-dim` (Task 1). No new tokens introduced.
+- Produces: nothing consumed by later tasks — this is a leaf CSS-only task.
+
+This task restyles CSS that has existed, untouched, since before this redesign began — none of it was ever in any prior task's scope (Task 5 was explicitly a container-only conversion; Task 7 was explicitly scoped to container ids only). Two categories of selector appear below: **restyle** (card/button/panel chrome — the redesign's actual target) and **leave alone, confirmed functional** (confidence-tier indicator colors, already-established exceptions elsewhere in this plan for the exact same color family — do not "fix" these, they are correct as-is and flattening/recoloring them would be a *new* defect, not a fix).
+
+- [ ] **Step 1: `.run-btn`'s sibling `.spinner` — the one parked item from Task 8's re-review**
+
+Current (`bullion_mkultra.html:726`):
+```css
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--border); border-top-color: var(--gold); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+```
+Change only `border-top-color`:
+```css
+  .spinner { display: inline-block; width: 12px; height: 12px; border: 1.5px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+```
+(The `border-radius: 50%` stays — a loading spinner's circular shape is the established "functional shape" exception, same as the small indicator dots elsewhere in this file. Only its color was gold-as-accent; that's what's being fixed.)
+
+- [ ] **Step 2: `#analysis-view` scenario/metrics chrome — flatten to the file's zero-radius convention**
+
+Current (`bullion_mkultra.html:660-667`, `:684`, `:693-694`):
+```css
+  select.scenario-select {
+    /* ...existing declarations, confirm exact current content before editing... */
+  }
+  select.scenario-select optgroup { background: var(--bg-panel); color: var(--gold-dim); font-style: normal; }
+  select.scenario-select option { background: var(--bg-panel); color: var(--text); }
+  select.scenario-select.active {
+    /* ... */
+  }
+  .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .drawer-tag { font-size: 10px; padding: 2px 8px; border-radius: 10px; background: var(--bg-panel2); color: var(--gold); border: 1px solid var(--border); cursor: pointer; }
+  .drawer-tag:hover { border-color: var(--gold-dim); }
+```
+Read `select.scenario-select`'s and `select.scenario-select.active`'s full current declarations before editing (not fully captured during planning) — then apply, to every rule in this step: `border-radius: 0` everywhere one currently appears (`.metrics-grid`, `.drawer-tag`, and `select.scenario-select` if it has one), and swap `.drawer-tag`'s `color: var(--gold)` / `:hover`'s `border-color: var(--gold-dim)` to `var(--accent)` (it's a clickable show/hide toggle, squarely "buttons/nav/active-states" per the Global Constraint). Leave `select.scenario-select optgroup`'s `color: var(--gold-dim)` as a judgment call matching this task's own `#header h1` precedent from Task 8 (native `<select>` styling has limited cross-browser control; a muted label color on an optgroup reads closer to typographic voice than brand chrome) — state your decision either way in the commit message, same as Task 8 did for the wordmark.
+
+- [ ] **Step 3: `.state-alert` / `.narrative-box` / `.glossary-view` / `.chain-card` — flatten borders, drop radius**
+
+Current (`bullion_mkultra.html:700-705`, `:739`, `:746`):
+```css
+  .state-alert { font-size: 11px; padding: 6px 9px; border-radius: 6px; border: 1px solid; line-height: 1.4; }
+  .state-alert.risk-off { background: rgba(224,101,79,0.12); color: var(--up); border-color: rgba(224,101,79,0.5); }
+  .state-alert.tight { background: rgba(224,177,90,0.12); color: var(--warn); border-color: rgba(224,177,90,0.5); }
+  .state-alert.normal { background: rgba(123,191,142,0.12); color: var(--green); border-color: rgba(123,191,142,0.5); }
+  .narrative-box { font-size: 12px; color: var(--text-dim); line-height: 1.6; background: var(--bg-panel2); border-radius: 6px; padding: 10px; border: 1px solid var(--border); white-space: pre-wrap; }
+  .glossary-view { padding: 9px 11px; font-size: 11px; color: var(--text-dim); background: var(--bg-deep); overflow-y: auto; touch-action: pan-y; border-radius: 6px; max-height: 240px; border: 1px solid var(--border); }
+  .chain-card { border: 1px solid var(--border); border-radius: 6px; padding: 9px 11px; background: var(--bg-panel2); }
+```
+Replace each `border-radius: 6px` with `border-radius: 0`. Leave `.state-alert.risk-off/.tight/.normal`'s `background`/`color`/`border-color` values (the `rgba(...)`+`var(--up)`/`var(--warn)`/`var(--green)` triad) completely untouched — these are functional risk-state indicators (same semantic-color pattern as `.market-card-change.up`/`.down`, already an established exception throughout this plan), only `.state-alert`'s own base `border-radius` changes. `.narrative-box`/`.glossary-view`/`.chain-card` keep their existing `border: 1px solid var(--border)` (a plain border, not gold-tinted) — only drop the radius; do not convert these to the "3px top-rule" pattern used for larger cards elsewhere, a 1px all-around border on a small text container reads fine flat, and forcing the top-rule pattern onto every single small box in this tab would look repetitive rather than deliberate.
+
+- [ ] **Step 4: `.health-bar-bg`/`.health-bar-fill`/`.stat-track` — flatten, no color change**
+
+Current (`bullion_mkultra.html:721-722`, `:790`):
+```css
+  .health-bar-bg { height: 7px; background: var(--bg-deep); border-radius: 4px; overflow: hidden; border: 1px solid var(--border); }
+  .health-bar-fill { height: 100%; border-radius: 4px; transition: width 0.8s ease, background 0.8s ease; }
+  .stat-track { position: relative; height: 14px; background: var(--bg-deep); border-radius: 4px; border: 1px solid var(--border); overflow: hidden; }
+```
+Replace each `border-radius: 4px` with `border-radius: 0`. No color changes — `.health-bar-fill`'s fill color is set inline per-reading (green/amber/red status), `.stat-track-mid`'s `var(--gold-dim)` center-line marker (line 791, immediately below `.stat-track`) is a fine typographic/marker use, not UI chrome — leave it.
+
+- [ ] **Step 5: `.chain-badge`/`.chain-net-badge`/`.gterm::after` — flatten, leave tier colors alone**
+
+Current (`bullion_mkultra.html:750-756`, `:776`):
+```css
+  .chain-net-badge { margin-left: 6px; font-size: 10px; padding: 1px 6px; border-radius: 10px; font-weight: 700; }
+  .chain-badge { font-size: 9px; padding: 1px 5px; border-radius: 8px; text-transform: uppercase; letter-spacing: 0.03em; }
+  .chain-conf-measured { background: rgba(212,184,105,0.18); color: var(--gold); }
+  .chain-conf-directional { background: rgba(136,145,166,0.18); color: var(--text-dim); }
+  .gterm::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 5px); width: max-content; max-width: min(250px, 72vw); background: #14161f; color: var(--text); border: 1px solid rgba(212,184,105,0.45); border-radius: 6px; padding: 6px 9px; font-size: 12px; line-height: 1.5; font-weight: 400; font-style: normal; text-transform: none; letter-spacing: normal; white-space: normal; box-shadow: 0 6px 18px rgba(0,0,0,0.65); z-index: 80; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s; }
+```
+Replace `.chain-net-badge`'s and `.chain-badge`'s own `border-radius` with `0`. **Do NOT touch `.chain-conf-measured`/`.chain-conf-directional`** (and the `.chain-conf-unverified` rule that follows them, not shown above but present in the file) — these are the SAME measured/directional/unverified confidence-tier color family that Task 7 explicitly, correctly left untouched in the Audit Log popup; touching them here would contradict that established precedent. For `.gterm::after` (the glossary-term tooltip): replace `border-radius: 6px` with `0` and swap its gold-tinted border `rgba(212,184,105,0.45)` to a neutral `var(--border)` or `var(--accent)` (your call — this one genuinely is decorative chrome, not a tier indicator, since it's a generic definition-tooltip background, not a confidence signal).
+
+- [ ] **Step 6: `.tier-badge`/`.audit-badge` — flatten shape only, keep functional color**
+
+Current (`bullion_mkultra.html:809-814`):
+```css
+  .tier-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; padding: 1px 5px; margin-right: 4px; border-radius: 3px;
+    border: 1px solid currentColor; opacity: 0.9; vertical-align: 1px; cursor: help; }
+  .audit-badge { display: inline-block; font-size: 10px; font-weight: 700; text-transform: uppercase;
+                 letter-spacing: 0.05em; color: var(--warn, #e0b15a); border: 1px dashed var(--warn, #e0b15a);
+                 border-radius: 3px; padding: 0 4px; margin-right: 4px; }
+```
+Replace both `border-radius: 3px` with `0`. `.tier-badge`'s `border: 1px solid currentColor` (inherits whichever tier color — measured/directional/unverified — is applied via a sibling class) and `.audit-badge`'s `var(--warn, #e0b15a)` are both functional confidence/warning indicators — leave every color untouched, shape only.
+
+- [ ] **Step 7: detail-panel internals — `.rel-row`, `#narration-caption`, `.rel-summary .swatch`**
+
+Current (`bullion_mkultra.html:420-424`):
+```css
+  .rel-row {
+    border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; margin-bottom: 5px;
+    background: var(--bg-panel2); cursor: pointer; transition: border-color 0.15s;
+  }
+  .rel-row:hover { border-color: var(--gold-dim); }
+```
+Replace with:
+```css
+  .rel-row {
+    border: 1px solid var(--border); border-radius: 0; padding: 7px 9px; margin-bottom: 5px;
+    background: var(--bg-panel2); cursor: pointer; transition: border-color 0.15s;
+  }
+  .rel-row:hover { border-color: var(--accent); }
+```
+
+Current (`bullion_mkultra.html:373-382`):
+```css
+  #narration-caption {
+    position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%);
+    z-index: 20; max-width: min(640px, 88vw);
+    padding: 10px 18px; border-radius: 10px;
+    background: rgba(11,14,22,0.9); backdrop-filter: blur(6px);
+    border: 1px solid var(--border);
+    font-size: 13px; line-height: 1.5; text-align: center;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    pointer-events: none;
+  }
+```
+Change `border-radius: 10px` to `0`, and `background: rgba(11,14,22,0.9); backdrop-filter: blur(6px);` to a solid `background: var(--bg-panel);` (no `backdrop-filter` — matches the flat/no-blur treatment already applied to `#detail-panel`/`#legend-box` in Task 7). Leave `box-shadow` alone — it's a subtitle-style legibility aid over the 3D scene, not brand chrome, and this task's scope is color/radius, not shadow removal (no prior task in this plan removed a functional legibility shadow either).
+
+Current (`bullion_mkultra.html:413`):
+```css
+  .rel-summary .swatch { width: 14px; height: 14px; border-radius: 4px; flex-shrink: 0; }
+```
+Change to `border-radius: 0`. (This is a small color-swatch key, not a dot — flat reads correctly here, unlike the genuinely-round `.rel-dot`/`.legend-dot` indicators elsewhere, which stay round.)
+
+- [ ] **Step 8: `.manual-ctrls input[type=range]` accent color**
+
+Current (`bullion_mkultra.html:834`):
+```css
+  .manual-ctrls input[type=range] { flex: 1 1 auto; min-width: 0; accent-color: var(--gold); height: 18px; }
+```
+Change `accent-color: var(--gold)` to `accent-color: var(--accent)`.
+
+- [ ] **Step 9: JS-parse safety check**
+
+This task is CSS-only, but run the standing check anyway:
+```bash
+cd bullion-live-map && python3 -c "
+import re
+html = open('bullion_mkultra.html', encoding='utf-8').read()
+scripts = re.findall(r'<script(?:(?!type=\"importmap\")[^>])*>(.*?)</script>', html, re.S)
+main = max(scripts, key=len)
+open('/tmp/extracted_main_script.js','w',encoding='utf-8').write(main)
+"
+node --check /tmp/extracted_main_script.js && echo "PARSES OK"
+```
+
+- [ ] **Step 10: Screenshot and verify**
+
+Screenshot the Analysis tab in full (scroll through: scenario grid, manual drivers with the range slider, live-metrics grid, health score/narrative, node picker, chain-reaction cards, glossary), and the detail panel open on a node with at least one relationship that has a field-note (to see `.rel-row` rendered). Confirm: no rounded corners anywhere except the explicitly-kept functional shapes (spinner, small indicator dots), no gold used as a clickable/interactive-state color anywhere in this tab, all confidence-tier colors (`.state-alert.*`, `.chain-conf-*`, `.tier-badge`, `.audit-badge`) render exactly as they did before this task (same colors, just flat corners). Re-run `grep -n "border-radius: [1-9]" bullion-live-map/bullion_mkultra.html` and confirm every remaining hit is one of the explicitly-kept exceptions (functional dots/spinner/legend patterns/persona-orb/Three.js canvas — cross-check against the list in the ledger's "gap confirmed + deepened" entry if unsure whether a given remaining hit is a legitimate keep).
+
+- [ ] **Step 11: Commit**
+
+```bash
+cd /Users/thanhnguyen/minhthanh0403/claude-projects/claudekit
+git add bullion-live-map/bullion_mkultra.html
+git commit -m "$(cat <<'EOF'
+Bullion Mk Ultra redesign 8b/9: Analysis-tab + detail-panel internals restyle
+
+Closes a real gap in the original plan (surfaced by Task 8's review, not
+any implementer's fault -- Task 5 correctly scoped to a container-only
+drawer->tab conversion, Task 7 correctly scoped to container ids only,
+and the design spec's own Phase 4 never said "restyle" the way Phases
+3/5 did). Flattens border-radius and swaps gold-as-clickable-accent to
+--accent across .run-btn's spinner, the scenario/metrics chrome,
+state-alert/narrative-box/glossary-view/chain-card, health-bar/stat-
+track, chain-badge/gterm tooltip, tier-badge/audit-badge (shape only),
+and detail-panel's rel-row/narration-caption/swatch. Every confidence-
+tier color (measured/directional/unverified, risk-off/tight/normal,
+warn) is explicitly left untouched throughout -- same functional-color
+exception already established for the Audit Log popup in Task 7.
 
 Co-Authored-By: Claude Sonnet 5 <noreply@anthropic.com>
 EOF
