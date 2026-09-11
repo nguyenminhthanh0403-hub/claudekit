@@ -3809,6 +3809,12 @@ function showView(which) {
 document.getElementById('tab-market').addEventListener('click', () => showView('market'));
 document.getElementById('tab-analysis').addEventListener('click', () => showView('analysis'));
 document.getElementById('tab-causal-link').addEventListener('click', () => showView('causal-link'));
+// Market is the default active tab in the static markup above; without this
+// call the page would land with "Market" highlighted in the nav while the
+// 3D constellation (Causal Link's content) is what's actually still showing,
+// since #markets-view/#board-view/#stage all default to their bare HTML
+// visibility rather than whatever showView() would set for 'market'.
+showView('market');
 
 // ── Header controls ─────────────────────────────────────────────────────
 document.getElementById('expand-all-btn').addEventListener('click', () => {
