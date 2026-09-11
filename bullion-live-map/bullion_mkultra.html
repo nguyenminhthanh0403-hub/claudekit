@@ -158,6 +158,7 @@
   #causal-link-toolbar {
     display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
     padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
   }
   /* Same id-specificity-beats-[hidden] issue as #board-view/#markets-view
      elsewhere in this file — re-assert it here. */
@@ -574,19 +575,19 @@
   }
 
   /* ── Beginner Mode: a genuinely simplified canvas ───────────────────── */
-  /* In beginner mode the header collapses to a single ⚙ Tools affordance;
+  /* In beginner mode the header collapses to a single Tools affordance;
      every analyst control (Controls, Live Data, Expand/Collapse, Audit Log,
      Reset View) is tagged .adv-control and hidden until Tools is opened. */
   #app.beginner-on .adv-control { display: none !important; }
   #hint-banner { display: none; }  /* superseded by the guided coach card below */
 
-  /* ⚙ Tools glows briefly once the visitor clicks their first dot, signalling
+  /* Tools glows briefly once the visitor clicks their first dot, signalling
      that the deeper toolkit is now one click away (progressive disclosure). */
   #mode-toggle-btn.tools-ready { animation: toolsPulse 2s ease-out 3; }
   @keyframes toolsPulse {
-    0%   { box-shadow: 0 0 0 0 rgba(212,164,65,0.55); }
-    70%  { box-shadow: 0 0 0 8px rgba(212,164,65,0); }
-    100% { box-shadow: 0 0 0 0 rgba(212,164,65,0); }
+    0%   { box-shadow: 0 0 0 0 rgba(255,51,0,0.55); }
+    70%  { box-shadow: 0 0 0 8px rgba(255,51,0,0); }
+    100% { box-shadow: 0 0 0 0 rgba(255,51,0,0); }
   }
 
   /* Guided first-run coach: one step at a time, dismissible, beginner-mode only.
@@ -594,8 +595,8 @@
      walkthrough that advances as the visitor actually interacts with the map. */
   #coach {
     position: fixed; top: 66px; left: 16px; z-index: 6; max-width: 300px;
-    background: var(--bg-panel); border: 1px solid var(--gold-dim);
-    border-radius: 12px; padding: 14px 16px 12px;
+    background: var(--bg-panel); border: 1px solid var(--border);
+    border-radius: 0; padding: 14px 16px 12px;
     box-shadow: 0 10px 32px rgba(0,0,0,0.5);
     color: var(--text); font-size: 12.5px; line-height: 1.5;
   }
@@ -604,8 +605,8 @@
   #manual-box.hidden { display: none; }
   #copy-link-fallback.hidden { display: none; }
   #coach-steps { display: flex; gap: 5px; margin-bottom: 10px; }
-  .coach-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border); transition: background 0.2s; }
-  .coach-dot.on { background: var(--gold); }
+  .coach-dot { width: 6px; height: 6px; border-radius: 0; background: var(--border); transition: background 0.2s; }
+  .coach-dot.on { background: var(--accent); }
   #coach-title { margin: 0 0 6px; font-size: 13px; color: var(--gold); font-weight: 600; padding-right: 16px; }
   #coach-body { color: var(--text-dim); }
   #coach-body b { color: var(--text); font-weight: 600; }
@@ -620,7 +621,7 @@
   /* Bouncing down-arrow shown on step 1, nudging the eye toward the glowing dots. */
   #coach.point::after {
     content: ''; position: absolute; left: 28px; bottom: -9px;
-    border: 9px solid transparent; border-top-color: var(--gold-dim);
+    border: 9px solid transparent; border-top-color: var(--accent);
     animation: coachBounce 1.4s ease-in-out infinite;
   }
   @keyframes coachBounce {
@@ -703,6 +704,11 @@
 
   .narrative-box { font-size: 12px; color: var(--text-dim); line-height: 1.6; background: var(--bg-panel2); border-radius: 6px; padding: 10px; border: 1px solid var(--border); white-space: pre-wrap; }
   .health-score-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+  /* .health-score-row is a flex row, so its .hero-stat child would otherwise
+     shrink-to-fit its 2-digit number -- clipping the 96px .hero-stat-ghost
+     glyph (absolutely positioned inside, sized off the wrapper) via the
+     wrapper's own overflow:hidden. Let it actually claim the row's space. */
+  .health-score-row .hero-stat { flex: 1 1 auto; }
   /* This file has NO generic `.hidden { display: none }` utility -- every
      other `.hidden` rule here is id-scoped (#coach.hidden, #manual-box.hidden,
      #narration-caption.hidden). So hiding the disabled composite-health-score
@@ -847,11 +853,16 @@
   .disclaimer-link:hover { color:var(--gold); }
   #disclaimer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:400; opacity:0; pointer-events:none; transition:opacity 0.18s; }
   #disclaimer-overlay.visible { opacity:1; pointer-events:auto; }
-  #disclaimer-modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(440px,90vw); max-height:82vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; box-shadow:0 12px 40px rgba(0,0,0,0.7); padding:18px 20px; }
+  #disclaimer-modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(440px,90vw); max-height:82vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--bg-panel); border:1px solid var(--border); border-radius:0; box-shadow:0 12px 40px rgba(0,0,0,0.7); padding:18px 20px; }
   #disclaimer-modal h3 { font-size:14px; color:var(--gold); margin:0 0 2px; letter-spacing:0.02em; }
   #disclaimer-modal h4 { font-size:11px; color:var(--gold-dim); text-transform:uppercase; letter-spacing:0.06em; margin:14px 0 5px; }
+  /* Rule-line divider ahead of the second disclosure section (Privacy) --
+     targets only an h4 preceded by a p, so the first h4 (right under the
+     h3 title) is left alone. */
+  #disclaimer-modal p + h4 { border-top:1px solid var(--border); padding-top:12px; }
   #disclaimer-modal p { font-size:12px; color:var(--text-dim); line-height:1.6; margin:0 0 8px; }
-  #disclaimer-close { position:absolute; top:12px; right:14px; font-size:22px; line-height:1; cursor:pointer; color:var(--gold); background:none; border:none; padding:0 4px; }
+  #disclaimer-close { position:absolute; top:12px; right:14px; font-size:22px; line-height:1; cursor:pointer; color:var(--text-dim); background:none; border:none; padding:0 4px; }
+  #disclaimer-close:hover { color:var(--text); }
 </style>
 <!-- Mk Ultra render layer: Three.js r160 (npm 0.160.0) core module, vendored
      locally at vendor/three.module.js so this page has no CDN dependency —
@@ -894,8 +905,8 @@
         <button class="btn tab" id="tab-analysis" role="tab" aria-selected="false">Analysis</button>
         <button class="btn tab" id="tab-causal-link" role="tab" aria-selected="false">Causal Link</button>
       </div>
-      <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">&#9776; Controls</button>
-      <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">&#9881; Tools</button>
+      <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">Controls</button>
+      <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">Tools</button>
     </div>
   </div>
   <div id="causal-link-toolbar" hidden>
@@ -1071,7 +1082,7 @@
       <div id="detail-layer">—</div>
     </div>
     <div class="detail-header-actions">
-      <button id="detail-narrate" class="narrate-btn" title="Play narration" hidden>&#128266;</button>
+      <button id="detail-narrate" class="narrate-btn" title="Play narration" hidden>Play</button>
       <button id="detail-close">&times;</button>
     </div>
   </div>
@@ -3044,7 +3055,7 @@ const Renderer = (function () {
 
 function activateNode(event, d) {
   event.stopPropagation();
-  onFirstInteraction();   // reveal the ⚙ Tools hint + advance the coach on the first real click
+  onFirstInteraction();   // reveal the Tools hint + advance the coach on the first real click
   stickyFocusId = d.id;
   if (d.isHub) {
     allExpanded = false;
@@ -3218,12 +3229,12 @@ function buildRelationships(d) {
           '<span class="rel-dot" style="background:' + color + '"></span>' +
           '<span class="rel-arrow">' + arrow + '</span>' +
           '<span class="rel-name">' + name + '</span>' +
-          (r.l.fieldNote ? '<span class="fieldnote-badge" title="' + FIELDNOTE_TITLE + '">&#9998;</span>' : '') +
+          (r.l.fieldNote ? '<span class="fieldnote-badge" title="' + FIELDNOTE_TITLE + '">note</span>' : '') +
           '<span class="rel-arrows" style="color:' + color + '" title="Direction and strength (? = unverified sign)">' + arrowGlyphs(r.l) + '</span>' +
           '<span class="rel-strength">' + strengthWord(r.l.w) + '</span>' +
         '</div>' +
         '<div class="rel-detail">' +
-          (r.l.aud === false ? '<span class="audit-badge" title="' + (r.l.note || '').replace(/"/g,'&quot;') + '">&#9888; sign unverified</span> ' : '') +
+          (r.l.aud === false ? '<span class="audit-badge" title="' + (r.l.note || '').replace(/"/g,'&quot;') + '">sign unverified</span> ' : '') +
           // How much this particular claim is actually backed. Same vocabulary
           // the audit log uses, shown where the claim is read rather than only
           // in a panel the reader has to go looking for.
@@ -3231,9 +3242,9 @@ function buildRelationships(d) {
                       TIER_TITLE[r.l.conf] + '">' + r.l.conf + '</span> ' : '') +
           '<span class="rel-lead" style="color:' + color + '">' + word + '.</span> ' +
           enrichText(r.l.why) +
-          '<span class="rel-stat">&#9873; ' + enrichText(r.l.stat || '') + '</span>' +
+          '<span class="rel-stat">' + enrichText(r.l.stat || '') + '</span>' +
           (r.l.fieldNote ? '<div class="rel-field-note">' + enrichText(r.l.fieldNote) +
-            (NARRATION_LINKS[r.l.s + '-' + r.l.t] ? ' <button class="rel-field-note-narrate" title="Play narration" onclick="playNarration(\'' + NARRATION_LINKS[r.l.s + '-' + r.l.t] + '\')">&#128266;</button>' : '') +
+            (NARRATION_LINKS[r.l.s + '-' + r.l.t] ? ' <button class="rel-field-note-narrate" title="Play narration" onclick="playNarration(\'' + NARRATION_LINKS[r.l.s + '-' + r.l.t] + '\')">Play</button>' : '') +
             '</div>' : '') +
           '</div>' +
       '</div>';
@@ -3851,9 +3862,9 @@ document.getElementById('collapse-all-btn').addEventListener('click', () => {
 });
 function applyBeginnerMode() {
   const btn = document.getElementById('mode-toggle-btn');
-  // Beginner view hides everything behind one affordance ("⚙ Tools"); the full
+  // Beginner view hides everything behind one affordance ("Tools"); the full
   // analyst view relabels the same button to a "back to simple" toggle.
-  btn.innerHTML = beginnerMode ? '&#9881; Tools' : '&#8249; Simple View';
+  btn.innerHTML = beginnerMode ? 'Tools' : '&#8249; Simple View';
   btn.classList.toggle('active', beginnerMode);
   document.getElementById('app').classList.toggle('beginner-on', beginnerMode);
   // #analysis-view is a real tab, reachable via #tab-analysis in both modes
@@ -3909,7 +3920,7 @@ function dismissCoach() {
   const card = document.getElementById('coach');
   if (card) card.classList.add('hidden');
 }
-// First genuine interaction: surface the ⚙ Tools glow and nudge the coach forward.
+// First genuine interaction: surface the Tools glow and nudge the coach forward.
 function onFirstInteraction() {
   if (interacted) return;
   interacted = true;
