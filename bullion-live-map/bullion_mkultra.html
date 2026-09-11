@@ -789,7 +789,7 @@
   .stat-label small { display: block; color: var(--text-dim); opacity: 0.7; font-size: 9px; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px; }
   .stat-track { position: relative; height: 14px; background: var(--bg-deep); border-radius: 0; border: 1px solid var(--border); overflow: hidden; }
   .stat-track-mid { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px; background: var(--gold-dim); opacity: 0.55; }
-  .stat-bar { position: absolute; top: 2px; bottom: 2px; border-radius: 2px; transition: width 0.35s ease, left 0.35s ease; }
+  .stat-bar { position: absolute; top: 2px; bottom: 2px; border-radius: 0; transition: width 0.35s ease, left 0.35s ease; }
   .stat-bar.pos { background: var(--up); }
   .stat-bar.neg { background: var(--down); }
   .stat-bar.flat { background: var(--text-dim); opacity: 0.4; }
@@ -833,9 +833,9 @@
   .manual-ctrls { display: flex; align-items: center; gap: 8px; }
   .manual-ctrls input[type=range] { flex: 1 1 auto; min-width: 0; accent-color: var(--accent); height: 18px; }
   .manual-ctrls input[type=number] { width: 68px; flex: 0 0 auto; background: var(--bg-deep);
-      border: 1px solid var(--border); color: var(--text); border-radius: 4px; padding: 4px 6px;
+      border: 1px solid var(--border); color: var(--text); border-radius: 0; padding: 4px 6px;
       font-size: 11px; font-variant-numeric: tabular-nums; font-family: inherit; }
-  .manual-ctrls input[type=number]:focus { outline: none; border-color: var(--gold-dim); }
+  .manual-ctrls input[type=number]:focus { outline: none; border-color: var(--accent); }
   .manual-help { font-size: 12px; color: var(--text-dim); line-height: 1.5; margin-top: 3px; opacity: 0.85; }
   .manual-warn { font-size: 12px; color: var(--warn); opacity: 0.85; font-style: italic;
                  line-height: 1.5; margin-top: 10px; }
