@@ -188,20 +188,29 @@
   #markets-indices { display: flex; gap: 14px; flex-wrap: wrap; }
   .market-card {
     flex: 1 1 220px; min-width: 200px; max-width: 320px;
-    display: block; background: var(--bg-panel2); color: var(--text);
-    border: 1px solid var(--border); border-radius: 10px; padding: 16px 18px;
+    display: block; background: var(--bg-panel); color: var(--text);
+    border: none; border-top: 3px solid #fff; border-radius: 0; padding: 16px 18px 12px;
     text-decoration: none; cursor: pointer;
-    transition: background 0.15s, border-color 0.15s;
+    transition: background 0.15s;
+    position: relative; overflow: hidden;
   }
-  .market-card:hover { background: #182034; border-color: #2a3352; }
+  .market-card:hover { background: #161616; }
   .market-card-name {
-    font-size: 12px; font-weight: 700; letter-spacing: 0.06em;
-    text-transform: uppercase; color: var(--gold); margin-bottom: 6px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px;
   }
-  .market-card-value { font-size: 26px; font-weight: 700; line-height: 1.1; }
-  .market-card-change { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .market-card-value { font-size: 46px; font-weight: 800; line-height: 0.95; }
+  .market-card-change { font-size: 13px; font-weight: 700; margin-top: 4px; }
+  .market-card-change::before { content: "\0394 "; font-family: var(--font-display); font-style: italic; }
   .market-card-change.up { color: var(--green); }
   .market-card-change.down { color: var(--red); }
+  .hero-stat { position: relative; overflow: hidden; padding: 4px 0; }
+  .hero-stat-ghost {
+    position: absolute; right: -6px; top: -14px; font-size: 96px; font-weight: 400;
+    font-family: var(--font-display); font-style: italic; color: #fff; opacity: 0.07;
+    line-height: 1; pointer-events: none; z-index: 0;
+  }
+  .hero-stat > * { position: relative; z-index: 1; }
   .market-card-na { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
   .market-sparkline { display: block; width: 100%; height: 40px; margin-top: 10px; }
   .market-sparkline polyline {
@@ -215,7 +224,7 @@
      from the Rate Hike scenario button in the drawer -- that's a simulated
      what-if, this is a live number, and the two must not be conflated. */
   .fed-odds-card {
-    background: var(--bg-panel2); border: 1px solid var(--border); border-radius: 10px;
+    background: var(--bg-panel); border: none; border-top: 3px solid #fff; border-radius: 0;
     padding: 16px 18px;
   }
   .fed-odds-title {
@@ -255,7 +264,7 @@
   }
   #news-list {
     display: flex; flex-direction: column; gap: 18px;
-    border: 1px solid var(--border); border-radius: 8px;
+    border: none; border-top: 3px solid #fff; border-radius: 0;
     background: var(--bg-panel2); padding: 16px;
   }
   .news-category { border-left: 3px solid var(--cat-color, var(--border)); padding-left: 12px; }
@@ -3571,10 +3580,18 @@ function buildFedOddsCard() {
     return;
   }
 
+  const heroWrap = document.createElement('div');
+  heroWrap.className = 'hero-stat';
+  const ghost = document.createElement('span');
+  ghost.className = 'hero-stat-ghost';
+  ghost.textContent = 'Δ';
+  ghost.setAttribute('aria-hidden', 'true');
+  heroWrap.appendChild(ghost);
   const headline = document.createElement('div');
   headline.className = 'fed-odds-headline';
   headline.textContent = fedOddsHeadline(kalshi, polymarket);
-  card.appendChild(headline);
+  heroWrap.appendChild(headline);
+  card.appendChild(heroWrap);
 
   if (polymarket) card.appendChild(buildFedOddsSource('polymarket', polymarket));
   if (kalshi) card.appendChild(buildFedOddsSource('kalshi', kalshi));
