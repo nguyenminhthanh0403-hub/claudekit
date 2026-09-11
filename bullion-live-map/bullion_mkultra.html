@@ -29,14 +29,15 @@
 <meta name="twitter:card" content="summary_large_image">
 <style>
   :root {
-    --bg-deep:    #05060a;
-    --bg-panel:   #0b0e16;
-    --bg-panel2:  #111522;
-    --border:     #1e2436;
-    --text:       #d8dce6;
-    --text-dim:   #8891a6;
+    --bg-deep:    #000000;
+    --bg-panel:   #0d0d0d;
+    --bg-panel2:  #0d0d0d;
+    --border:     #ffffff;
+    --text:       #ffffff;
+    --text-dim:   #999999;
     --gold:       #d4b869;
     --gold-dim:   #a8925a;
+    --accent:     #ff3300;
     --green:      #7bbf8e;
     --red:        #e0654f;
     --blue:       #4d7fb8;
@@ -49,7 +50,8 @@
     --scenario-active: #8b0000; /* deep blood-red, deliberately darker/more saturated
                                     than --red (used elsewhere for negative shock
                                     direction) so the two are never visually confused */
-    --font-display: "Times New Roman", Times, serif;
+    --font-display: Georgia, "Times New Roman", serif;
+    --font-condensed: "Arial Narrow", "Helvetica Neue", Arial, sans-serif;
   }
   h1, h2, h3, .legend-causal-title, #detail-title, #coach-title {
     font-family: var(--font-display);
@@ -60,7 +62,7 @@
     height: 100%;
     height: 100dvh; /* survives mobile browser chrome (URL bar) show/hide without resizing the layout under it */
     background: var(--bg-deep); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: var(--font-condensed);
     overflow: hidden;
     overscroll-behavior: none; /* stop rubber-band/bounce scroll from ever shifting this fixed-viewport layout */
     position: fixed; /* belt-and-suspenders: page itself can never scroll, so the header can never end up over the map */
@@ -69,17 +71,7 @@
   }
   #starfield {
     position: fixed; inset: 0; z-index: 0; pointer-events: none;
-    background:
-      radial-gradient(1px 1px at 10% 20%, rgba(255,255,255,0.55), transparent),
-      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.4), transparent),
-      radial-gradient(1.5px 1.5px at 60% 70%, rgba(255,255,255,0.5), transparent),
-      radial-gradient(1px 1px at 30% 85%, rgba(255,255,255,0.35), transparent),
-      radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.45), transparent),
-      radial-gradient(1.5px 1.5px at 45% 35%, rgba(255,255,255,0.3), transparent),
-      radial-gradient(1px 1px at 20% 55%, rgba(255,255,255,0.4), transparent),
-      radial-gradient(1px 1px at 70% 90%, rgba(255,255,255,0.3), transparent),
-      radial-gradient(ellipse at 50% 0%, rgba(80,60,140,0.10), transparent 60%),
-      radial-gradient(ellipse at 20% 100%, rgba(40,80,120,0.08), transparent 55%);
+    background: var(--bg-deep);
   }
 
   #app { position: relative; z-index: 1; height: 100%; width: 100%; display: flex; flex-direction: column; }
