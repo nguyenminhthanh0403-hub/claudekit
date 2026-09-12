@@ -214,17 +214,17 @@ fetch('../index.html')
       check('badge counts healthy fields',
         provenanceBadgeText({ok:true, schema:2, fields:{
           a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'fresh'}}}),
-        '🟠 Live · 0 of 10 fields — 10 missing');
+        'Live · 0 of 10 fields — 10 missing');
       check('badge surfaces failing fields',
         provenanceBadgeText({ok:true, schema:2, fields:{
           a:{class:'measured', state:'fresh'}, b:{class:'measured', state:'flagged'}}}),
-        '🟠 Live · 1 of 2 may be failing');
+        'Live · 1 of 2 may be failing');
       check('badge says freshness unknown on a v1 file',
         provenanceBadgeText({ok:true, schema:1, fields:{
           a:{class:'measured', state:'unknown'}}}),
-        '🟢 Live · 1 fields · freshness unknown');
+        'Live · 1 fields · freshness unknown');
       check('badge falls back to simulated when load failed',
-        provenanceBadgeText({ok:false, fields:{}}), '⚪ Simulated');
+        provenanceBadgeText({ok:false, fields:{}}), 'Simulated');
       // Fix 2: a real expected field (gold_px) that is present but
       // class:'simulated' — never happens for these ten in production, but
       // proves the rule — must not count toward the present total even
@@ -232,13 +232,13 @@ fetch('../index.html')
       check('badge ignores simulated fields in its count',
         provenanceBadgeText({ok:true, schema:2, fields:
           Object.assign({}, TEN_FRESH_FIELDS, {gold_px:{class:'simulated', state:'unknown'}})}),
-        '🟠 Live · 9 of 10 fields — 1 missing');
+        'Live · 9 of 10 fields — 1 missing');
 
       // Fix 2, new: all ten expected fields present and healthy — output
       // format is unchanged from before the fix.
       check('badge reports all ten fields current when all present',
         provenanceBadgeText({ok:true, schema:2, fields: TEN_FRESH_FIELDS}),
-        '🟢 Live · 10 fields current');
+        'Live · 10 fields current');
       // Fix 2, new: only three of ten survive a partial fetch — this is the
       // exact defect the fix removes (nine missing fields must not read
       // green just because the three survivors are individually healthy).
@@ -246,7 +246,7 @@ fetch('../index.html')
         provenanceBadgeText({ok:true, schema:2, fields:{
           us2y: TEN_FRESH_FIELDS.us2y, us10y: TEN_FRESH_FIELDS.us10y,
           vix: TEN_FRESH_FIELDS.vix}}),
-        '🟠 Live · 3 of 10 fields — 7 missing');
+        'Live · 3 of 10 fields — 7 missing');
     }
 
     // ── provenanceSummaryText ──
