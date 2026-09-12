@@ -93,7 +93,7 @@
     flex: 0 0 auto;
     display: flex; align-items: center; justify-content: space-between;
     padding: 10px 16px; gap: 12px;
-    background: rgba(11,14,22,0.85); backdrop-filter: blur(6px);
+    background: var(--bg-panel);
     border-bottom: 1px solid var(--border);
     flex-wrap: wrap;
     /* #stage has position:relative, which makes it paint above non-positioned
@@ -242,7 +242,7 @@
   }
   .fed-odds-title {
     font-size: 12px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 10px;
+    color: var(--text-dim); margin-bottom: 10px;
   }
   .fed-odds-headline { font-size: 15px; line-height: 1.5; margin-bottom: 12px; }
   .fed-odds-source { margin-bottom: 10px; }
@@ -251,7 +251,7 @@
     display: flex; justify-content: space-between; gap: 8px;
   }
   .fed-odds-bar {
-    display: flex; height: 18px; border-radius: 4px; overflow: hidden;
+    display: flex; height: 18px; border-radius: 0; overflow: hidden;
     background: var(--bg-panel); border: 1px solid var(--border);
   }
   .fed-odds-seg { height: 100%; }
@@ -273,7 +273,7 @@
   #markets-news { min-width: 0; }
   #news-list-label {
     font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--gold); margin-bottom: 8px;
+    color: var(--text-dim); margin-bottom: 8px;
   }
   #news-list {
     display: flex; flex-direction: column; gap: 18px;
@@ -288,12 +288,12 @@
   .news-category-items { display: flex; flex-direction: column; }
   .news-item {
     display: flex; align-items: center; gap: 10px;
-    padding: 5px 8px; margin: 0 -8px; border-radius: 6px;
+    padding: 5px 8px; margin: 0 -8px; border-radius: 0;
     color: var(--text); text-decoration: none;
   }
-  .news-item:hover { background: #182034; text-decoration: underline; }
+  .news-item:hover { background: #161616; text-decoration: underline; }
   .news-item-thumb {
-    flex: 0 0 auto; width: 36px; height: 24px; border-radius: 3px;
+    flex: 0 0 auto; width: 36px; height: 24px; border-radius: 0;
     object-fit: cover; background: var(--bg-panel2);
   }
   .news-item-time {
@@ -528,12 +528,12 @@
   }
   .orb-nudge-tip {
     position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); margin-bottom: 8px;
-    background: rgba(11,14,22,0.95); border: 1px solid var(--border); border-radius: 6px;
+    background: var(--bg-panel); border: 1px solid var(--border); border-radius: 6px;
     padding: 4px 8px; font-size: 11px; white-space: nowrap; color: var(--text-dim);
   }
   #johnny-disclaimer-tip {
     position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%);
-    z-index: 16; background: rgba(11,14,22,0.97); border: 1px solid var(--border);
+    z-index: 16; background: var(--bg-panel); border: 1px solid var(--border);
     border-radius: 6px; padding: 8px 14px; font-size: 12px; line-height: 1.4;
     text-align: center; color: var(--text-dim); max-width: min(360px, 90vw);
   }
@@ -554,7 +554,7 @@
   #hint-banner {
     position: fixed; top: 66px; left: 50%; transform: translateX(-50%);
     z-index: 5; font-size: 12px; color: var(--text-dim);
-    background: rgba(11,14,22,0.75); border: 1px solid var(--border);
+    background: var(--bg-panel); border: 1px solid var(--border);
     padding: 6px 14px; border-radius: 999px; pointer-events: none;
     transition: opacity 0.3s;
   }
@@ -570,7 +570,7 @@
   #all-hidden-message {
     position: fixed; top: 66px; left: 50%; transform: translateX(-50%);
     z-index: 8; max-width: min(360px, 90vw); text-align: center;
-    background: rgba(11,14,22,0.75); border: 1px solid var(--border);
+    background: var(--bg-panel); border: 1px solid var(--border);
     padding: 6px 14px; border-radius: 999px;
   }
 
@@ -773,7 +773,7 @@
   /* Clickable / hoverable acronym terms inside bullets */
   .gterm { text-decoration: none; border-bottom: 1px dotted var(--gold-dim); cursor: help; color: inherit; position: relative; outline: none; }
   .gterm:hover, .gterm:focus, .gterm.gterm-open { border-bottom-color: var(--gold); color: var(--gold); }
-  .gterm::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 5px); width: max-content; max-width: min(250px, 72vw); background: #14161f; color: var(--text); border: 1px solid var(--border); border-radius: 0; padding: 6px 9px; font-size: 12px; line-height: 1.5; font-weight: 400; font-style: normal; text-transform: none; letter-spacing: normal; white-space: normal; box-shadow: 0 6px 18px rgba(0,0,0,0.65); z-index: 80; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s; }
+  .gterm::after { content: attr(data-def); position: absolute; left: 0; top: calc(100% + 5px); width: max-content; max-width: min(250px, 72vw); background: var(--bg-panel); color: var(--text); border: 1px solid var(--border); border-radius: 0; padding: 6px 9px; font-size: 12px; line-height: 1.5; font-weight: 400; font-style: normal; text-transform: none; letter-spacing: normal; white-space: normal; box-shadow: 0 6px 18px rgba(0,0,0,0.65); z-index: 80; opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.12s; }
   .gterm:hover::after, .gterm:focus::after, .gterm.gterm-open::after { opacity: 1; visibility: visible; }
   a.src-link { color: var(--gold); text-decoration: underline; text-decoration-style: dotted; text-underline-offset: 2px; }
   a.src-link:hover { color: var(--gold); opacity: 0.85; }
@@ -797,6 +797,14 @@
   .stat-delta.pos { color: var(--up); }
   .stat-delta.neg { color: var(--down); }
   .stat-delta.flat { color: var(--text-dim); }
+  /* Extend the Market tab's Δ-prefix device (see .market-card-change::before) to
+     Analysis tab delta values. Scoped to .pos/.neg only — .manual-delta is also
+     used bare for a non-delta baseline label and must not get a Δ prefix. */
+  .stat-delta.pos::before, .stat-delta.neg::before,
+  .manual-delta.pos::before, .manual-delta.neg::before,
+  .impact-val.pos::before, .impact-val.neg::before {
+    content: "\0394 "; font-family: var(--font-display); font-style: italic;
+  }
   .stats-foot { font-size: 12px; color: var(--warn); opacity: 0.8; font-style: italic; line-height: 1.45; margin-top: 8px; }
   /* ── Mk8 additions ── */
   .rel-arrows { margin-left: auto; margin-right: 6px; font-weight: 700; font-size: 11px; letter-spacing: -1px; flex-shrink: 0; }
@@ -850,7 +858,7 @@
                background:var(--amber); margin-left:5px; vertical-align:middle; }
   .sim-mark { color:var(--amber); font-weight:600; margin-left:3px; cursor:help; }
   .disclaimer-link { font-size:11px; color:var(--text-dim); cursor:pointer; text-decoration:underline; text-underline-offset:2px; letter-spacing:0.02em; }
-  .disclaimer-link:hover { color:var(--gold); }
+  .disclaimer-link:hover { color:var(--accent); }
   #disclaimer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.65); z-index:400; opacity:0; pointer-events:none; transition:opacity 0.18s; }
   #disclaimer-overlay.visible { opacity:1; pointer-events:auto; }
   #disclaimer-modal { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:min(440px,90vw); max-height:82vh; overflow-y:auto; -webkit-overflow-scrolling:touch; background:var(--bg-panel); border:1px solid var(--border); border-radius:0; box-shadow:0 12px 40px rgba(0,0,0,0.7); padding:18px 20px; }
@@ -901,11 +909,10 @@
     </div>
     <div id="header-controls">
       <div id="view-tabs" role="tablist" aria-label="View">
-        <button class="btn tab active" id="tab-market" role="tab" aria-selected="true">Market</button>
-        <button class="btn tab" id="tab-analysis" role="tab" aria-selected="false">Analysis</button>
-        <button class="btn tab" id="tab-causal-link" role="tab" aria-selected="false">Causal Link</button>
+        <button class="btn tab active" id="tab-market" role="tab" aria-selected="true" aria-controls="markets-view">Market</button>
+        <button class="btn tab" id="tab-analysis" role="tab" aria-selected="false" aria-controls="analysis-view">Analysis</button>
+        <button class="btn tab" id="tab-causal-link" role="tab" aria-selected="false" aria-controls="stage board-view">Causal Link</button>
       </div>
-      <button class="btn adv-control" id="controls-drawer-btn" title="Open scenarios, metrics and AI analysis">Controls</button>
       <button class="btn active" id="mode-toggle-btn" title="Open the full analyst toolkit — live data, scenarios, metrics and sources. Click again to return to the simple view.">Tools</button>
     </div>
   </div>
@@ -917,7 +924,7 @@
     <button class="btn adv-control" id="reset-view-btn">Reset View</button>
     <button class="btn adv-control" id="audit-log-btn" title="Every causal number on this map, with its confidence tier and source">Audit Log</button>
   </div>
-  <div id="stage">
+  <div id="stage" role="tabpanel" aria-labelledby="tab-causal-link">
     <svg id="network-svg"></svg>
     <div id="coach" class="point">
       <button id="coach-dismiss" title="Hide this" aria-label="Dismiss">&times;</button>
@@ -938,8 +945,8 @@
       <div class="orb-nudge-tip" hidden>Tap to switch narrator voice</div>
     </div>
   </div>
-  <div id="board-view" role="tabpanel" aria-label="Overview board" hidden></div>
-  <div id="markets-view" role="tabpanel" aria-label="Markets" hidden>
+  <div id="board-view" role="tabpanel" aria-labelledby="tab-causal-link" aria-label="Causal Link — 2D board view" hidden></div>
+  <div id="markets-view" role="tabpanel" aria-labelledby="tab-market" aria-label="Markets" hidden>
     <div id="markets-indices"></div>
     <div id="markets-fed-odds"></div>
     <div id="markets-news">
@@ -948,7 +955,7 @@
     </div>
   </div>
 <!-- ── Analysis tab: scenarios, live metrics, glossary, AI analysis ── -->
-<div id="analysis-view" role="tabpanel" aria-label="Analysis" hidden>
+<div id="analysis-view" role="tabpanel" aria-labelledby="tab-analysis" aria-label="Analysis" hidden>
 
     <div>
       <div class="drawer-label">Run a scenario</div>
@@ -2165,8 +2172,8 @@ const Renderer = (function () {
     card.id = 'render-fallback';
     card.innerHTML =
       '<h2>Here\'s the same map, flattened</h2>' +
-      '<p>This view needs 3D graphics your browser isn\'t giving us right now. The Overview board shows every node and link the same way, without WebGL.</p>' +
-      '<button class="btn run-btn" id="render-fallback-btn">Open the Overview board</button>';
+      '<p>This view needs 3D graphics your browser isn\'t giving us right now. The Causal Link tab\'s flat 2D layout shows every node and link the same way, without WebGL.</p>' +
+      '<button class="btn run-btn" id="render-fallback-btn">Switch to 2D view</button>';
     stageEl.appendChild(card);
     dismissCoach();
     document.getElementById('render-fallback-btn').addEventListener('click', () => {
@@ -3366,7 +3373,9 @@ function buildBoard() {
     inCol.forEach(n => {
       const card = document.createElement('button');
       card.className = 'board-card' + (n.isHub ? ' hub' : '');
-      card.style.borderLeftColor = GROUP_COLOR[n.group] || '#8891a6';
+      // Hub cards keep the CSS-defined accent border (.board-card.hub); only set
+      // the inline group color for non-hub cards, or it beats the CSS rule.
+      if (!n.isHub) card.style.borderLeftColor = GROUP_COLOR[n.group] || '#8891a6';
       card.appendChild(document.createTextNode(n.label));
       if (FIELDNOTE_NODE_IDS.has(n.id)) {
         const badge = document.createElement('span');
@@ -3869,8 +3878,8 @@ function applyBeginnerMode() {
   btn.classList.toggle('active', beginnerMode);
   document.getElementById('app').classList.toggle('beginner-on', beginnerMode);
   // #analysis-view is a real tab, reachable via #tab-analysis in both modes
-  // (not gated behind .adv-control the way #controls-drawer-btn is), so
-  // entering beginner mode no longer needs to force it closed/stranded.
+  // (not gated behind .adv-control), so entering beginner mode no longer
+  // needs to force it closed/stranded.
   // If a node panel is open, re-render it at the new reading depth (plain vs technical).
   if (openDetailNode && document.getElementById('detail-panel').classList.contains('open')) {
     openDetail(openDetailNode);
@@ -6404,8 +6413,6 @@ function updateGraph(s) {
 }
 
 // ─── ANALYSIS TAB + CONTROL WIRING ──────────────────────────────────────────
-document.getElementById('controls-drawer-btn').addEventListener('click', () => showView('analysis'));
-
 document.querySelectorAll('#analysis-view [data-shock]').forEach(b => {
   b.addEventListener('click', () => triggerShock(b.getAttribute('data-shock')));
 });
