@@ -22,7 +22,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo ^DJI",
-      "value": 52564.75
+      "value": 52573.29
     },
     "dxy": {
       "cadence": "daily",
@@ -30,7 +30,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo DX-Y.NYB",
-      "value": 98.98
+      "value": 99.09
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -40,11 +40,48 @@
       "source": "FRED WALCL",
       "value": 6740619.0
     },
+    "fed_decision_kalshi": {
+      "cadence": "fomc",
+      "class": "measured",
+      "published": "2026-09-12",
+      "ref_date": "2026-09-12",
+      "source": "Kalshi KXFED ladder, bucketed against FRED DFEDTARU",
+      "value": {
+        "buckets": {
+          "cut25": 0.0,
+          "cut50plus": 0.005,
+          "hike25": 0.8,
+          "hike50plus": 0.005,
+          "hold": 0.19
+        },
+        "current_upper": 3.75,
+        "event": "KXFED-26SEP",
+        "meeting_close": "2026-09-16"
+      }
+    },
+    "fed_decision_polymarket": {
+      "cadence": "fomc",
+      "class": "measured",
+      "published": "2026-09-12",
+      "ref_date": "2026-09-12",
+      "source": "Polymarket 'Fed Decision' event",
+      "value": {
+        "buckets": {
+          "cut25": 0.0035,
+          "cut50plus": 0.0005,
+          "hike25": 0.785,
+          "hike50plus": 0.0065,
+          "hold": 0.205
+        },
+        "event": "fed-decision-in-september-762",
+        "meeting_close": "2026-09-16"
+      }
+    },
     "ffr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-10",
-      "ref_date": "2026-09-09",
+      "published": "2026-09-11",
+      "ref_date": "2026-09-10",
       "source": "FRED DFF",
       "value": 3.63
     },
@@ -54,7 +91,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo GC=F",
-      "value": 4429.0
+      "value": 4408.9
     },
     "hy_oas": {
       "cadence": "daily",
@@ -94,7 +131,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo ^IXIC",
-      "value": 26355.02
+      "value": 26333.03
     },
     "nfci": {
       "cadence": "weekly",
@@ -115,10 +152,10 @@
     "rrp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-10",
-      "ref_date": "2026-09-10",
+      "published": "2026-09-11",
+      "ref_date": "2026-09-11",
       "source": "FRED RRPONTSYD",
-      "value": 4.7
+      "value": 5.3
     },
     "sofr": {
       "cadence": "daily",
@@ -134,31 +171,31 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo ^GSPC",
-      "value": 7663.42
+      "value": 7656.98
     },
     "tbill_3m": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-10",
-      "ref_date": "2026-09-09",
+      "published": "2026-09-11",
+      "ref_date": "2026-09-10",
       "source": "FRED DTB3",
-      "value": 3.81
+      "value": 3.86
     },
     "us10y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-10",
-      "ref_date": "2026-09-09",
+      "published": "2026-09-11",
+      "ref_date": "2026-09-10",
       "source": "FRED DGS10",
-      "value": 4.83
+      "value": 4.95
     },
     "us2y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-10",
-      "ref_date": "2026-09-09",
+      "published": "2026-09-11",
+      "ref_date": "2026-09-10",
       "source": "FRED DGS2",
-      "value": 4.43
+      "value": 4.56
     },
     "usd_reserve_share": {
       "cadence": "quarterly",
@@ -190,7 +227,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo XLE",
-      "value": 65.31
+      "value": 65.14
     },
     "xlf": {
       "cadence": "daily",
@@ -198,7 +235,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo XLF",
-      "value": 57.09
+      "value": 57.25
     },
     "xlk": {
       "cadence": "daily",
@@ -206,7 +243,7 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo XLK",
-      "value": 187.72
+      "value": 187.67
     },
     "xlp": {
       "cadence": "daily",
@@ -214,37 +251,15 @@
       "published": "2026-09-11",
       "ref_date": "2026-09-11",
       "source": "Yahoo XLP",
-      "value": 83.39
+      "value": 83.38
     }
   },
-  "generated_at": "2026-09-11T14:16:26Z",
+  "generated_at": "2026-09-12T13:31:24Z",
   "history": {
     "2025-09-01": {
       "cpi_yoy": 3.0,
       "m2": 22176.1,
       "nfp_mom": 76.0
-    },
-    "2025-09-11": {
-      "dow": 46108.0,
-      "dxy": 97.54,
-      "ffr": 4.33,
-      "gold_px": 3636.9,
-      "hy_oas": 2.78,
-      "ig_oas": 0.78,
-      "mortgage_30y": 6.35,
-      "nasdaq": 22043.07,
-      "rrp": 26.9,
-      "sofr": 4.41,
-      "spx": 6587.47,
-      "tbill_3m": 3.94,
-      "us10y": 4.01,
-      "us2y": 3.52,
-      "vix": 14.7,
-      "wti_px": 62.71,
-      "xle": 44.56,
-      "xlf": 54.03,
-      "xlk": 135.53,
-      "xlp": 80.59
     },
     "2025-09-12": {
       "dow": 45834.22,
@@ -6041,6 +6056,7 @@
     "2026-09-10": {
       "dow": 52064.1,
       "dxy": 99.09,
+      "ffr": 3.63,
       "gold_px": 4364.5,
       "hy_oas": 2.7,
       "ig_oas": 0.8,
@@ -6049,6 +6065,9 @@
       "rrp": 4.7,
       "sofr": 3.62,
       "spx": 7591.7,
+      "tbill_3m": 3.86,
+      "us10y": 4.95,
+      "us2y": 4.56,
       "vix": 17.8,
       "xle": 64.93,
       "xlf": 56.87,
@@ -6056,15 +6075,16 @@
       "xlp": 83.09
     },
     "2026-09-11": {
-      "dow": 52564.75,
-      "dxy": 98.98,
-      "gold_px": 4429.0,
-      "nasdaq": 26355.02,
-      "spx": 7663.42,
-      "xle": 65.32,
-      "xlf": 57.09,
-      "xlk": 187.72,
-      "xlp": 83.39
+      "dow": 52573.29,
+      "dxy": 99.12,
+      "gold_px": 4366.2,
+      "nasdaq": 26333.04,
+      "rrp": 5.3,
+      "spx": 7656.98,
+      "xle": 65.14,
+      "xlf": 57.25,
+      "xlk": 187.67,
+      "xlp": 83.38
     }
   },
   "schema": 2
