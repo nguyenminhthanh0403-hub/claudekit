@@ -43,15 +43,15 @@
     "fed_decision_kalshi": {
       "cadence": "fomc",
       "class": "measured",
-      "published": "2026-09-12",
-      "ref_date": "2026-09-12",
+      "published": "2026-09-13",
+      "ref_date": "2026-09-13",
       "source": "Kalshi KXFED ladder, bucketed against FRED DFEDTARU",
       "value": {
         "buckets": {
           "cut25": 0.0,
           "cut50plus": 0.005,
-          "hike25": 0.8,
-          "hike50plus": 0.005,
+          "hike25": 0.795,
+          "hike50plus": 0.01,
           "hold": 0.19
         },
         "current_upper": 3.75,
@@ -62,8 +62,8 @@
     "fed_decision_polymarket": {
       "cadence": "fomc",
       "class": "measured",
-      "published": "2026-09-12",
-      "ref_date": "2026-09-12",
+      "published": "2026-09-13",
+      "ref_date": "2026-09-13",
       "source": "Polymarket 'Fed Decision' event",
       "value": {
         "buckets": {
@@ -71,7 +71,7 @@
           "cut50plus": 0.0005,
           "hike25": 0.785,
           "hike50plus": 0.0065,
-          "hold": 0.205
+          "hold": 0.215
         },
         "event": "fed-decision-in-september-762",
         "meeting_close": "2026-09-16"
@@ -254,7 +254,7 @@
       "value": 83.38
     }
   },
-  "generated_at": "2026-09-12T13:31:24Z",
+  "generated_at": "2026-09-13T14:14:07Z",
   "history": {
     "2025-09-01": {
       "cpi_yoy": 3.0,
@@ -263,21 +263,8 @@
     },
     "2025-09-12": {
       "dow": 45834.22,
-      "dxy": 97.55,
-      "ffr": 4.33,
-      "gold_px": 3649.4,
-      "hy_oas": 2.79,
-      "ig_oas": 0.77,
       "nasdaq": 22141.1,
-      "nfci": -0.53,
-      "rrp": 17.3,
-      "sofr": 4.42,
       "spx": 6584.29,
-      "tbill_3m": 3.94,
-      "us10y": 4.06,
-      "us2y": 3.56,
-      "vix": 14.8,
-      "wti_px": 63.02,
       "xle": 44.3,
       "xlf": 53.8,
       "xlk": 135.44,
@@ -6077,7 +6064,7 @@
     "2026-09-11": {
       "dow": 52573.29,
       "dxy": 99.12,
-      "gold_px": 4366.2,
+      "gold_px": 4408.9,
       "nasdaq": 26333.04,
       "rrp": 5.3,
       "spx": 7656.98,
