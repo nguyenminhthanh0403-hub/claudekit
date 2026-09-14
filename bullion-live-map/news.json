@@ -1,46 +1,6 @@
 {
-  "generated_at": "2026-09-14T18:34:03Z",
+  "generated_at": "2026-09-14T22:26:43Z",
   "headlines": [
-    {
-      "category": "tech",
-      "headline": "Stock Market Today (Sept. 14, 2026): Nasdaq, S&P 500 falls on rising oil, AI tensions",
-      "image": "news-images/74cd1f15c4c483ac281766da.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-today-sept-14-133832281.html",
-      "published": "2026-09-14T13:38:32Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "energy",
-      "headline": "Diversified Energy\u2019s (DEC) $1.8B Bet On Permian Scale",
-      "image": "news-images/3c5d3883db5acd3a747e6ac1.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/diversified-energy-dec-1-8b-093840663.html",
-      "published": "2026-09-13T09:38:40Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Gentherm (THRM) Shareholders Approve Modine Merger, Clear for October Close",
-      "image": "news-images/801b9d49907f080f670e47a7.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/gentherm-thrm-shareholders-approve-modine-093511169.html",
-      "published": "2026-09-13T09:35:11Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Novartis (NVS) Just Handed Monte Rosa (GLUE) A $50M Milestone",
-      "image": "news-images/edf6566dd117694c7a4aadc0.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/novartis-nvs-just-handed-monte-092912734.html",
-      "published": "2026-09-13T09:29:12Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Roivant Sciences Ltd. (ROIV)\u2019s Pulmonary Hypertension Breakthrough Could Transform Its Growth Story",
-      "image": "news-images/f1e083598e7e1c897e27fe92.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/roivant-sciences-ltd-roiv-pulmonary-094515386.html",
-      "published": "2026-09-13T09:45:15Z",
-      "sentiment": "neutral"
-    },
     {
       "category": "other",
       "headline": "Another coffeehouse files for Chapter 11 as costs, prices rise",
@@ -50,27 +10,299 @@
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "Campbell\u2019s (CPB) Slashes Its Dividend To Fund A Brutal Reset",
-      "image": "news-images/6e6494022f9d0bb968a7ff54.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/campbell-cpb-slashes-dividend-fund-094655845.html",
-      "published": "2026-09-13T09:46:55Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "Robinhood (HOOD) Expands Prediction Markets With Crypto.com Partnership",
-      "image": "news-images/0b70eaad3e05c64a3946bab6.jpg",
-      "link": "https://finance.yahoo.com/markets/options/articles/robinhood-hood-expands-prediction-markets-094928525.html",
-      "published": "2026-09-13T09:49:28Z",
+      "category": "financials",
+      "headline": "AI agents to start spending your money with Visa, Mastercard",
+      "image": "news-images/0a8ac48235ab210926897e5d.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/ai-agents-start-spending-money-010300686.html",
+      "published": "2026-09-14T01:03:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Phreesia\u2019s (PHR) Profit Turnaround Meets A Cash-Strapped Client Base",
-      "image": "news-images/77f59c91f4c375559ffca7f2.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/phreesia-phr-profit-turnaround-meets-095338755.html",
-      "published": "2026-09-13T09:53:38Z",
+      "headline": "The RealReal (REAL) Posts Record Sales, But The Losses Keep Growing",
+      "image": "news-images/cea5c0f5a9460e05ad480a97.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/realreal-real-posts-record-sales-134612583.html",
+      "published": "2026-09-13T13:46:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Willis Lease Finance (WLFC) Grows Fast While Its Bottom Line Shrinks",
+      "image": "news-images/9be153478ce265394e928217.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/willis-lease-finance-wlfc-grows-134921293.html",
+      "published": "2026-09-13T13:49:21Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Snowflake\u2019s Blowout Quarter Adds to a Software Sector Already Rallying on AI",
+      "image": "news-images/4d9aa0397f03fe3ec2ee5d5f.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/snowflake-blowout-quarter-adds-software-133832576.html",
+      "published": "2026-09-13T13:38:32Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Red Violet (RDVT) Turns Record Growth Into Real Profit Gains",
+      "image": "news-images/6fc65bc82b0e5c600ccbd1d9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/red-violet-rdvt-turns-record-133658483.html",
+      "published": "2026-09-13T13:36:58Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "38-year-old beloved steakhouse chain closing over 40 locations",
+      "image": "news-images/4edf2dda772df1bdbfcbeae0.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/38-old-beloved-steakhouse-chain-020300119.html",
+      "published": "2026-09-14T02:03:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "PureCycle (PCT) Turns Lab Promises Into Detergent Cap Reality",
+      "image": "news-images/3a77af7ad1667935ddd442b2.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/purecycle-pct-turns-lab-promises-133324594.html",
+      "published": "2026-09-13T13:33:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Clear Channel Outdoor (CCO) Grows Fastest Right Before Going Private",
+      "image": "news-images/6ba4a0b150e4ff7abcb159a7.jpg",
+      "link": "https://finance.yahoo.com/media-advertising/articles/clear-channel-outdoor-cco-grows-132626831.html",
+      "published": "2026-09-13T13:26:26Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Is ConocoPhillips Stock Worth Buying Here? - Shorting COP Puts and Credit Spreads are Better Plays",
+      "image": "news-images/57d31c0dadb6927916770e90.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/conocophillips-stock-worth-buying-shorting-140002756.html",
+      "published": "2026-09-13T14:00:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "NVIDIA\u2019s Older GPUs Still Earn Rent. What That Does and Doesn\u2019t Prove for CoreWeave",
+      "image": "news-images/894bc822e07e62912ffed5f9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-older-gpus-still-earn-140210350.html",
+      "published": "2026-09-13T14:02:10Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "consumer",
+      "headline": "National specialty clothing chain closing all its stores",
+      "image": "news-images/cd32f5c4062e1774e3c7fb78.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/national-specialty-clothing-chain-closing-140700669.html",
+      "published": "2026-09-14T14:07:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Adobe\u2019s (ADBE) AI Bet Is Finally Showing Up In Revenue",
+      "image": "news-images/26bb113de65f587a9a1fe89d.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/adobe-adbe-ai-bet-finally-132237575.html",
+      "published": "2026-09-13T13:22:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Alibaba and Amazon Face the Same AI Spending Question: How Quickly Does Capacity Become Cash?",
+      "image": "news-images/5aac309a9a69446598ca6e26.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/alibaba-amazon-face-same-ai-140837189.html",
+      "published": "2026-09-13T14:08:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "LightPath\u2019s (LPTH) Defense Pivot Just Showed Up In The Numbers",
+      "image": "news-images/ca05991568fc6d2fda0905e3.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lightpath-lpth-defense-pivot-just-131404572.html",
+      "published": "2026-09-13T13:14:04Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Copart (CPRT) Bets On Digital Dealers As Core Volumes Shrink",
+      "image": "news-images/d41265a3bc70411256b39bef.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/copart-cprt-bets-digital-dealers-130853110.html",
+      "published": "2026-09-13T13:08:53Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Costco Stock Price Forecast: Here's What a $10,000 Investment Today Could Be Worth by September 2027",
+      "image": "news-images/52413f874e63569ff48c76d9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/costco-stock-price-forecast-heres-134500562.html",
+      "published": "2026-09-13T13:45:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "CrowdStrike Expands AI Capabilities With Autonomous Product Launch. What This Means for CRWD Stock.",
+      "image": "news-images/9d99dba0ce41f8168e178d8b.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/crowdstrike-expands-ai-capabilities-autonomous-130002831.html",
+      "published": "2026-09-13T13:00:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "GF Securities Says NAND Prices May Stabilize Later This Year. What This Means for Sandisk Stock.",
+      "image": "news-images/243838f4b0cc445ddaad1849.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/gf-securities-says-nand-prices-130002701.html",
+      "published": "2026-09-13T13:00:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Lovesac\u2019s (LOVE) Premium Sofas Shine While Entry-Level Buyers Stay Away",
+      "image": "news-images/dc2d875a17697bbf7afe0f92.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lovesac-love-premium-sofas-shine-125527184.html",
+      "published": "2026-09-13T12:55:27Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "Amgen (AMGN) Fell 5% on a Drug That Isn\u2019t Even Its Own. Here\u2019s the Lp(a) Bet Now in Question.",
+      "image": "news-images/779c1f886f588a061f3bd3af.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/amgen-amgn-fell-5-drug-142916899.html",
+      "published": "2026-09-13T14:29:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Google Bought YouTube for $1.65 Billion in 2006. The Streaming Platform Is Now the Main Driver of a Roughly $93 Billion Business at Alphabet.",
+      "image": "news-images/993711d68184ec31b0571465.jpg",
+      "link": "https://finance.yahoo.com/media-advertising/articles/google-bought-youtube-1-65-134000431.html",
+      "published": "2026-09-13T13:40:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "consumer",
+      "headline": "Walmart Just Declared War on DoorDash and Uber Eats, But Winning Won't Be Easy for 1 Simple Reason",
+      "image": "news-images/8bfa45bf32216d4777cebb35.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/walmart-just-declared-war-doordash-123023266.html",
+      "published": "2026-09-13T12:30:23Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "IBEX (IBEX) Turns The AI Threat Into Its Biggest Growth Engine",
+      "image": "news-images/3bae8f2206e6acdf8cc71240.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/ibex-ibex-turns-ai-threat-121949823.html",
+      "published": "2026-09-13T12:19:49Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Wall Street Is Betting Against Designer Brands (DBI) Even as Profits Double",
+      "image": "news-images/f93d413888b437d0962580e5.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/wall-street-betting-against-designer-121631989.html",
+      "published": "2026-09-13T12:16:31Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "1-800-Flowers (FLWS) Bets On Discipline While Revenue Keeps Fading",
+      "image": "news-images/61ad237d10c1f927d13abd65.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/1-800-flowers-flws-bets-120329224.html",
+      "published": "2026-09-13T12:03:29Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "UBS Expects Two Fed Rate Hikes by End of 2026 After Warsh Speech and Jobs Data",
+      "image": "news-images/fb92422a510f02be42d764ae.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/ubs-expects-two-fed-rate-133800516.html",
+      "published": "2026-09-13T13:38:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Dimensional\u2019s David Booth Discusses the State of ETFs, Investing and More",
+      "image": "news-images/dc6c2fe458b92400a05fd830.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/dimensional-david-booth-discusses-state-120000449.html",
+      "published": "2026-09-13T12:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Ron Paul says 'people ought to own the gold, not the government', doubts the accounting at Fort Knox is 'trustworthy'",
+      "image": "news-images/8c52be1901f4f8504435a9d5.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/ron-paul-says-people-ought-120000495.html",
+      "published": "2026-09-13T12:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Dow Jones Futures: Fed Rate Hike Seen As Oil, Yields Pressure Stocks; Apple, Moderna Are New Buys",
+      "image": "news-images/377223ddceee7e8fa27f2c5e.jpg",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-100-oil-surging-yields-pressure-stocks-with-fed-rate-hike-seen-apple-leads-new-buys/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-13T11:57:14Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "MasterCraft\u2019s (MCFT) Margins Soared While Its Pontoon Brand Stumbled",
+      "image": "news-images/b1d3d3b729462a2df973b193.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/mastercraft-mcft-margins-soared-while-115519325.html",
+      "published": "2026-09-13T11:55:19Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Nvidia Is Focused on Redefining AI Infrastructure as an Income-Generating Asset",
+      "image": "news-images/29044c7f65d30584538273a6.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/nvidia-focused-redefining-ai-infrastructure-153002085.html",
+      "published": "2026-09-13T15:30:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "consumer",
+      "headline": "Shoe Station Group (SHOE) Bets On Localized Stores To Reverse A Slide",
+      "image": "news-images/5c2c541bf3d5a168dadddff0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/shoe-station-group-shoe-bets-114759320.html",
+      "published": "2026-09-13T11:47:59Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "How to Play IBM Stock as It Teams Up with NASA to Launch a New Open-Source Model",
+      "image": "news-images/1ac69d50dbc2d9b674a84a55.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/play-ibm-stock-teams-nasa-114716945.html",
+      "published": "2026-09-13T11:47:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "\u2018Homeless or living in RVs\u2019: Kiyosaki warns \u2018millions\u2019 of American boomers are about to go broke. Protect yourself now",
+      "image": "news-images/4e8b660abc177efbf262a7c5.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/homeless-living-rvs-kiyosaki-warns-114500107.html",
+      "published": "2026-09-13T11:45:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "The companies that own the customer relationship will ultimately beat those that simply own the best AI",
+      "image": "news-images/0831ecbcf723cd036b5b850b.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/companies-own-customer-relationship-ultimately-133641252.html",
+      "published": "2026-09-13T13:36:41Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "energy",
+      "headline": "Tsakos Energy Navigation (TEN) Just Posted Its Best Half Ever",
+      "image": "news-images/40064042ef979ac4a1703643.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/tsakos-energy-navigation-ten-just-114411263.html",
+      "published": "2026-09-13T11:44:11Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Bank exits squeeze truck financing for mid-size fleets",
+      "image": "news-images/b30e3c490816181c29ba63f6.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/bank-exits-squeeze-truck-financing-154006871.html",
+      "published": "2026-09-13T15:40:06Z",
       "sentiment": "neutral"
     },
     {
@@ -83,242 +315,10 @@
     },
     {
       "category": "other",
-      "headline": "Prediction: NuScale Power Stock Doesn't Get Halfway Back to Its Old High Before 2029",
-      "image": "news-images/d5134828a2374ad5723f5ef3.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/prediction-nuscale-power-stock-doesnt-092901509.html",
-      "published": "2026-09-13T09:29:01Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "international",
-      "headline": "A highly anticipated Fed meeting, war worries, and an unblinking stock market: What to watch this week",
-      "image": "news-images/9241e6a38770bbaab7d338cf.jpg",
-      "link": "https://finance.yahoo.com/markets/article/a-highly-anticipated-fed-meeting-war-worries-and-an-unblinking-stock-market-what-to-watch-this-week-100000843.html",
-      "published": "2026-09-13T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
       "headline": "Best CD rates today, Sunday, September 13, 2026: Lock in up to 4.35% APY",
       "image": "news-images/81fad0383deb8ac130720fb8.jpg",
       "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-sunday-september-13-2026-lock-in-up-to-435-apy-100000271.html",
       "published": "2026-09-13T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Argan\u2019s (AGX) Power Boom Comes With A Margin Catch",
-      "image": "news-images/fbd34a9c5eec21f08eb6e7bb.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/argan-agx-power-boom-comes-100043772.html",
-      "published": "2026-09-13T10:00:43Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Matrix Service (MTRX) Returns To Profit, But Can It Last",
-      "image": "news-images/de22d169046e60b8af54ee66.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/matrix-mtrx-returns-profit-last-100415091.html",
-      "published": "2026-09-13T10:04:15Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Wall Street Is Looking For New Ways to Play the Debasement Trade. Here's Why That's Bullish for Bitcoin.",
-      "image": "news-images/7e9e50c4546e4ea1ae927077.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/wall-street-looking-ways-play-094600247.html",
-      "published": "2026-09-13T09:46:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Signet Jewelers (SIG) Lifts Guidance on Tariff Refunds and Cost Discipline",
-      "image": "news-images/870f1daf9602fac8eb4612b8.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/signet-jewelers-sig-lifts-guidance-100950018.html",
-      "published": "2026-09-13T10:09:50Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Gold.com (GOLD): On A Gold Rush With Cracks Underneath",
-      "image": "news-images/6b485f908759f9c4531e5075.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/gold-com-gold-gold-rush-101442314.html",
-      "published": "2026-09-13T10:14:42Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Retiree, 70, lost over $2,000 in an Amazon impersonation scam. How fraudsters got him \u2018hook, line and sinker\u2019",
-      "image": "news-images/3879f39dbec2e5fce1157e19.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/retiree-70-lost-over-2-101500668.html",
-      "published": "2026-09-13T10:15:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "C3.ai (AI) Just Posted Its Most Promising Quarter In Years",
-      "image": "news-images/4a2935fa53dcf7e09bc1e0a6.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/c3-ai-ai-just-posted-102417897.html",
-      "published": "2026-09-13T10:24:17Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Snowflake (SNOW) Is Growing Faster Now Than It Was A Year Ago",
-      "image": "news-images/a6b5ccf3edd4c03174f5f561.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/snowflake-snow-growing-faster-now-102813308.html",
-      "published": "2026-09-13T10:28:13Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Nvidia May Put $10 Billion Into Anthropic\u2019s $2 Trillion IPO. Amazon Already Has Much More Riding on It",
-      "image": "news-images/d656b2ea2adfd1c32d3588ef.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/nvidia-may-put-10-billion-103618397.html",
-      "published": "2026-09-13T10:36:18Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "REX American Resources (REX) Notches A Record Quarter, Then Doubts Creep In",
-      "image": "news-images/410167e20baac8a21be760cb.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/rex-american-resources-rex-notches-103748951.html",
-      "published": "2026-09-13T10:37:48Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "SpaceX Says a Mystery AI Customer Adds $1.11 Billion a Month. Google Shows How Fast Compute Is Growing",
-      "image": "news-images/4e5a583f8feba3c84b75ccb7.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/spacex-says-mystery-ai-customer-104230984.html",
-      "published": "2026-09-13T10:42:30Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Here's How Many Shares of Home Depot You'd Need for $10,000 in Yearly Dividends",
-      "image": "news-images/c4bf2733ec4ca52ed028170a.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/heres-many-shares-home-depot-095000904.html",
-      "published": "2026-09-13T09:50:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "This 1 Costco item has skyrocketed 125% in price over just 2 years. And the retail behemoth is limiting member purchases",
-      "image": "news-images/fae87a49937b8ca59f4d524c.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/1-costco-item-skyrocketed-125-104500067.html",
-      "published": "2026-09-13T10:45:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How Bold Was Cotton's Move?",
-      "image": "news-images/492fc21bafbe4b53ae2e77dd.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/bold-cottons-move-104604438.html",
-      "published": "2026-09-13T10:46:04Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Firmus Adds OpenAI. NVIDIA and Blackstone Face Different Sides of the AI Buildout",
-      "image": "news-images/d656b2ea2adfd1c32d3588ef.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/firmus-adds-openai-nvidia-blackstone-105141455.html",
-      "published": "2026-09-13T10:51:41Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Academy Sports (ASO) Turns A Tariff Refund Into A Profit Surge",
-      "image": "news-images/d355db0093e68f2bd3ba9807.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/academy-sports-aso-turns-tariff-105619595.html",
-      "published": "2026-09-13T10:56:19Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "Is Lululemon Nearing Its Bottom?",
-      "image": "news-images/53386602c7b0eb8d8c30d4cc.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/lululemon-nearing-bottom-092300024.html",
-      "published": "2026-09-13T09:23:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Borderlands Mexico: Exports of Mexican-made heavy-duty trucks to US roar back",
-      "image": "news-images/08550bf2f8bd1bfdb624dade.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/borderlands-mexico-exports-mexican-made-110000609.html",
-      "published": "2026-09-13T11:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Lakeland\u2019s (LAKE) Fire Business Is Carrying A Bumpy Turnaround",
-      "image": "news-images/f296579e0940a9e6069f77f0.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/lakeland-lake-fire-business-carrying-110817440.html",
-      "published": "2026-09-13T11:08:17Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Amazon\u2019s Zoox Enters San Francisco\u2019s Crowded Robotaxi Market, Taking Direct Aim at Waymo and Tesla",
-      "image": "news-images/b0afa852a081b7e15bb4f22b.jpg",
-      "link": "https://finance.yahoo.com/technology/articles/amazon-zoox-enters-san-francisco-112558972.html",
-      "published": "2026-09-13T11:25:58Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Limoneira (LMNR) Leans On Avocados And Land Deals As Lemons Slump",
-      "image": "news-images/c1d04be252c25d1a7fc7bfde.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/limoneira-lmnr-leans-avocados-land-112636841.html",
-      "published": "2026-09-13T11:26:36Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "tech",
-      "headline": "Broadcom\u2019s Anthropic Ramp Puts Google\u2019s TPU Business in a Different Light",
-      "image": "news-images/4e5a583f8feba3c84b75ccb7.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/broadcom-anthropic-ramp-puts-google-113804111.html",
-      "published": "2026-09-13T11:38:04Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Nscale\u2019s Funding Talks Put Dell and Nokia\u2019s AI Supply Relationships to the Test",
-      "image": "news-images/cfb7b73c10710129ea957d30.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/nscale-funding-talks-put-dell-114055829.html",
-      "published": "2026-09-13T11:40:55Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Tsakos Energy Navigation (TEN) Just Posted Its Best Half Ever",
-      "image": "news-images/40064042ef979ac4a1703643.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/tsakos-energy-navigation-ten-just-114411263.html",
-      "published": "2026-09-13T11:44:11Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Living on Social Security Alone? Here\u2019s the Playbook That Makes $2,086 a Month Work",
-      "image": "news-images/1470ee44394475c733b6d77d.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/living-social-security-alone-playbook-095322323.html",
-      "published": "2026-09-13T09:53:22Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "\u2018Homeless or living in RVs\u2019: Kiyosaki warns \u2018millions\u2019 of American boomers are about to go broke. Protect yourself now",
-      "image": "news-images/4e8b660abc177efbf262a7c5.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/homeless-living-rvs-kiyosaki-warns-114500107.html",
-      "published": "2026-09-13T11:45:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How to Play IBM Stock as It Teams Up with NASA to Launch a New Open-Source Model",
-      "image": "news-images/1ac69d50dbc2d9b674a84a55.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/play-ibm-stock-teams-nasa-114716945.html",
-      "published": "2026-09-13T11:47:16Z",
       "sentiment": "neutral"
     }
   ]
