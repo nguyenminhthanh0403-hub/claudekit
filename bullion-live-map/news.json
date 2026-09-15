@@ -1,93 +1,45 @@
 {
-  "generated_at": "2026-09-14T22:26:43Z",
+  "generated_at": "2026-09-15T17:39:06Z",
   "headlines": [
     {
-      "category": "other",
-      "headline": "Another coffeehouse files for Chapter 11 as costs, prices rise",
-      "image": "news-images/bbc4a05fbfb884c83f29b4ff.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/another-coffeehouse-files-chapter-11-033545256.html",
-      "published": "2026-09-14T03:35:45Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "AI agents to start spending your money with Visa, Mastercard",
-      "image": "news-images/0a8ac48235ab210926897e5d.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/ai-agents-start-spending-money-010300686.html",
-      "published": "2026-09-14T01:03:00Z",
+      "category": "energy",
+      "headline": "Costco rations Kirkland motor oil, raises price to $57.99",
+      "image": "news-images/968a9a3d78e855ce044de4ad.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/costco-rations-kirkland-motor-oil-133308837.html",
+      "published": "2026-09-14T13:33:08Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "The RealReal (REAL) Posts Record Sales, But The Losses Keep Growing",
-      "image": "news-images/cea5c0f5a9460e05ad480a97.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/realreal-real-posts-record-sales-134612583.html",
-      "published": "2026-09-13T13:46:12Z",
+      "headline": "Jim Cramer Validates Caller\u2019s $1,400 Micron (MU) Thesis, Doubles Down on Charitable Trust Position",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-validates-caller-1-172138438.html",
+      "published": "2026-09-15T17:21:38Z",
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "Willis Lease Finance (WLFC) Grows Fast While Its Bottom Line Shrinks",
-      "image": "news-images/9be153478ce265394e928217.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/willis-lease-finance-wlfc-grows-134921293.html",
-      "published": "2026-09-13T13:49:21Z",
+      "category": "federal",
+      "headline": "What American Eagle\u2019s (AEO) Q2 Numbers Say Beyond the Tariff Refund Boost",
+      "image": "news-images/82330bbfdf116c59c3a50d88.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/american-eagle-aeo-q2-numbers-171745773.html",
+      "published": "2026-09-15T17:17:45Z",
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "Snowflake\u2019s Blowout Quarter Adds to a Software Sector Already Rallying on AI",
-      "image": "news-images/4d9aa0397f03fe3ec2ee5d5f.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/snowflake-blowout-quarter-adds-software-133832576.html",
-      "published": "2026-09-13T13:38:32Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "Red Violet (RDVT) Turns Record Growth Into Real Profit Gains",
-      "image": "news-images/6fc65bc82b0e5c600ccbd1d9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/red-violet-rdvt-turns-record-133658483.html",
-      "published": "2026-09-13T13:36:58Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "38-year-old beloved steakhouse chain closing over 40 locations",
-      "image": "news-images/4edf2dda772df1bdbfcbeae0.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/38-old-beloved-steakhouse-chain-020300119.html",
-      "published": "2026-09-14T02:03:00Z",
+      "category": "energy",
+      "headline": "IBD Stock Of The Day Scorpio Tankers Sails Toward Buy Point As Oil-Needy World Seeks Its Services",
+      "image": "news-images/6f7ee8403a7588a22e236948.jpg",
+      "link": "https://www.investors.com/research/ibd-stock-of-the-day/scorpio-tankers-stock-buy-point/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-15T17:17:24Z",
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "PureCycle (PCT) Turns Lab Promises Into Detergent Cap Reality",
-      "image": "news-images/3a77af7ad1667935ddd442b2.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/purecycle-pct-turns-lab-promises-133324594.html",
-      "published": "2026-09-13T13:33:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Clear Channel Outdoor (CCO) Grows Fastest Right Before Going Private",
-      "image": "news-images/6ba4a0b150e4ff7abcb159a7.jpg",
-      "link": "https://finance.yahoo.com/media-advertising/articles/clear-channel-outdoor-cco-grows-132626831.html",
-      "published": "2026-09-13T13:26:26Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is ConocoPhillips Stock Worth Buying Here? - Shorting COP Puts and Credit Spreads are Better Plays",
-      "image": "news-images/57d31c0dadb6927916770e90.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/conocophillips-stock-worth-buying-shorting-140002756.html",
-      "published": "2026-09-13T14:00:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "NVIDIA\u2019s Older GPUs Still Earn Rent. What That Does and Doesn\u2019t Prove for CoreWeave",
-      "image": "news-images/894bc822e07e62912ffed5f9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-older-gpus-still-earn-140210350.html",
-      "published": "2026-09-13T14:02:10Z",
-      "sentiment": "neutral"
+      "category": "federal",
+      "headline": "Stock market today: Dow, S&P 500, Nasdaq fall after 10-year Treasury yield rises",
+      "image": "news-images/bc64eb6d65577f6bff0ac9cc.jpg",
+      "link": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-september-15-dow-sp-500-nasdaq-081307838.html",
+      "published": "2026-09-15T08:13:07Z",
+      "sentiment": "bearish"
     },
     {
       "category": "consumer",
@@ -98,227 +50,275 @@
       "sentiment": "neutral"
     },
     {
+      "category": "other",
+      "headline": "United Natural Foods\u2019 (UNFI) Path to Profitability\u2013What Lies Ahead",
+      "image": "news-images/cd42000e382aa7cc98504acb.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/united-natural-foods-unfi-path-170958370.html",
+      "published": "2026-09-15T17:09:58Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Imperial Petroleum (IMPP) Posts Robust Q2 Topline Growth Despite Soft Fleet Utilization",
+      "image": "news-images/88733a10f72ea48a6d9d79ae.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/imperial-petroleum-impp-posts-robust-170438574.html",
+      "published": "2026-09-15T17:04:38Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Fed meeting live updates: Anticipation builds with Fed expected to hike interest rates for first time in 3 years",
+      "image": "news-images/3cead7f3045621fe362767a6.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/live/federal-reserve-meeting-live-updates-chairman-kevin-warsh-143452661.html",
+      "published": "2026-09-15T14:34:52Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "How a Costco partner's bankruptcy could benefit its biggest rival",
+      "image": "news-images/2c2442e4bdc1d6cd37949fa9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/costco-partners-bankruptcy-could-benefit-133300901.html",
+      "published": "2026-09-15T13:33:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Dell Technologies (DELL) Rallies on Bullish RBC Outlook: Is the Stock a Buy?",
+      "image": "news-images/cfb7b73c10710129ea957d30.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/dell-technologies-dell-rallies-bullish-165722821.html",
+      "published": "2026-09-15T16:57:22Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Vera Bradley, Inc. Q2 2027 Earnings Call Summary",
+      "image": "news-images/1ab510c6b28c262049b12dad.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/vera-bradley-inc-q2-2027-165537210.html",
+      "published": "2026-09-15T16:55:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "Econergy Expands European Base, Acquires French Wind Energy Platform",
+      "image": "news-images/e4242e7f7b25af00f2c1c68c.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/econergy-expands-european-acquires-french-165519899.html",
+      "published": "2026-09-15T16:55:19Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "Stock Market Today: Dow Dives, Oil Play Tests New Entry; Bitcoin Falls Ahead Of Clarity Act Vote (Live Coverage)",
+      "image": "news-images/c86713649117cf16e99cf0d9.jpg",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-treasury-yields-oil-prices-nvidia-stock/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-15T16:52:11Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "consumer",
+      "headline": "Lovesac (LOVE) Target Cut by Canaccord, Analysts See 40% Upside",
+      "image": "news-images/f255b7c638094ec5dc6a4af8.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lovesac-love-target-cut-canaccord-165004527.html",
+      "published": "2026-09-15T16:50:04Z",
+      "sentiment": "neutral"
+    },
+    {
       "category": "tech",
-      "headline": "Adobe\u2019s (ADBE) AI Bet Is Finally Showing Up In Revenue",
-      "image": "news-images/26bb113de65f587a9a1fe89d.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/adobe-adbe-ai-bet-finally-132237575.html",
-      "published": "2026-09-13T13:22:37Z",
+      "headline": "Tech stocks today: CEOs call for pacing AI, as Nvidia CEO says extinction fears are made up",
+      "image": "news-images/adaca9166ea61de37dd44604.jpg",
+      "link": "https://finance.yahoo.com/technology/live/tech-stocks-today-ceos-call-for-pacing-ai-as-nvidia-ceo-says-extinction-fears-are-made-up-140134624.html",
+      "published": "2026-09-14T14:01:34Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Alibaba and Amazon Face the Same AI Spending Question: How Quickly Does Capacity Become Cash?",
-      "image": "news-images/5aac309a9a69446598ca6e26.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/alibaba-amazon-face-same-ai-140837189.html",
-      "published": "2026-09-13T14:08:37Z",
+      "headline": "H&R Block (HRB) Uses AI to Drive Value",
+      "image": "news-images/5ed99d113e4f91e8007bd0b8.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/h-r-block-hrb-uses-164551430.html",
+      "published": "2026-09-15T16:45:51Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "LightPath\u2019s (LPTH) Defense Pivot Just Showed Up In The Numbers",
-      "image": "news-images/ca05991568fc6d2fda0905e3.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/lightpath-lpth-defense-pivot-just-131404572.html",
-      "published": "2026-09-13T13:14:04Z",
+      "headline": "Alibaba\u2019s (BABA) Short-Term Capex Drag Creates a 30% Valuation Discount",
+      "image": "news-images/dc87b8d0de060fa2fdc391f9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/alibaba-baba-short-term-capex-163729017.html",
+      "published": "2026-09-15T16:37:29Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "Oil prices surge past $108 as Saudi pipeline shutdown continues",
+      "image": "news-images/da96df6e242ed9ca7e8ae581.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/oil-prices-surge-past-108-171815703.html",
+      "published": "2026-09-15T17:18:15Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Zumiez (ZUMZ) Falls on Weak Results and Lower Outlook, But Is the Selloff Overdone?",
+      "image": "news-images/556e965b8eb60be3f296c6d1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/zumiez-zumz-falls-weak-results-163241796.html",
+      "published": "2026-09-15T16:32:41Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "other",
+      "headline": "Forward Industries Sweetens SkyAI Takeover Offer to 50% Premium",
+      "image": "news-images/a436f7c76820508db974129d.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/forward-industries-sweetens-skyai-takeover-163100379.html",
+      "published": "2026-09-15T16:31:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Copart (CPRT) Bets On Digital Dealers As Core Volumes Shrink",
-      "image": "news-images/d41265a3bc70411256b39bef.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/copart-cprt-bets-digital-dealers-130853110.html",
-      "published": "2026-09-13T13:08:53Z",
+      "headline": "Mikargo247, Verified Carrier launch coverage for strategic cargo theft",
+      "image": "news-images/103cf781bcaf18833665dae9.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/mikargo247-verified-carrier-launch-coverage-163013642.html",
+      "published": "2026-09-15T16:30:13Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Stablecoin Yield Ban Would Boost Bank Lending by Just 0.02%: White House",
+      "image": "news-images/339d243979cfc5f18321d838.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/stablecoin-yield-ban-boost-bank-162900064.html",
+      "published": "2026-09-15T16:29:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "\u201cSpaceX Has To Buy It. Period. End Of Story.\u201d Cramer\u2019s Answer For Tesla, Down 19.97% This Year.",
+      "image": "news-images/d5c7b1c3bf5d83006ff61bc1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/spacex-buy-period-end-story-171652833.html",
+      "published": "2026-09-15T17:16:52Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Costco Stock Price Forecast: Here's What a $10,000 Investment Today Could Be Worth by September 2027",
-      "image": "news-images/52413f874e63569ff48c76d9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/costco-stock-price-forecast-heres-134500562.html",
-      "published": "2026-09-13T13:45:00Z",
+      "headline": "Yahoo Stock: How To Find & Own America's Greatest Opportunities",
+      "image": "news-images/572d1bc6d85968d15e7d024c.jpg",
+      "link": "https://www.investors.com/how-to-invest/yahoo-stock-americas-greatest-opportunities/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-15T16:28:16Z",
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "CrowdStrike Expands AI Capabilities With Autonomous Product Launch. What This Means for CRWD Stock.",
-      "image": "news-images/9d99dba0ce41f8168e178d8b.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/crowdstrike-expands-ai-capabilities-autonomous-130002831.html",
-      "published": "2026-09-13T13:00:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "GF Securities Says NAND Prices May Stabilize Later This Year. What This Means for Sandisk Stock.",
-      "image": "news-images/243838f4b0cc445ddaad1849.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/gf-securities-says-nand-prices-130002701.html",
-      "published": "2026-09-13T13:00:02Z",
+      "category": "energy",
+      "headline": "Generate Capital Closes $117-Million in Financing for Community Solar",
+      "image": "news-images/86d920b88974deb10442e0b2.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/generate-capital-closes-117-million-162655532.html",
+      "published": "2026-09-15T16:26:55Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Lovesac\u2019s (LOVE) Premium Sofas Shine While Entry-Level Buyers Stay Away",
-      "image": "news-images/dc2d875a17697bbf7afe0f92.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/lovesac-love-premium-sofas-shine-125527184.html",
-      "published": "2026-09-13T12:55:27Z",
+      "headline": "Why Alluvium Bought Copart (CPRT) Despite the Long-Term Autonomous Driving Risk",
+      "image": "news-images/e1550e60cec3c59614cc644b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-alluvium-bought-copart-cprt-162642815.html",
+      "published": "2026-09-15T16:26:42Z",
       "sentiment": "neutral"
     },
     {
       "category": "healthcare",
-      "headline": "Amgen (AMGN) Fell 5% on a Drug That Isn\u2019t Even Its Own. Here\u2019s the Lp(a) Bet Now in Question.",
-      "image": "news-images/779c1f886f588a061f3bd3af.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/amgen-amgn-fell-5-drug-142916899.html",
-      "published": "2026-09-13T14:29:16Z",
+      "headline": "Pfizer (PFE), Valneva (VALN) Lyme Vaccine Moves to EMA Review Despite Phase 3 Caveat",
+      "image": "news-images/6a4500c5b7ee761f4018a623.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/pfizer-pfe-valneva-valn-lyme-162100405.html",
+      "published": "2026-09-15T16:21:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Google Bought YouTube for $1.65 Billion in 2006. The Streaming Platform Is Now the Main Driver of a Roughly $93 Billion Business at Alphabet.",
-      "image": "news-images/993711d68184ec31b0571465.jpg",
-      "link": "https://finance.yahoo.com/media-advertising/articles/google-bought-youtube-1-65-134000431.html",
-      "published": "2026-09-13T13:40:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Walmart Just Declared War on DoorDash and Uber Eats, But Winning Won't Be Easy for 1 Simple Reason",
-      "image": "news-images/8bfa45bf32216d4777cebb35.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/walmart-just-declared-war-doordash-123023266.html",
-      "published": "2026-09-13T12:30:23Z",
+      "headline": "Why Meta\u2019s $2.4 Billion Legal Tab Could Explode Into a National Regulatory Nightmare",
+      "image": "news-images/d61fa2c981a22d6ab1398ae4.jpg",
+      "link": "https://finance.yahoo.com/media-advertising/articles/why-meta-2-4-billion-171531616.html",
+      "published": "2026-09-15T17:15:31Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "IBEX (IBEX) Turns The AI Threat Into Its Biggest Growth Engine",
-      "image": "news-images/3bae8f2206e6acdf8cc71240.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/ibex-ibex-turns-ai-threat-121949823.html",
-      "published": "2026-09-13T12:19:49Z",
+      "headline": "How UnitedHealth (UNH) Leads the AI Revolution in the Insurance Industry",
+      "image": "news-images/d48f4888525c784ae68dad4a.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/unitedhealth-unh-leads-ai-revolution-161312650.html",
+      "published": "2026-09-15T16:13:12Z",
       "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Wall Street Is Betting Against Designer Brands (DBI) Even as Profits Double",
-      "image": "news-images/f93d413888b437d0962580e5.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/wall-street-betting-against-designer-121631989.html",
-      "published": "2026-09-13T12:16:31Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "1-800-Flowers (FLWS) Bets On Discipline While Revenue Keeps Fading",
-      "image": "news-images/61ad237d10c1f927d13abd65.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/1-800-flowers-flws-bets-120329224.html",
-      "published": "2026-09-13T12:03:29Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "UBS Expects Two Fed Rate Hikes by End of 2026 After Warsh Speech and Jobs Data",
-      "image": "news-images/fb92422a510f02be42d764ae.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/ubs-expects-two-fed-rate-133800516.html",
-      "published": "2026-09-13T13:38:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Dimensional\u2019s David Booth Discusses the State of ETFs, Investing and More",
-      "image": "news-images/dc6c2fe458b92400a05fd830.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dimensional-david-booth-discusses-state-120000449.html",
-      "published": "2026-09-13T12:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Ron Paul says 'people ought to own the gold, not the government', doubts the accounting at Fort Knox is 'trustworthy'",
-      "image": "news-images/8c52be1901f4f8504435a9d5.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/ron-paul-says-people-ought-120000495.html",
-      "published": "2026-09-13T12:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Dow Jones Futures: Fed Rate Hike Seen As Oil, Yields Pressure Stocks; Apple, Moderna Are New Buys",
-      "image": "news-images/377223ddceee7e8fa27f2c5e.jpg",
-      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-100-oil-surging-yields-pressure-stocks-with-fed-rate-hike-seen-apple-leads-new-buys/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-13T11:57:14Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "MasterCraft\u2019s (MCFT) Margins Soared While Its Pontoon Brand Stumbled",
-      "image": "news-images/b1d3d3b729462a2df973b193.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/mastercraft-mcft-margins-soared-while-115519325.html",
-      "published": "2026-09-13T11:55:19Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Nvidia Is Focused on Redefining AI Infrastructure as an Income-Generating Asset",
-      "image": "news-images/29044c7f65d30584538273a6.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/nvidia-focused-redefining-ai-infrastructure-153002085.html",
-      "published": "2026-09-13T15:30:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Shoe Station Group (SHOE) Bets On Localized Stores To Reverse A Slide",
-      "image": "news-images/5c2c541bf3d5a168dadddff0.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/shoe-station-group-shoe-bets-114759320.html",
-      "published": "2026-09-13T11:47:59Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How to Play IBM Stock as It Teams Up with NASA to Launch a New Open-Source Model",
-      "image": "news-images/1ac69d50dbc2d9b674a84a55.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/play-ibm-stock-teams-nasa-114716945.html",
-      "published": "2026-09-13T11:47:16Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "\u2018Homeless or living in RVs\u2019: Kiyosaki warns \u2018millions\u2019 of American boomers are about to go broke. Protect yourself now",
-      "image": "news-images/4e8b660abc177efbf262a7c5.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/homeless-living-rvs-kiyosaki-warns-114500107.html",
-      "published": "2026-09-13T11:45:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "The companies that own the customer relationship will ultimately beat those that simply own the best AI",
-      "image": "news-images/0831ecbcf723cd036b5b850b.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/companies-own-customer-relationship-ultimately-133641252.html",
-      "published": "2026-09-13T13:36:41Z",
-      "sentiment": "bullish"
     },
     {
       "category": "energy",
-      "headline": "Tsakos Energy Navigation (TEN) Just Posted Its Best Half Ever",
-      "image": "news-images/40064042ef979ac4a1703643.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/tsakos-energy-navigation-ten-just-114411263.html",
-      "published": "2026-09-13T11:44:11Z",
+      "headline": "Oil prices tick up as conflict widens, disruptions grow in Middle East",
+      "image": "news-images/99cdf7b7ae92448c627822fd.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/article/oil-prices-tick-up-as-conflict-widens-disruptions-grow-in-middle-east-161121550.html",
+      "published": "2026-09-15T16:11:21Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Kroger Co. (KR) Could Be a Consumer Staples Comeback Story",
+      "image": "news-images/5d420f74efd275f560a34371.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-kroger-co-kr-could-160335573.html",
+      "published": "2026-09-15T16:03:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "OXEA taps Uber Freight to manage North American, European logistics",
+      "image": "news-images/18977962cc215446575feae1.jpg",
+      "link": "https://finance.yahoo.com/economy/articles/oxea-taps-uber-freight-manage-160000087.html",
+      "published": "2026-09-15T16:00:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "financials",
-      "headline": "Bank exits squeeze truck financing for mid-size fleets",
-      "image": "news-images/b30e3c490816181c29ba63f6.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/bank-exits-squeeze-truck-financing-154006871.html",
-      "published": "2026-09-13T15:40:06Z",
+      "headline": "DFW Loan Maturities Total $13.3B, County Records Show",
+      "image": "news-images/cd204ff0c2d2b7c24dc14104.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/dfw-loan-maturities-total-13-171414423.html",
+      "published": "2026-09-15T17:14:14Z",
       "sentiment": "neutral"
     },
     {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Sunday, September 13, 2026: Mortgage rates surged higher in the last week",
-      "image": "news-images/4665670f2b8d1df683de6e6f.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-sunday-september-13-2026-mortgage-rates-surged-higher-in-the-last-week-100000138.html",
-      "published": "2026-09-13T10:00:00Z",
-      "sentiment": "bullish"
+      "category": "tech",
+      "headline": "Nvidia, AI Chip Stocks Look To Stem The Bleeding After Sell-Off",
+      "image": "news-images/2e00c9808f22eeea56ae2bd5.jpg",
+      "link": "https://www.investors.com/news/technology/chip-stocks-nvidia-seek-rebound-after-ai-sell-off/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-15T15:59:59Z",
+      "sentiment": "bearish"
     },
     {
-      "category": "other",
-      "headline": "Best CD rates today, Sunday, September 13, 2026: Lock in up to 4.35% APY",
-      "image": "news-images/81fad0383deb8ac130720fb8.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-sunday-september-13-2026-lock-in-up-to-435-apy-100000271.html",
-      "published": "2026-09-13T10:00:00Z",
+      "category": "tech",
+      "headline": "How Caterpillar (CAT) Drives Sector-Leading Performance Beyond AI Models",
+      "image": "news-images/bac414feb19a4fdf08072083.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/caterpillar-cat-drives-sector-leading-155623250.html",
+      "published": "2026-09-15T15:56:23Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "The Oil Crisis Has Reached Costco\u2019s Motor Oil Aisle",
+      "image": "news-images/05f4c72a0b34a0704d9fac3e.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/oil-crisis-reached-costco-motor-155626578.html",
+      "published": "2026-09-15T15:56:26Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Clarity Act: What it means for your crypto holdings",
+      "image": "news-images/989d4311329a4c56882e5ab4.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/clarity-act-what-it-means-for-your-crypto-holdings-153849029.html",
+      "published": "2026-09-15T15:38:49Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Legacy West Apartment Rents Hold Up on Fewer Discounts",
+      "image": "news-images/5e7d901d5ed6ff94e00948aa.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/legacy-west-apartment-rents-hold-171404004.html",
+      "published": "2026-09-15T17:14:04Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Bitcoin and ethereum prices today, Tuesday, September 15, 2026: Crypto prices sliding this morning ahead of Fed meeting",
+      "image": "news-images/05b223d029dc486c01823e78.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-september-15-2026-crypto-prices-sliding-this-morning-ahead-of-fed-meeting-113732149.html",
+      "published": "2026-09-15T11:37:32Z",
       "sentiment": "neutral"
     }
   ]
