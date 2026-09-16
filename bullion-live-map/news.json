@@ -1,54 +1,6 @@
 {
-  "generated_at": "2026-09-15T21:15:45Z",
+  "generated_at": "2026-09-16T17:36:20Z",
   "headlines": [
-    {
-      "category": "energy",
-      "headline": "Costco rations Kirkland motor oil, raises price to $57.99",
-      "image": "news-images/968a9a3d78e855ce044de4ad.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/costco-rations-kirkland-motor-oil-133308837.html",
-      "published": "2026-09-14T13:33:08Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "National specialty clothing chain closing all its stores",
-      "image": "news-images/cd32f5c4062e1774e3c7fb78.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/national-specialty-clothing-chain-closing-140700669.html",
-      "published": "2026-09-14T14:07:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Garmin Stock: Is GRMN Underperforming the Technology Sector?",
-      "image": "news-images/3396f1106e094e112364ea94.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/garmin-stock-grmn-underperforming-technology-124945758.html",
-      "published": "2026-09-14T12:49:45Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Soybeans Holding Steady on Monday Morning",
-      "image": "news-images/e40ee1c2c94b091b79a224dd.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/soybeans-holding-steady-monday-morning-123634476.html",
-      "published": "2026-09-14T12:36:34Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Corn Slipping Back Early on Monday",
-      "image": "news-images/3721dd8070aa6ddc01c363cd.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/corn-slipping-back-early-monday-123634575.html",
-      "published": "2026-09-14T12:36:34Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Wheat Showing Mixed Early Trade on Monday",
-      "image": "news-images/df41aba07e1ba94d66cdc644.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/wheat-showing-mixed-early-trade-123634313.html",
-      "published": "2026-09-14T12:36:34Z",
-      "sentiment": "neutral"
-    },
     {
       "category": "financials",
       "headline": "How a Costco partner's bankruptcy could benefit its biggest rival",
@@ -58,235 +10,203 @@
       "sentiment": "neutral"
     },
     {
-      "category": "industrials",
-      "headline": "LX Pantos Sets Its Sights on Global Logistics Leadership",
-      "image": "news-images/a05fa1f0a8a02a4f475431e2.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/lx-pantos-sets-sights-global-130000075.html",
-      "published": "2026-09-14T13:00:00Z",
+      "category": "federal",
+      "headline": "Mortgage and refinance interest rates today, Wednesday, September 16, 2026: Rates ease somewhat ahead of the Fed's rate decision",
+      "image": "news-images/c85eaff0f6875d335185cde5.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-wednesday-september-16-2026-rates-ease-somewhat-ahead-of-the-feds-rate-decision-100000213.html",
+      "published": "2026-09-16T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Fed meeting live updates: Fed interest rate decision looms, with traders anticipating first hike in 3 years",
+      "image": "news-images/3cead7f3045621fe362767a6.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/live/federal-reserve-meeting-live-updates-chairman-kevin-warsh-143452661.html",
+      "published": "2026-09-15T14:34:52Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "Stock Market Today: Nasdaq Leads Gains As Fed News Looms; Oil Ship Stocks Sail North (Live Coverage)",
+      "image": "news-images/0ea22a5803bc08ed4b9aacfc.jpg",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-fed-rate-hike-warsh-intel-sk-hynix/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T17:14:02Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Rich Dad Poor Dad author warns biggest crash in history has started",
+      "image": "news-images/dff162f3d2c2683ea01388e2.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/rich-dad-poor-dad-author-172603940.html",
+      "published": "2026-09-15T17:26:03Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "federal",
+      "headline": "Wall Street bets on a rate hike, but the Fed decision could be a close call",
+      "image": "news-images/0b2502c68fe33d485bf92bb8.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/article/wall-street-bets-on-a-rate-hike-but-the-fed-decision-could-be-a-close-call-171212149.html",
+      "published": "2026-09-16T17:12:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "S&P 500 Trucking Stock Craters On CFO's Warning",
+      "image": "news-images/87f95588cf6b2305317e5ef0.jpg",
+      "link": "https://www.investors.com/news/sp-500-stocks-jb-hunt-cfo-earnings-oil-diesel-prices-iran-war/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T17:00:50Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "energy",
+      "headline": "Bloom Energy Stock Jumps On 'Meaningful' Data-Center Catalyst",
+      "image": "news-images/05fa0e0a40ac4a86cbd985f4.jpg",
+      "link": "https://www.investors.com/news/bloom-energy-stock-jumps-on-meaningful-data-center-catalyst/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:55:19Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "federal",
+      "headline": "Stock market today: S&P 500 and Nasdaq rise ahead of crucial Fed interest rate decision",
+      "image": "news-images/3db399c800e1c762b19a910e.jpg",
+      "link": "https://finance.yahoo.com/markets/live/stock-market-today-wednesday-september-16-dow-sp-500-nasdaq-fed-meeting-decision-080356525.html",
+      "published": "2026-09-16T08:03:56Z",
       "sentiment": "neutral"
     },
     {
       "category": "crypto",
-      "headline": "Ethereum Price Prediction: Clarity Act Could Trigger ETH Breakout",
-      "image": "news-images/0e4744fae238cde0b2ba8344.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/ethereum-price-prediction-clarity-act-121745525.html",
-      "published": "2026-09-14T12:17:45Z",
-      "sentiment": "bullish"
+      "headline": "Bitcoin ETF Outflows Hit $450mn as CLARITY Act Stalls in Senate",
+      "image": "news-images/f86a41bcf440d2813056cf0b.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-etf-outflows-hit-450mn-172252010.html",
+      "published": "2026-09-16T17:22:52Z",
+      "sentiment": "neutral"
     },
     {
-      "category": "consumer",
-      "headline": "Amazon's Operating Cash Flow Could Push AMZN Over $314 - What's the Best AMZN Play?",
-      "image": "news-images/e6b79fc9c889506ac3a5ac28.jpg",
-      "link": "https://finance.yahoo.com/markets/options/articles/amazons-operating-cash-flow-could-130002375.html",
-      "published": "2026-09-14T13:00:02Z",
+      "category": "healthcare",
+      "headline": "Guardant Health Nears Buy Point As Sales Outlook Brightens",
+      "image": "news-images/c1537930a5d3facaf615766e.jpg",
+      "link": "https://www.investors.com/research/cancer-stock-guardant-health-gh/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:39:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Salesforce Stock Dips Ahead Of Investor Briefing Amid System Outage",
+      "image": "news-images/5c03da6a4a2ded2eae47d8ce.jpg",
+      "link": "https://www.investors.com/news/technology/salesforce-stock-dips-ahead-of-investor-briefing-amid-system-outage/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:11:26Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Dow Jones Tech Titan Apple, Nvidia Chipmaker TSMC, AMD, Bloom Energy In Or Near Buy Zones",
+      "image": "news-images/a45149ee02091b2f34d8cb83.jpg",
+      "link": "https://www.investors.com/stock-lists/stocks-near-a-buy-zone/dow-jones-apple-stock-aapl-nvidia-chipmaker-tsm-amd-bloom/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:10:31Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "The Fed Will Be Hawkish. The S&P 500 May Prefer It. (Live Coverage)",
+      "image": "news-images/e56838a582076f78f5b2b6c0.jpg",
+      "link": "https://www.investors.com/news/federal-reserve-meeting-sept-warsh-10-year-treasury-yield-sp-500/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:10:25Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Bitcoin Falls Under $76,000 After the Senate Stalls the CLARITY Act. Why BTC Took the Smallest Hit at 1.5%",
+      "image": "news-images/addbfb55052795dc4989c535.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/bitcoin-falls-under-76-000-172205663.html",
+      "published": "2026-09-16T17:22:05Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "tech",
+      "headline": "AMD, IBD Stock Of The Day, Gains As Heavyweights Dismiss AI Slowdown",
+      "image": "news-images/e0799775ccfb3978435f866f.jpg",
+      "link": "https://www.investors.com/research/ibd-stock-of-the-day/amd-stock-rises-pundits-dismiss-ai-slowdown/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T16:05:19Z",
       "sentiment": "neutral"
     },
     {
       "category": "realestate",
-      "headline": "Chase Home Lendings' mortgage rate sale returns for a 3-week run",
-      "image": "news-images/581ad2da14fac520a36617a7.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/chase-home-lendings-mortgage-rate-sale-returns-for-a-3-week-run-130100448.html",
-      "published": "2026-09-14T13:01:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Stock Market Today (Sept. 14, 2026): Nasdaq, S&P 500 falls as 10Y Treasury yield hits highest since 2023ising oil, AI tensions",
-      "image": "news-images/74cd1f15c4c483ac281766da.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-today-sept-14-133832281.html",
-      "published": "2026-09-14T13:38:32Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "international",
-      "headline": "Etihad Airways sees strong demand, higher passenger capacity\u00a0despite Iran war, CEO says",
-      "image": "news-images/52c81d84a331851b7f515832.jpg",
-      "link": "https://finance.yahoo.com/news/etihad-airways-sees-strong-demand-121621387.html",
-      "published": "2026-09-14T12:16:21Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "AI warnings by Anthropic CEO Dario Amodei and OpenAI CEO Sam Altman could hammer this momentum stock",
-      "image": "news-images/c88115a830a6103061bd6ca9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/article/ai-warnings-by-anthropic-ceo-dario-amodei-and-openai-ceo-sam-altman-could-hammer-this-momentum-stock-101518585.html",
-      "published": "2026-09-14T10:15:18Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Dow Jones Futures Fall, Techs Tumble As Oil Prices Rise, Anthropic Leads AI Slowdown Call",
-      "image": "news-images/978a2e37ce5f1c8d463d420a.jpg",
-      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-futures-fed-meeting-anthropic-amodei-openai-altman-spacex-musk-ai-model-slowdown/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-14T12:11:35Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "healthcare",
-      "headline": "ResMed Stock: Is RMD Underperforming the Healthcare Sector?",
-      "image": "news-images/5968af96d8b6e21a0670f542.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/resmed-stock-rmd-underperforming-healthcare-130726425.html",
-      "published": "2026-09-14T13:07:26Z",
+      "headline": "CareTrust REIT\u2019s (CTRE) $400M Bet Extends A Record Year",
+      "image": "news-images/3a77af7ad1667935ddd442b2.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/caretrust-reit-ctre-400m-bet-160209188.html",
+      "published": "2026-09-16T16:02:09Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Novo Nordisk rebrands as Novo to compete in obesity market",
-      "image": "news-images/2243ae20f2bd72437c970564.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/novo-nordisk-rebrands-novo-compete-124941872.html",
-      "published": "2026-09-14T12:49:41Z",
+      "headline": "Bitget Publishes 45th Consecutive Monthly Proof-of-Reserves Report at 122% Reserve Ratio",
+      "image": "news-images/98bf57be196b4ed7acdc27f1.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/bitget-publishes-45th-consecutive-monthly-160021181.html",
+      "published": "2026-09-16T16:00:21Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Robust US retail sales underscore economy's resilience; inflation pressures building",
+      "image": "news-images/7b36a6af5a3168545f3b9db7.jpg",
+      "link": "https://finance.yahoo.com/economy/articles/us-retail-sales-rebound-sharply-123724094.html",
+      "published": "2026-09-16T15:57:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Retirees Who Ended Up Alone in The Villages Say Nobody Warned Them What It Would Cost",
+      "image": "news-images/9414eaf074dcc52054e734ad.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/retirees-ended-alone-villages-nobody-172055632.html",
+      "published": "2026-09-16T17:20:55Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Tesla, Microsoft and Amazon Forecast: Tech Stocks Diverge",
-      "image": "news-images/66880c08a114a9cb25ad3850.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/tesla-microsoft-amazon-forecast-tech-131133844.html",
-      "published": "2026-09-14T13:11:33Z",
+      "headline": "Aptiv (APTV) Turns Chip Partnerships Into A Physical AI Bet",
+      "image": "news-images/ca05991568fc6d2fda0905e3.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/aptiv-aptv-turns-chip-partnerships-155643163.html",
+      "published": "2026-09-16T15:56:43Z",
       "sentiment": "neutral"
     },
     {
       "category": "crypto",
-      "headline": "Bitcoin and ethereum prices today, Monday, September 14, 2026: Crypto prices trying to hold as rate-hike expectations grow",
-      "image": "news-images/37f1ec17912f8de55fe23e0d.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-monday-september-14-2026-crypto-prices-trying-to-hold-as-rate-hike-expectations-grow-114245430.html",
-      "published": "2026-09-14T11:42:45Z",
+      "headline": "Bitcoin and ethereum prices today, Wednesday, September 16, 2026: Crypto prices tank after CLARITY Act fails and ahead of Fed decision",
+      "image": "news-images/a2bb4b09a2c8501fa357a1b3.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-wednesday-september-16-2026-crypto-prices-tank-after-clarity-act-fails-and-ahead-of-fed-decision-112517152.html",
+      "published": "2026-09-16T11:25:17Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Silver prices today, Monday, September 14, 2026: Silver slides as rate-hike expectations grow",
-      "image": "news-images/736e765e72a36bfb11948df3.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-prices-today-monday-september-14-2026-silver-slides-as-rate-hike-expectations-grow-112941547.html",
-      "published": "2026-09-14T11:29:41Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Gold prices today, Monday, September 14, 2026: Gold sinks following new attacks on Saudi pipeline and more",
-      "image": "news-images/56ad2e1b30ee0c325d169f35.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-prices-today-monday-september-14-2026-gold-sinks-following-new-attacks-on-saudi-pipeline-and-more-111825907.html",
-      "published": "2026-09-14T11:18:25Z",
+      "headline": "Silver price today, Wednesday, September 16, 2026:  Silver prices rise in anticipation of the Fed",
+      "image": "news-images/1e04954fd586518f661948ab.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-wednesday-september-16-2026-silver-prices-rise-in-anticipation-of-the-fed-105134969.html",
+      "published": "2026-09-16T10:51:34Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Home Depot vs. Lowe\u2019s: One Payout Will Weather the Storm \u2014 Here\u2019s Which",
-      "image": "news-images/561058cf80094bddc89b41b7.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/home-depot-vs-lowe-one-125026745.html",
-      "published": "2026-09-14T12:50:26Z",
+      "headline": "Former Advisor Gets 7 Years for $10M Fraud",
+      "image": "news-images/87e0eff5d084b3ab9cea1f61.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/former-advisor-gets-7-years-171703418.html",
+      "published": "2026-09-16T17:17:03Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Best CD rates today, Monday, September 14, 2026: Lock in up to 4.35% APY",
-      "image": "news-images/25881f22140e313acd44f508.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-monday-september-14-2026-lock-in-up-to-435-apy-100000686.html",
-      "published": "2026-09-14T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Monday, September 14, 2026: Purchase and refinance rates are mixed",
-      "image": "news-images/731e7dcf2b6cd113d0e8cb0f.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-monday-september-14-2026-purchase-and-refinance-rates-are-mixed-100000816.html",
-      "published": "2026-09-14T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How gold IRAs fit into a diversified retirement portfolio",
-      "image": "news-images/a0e86aab2fb349f80cf98cd0.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/how-gold-iras-fit-into-a-diversified-retirement-portfolio-162815731.html",
-      "published": "2026-09-14T16:28:15Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Here's Why I Think AT&T Stock Could Be a No-Brainer Buy Right Now",
-      "image": "news-images/b52b5765dbbaa4dae66efa32.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/heres-why-think-t-stock-124915999.html",
-      "published": "2026-09-14T12:49:15Z",
+      "headline": "Gold price today, Wednesday, September 16, 2026: Gold holds in the $4,300 range, awaiting the Fed's decision",
+      "image": "news-images/a9c6a4dfb25a30a6934500fb.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-wednesday-september-16-2026-gold-holds-in-the-4300-range-awaiting-the-feds-decision-104038147.html",
+      "published": "2026-09-16T10:40:38Z",
       "sentiment": "neutral"
     },
     {
       "category": "financials",
-      "headline": "Debt settlement vs. bankruptcy: How to choose",
-      "image": "news-images/e99bf9283bf40416bdb78e00.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/personal-loans/article/debt-settlement-vs-bankruptcy-175657072.html",
-      "published": "2026-09-14T17:56:57Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Oil prices jump after Saudi Arabia shuts East-West pipeline",
-      "image": "news-images/fad32e73e0be137bab0ad7b2.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/oil-prices-jump-saudi-arabia-124807593.html",
-      "published": "2026-09-14T12:48:07Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "financials",
-      "headline": "HELOC and home equity loan rates today, Tuesday, September 15, 2026: Besides rates, how to choose between a HELOC or home equity loan",
-      "image": "news-images/e34feef267b4f39558a5e3c0.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/heloc-and-home-equity-loan-rates-today-tuesday-september-15-2026-besides-rates-how-to-choose-between-a-heloc-or-home-equity-loan-100000523.html",
-      "published": "2026-09-14T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Best CD rates today, Tuesday, September 15, 2026: Lock in up to 4.40% APY",
-      "image": "news-images/7f18ecad78d4fee3d033758f.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-tuesday-september-15-2026-lock-in-up-to-440-apy-100000502.html",
-      "published": "2026-09-15T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Best high-yield savings interest rates today, Tuesday, September 15, 2026: Earn up to 4.10% APY",
-      "image": "news-images/00ca28f18ad03dabb122c9ff.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-high-yield-savings-interest-rates-today-tuesday-september-15-2026-earn-up-to-410-apy-100000167.html",
-      "published": "2026-09-14T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Eaton vs. Rivian Automotive: Which Industrials Stock Is a Better Buy in 2026?",
-      "image": "news-images/5ba7c98177761f3236e6eda4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/eaton-vs-rivian-automotive-industrials-124856402.html",
-      "published": "2026-09-14T12:48:56Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Gold prices today, Tuesday, September 15, 2026: Gold sees lowest open in weeks as Treasury yields keep rising",
-      "image": "news-images/78a357f9875a1889ae5e1cc7.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-prices-today-tuesday-september-15-2026-gold-sees-lowest-open-in-weeks-as-treasury-yields-keep-rising-111454530.html",
-      "published": "2026-09-15T11:14:54Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Silver prices today, Tuesday, September 15, 2026: Silver prices drop below $64 as Fed-decision day approaches",
-      "image": "news-images/b50311dc54b8cbf185751334.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-prices-today-tuesday-september-15-2026-silver-prices-drop-below-64-as-fed-decision-day-approaches-112326237.html",
-      "published": "2026-09-15T11:23:26Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "crypto",
-      "headline": "Bitcoin and ethereum prices today, Tuesday, September 15, 2026: Crypto prices sliding this morning ahead of Fed meeting",
-      "image": "news-images/05b223d029dc486c01823e78.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-september-15-2026-crypto-prices-sliding-this-morning-ahead-of-fed-meeting-113732149.html",
-      "published": "2026-09-15T11:37:32Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Advanced Micro Devices vs. ASML: Which Tech Stock Is a Better Buy in 2026?",
-      "image": "news-images/5ba7c98177761f3236e6eda4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/advanced-micro-devices-vs-asml-125001906.html",
-      "published": "2026-09-14T12:50:01Z",
+      "headline": "Best CD rates today, Wednesday, September 16, 2026: Earn up to 4.40% APY with Happen Bank",
+      "image": "news-images/4d5a47c785c2a4f8c2a77b1c.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-wednesday-september-16-2026-earn-up-to-440-apy-with-happen-bank-100000125.html",
+      "published": "2026-09-16T10:00:00Z",
       "sentiment": "neutral"
     },
     {
@@ -298,12 +218,12 @@
       "sentiment": "neutral"
     },
     {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Tuesday, September 15, 2026: Will they drop soon?",
-      "image": "news-images/8a9a61a80d0b1e21fa59f78e.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-tuesday-september-15-2026-rates-cross-the-7-threshold-100000413.html",
-      "published": "2026-09-15T10:00:00Z",
-      "sentiment": "bearish"
+      "category": "consumer",
+      "headline": "Casual Mexican restaurant chain closes more locations, 3 remain",
+      "image": "news-images/7ad1d4977810c038cf9a076f.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/casual-mexican-restaurant-chain-closes-171700483.html",
+      "published": "2026-09-16T17:17:00Z",
+      "sentiment": "neutral"
     },
     {
       "category": "crypto",
@@ -319,6 +239,54 @@
       "image": "news-images/b88f60b15c97fef428ca52ac.jpg",
       "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-card-application-denied-194416584.html",
       "published": "2026-09-15T19:44:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "The One Cost Line UnitedHealth Stock Has Not Caught Up To Yet",
+      "image": "news-images/433120bb48b12d7e9c255113.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/one-cost-line-unitedhealth-stock-171653661.html",
+      "published": "2026-09-16T17:16:53Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Gold and the U.S. dollar: Why they often move in opposite directions",
+      "image": "news-images/ddb64b819d25687161523aa9.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-us-dollar-relationship-204112404.html",
+      "published": "2026-09-15T20:41:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "$250,000 Sitting in SPAXX Pays State Tax on Most of Its Interest While FDLXX Holders Pay Almost None",
+      "image": "news-images/da8eacd0b244c465becdad4b.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/250-000-sitting-spaxx-pays-171554728.html",
+      "published": "2026-09-16T17:15:54Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Debt settlement vs. bankruptcy: How to choose",
+      "image": "news-images/e99bf9283bf40416bdb78e00.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/personal-loans/article/debt-settlement-vs-bankruptcy-175657072.html",
+      "published": "2026-09-14T17:56:57Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Solana Price Prediction: What Could SOL Be Worth Before Q4?",
+      "image": "news-images/a0412002844204db5b7e3daf.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/solana-price-prediction-could-sol-171452168.html",
+      "published": "2026-09-16T17:14:52Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Jim Cramer calls Salesforce stock too cheap at Dreamforce 2026",
+      "image": "news-images/e2bddc0546019bb3bd0b3fc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-calls-salesforce-stock-171112845.html",
+      "published": "2026-09-16T17:11:12Z",
       "sentiment": "neutral"
     }
   ]
