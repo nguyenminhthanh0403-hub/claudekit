@@ -1,22 +1,6 @@
 {
-  "generated_at": "2026-09-16T21:14:17Z",
+  "generated_at": "2026-09-17T17:36:20Z",
   "headlines": [
-    {
-      "category": "financials",
-      "headline": "How a Costco partner's bankruptcy could benefit its biggest rival",
-      "image": "news-images/2c2442e4bdc1d6cd37949fa9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/costco-partners-bankruptcy-could-benefit-133300901.html",
-      "published": "2026-09-15T13:33:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Rich Dad Poor Dad author warns biggest crash in history has started",
-      "image": "news-images/dff162f3d2c2683ea01388e2.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/rich-dad-poor-dad-author-172603940.html",
-      "published": "2026-09-15T17:26:03Z",
-      "sentiment": "bearish"
-    },
     {
       "category": "other",
       "headline": "Mysterious trader moves $122 million ahead of Fed's 2 p.m. decision",
@@ -26,299 +10,283 @@
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "Is Targa Resources Stock Outperforming the S&P 500?",
-      "image": "news-images/32465c28505ae7fb4a2dadf4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/targa-resources-stock-outperforming-p-130106466.html",
-      "published": "2026-09-15T13:01:06Z",
+      "category": "federal",
+      "headline": "How does the Fed interest rate affect car loans?",
+      "image": "news-images/e1552c96464634299f7a6cfa.jpg",
+      "link": "https://finance.yahoo.com/news/fed-affects-auto-loan-rates-190622401.html",
+      "published": "2026-09-17T17:20:50Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Universal Display (OLED): Is the AI Infrastructure Boom Becoming a Hidden Risk for Display Suppliers?",
-      "image": "news-images/53d5f937ddc672665e9290a8.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/universal-display-oled-ai-infrastructure-125924977.html",
-      "published": "2026-09-15T12:59:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Vishay Precision (VPG) Became a Winner From Industrial Recovery and the Humanoid Robotics Boom",
-      "image": "news-images/c10dbb223d64acc28117c063.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/vishay-precision-vpg-became-winner-130351712.html",
-      "published": "2026-09-15T13:03:51Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "NVIDIA, AMD and Intel Forecast: AI Stocks Eye a Rebound",
-      "image": "news-images/2f43cfc10b8764ef954ac260.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-amd-intel-forecast-ai-125717460.html",
-      "published": "2026-09-15T12:57:17Z",
+      "headline": "Stock Market Today: Nasdaq Dwarfs Dow's Gain; This AI Chip Leader Breaks Out To All-Time High (Live Coverage)",
+      "image": "news-images/3d0f0a36f55f1321125778f0.jpg",
+      "link": "https://www.investors.com/market-trend/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-fed-reaction-generac-nebius-bloom-energy-spacex/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-17T17:17:07Z",
       "sentiment": "bullish"
     },
     {
       "category": "financials",
-      "headline": "Bank of America Q3 investment banking fees to drop, CEO warns",
-      "image": "news-images/a8f1ddb879ce2b1d2d9ad822.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/bank-america-q3-investment-banking-125930006.html",
-      "published": "2026-09-15T12:59:30Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "other",
-      "headline": "Adobe Stock is Dirt Cheap After Its Recent Results - What's the Best Way to Play ADBE?",
-      "image": "news-images/14b635ebd486f134da69a78b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/adobe-stock-dirt-cheap-recent-130002656.html",
-      "published": "2026-09-15T13:00:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Ballooning US debt is a ticking time bomb, billionaire investor David Rubenstein says",
-      "image": "news-images/5317eb154b946e9233e9c36f.jpg",
-      "link": "https://finance.yahoo.com/markets/article/ballooning-us-debt-is-a-ticking-time-bomb-billionaire-investor-david-rubenstein-says-130757123.html",
-      "published": "2026-09-15T13:07:57Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "realestate",
-      "headline": "How Is Vivmark Residential\u2019s Stock Performance Compared to Other Residential REIT Stocks",
-      "image": "news-images/d1cb786274e6d08b138fc770.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/vivmark-residential-stock-performance-compared-130626261.html",
-      "published": "2026-09-15T13:06:26Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Nasdaq, Dow and S&P 500 Forecast: Markets Await the Fed",
-      "image": "news-images/06a77f4558a84355f9469d13.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-dow-p-500-forecast-130903574.html",
-      "published": "2026-09-15T13:09:03Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Atlassian Says AI Tailwind Is Building as Cloud Growth and Rovo Adoption Accelerate",
-      "image": "news-images/a2fcb766454235cc31c8b366.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/atlassian-says-ai-tailwind-building-130215290.html",
-      "published": "2026-09-15T13:02:15Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "NetApp Stock: Is NTAP Outperforming the Technology Sector?",
-      "image": "news-images/82cce56a8ba71e905cb69080.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/netapp-stock-ntap-outperforming-technology-125243290.html",
-      "published": "2026-09-15T12:52:43Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "How AI Infrastructure and Component Costs Threaten Logitech\u2019s (LOGI) Outlook",
-      "image": "news-images/941fa782d004a6a4df3689fd.jpg",
-      "link": "https://finance.yahoo.com/technology/articles/ai-infrastructure-component-costs-threaten-125222803.html",
-      "published": "2026-09-15T12:52:22Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How Is T. Rowe Price's Stock Performance Compared to Other Financial Stocks?",
-      "image": "news-images/e310214c0c3c8cfc9000da95.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/t-rowe-prices-stock-performance-125137107.html",
-      "published": "2026-09-15T12:51:37Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Can Rising Component Costs and Weak Consumer Spending Break Dolby Laboratories\u2019 (DLB) Growth Outlook?",
-      "image": "news-images/63480d349baa44b975de5498.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/rising-component-costs-weak-consumer-125048665.html",
-      "published": "2026-09-15T12:50:48Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Companies Maintain AI Deployments With a Focus on Governance",
-      "image": "news-images/5c51b46c8fcfee01bd9013a8.jpg",
-      "link": "https://www.wsj.com/cio-journal/companies-maintain-ai-deployments-with-a-focus-on-governance-51310d2f?siteid=yhoof2&amp;yptr=yahoo",
-      "published": "2026-09-15T13:02:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "AMD (AMD) Could Compound EPS at 65% Through 2030, Piper Says",
-      "image": "news-images/bff020145c67494e1c12b15e.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/amd-amd-could-compound-eps-125049495.html",
-      "published": "2026-09-15T12:50:49Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Deckers Outdoor Stock: Is DECK Underperforming the Consumer Discretionary Sector?",
-      "image": "news-images/d2caa9c7c441ecd3b13c1ce5.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/deckers-outdoor-stock-deck-underperforming-124824061.html",
-      "published": "2026-09-15T12:48:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Is M&T Bank Outperforming the Nasdaq?",
-      "image": "news-images/d003d51fdf35ae10506d314b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/m-t-bank-outperforming-nasdaq-131152976.html",
-      "published": "2026-09-15T13:11:52Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "How Is Datadog\u2019s Stock Performance Compared to Other Cloud Computing Stocks",
-      "image": "news-images/e86b3857587b4071592f55c9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/datadog-stock-performance-compared-other-124420745.html",
-      "published": "2026-09-15T12:44:20Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "There Are Plenty of Eli Lilly Bulls: Here\u2019s What They Aren\u2019t Telling You",
-      "image": "news-images/0185b0a11dd04423ab23fcc4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/plenty-eli-lilly-bulls-aren-130554405.html",
-      "published": "2026-09-15T13:05:54Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Church & Dwight Stock Outperforming the Dow?",
-      "image": "news-images/b7067e57688f485ac860594b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/church-dwight-stock-outperforming-dow-124355285.html",
-      "published": "2026-09-15T12:43:55Z",
+      "headline": "Access to credit is tightening \u2014 here\u2019s what it means for your next auto loan",
+      "image": "news-images/84a17d61d63e4c8b7507b04b.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/access-credit-tightening-means-next-150515547.html",
+      "published": "2026-09-17T17:11:21Z",
       "sentiment": "neutral"
     },
     {
       "category": "healthcare",
-      "headline": "Here\u2019s Why Sotera Health Company (SHC) Surges 25% in Q2",
-      "image": "news-images/e3e8a7a5a602a093dd956d1c.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/why-sotera-health-company-shc-131345471.html",
-      "published": "2026-09-15T13:13:45Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "Is Fortive Stock Underperforming the Nasdaq?",
-      "image": "news-images/123de4ce7e9520ce888eb9a1.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/fortive-stock-underperforming-nasdaq-131520272.html",
-      "published": "2026-09-15T13:15:20Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Take-Two Interactive Stock Underperforming the S&P 500?",
-      "image": "news-images/56c1522e5298e2f4be28dcf8.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/two-interactive-stock-underperforming-p-123419248.html",
-      "published": "2026-09-15T12:34:19Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "On Holding's 2026 Outlook: DTC Channel Strategy Drives Higher Profit Margins",
-      "image": "news-images/82fa49bcec81d8d1fbaea146.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/holdings-2026-outlook-dtc-channel-130001729.html",
-      "published": "2026-09-15T13:00:01Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Bioceres Crop Solutions Corp. Q4 2026 Earnings Call Summary",
-      "image": "news-images/2ff5bfb4b32fb403943b0cf8.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/bioceres-crop-solutions-corp-q4-123000503.html",
-      "published": "2026-09-15T12:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "MindWalk Holdings Corp. Q1 2027 Earnings Call Summary",
-      "image": "news-images/c1be5e33223298602e0f2788.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/mindwalk-holdings-corp-q1-2027-123000284.html",
-      "published": "2026-09-15T12:30:00Z",
+      "headline": "Takeda Pharmaceutical (TAK) Gets Priority Review. Can Zasocitinib Win in Psoriasis?",
+      "image": "news-images/9d0dae8e9bc5b9ce223961de.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/takeda-pharmaceutical-tak-gets-priority-170819495.html",
+      "published": "2026-09-17T17:08:19Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "American Battery Technology Company Common Stock Q4 2026 Earnings Call Summary",
-      "image": "news-images/82220367dbd5e693d0e9af0f.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/american-battery-technology-company-common-123000033.html",
-      "published": "2026-09-15T12:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Radiant Logistics, Inc. Q4 2026 Earnings Call Summary",
-      "image": "news-images/62c870bf6e9e30ca080220fa.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/radiant-logistics-inc-q4-2026-123000994.html",
-      "published": "2026-09-15T12:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Legend Names Novartis Executive as CEO",
-      "image": "news-images/e19a8ce5963fd335f9ffea8e.jpg",
-      "link": "https://www.wsj.com/health/pharma/legend-naming-novartis-executive-as-ceo-6a79fa0c?siteid=yhoof2&amp;yptr=yahoo",
-      "published": "2026-09-15T13:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "KESTRA MEDICAL TECHNOLOGIES, LTD. Q1 2027 Earnings Call Summary",
-      "image": "news-images/379065bf33d2b4acec05b590.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/kestra-medical-technologies-ltd-q1-123000305.html",
-      "published": "2026-09-15T12:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Dave & Buster's Entertainment, Inc. Q2 2026 Earnings Call Summary",
-      "image": "news-images/4b1e72e935735ccb826043ed.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dave-busters-entertainment-inc-q2-123000667.html",
-      "published": "2026-09-15T12:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Willis Towers Watson Stock: Is WTW Underperforming the Financial Service Sector?",
-      "image": "news-images/b2eaaa3dcaaf6eff7702e4e4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/willis-towers-watson-stock-wtw-131710264.html",
-      "published": "2026-09-15T13:17:10Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Soybeans Slipping Back as Ratings Remain Steady",
-      "image": "news-images/a5a69b8dbbe46974f3fe3d96.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/soybeans-slipping-back-ratings-remain-122930897.html",
-      "published": "2026-09-15T12:29:30Z",
+      "headline": "Box's 2026 Outlook: AI-Driven Workflow Adoption Solidifies Enterprise Competitive Moat",
+      "image": "news-images/3d713bfd6cb4e91ff9a502f3.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/boxs-2026-outlook-ai-driven-172501129.html",
+      "published": "2026-09-17T17:25:01Z",
       "sentiment": "neutral"
     },
     {
       "category": "financials",
-      "headline": "Mastercard is rethinking its iconic \u2018Priceless\u2019 campaign after nearly 30 years",
-      "image": "news-images/b4516d34ea81abe33a2b12d6.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/mastercard-rethinking-iconic-priceless-campaign-130000364.html",
-      "published": "2026-09-15T13:00:00Z",
+      "headline": "How secured auto loans work",
+      "image": "news-images/019b00a283070800a7db85e7.jpg",
+      "link": "https://finance.yahoo.com/markets/currencies/articles/secured-auto-loans-why-usually-212442450.html",
+      "published": "2026-09-17T17:05:22Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Stock market today: Dow, S&P 500, Nasdaq rise as oil slips, Fed rate hike pacifies markets' inflation worries",
+      "image": "news-images/26f90a8210a78fad2eb394ff.jpg",
+      "link": "https://finance.yahoo.com/markets/live/stock-market-today-thursday-september-17-dow-sp-500-nasdaq-oil-fed-081248626.html",
+      "published": "2026-09-17T08:12:48Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Corn Facing Early Turnaround Tuesday Weakness",
-      "image": "news-images/b1f9c1bdab4dc9f855e0ee59.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/corn-facing-early-turnaround-tuesday-122930175.html",
-      "published": "2026-09-15T12:29:30Z",
+      "headline": "airBaltic Is Shrinking. Ryanair Is Moving In.",
+      "image": "news-images/799e74a24963ad4c95c5d560.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/airbaltic-shrinking-ryanair-moving-165823095.html",
+      "published": "2026-09-17T16:58:23Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Is Dover Stock Underperforming the Dow?",
-      "image": "news-images/1842c6bdc20929c18703b21d.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dover-stock-underperforming-dow-131747663.html",
-      "published": "2026-09-15T13:17:47Z",
+      "headline": "Pinterest Director Benjamin Silbermann Sells 93,750 Shares for $1.8 Million",
+      "image": "news-images/dd9e5689480330dec9fecc8f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/pinterest-director-benjamin-silbermann-sells-172001146.html",
+      "published": "2026-09-17T17:20:01Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Aon\u2019s $17 Billion USI Deal: What Hedge Fund Sentiment Says About AON and KKR",
+      "image": "news-images/796948b7123033175ce929b3.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/aon-17-billion-usi-deal-165811093.html",
+      "published": "2026-09-17T16:58:11Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Polestar (PSNY)\u2019s US Exit Just Showed Up in its Guidance",
+      "image": "news-images/9285795662821e95a869497d.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/polestar-psny-us-exit-just-165023810.html",
+      "published": "2026-09-17T16:50:23Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "Jim Cramer on Tesla (TSLA): \u201cMy Only Solution to It Is That SpaceX Has to Buy It\u201d",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-tesla-tsla-only-164733818.html",
+      "published": "2026-09-17T16:47:33Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Apple (AAPL) Faces a $2.7 Billion UK Lawsuit over its App Tracking Rules",
+      "image": "news-images/922bae7d25fb671551c69336.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/apple-aapl-faces-2-7-164412973.html",
+      "published": "2026-09-17T16:44:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "Elon Musk sends strong message to SpaceX and Tesla investors",
+      "image": "news-images/be49bffe51d486a9059d69ee.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/elon-musk-sends-strong-message-171700495.html",
+      "published": "2026-09-17T17:17:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Lululemon (LULU) Cuts its Outlook Again Just as a New CEO Walks through the Door",
+      "image": "news-images/7fb289186c26997340b6d429.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lululemon-lulu-cuts-outlook-again-164209283.html",
+      "published": "2026-09-17T16:42:09Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "tech",
+      "headline": "AMD Leads Chip Stocks Higher Amid Sector Rebound",
+      "image": "news-images/95655e5d56702fee3f8c947d.jpg",
+      "link": "https://www.investors.com/news/technology/amd-stock-leads-chip-stocks-sox-index-higher-amid-sector-rebound/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-17T16:41:50Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "tech",
+      "headline": "Rackspace\u2019s Nvidia Partnership Sparks Early Rally, But a $2.8 Billion Debt Load Remains",
+      "image": "news-images/c8e59a8a3f8d04e7839c3547.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/rackspace-nvidia-partnership-sparks-early-163851620.html",
+      "published": "2026-09-17T16:38:51Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "tech",
+      "headline": "Meta (META) Overhauls Instagram and Facebook for Teens after its $17 Billion Settlement",
+      "image": "news-images/9b3081bece337bc550a1e74b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/meta-meta-overhauls-instagram-facebook-163514422.html",
+      "published": "2026-09-17T16:35:14Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Oracle Stock Jumped 6% Today on OpenAI Funding Buzz",
+      "image": "news-images/dd1925215c6702d4ee9c8032.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-oracle-stock-jumped-6-171651571.html",
+      "published": "2026-09-17T17:16:51Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "consumer",
+      "headline": "A Deadly Amazon (AMZN) Cargo Plane Crash in Miami Puts its Air Network Under Scrutiny",
+      "image": "news-images/3e9da03daef7d2e082152883.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/deadly-amazon-amzn-cargo-plane-163256704.html",
+      "published": "2026-09-17T16:32:56Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "other",
+      "headline": "How To Protect Yourself From The Looming AI-Stock Crash",
+      "image": "news-images/c2569ebd8c036ac5de014f5f.jpg",
+      "link": "https://www.investors.com/etfs-and-funds/etfs/ai-stock-crash-how-to-protect-yourself-from-the-looming/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-17T16:30:04Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "international",
+      "headline": "Assemblin Caverion prints \u20ac1.5B floating-rate note in bumper day for European high yield",
+      "image": "news-images/81cc9ea7b4f3bb1a64a35e4b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/assemblin-caverion-prints-1-5b-162749040.html",
+      "published": "2026-09-17T16:27:49Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Can I settle my medical bills? A guide to debt settlement.",
+      "image": "news-images/1ef16d475fe9f0e00c94d912.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/personal-loans/article/settle-medical-bills-a-guide-to-debt-settlement-111100958.html",
+      "published": "2026-09-17T11:11:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Roundtable Secures 10-Year, $1 Billion Agreement, Bringing its AI/DeFi Media Operating System to Global Scale and Profitability",
+      "image": "news-images/bceefc370abb1eb67286f4f2.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/roundtable-secures-10-1-billion-171557951.html",
+      "published": "2026-09-17T17:15:57Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Bitcoin and ethereum prices today, Thursday, September 17, 2026: Crypto prices move up following Fed's rate increase",
+      "image": "news-images/dbada3908ba6b5bd9cbe4b14.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-thursday-september-17-2026-crypto-prices-move-up-following-feds-rate-increase-114024955.html",
+      "published": "2026-09-17T11:40:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Silver price today, Thursday, September 17, 2026: Silver prices stay steady post Fed decision",
+      "image": "news-images/3e05784970eeca7b5e153614.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-thursday-september-17-2026-silver-prices-stay-steady-post-fed-decision-112308053.html",
+      "published": "2026-09-17T11:23:08Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "McDonald\u2019s CEO Admits Execution Failure as K-Shape Economy Splits Consumer Base",
+      "image": "news-images/8e8364d6fa05b7244cda4c7c.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/mcdonald-ceo-admits-execution-failure-171435977.html",
+      "published": "2026-09-17T17:14:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Goldman Reversed Its Fed Call Twice in Four Days. What an October Hike Does to Bitcoin and XRP.",
+      "image": "news-images/454c553f47e7e3a0f589328c.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/goldman-reversed-fed-call-twice-171242819.html",
+      "published": "2026-09-17T17:12:42Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Gold price today, Thursday, September 17, 2026: Gold prices relatively stable following Fed rate increase",
+      "image": "news-images/68fe9082ef87f1dc92e19425.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-thursday-september-17-2026-gold-prices-relatively-stable-following-fed-rate-increase-110852391.html",
+      "published": "2026-09-17T11:08:52Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "170-year-old whiskey brand's saga adds forced Chapter 7 bankruptcy",
+      "image": "news-images/4a6f1cd8f6ddf162110836ff.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/170-old-whiskey-brands-saga-171043884.html",
+      "published": "2026-09-17T17:10:43Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Best CD rates today, Thursday, September 17, 2026: Lock in up to 4.40% APY with a 2-year CD",
+      "image": "news-images/313a56bd54af9893005e72ae.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-thursday-september-17-2026-lock-in-up-to-440-apy-with-a-2-year-cd-100000275.html",
+      "published": "2026-09-17T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Mortgage and refinance interest rates today, Thursday, September 17, 2026: Fixed rates tick upward",
+      "image": "news-images/55fc77580dbe0a897f2eeaaa.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-thursday-september-17-2026-fixed-rates-tick-upward-100000901.html",
+      "published": "2026-09-17T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Stock Market Midday, Sept. 17: Stocks Rebound From Post Fed Sell-off, Generac soars 20%",
+      "image": "news-images/9617457855cb5ee909596bd1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-midday-sept-17-171030258.html",
+      "published": "2026-09-17T17:10:30Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Gold and the U.S. dollar: Why they often move in opposite directions",
+      "image": "news-images/ddb64b819d25687161523aa9.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-us-dollar-relationship-204112404.html",
+      "published": "2026-09-15T20:41:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Credit card application denied? Here\u2019s what to do next",
+      "image": "news-images/b88f60b15c97fef428ca52ac.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-card-application-denied-194416584.html",
+      "published": "2026-09-15T19:44:16Z",
       "sentiment": "neutral"
     }
   ]
