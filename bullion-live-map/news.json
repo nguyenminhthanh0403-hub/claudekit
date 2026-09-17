@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-17T17:36:20Z",
+  "generated_at": "2026-09-17T21:17:41Z",
   "headlines": [
     {
       "category": "other",
@@ -10,284 +10,252 @@
       "sentiment": "neutral"
     },
     {
-      "category": "federal",
-      "headline": "How does the Fed interest rate affect car loans?",
-      "image": "news-images/e1552c96464634299f7a6cfa.jpg",
-      "link": "https://finance.yahoo.com/news/fed-affects-auto-loan-rates-190622401.html",
-      "published": "2026-09-17T17:20:50Z",
+      "category": "tech",
+      "headline": "Real REMAX Group (REAX) Stock Weakness Reflects Fears of AI-Driven Market Changes",
+      "image": "news-images/022f7ee553c1226ada26ce53.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/real-remax-group-reax-stock-130724417.html",
+      "published": "2026-09-16T13:07:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "What Makes Mettler-Toledo International (MTD) an Attractive Bet?",
+      "image": "news-images/371b7fdd6759c81ead58d9a7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/makes-mettler-toledo-international-mtd-132254501.html",
+      "published": "2026-09-16T13:22:54Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Stock Market Today: Nasdaq Dwarfs Dow's Gain; This AI Chip Leader Breaks Out To All-Time High (Live Coverage)",
-      "image": "news-images/3d0f0a36f55f1321125778f0.jpg",
-      "link": "https://www.investors.com/market-trend/stock-market-today/stock-market-today-dow-jones-sp-500-nasdaq-fed-reaction-generac-nebius-bloom-energy-spacex/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-17T17:17:07Z",
-      "sentiment": "bullish"
+      "headline": "Bloom Energy Corp. (BE) Short Position Weighs on Performance Amid Small-Cap AI Rally",
+      "image": "news-images/7bffa4937e75452ec1ce6380.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bloom-energy-corp-short-position-130509545.html",
+      "published": "2026-09-16T13:05:09Z",
+      "sentiment": "bearish"
     },
     {
-      "category": "financials",
-      "headline": "Access to credit is tightening \u2014 here\u2019s what it means for your next auto loan",
-      "image": "news-images/84a17d61d63e4c8b7507b04b.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/access-credit-tightening-means-next-150515547.html",
-      "published": "2026-09-17T17:11:21Z",
+      "category": "other",
+      "headline": "Why Axon Got Slammed By Convertible: It's The Cash Flow",
+      "image": "news-images/71cf1bd465bf4fa0efdb1598.jpg",
+      "link": "https://www.investors.com/news/axon-stock-falls-convertible-bond-sp-500/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T13:20:47Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "US Stock Futures Rise as Oil Prices Retreat Ahead of Federal Reserve Decision: Dow Jones, S&P, Nasdaq, Wall Street",
+      "image": "news-images/488053b56e27f1c4ec43ab44.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/us-stock-futures-rise-oil-131200145.html",
+      "published": "2026-09-16T13:12:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Why Meta's Zuckerberg, Nvidia's Huang Say An AI Slowdown Is Not Needed",
+      "image": "news-images/10c17d4ee89940bf00c8ee0c.jpg",
+      "link": "https://www.investors.com/news/technology/meta-stock-zuckerberg-ai-safety-nvidia-anthropic/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T13:22:23Z",
       "sentiment": "neutral"
     },
     {
       "category": "healthcare",
-      "headline": "Takeda Pharmaceutical (TAK) Gets Priority Review. Can Zasocitinib Win in Psoriasis?",
-      "image": "news-images/9d0dae8e9bc5b9ce223961de.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/takeda-pharmaceutical-tak-gets-priority-170819495.html",
-      "published": "2026-09-17T17:08:19Z",
+      "headline": "Oscar Health's Big ACA Gamble Is Paying Off. Here's The Caveat.",
+      "image": "news-images/feffd14f72d82b47190ce292.jpg",
+      "link": "https://www.investors.com/news/oscar-health-stock-medical-costs-aca-investor-update/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-16T13:02:50Z",
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "Box's 2026 Outlook: AI-Driven Workflow Adoption Solidifies Enterprise Competitive Moat",
-      "image": "news-images/3d713bfd6cb4e91ff9a502f3.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/boxs-2026-outlook-ai-driven-172501129.html",
-      "published": "2026-09-17T17:25:01Z",
-      "sentiment": "neutral"
+      "category": "other",
+      "headline": "Mesa man loses $449,328 home after HOA forecloses over $977 in missed assessments \u2014 lawyers say it's not uncommon",
+      "image": "news-images/efbdeda1fee6af8fe4c7ad81.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/mesa-man-loses-449-328-132000949.html",
+      "published": "2026-09-16T13:20:00Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "other",
+      "headline": "This Dividend Stock Is Beating the Market in 2026 and Yields 2.36%",
+      "image": "news-images/7a3cce74516c82a65da150da.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/dividend-stock-beating-market-2026-130002850.html",
+      "published": "2026-09-16T13:00:02Z",
+      "sentiment": "bullish"
     },
     {
       "category": "financials",
-      "headline": "How secured auto loans work",
-      "image": "news-images/019b00a283070800a7db85e7.jpg",
-      "link": "https://finance.yahoo.com/markets/currencies/articles/secured-auto-loans-why-usually-212442450.html",
-      "published": "2026-09-17T17:05:22Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Stock market today: Dow, S&P 500, Nasdaq rise as oil slips, Fed rate hike pacifies markets' inflation worries",
-      "image": "news-images/26f90a8210a78fad2eb394ff.jpg",
-      "link": "https://finance.yahoo.com/markets/live/stock-market-today-thursday-september-17-dow-sp-500-nasdaq-oil-fed-081248626.html",
-      "published": "2026-09-17T08:12:48Z",
+      "headline": "Homebuilders Are Down for the Year, Is Wall Street in Denial?",
+      "image": "news-images/a7fab6d5cabe2edcaa5f055a.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/homebuilders-down-wall-street-denial-131000063.html",
+      "published": "2026-09-16T13:10:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "airBaltic Is Shrinking. Ryanair Is Moving In.",
-      "image": "news-images/799e74a24963ad4c95c5d560.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/airbaltic-shrinking-ryanair-moving-165823095.html",
-      "published": "2026-09-17T16:58:23Z",
+      "headline": "The Bull Case for Netflix\u2019s (NFLX) New Growth Engine",
+      "image": "news-images/1ddfeaea449f9114d3c2e7a4.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bull-case-netflix-nflx-growth-132531860.html",
+      "published": "2026-09-16T13:25:31Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Pinterest Director Benjamin Silbermann Sells 93,750 Shares for $1.8 Million",
-      "image": "news-images/dd9e5689480330dec9fecc8f.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/pinterest-director-benjamin-silbermann-sells-172001146.html",
-      "published": "2026-09-17T17:20:01Z",
+      "headline": "Lopsided Stock Market Momentum Suggests This is the Top\u2026 or the Buying Opportunity of the Century",
+      "image": "news-images/ec4207f56baa0d4901344795.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lopsided-stock-market-momentum-suggests-133002553.html",
+      "published": "2026-09-16T13:30:02Z",
       "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Aon\u2019s $17 Billion USI Deal: What Hedge Fund Sentiment Says About AON and KKR",
-      "image": "news-images/796948b7123033175ce929b3.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/aon-17-billion-usi-deal-165811093.html",
-      "published": "2026-09-17T16:58:11Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Polestar (PSNY)\u2019s US Exit Just Showed Up in its Guidance",
-      "image": "news-images/9285795662821e95a869497d.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/polestar-psny-us-exit-just-165023810.html",
-      "published": "2026-09-17T16:50:23Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Jim Cramer on Tesla (TSLA): \u201cMy Only Solution to It Is That SpaceX Has to Buy It\u201d",
-      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-tesla-tsla-only-164733818.html",
-      "published": "2026-09-17T16:47:33Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Apple (AAPL) Faces a $2.7 Billion UK Lawsuit over its App Tracking Rules",
-      "image": "news-images/922bae7d25fb671551c69336.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/apple-aapl-faces-2-7-164412973.html",
-      "published": "2026-09-17T16:44:12Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Elon Musk sends strong message to SpaceX and Tesla investors",
-      "image": "news-images/be49bffe51d486a9059d69ee.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/elon-musk-sends-strong-message-171700495.html",
-      "published": "2026-09-17T17:17:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Lululemon (LULU) Cuts its Outlook Again Just as a New CEO Walks through the Door",
-      "image": "news-images/7fb289186c26997340b6d429.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/lululemon-lulu-cuts-outlook-again-164209283.html",
-      "published": "2026-09-17T16:42:09Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "tech",
-      "headline": "AMD Leads Chip Stocks Higher Amid Sector Rebound",
-      "image": "news-images/95655e5d56702fee3f8c947d.jpg",
-      "link": "https://www.investors.com/news/technology/amd-stock-leads-chip-stocks-sox-index-higher-amid-sector-rebound/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-17T16:41:50Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "tech",
-      "headline": "Rackspace\u2019s Nvidia Partnership Sparks Early Rally, But a $2.8 Billion Debt Load Remains",
-      "image": "news-images/c8e59a8a3f8d04e7839c3547.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/rackspace-nvidia-partnership-sparks-early-163851620.html",
-      "published": "2026-09-17T16:38:51Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "tech",
-      "headline": "Meta (META) Overhauls Instagram and Facebook for Teens after its $17 Billion Settlement",
-      "image": "news-images/9b3081bece337bc550a1e74b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/meta-meta-overhauls-instagram-facebook-163514422.html",
-      "published": "2026-09-17T16:35:14Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Why Oracle Stock Jumped 6% Today on OpenAI Funding Buzz",
-      "image": "news-images/dd1925215c6702d4ee9c8032.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/why-oracle-stock-jumped-6-171651571.html",
-      "published": "2026-09-17T17:16:51Z",
-      "sentiment": "bullish"
     },
     {
       "category": "consumer",
-      "headline": "A Deadly Amazon (AMZN) Cargo Plane Crash in Miami Puts its Air Network Under Scrutiny",
-      "image": "news-images/3e9da03daef7d2e082152883.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/deadly-amazon-amzn-cargo-plane-163256704.html",
-      "published": "2026-09-17T16:32:56Z",
-      "sentiment": "bearish"
+      "headline": "Amazon, Walmart and Target Forecast: Retail Stocks Test Key Levels",
+      "image": "news-images/74b31fc24f28ce7620bbafa1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/amazon-walmart-target-forecast-retail-133115158.html",
+      "published": "2026-09-16T13:31:15Z",
+      "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "How To Protect Yourself From The Looming AI-Stock Crash",
-      "image": "news-images/c2569ebd8c036ac5de014f5f.jpg",
-      "link": "https://www.investors.com/etfs-and-funds/etfs/ai-stock-crash-how-to-protect-yourself-from-the-looming/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-17T16:30:04Z",
-      "sentiment": "bearish"
+      "category": "energy",
+      "headline": "Is DTE Energy Stock Underperforming the Dow?",
+      "image": "news-images/59e74a5cc4670ea1feabb241.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/dte-energy-stock-underperforming-dow-124602615.html",
+      "published": "2026-09-16T12:46:02Z",
+      "sentiment": "neutral"
     },
     {
-      "category": "international",
-      "headline": "Assemblin Caverion prints \u20ac1.5B floating-rate note in bumper day for European high yield",
-      "image": "news-images/81cc9ea7b4f3bb1a64a35e4b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/assemblin-caverion-prints-1-5b-162749040.html",
-      "published": "2026-09-17T16:27:49Z",
+      "category": "tech",
+      "headline": "HIVE subsidiary BUZZ HPC strikes AI infrastructure deal with ProCogia",
+      "image": "news-images/61507b3ac16766d86deee6d7.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/hive-subsidiary-buzz-hpc-strikes-132100321.html",
+      "published": "2026-09-16T13:21:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Can I settle my medical bills? A guide to debt settlement.",
-      "image": "news-images/1ef16d475fe9f0e00c94d912.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/personal-loans/article/settle-medical-bills-a-guide-to-debt-settlement-111100958.html",
-      "published": "2026-09-17T11:11:00Z",
+      "headline": "Seattle single-income mom homeschooling her kids discovers she owns $18M in one stock. What Dave Ramsey says to do next",
+      "image": "news-images/2f17465dba6265305633a214.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/seattle-single-income-mom-homeschooling-124500141.html",
+      "published": "2026-09-16T12:45:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Roundtable Secures 10-Year, $1 Billion Agreement, Bringing its AI/DeFi Media Operating System to Global Scale and Profitability",
-      "image": "news-images/bceefc370abb1eb67286f4f2.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/roundtable-secures-10-1-billion-171557951.html",
-      "published": "2026-09-17T17:15:57Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "Bitcoin and ethereum prices today, Thursday, September 17, 2026: Crypto prices move up following Fed's rate increase",
-      "image": "news-images/dbada3908ba6b5bd9cbe4b14.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-thursday-september-17-2026-crypto-prices-move-up-following-feds-rate-increase-114024955.html",
-      "published": "2026-09-17T11:40:24Z",
+      "headline": "CoStar (CSGP): Residential Strategy Unchanged Despite Persistent Market Skepticism",
+      "image": "news-images/07e1a1940356882cb077a7ba.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/costar-csgp-residential-strategy-unchanged-133542445.html",
+      "published": "2026-09-16T13:35:42Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Silver price today, Thursday, September 17, 2026: Silver prices stay steady post Fed decision",
-      "image": "news-images/3e05784970eeca7b5e153614.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-thursday-september-17-2026-silver-prices-stay-steady-post-fed-decision-112308053.html",
-      "published": "2026-09-17T11:23:08Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "McDonald\u2019s CEO Admits Execution Failure as K-Shape Economy Splits Consumer Base",
-      "image": "news-images/8e8364d6fa05b7244cda4c7c.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/mcdonald-ceo-admits-execution-failure-171435977.html",
-      "published": "2026-09-17T17:14:35Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "Goldman Reversed Its Fed Call Twice in Four Days. What an October Hike Does to Bitcoin and XRP.",
-      "image": "news-images/454c553f47e7e3a0f589328c.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/goldman-reversed-fed-call-twice-171242819.html",
-      "published": "2026-09-17T17:12:42Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Gold price today, Thursday, September 17, 2026: Gold prices relatively stable following Fed rate increase",
-      "image": "news-images/68fe9082ef87f1dc92e19425.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-thursday-september-17-2026-gold-prices-relatively-stable-following-fed-rate-increase-110852391.html",
-      "published": "2026-09-17T11:08:52Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "170-year-old whiskey brand's saga adds forced Chapter 7 bankruptcy",
-      "image": "news-images/4a6f1cd8f6ddf162110836ff.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/170-old-whiskey-brands-saga-171043884.html",
-      "published": "2026-09-17T17:10:43Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Best CD rates today, Thursday, September 17, 2026: Lock in up to 4.40% APY with a 2-year CD",
-      "image": "news-images/313a56bd54af9893005e72ae.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-thursday-september-17-2026-lock-in-up-to-440-apy-with-a-2-year-cd-100000275.html",
-      "published": "2026-09-17T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Thursday, September 17, 2026: Fixed rates tick upward",
-      "image": "news-images/55fc77580dbe0a897f2eeaaa.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-thursday-september-17-2026-fixed-rates-tick-upward-100000901.html",
-      "published": "2026-09-17T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Stock Market Midday, Sept. 17: Stocks Rebound From Post Fed Sell-off, Generac soars 20%",
-      "image": "news-images/9617457855cb5ee909596bd1.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/stock-market-midday-sept-17-171030258.html",
-      "published": "2026-09-17T17:10:30Z",
+      "headline": "Soybean Gains Extending to Wednesday Morning",
+      "image": "news-images/058688bd3728fdbad224f8fa.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/soybean-gains-extending-wednesday-morning-123944074.html",
+      "published": "2026-09-16T12:39:44Z",
       "sentiment": "bullish"
     },
     {
       "category": "other",
-      "headline": "Gold and the U.S. dollar: Why they often move in opposite directions",
-      "image": "news-images/ddb64b819d25687161523aa9.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-us-dollar-relationship-204112404.html",
-      "published": "2026-09-15T20:41:12Z",
+      "headline": "Nasdaq, Dow and S&P 500 Rise Ahead of Fed Rate Decision",
+      "image": "news-images/dd9e05b48e367d2d49693493.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-dow-p-500-rise-133759906.html",
+      "published": "2026-09-16T13:37:59Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Credit card application denied? Here\u2019s what to do next",
-      "image": "news-images/b88f60b15c97fef428ca52ac.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-card-application-denied-194416584.html",
-      "published": "2026-09-15T19:44:16Z",
+      "headline": "Prediction: This Is What a $5,000 Investment in Broadcom Will Be Worth by 2028",
+      "image": "news-images/2806be9c1bef929e8cc2c028.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/prediction-5-000-investment-broadcom-130800571.html",
+      "published": "2026-09-16T13:08:00Z",
       "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "NVR Stock: Is NVR Underperforming the Consumer Cyclical Sector?",
+      "image": "news-images/aeccc80b7376df6301822df5.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nvr-stock-nvr-underperforming-consumer-133902769.html",
+      "published": "2026-09-16T13:39:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "LyondellBasell (LYB) Retraces Amid Shifting Commodity Sentiment",
+      "image": "news-images/65222729b25d1d69e0f67e27.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lyondellbasell-lyb-retraces-amid-shifting-123131175.html",
+      "published": "2026-09-16T12:31:31Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Alphabet (GOOG) Surges 24% as Revenue Growth Soars \u2014 But\u00a0Is\u00a0$190 Billion in Capex Too Much?",
+      "image": "news-images/402855a6022d8887e8b01d50.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/alphabet-goog-surges-24-revenue-123012360.html",
+      "published": "2026-09-16T12:30:12Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Evolution Petroleum Corporation Q4 2026 Earnings Call Summary",
+      "image": "news-images/5c9409e62318bfb0669d2b5b.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/evolution-petroleum-corporation-q4-2026-123000683.html",
+      "published": "2026-09-16T12:30:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Rate Hike Shock: Can the S&P Hold?",
+      "image": "news-images/3af73545986fd0cbdf0e8947.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/rate-hike-shock-p-hold-131112069.html",
+      "published": "2026-09-16T13:11:12Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Liberty Capital (GLIBK) Acquires Quintillion in $360M Synergistic Deal",
+      "image": "news-images/ba41ed98aa29500f171ee72b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/liberty-capital-glibk-acquires-quintillion-122805699.html",
+      "published": "2026-09-16T12:28:05Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Jim Cramer Says Brinker (EAT) \u201cNever Fails to Wow Me\u201d",
+      "image": "news-images/c49542333a309e7872e1ccc7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-says-brinker-eat-134344027.html",
+      "published": "2026-09-16T13:43:44Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "Veralto Stock: Is VLTO Underperforming the Industrial Sector?",
+      "image": "news-images/cd97985635ae42c138edea08.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/veralto-stock-vlto-underperforming-industrial-122504138.html",
+      "published": "2026-09-16T12:25:04Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "Walmart partners with SCAN Health on Medicare Advantage plans",
+      "image": "news-images/a1d0cffecbade3b4b39ee2b6.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/walmart-partners-scan-health-medicare-131602448.html",
+      "published": "2026-09-16T13:16:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "US Import Prices Rise 0.7% in August, Exceeding Expectations",
+      "image": "news-images/ef83112941974e0e702cf7da.jpg",
+      "link": "https://finance.yahoo.com/economy/articles/us-import-prices-rise-0-131453604.html",
+      "published": "2026-09-16T13:14:53Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Think Nvidia Is Overpriced? The Irony Keeps Me Buying Again and Again",
+      "image": "news-images/1873be645f8681f82a23bea4.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/think-nvidia-overpriced-irony-keeps-131532848.html",
+      "published": "2026-09-16T13:15:32Z",
+      "sentiment": "bullish"
     }
   ]
 }
