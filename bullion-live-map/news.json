@@ -1,316 +1,268 @@
 {
-  "generated_at": "2026-09-18T19:33:58Z",
+  "generated_at": "2026-09-18T22:32:13Z",
   "headlines": [
     {
       "category": "other",
-      "headline": "46% of American workers are skipping retirement savings to cover bills \u2014 here's the long-term cost",
-      "image": "news-images/2fabc9997a682a164512a000.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/46-american-workers-skipping-retirement-093000061.html",
-      "published": "2026-09-17T09:30:00Z",
+      "headline": "Did NetApp Borrow Its Record Quarter From The Rest Of The Year?",
+      "image": "news-images/5beba1ce4c2302893216c6e0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/did-netapp-borrow-record-quarter-150855033.html",
+      "published": "2026-09-17T15:08:55Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Worker Tensions in Taiwan Are Rising at Micron. What This Means for MU Stock.",
+      "image": "news-images/a72c8b7e6c89e555c9ed5f6d.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/worker-tensions-taiwan-rising-micron-151005678.html",
+      "published": "2026-09-17T15:10:05Z",
       "sentiment": "neutral"
     },
     {
       "category": "financials",
-      "headline": "Goldman Sachs Sees More Upside in Gasoline as Diesel Crunch Deepens",
-      "image": "news-images/ff6bfd7709379b638d9f5060.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/goldman-sachs-sees-more-upside-093000655.html",
-      "published": "2026-09-17T09:30:00Z",
+      "headline": "Wall Street May Have Overpriced the Fed Rate Hike\u2019s Impact on Citigroup Stock Spreads",
+      "image": "news-images/9950d1648779f1a27a76b851.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/wall-street-may-overpriced-fed-150657658.html",
+      "published": "2026-09-17T15:06:57Z",
       "sentiment": "neutral"
     },
     {
       "category": "energy",
-      "headline": "Saudi Arabia Has Another Option to Get Its Oil Out",
-      "image": "news-images/acfcdea8d8cb78e3bbfefc73.jpg",
-      "link": "https://www.wsj.com/world/middle-east/saudi-arabia-has-another-option-to-get-its-oil-out-7ef2a9da?siteid=yhoof2&amp;yptr=yahoo",
-      "published": "2026-09-17T09:30:00Z",
+      "headline": "Stocks Push Higher on Lower Crude Prices and Bond Yields",
+      "image": "news-images/4c8a971034185ae479dffb8e.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/stocks-push-higher-lower-crude-151213645.html",
+      "published": "2026-09-17T15:12:13Z",
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "AXIS Capital (AXS) Adds A High-Performing Excess Liability Book",
-      "image": "news-images/180a99558a05d5f5aea6d747.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/axis-capital-axs-adds-high-093627741.html",
-      "published": "2026-09-17T09:36:27Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Builders FirstSource Stock: Is BLDR Underperforming the Industrials Sector?",
-      "image": "news-images/4250f418bafae06ad016a6e3.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/builders-firstsource-stock-bldr-underperforming-093740455.html",
-      "published": "2026-09-17T09:37:40Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Leidos Stock Underperforming the Dow?",
-      "image": "news-images/67b5395357689654dc130144.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/leidos-stock-underperforming-dow-094411865.html",
-      "published": "2026-09-17T09:44:11Z",
+      "category": "financials",
+      "headline": "Second-chance car loans: What they are and how to get one",
+      "image": "news-images/3a04e0b517cf291e41dc0fd2.jpg",
+      "link": "https://finance.yahoo.com/markets/currencies/articles/second-chance-car-loans-one-210834465.html",
+      "published": "2026-09-17T15:02:40Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Figure (FIGR) Bets AI Agents Can Rescue Trillions in Stalled Home Loans",
-      "image": "news-images/9c7597a8b54eb7913c34695e.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/figure-figr-bets-ai-agents-092850874.html",
-      "published": "2026-09-17T09:28:50Z",
-      "sentiment": "neutral"
+      "headline": "Michael Burry Disclosed Put Options Worth an Estimated $1.1 Billion Against Nvidia and Palantir Before Closing His Hedge Fund. Was That Bearish Bet Ahead of Its Time?",
+      "image": "news-images/864f69ae300947f3cda25261.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/michael-burry-disclosed-put-options-151000579.html",
+      "published": "2026-09-17T15:10:00Z",
+      "sentiment": "bullish"
     },
     {
       "category": "other",
-      "headline": "Staples\u2019 CMO on introducing a Hard Button amid bigger B2B push",
-      "image": "news-images/8f04927baeb7cc31948b2d2a.jpg",
-      "link": "https://finance.yahoo.com/media-advertising/articles/staples-cmo-introducing-hard-button-093000782.html",
-      "published": "2026-09-17T09:30:00Z",
+      "headline": "Is Huntington Bancshares Stock Underperforming the S&P 500?",
+      "image": "news-images/ac8b7e103341e1cfbfc96f05.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/huntington-bancshares-stock-underperforming-p-150310108.html",
+      "published": "2026-09-17T15:03:10Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "international",
+      "headline": "VinFast (VFS)-Backed Taxi Firm GSM Plots a US and European Push ahead of its Hong Kong IPO",
+      "image": "news-images/3dcbe510b3a7a47adb54bdfc.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/vinfast-vfs-backed-taxi-firm-150001467.html",
+      "published": "2026-09-17T15:00:01Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "A Philippine Telecom\u2019s AI Makeover Tests UiPath\u2019s (PATH) Pitch",
-      "image": "news-images/19f8717d10c7b7f55e5ab846.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/philippine-telecom-ai-makeover-tests-093943850.html",
-      "published": "2026-09-17T09:39:43Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Genuine Parts Underperforming the Nasdaq?",
-      "image": "news-images/153b2b8b25aabbef24de3711.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/genuine-parts-underperforming-nasdaq-094824193.html",
-      "published": "2026-09-17T09:48:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "It\u2019s costing you up to $18,000 to have your adult kid live at home. What to do now to protect your finances",
-      "image": "news-images/6cd6523f13a8b66a5188aab8.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/costing-18-000-adult-kid-094500621.html",
-      "published": "2026-09-17T09:45:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "JPMorgan CEO Jamie Dimon says small businesses are experiencing a 'mini boom'",
-      "image": "news-images/12562b9d7ea396ae2cd3ab50.jpg",
-      "link": "https://finance.yahoo.com/markets/article/jpmorgan-ceo-jamie-dimon-says-small-businesses-are-experiencing-a-mini-boom-201551606.html",
-      "published": "2026-09-16T20:15:51Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Bilfinger Shares Fall 20% on Lowered Outlook, Job Cuts",
-      "image": "news-images/ffef21c8a55375e5934dd5ac.jpg",
-      "link": "https://www.wsj.com/business/earnings/bilfinger-shares-fall-20-on-lowered-outlook-job-cuts-c843f681?siteid=yhoof2&amp;yptr=yahoo",
-      "published": "2026-09-17T09:37:00Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "financials",
-      "headline": "\u2018Starting at rock bottom\u2019: Woman filed for bankruptcy at 24 with $65,000 in debt. How she made it back from the brink",
-      "image": "news-images/4eff016986ab3298417ad904.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/starting-rock-bottom-woman-filed-092500033.html",
-      "published": "2026-09-17T09:25:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Invitation Homes Stock Underperforming the S&P 500?",
-      "image": "news-images/cf5aaf5daf30703111715f94.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/invitation-homes-stock-underperforming-p-092714807.html",
-      "published": "2026-09-17T09:27:14Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "South Bow (SOBO): Pipeline Operator Cashes In On Global Crude Chaos",
-      "image": "news-images/f93d413888b437d0962580e5.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/south-bow-sobo-pipeline-operator-094656675.html",
-      "published": "2026-09-17T09:46:56Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Is Bank of New York Mellon Stock Outperforming the Dow?",
-      "image": "news-images/696a36a4a9b7c247183a6875.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/bank-york-mellon-stock-outperforming-094830405.html",
-      "published": "2026-09-17T09:48:30Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Mark Cuban Says Meta and Google Could Be Funding Their AI Future With Anti-Tech Content: 'Interesting to Watch the Irony\u2026'",
-      "image": "news-images/624b81255e0f8bdf95e2f6be.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/mark-cuban-says-meta-google-094510665.html",
-      "published": "2026-09-17T09:45:10Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Silicon Labs (SLAB) Swung to a Non-GAAP Profit, but Wall Street Hesitates",
-      "image": "news-images/5753f20f37a221a291245d0f.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/silicon-labs-slab-swung-non-095036143.html",
-      "published": "2026-09-17T09:50:36Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Why your cell phone bill is getting so expensive \u2014 and how that helped convince the Fed to raise rates",
-      "image": "news-images/94575cb43f2be800f21dd940.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/article/why-your-cell-phone-bill-is-getting-so-expensive--and-how-that-helped-convince-the-fed-to-raise-rates-100000440.html",
-      "published": "2026-09-17T10:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Ball Corporation Stock: Is BALL Outperforming the Consumer Discretionary Sector?",
-      "image": "news-images/4bfa23549ec20510e8e531f4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/ball-corporation-stock-ball-outperforming-091235618.html",
-      "published": "2026-09-17T09:12:35Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How Is Live Nation Entertainment\u2019s Stock Performance Compared to Other Entertainment Stocks",
-      "image": "news-images/36693ae1ae3a93728d2997d4.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/live-nation-entertainment-stock-performance-090619228.html",
-      "published": "2026-09-17T09:06:19Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "The Crypto Bear Market Is Ending. I Predict These 3 Coins Will Be Worth Buying and Holding for at Least 3 Years",
-      "image": "news-images/3b49c3d37b7c4904cf0caf1b.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/crypto-bear-market-ending-predict-092900431.html",
-      "published": "2026-09-17T09:29:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "JPMorgan CEO Jamie Dimon: 'It's not clear to me we've slayed inflation'",
-      "image": "news-images/ac8e5d69649a542eb282282b.jpg",
-      "link": "https://finance.yahoo.com/markets/article/jpmorgan-ceo-jamie-dimon-its-not-clear-to-me-weve-slayed-inflation-210823303.html",
-      "published": "2026-09-16T21:08:23Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "I'm 65 and a High Earner. Is Using My Roth IRA for Home Renovations a Mistake?",
-      "image": "news-images/d2ffea4b51821d70063b4b37.jpg",
-      "link": "https://finance.yahoo.com/markets/options/articles/im-65-high-earner-dont-135927460.html",
-      "published": "2026-09-17T09:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Warning to US boomers: You are now at serious fraud risk once you pay off your home. Do this now to protect yourself",
-      "image": "news-images/709fe85a5bb425b340e05741.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/warning-us-boomers-now-serious-101500316.html",
-      "published": "2026-09-17T10:15:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Axon Stock Underperforming the Nasdaq?",
-      "image": "news-images/220ebbcfb124701d9b32f1fa.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/axon-stock-underperforming-nasdaq-085804557.html",
-      "published": "2026-09-17T08:58:04Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Why Is Generac Stock Soaring On Thursday?",
-      "image": "news-images/65d63b379c35065279a211be.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/why-generac-stock-soaring-thursday-092830258.html",
-      "published": "2026-09-17T09:28:30Z",
+      "headline": "Talen Energy (TLN) Gains as Regulatory Progress Enhances Data Center Framework",
+      "image": "news-images/78a1c8442b9850cec2c39f27.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/talen-energy-tln-gains-regulatory-145925718.html",
+      "published": "2026-09-17T14:59:25Z",
       "sentiment": "bullish"
     },
     {
       "category": "tech",
-      "headline": "How Is Seagate Technology Stock Performance Compared to Other AI Infrastructure Stocks",
-      "image": "news-images/94a2d8a1fef15c61eba05f7c.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/seagate-technology-stock-performance-compared-101749842.html",
-      "published": "2026-09-17T10:17:49Z",
+      "headline": "Meta Stock Climbs On Muse AI Excitement. Here's The Next Potential Catalyst.",
+      "image": "news-images/1a159d5674873adfff811bc2.jpg",
+      "link": "https://www.investors.com/news/technology/meta-stock-connect-2026-preview-muse-ai/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-17T15:14:28Z",
       "sentiment": "neutral"
     },
     {
-      "category": "other",
-      "headline": "'Stay working, girlfriend': Suze Orman says the final few years on the job are worth far more than most people realize",
-      "image": "news-images/68cb4e3e804871703627bdc1.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/stay-working-girlfriend-suze-orman-102000906.html",
-      "published": "2026-09-17T10:20:00Z",
+      "category": "crypto",
+      "headline": "ETF Outflows Clash With Crypto Traders\u2019 Ethereum Conviction",
+      "image": "news-images/d84b1ab1970f3391a16f46e0.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/etf-outflows-clash-crypto-traders-150858417.html",
+      "published": "2026-09-17T15:08:58Z",
       "sentiment": "neutral"
     },
     {
       "category": "energy",
-      "headline": "Alberta Plans New Royalty Incentives to Spur Oil Production",
-      "image": "news-images/3197e296f203eeaa4cae0b9f.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/alberta-plans-royalty-incentives-spur-103000022.html",
-      "published": "2026-09-17T10:30:00Z",
+      "headline": "Ryanair (RYAAY) Slashes its Winter Flight Plans to Dodge a Costly Oil Spike",
+      "image": "news-images/11b2dd3cc5356d7ed1dbfc93.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/ryanair-ryaay-slashes-winter-flight-145505604.html",
+      "published": "2026-09-17T14:55:05Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Dangote IPO tests Nigeria's fintech infrastructure as investor demand overwhelms platforms",
-      "image": "news-images/033b87a79a1379a09db30773.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dangote-ipo-tests-nigerias-fintech-103122716.html",
-      "published": "2026-09-17T10:31:22Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "ECB's Makhlouf on Inflation, Economy, Rates",
-      "image": "news-images/898a73f9f7794e774a4bb0b9.jpg",
-      "link": "https://finance.yahoo.com/video/ecbs-makhlouf-inflation-economy-rates-094452785.html",
-      "published": "2026-09-17T09:44:52Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Federal Reserve interest rate hike may trigger another brutal move for US Treasury yields",
-      "image": "news-images/ef99650ec6203db51f9cbb68.jpg",
-      "link": "https://finance.yahoo.com/economy/article/federal-reserve-interest-rate-hike-may-trigger-another-brutal-move-for-us-treasury-yields-103135302.html",
-      "published": "2026-09-17T10:31:35Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "U.S. Stock Futures Rally as Bond Yields Fall on Fed\u2019s Inflation Resolve",
-      "image": "news-images/220ebbcfb124701d9b32f1fa.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/u-stock-futures-rally-bond-103249165.html",
-      "published": "2026-09-17T10:32:49Z",
+      "headline": "Broadcom CEO Hock Tan Says He Isn\u2019t Worried \u2013 \u2018No, Not in the Least\u2019 \u2013 About AVGO as AI Extinction Fears Rattle Stocks",
+      "image": "news-images/647339902e12d11eb1adcf4b.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/broadcom-ceo-hock-tan-says-145433255.html",
+      "published": "2026-09-17T14:54:33Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Worried $200K won\u2019t last through retirement? Here\u2019s why you may never run out of cash \u2014 if you make this move now",
-      "image": "news-images/771215c9d4080dbde534a239.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/worried-200k-won-t-last-103500964.html",
-      "published": "2026-09-17T10:35:00Z",
+      "headline": "Should I buy a new or used car? Here\u2019s how to decide",
+      "image": "news-images/a11674dafb42ccf90b9d8424.jpg",
+      "link": "https://finance.yahoo.com/deals-and-buying-guides/articles/buy-used-car-181444914.html",
+      "published": "2026-09-17T14:53:52Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Shaq moved his dad from a $60K Army salary to $500K a year \u2014 and gave his mom $750K. Here's how it's legal",
-      "image": "news-images/aa70241e4a39cb90ed06ca82.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/shaq-moved-dad-60k-army-103500420.html",
-      "published": "2026-09-17T10:35:00Z",
+      "headline": "Make This Trade Now That the Fed Has Hiked Rates",
+      "image": "news-images/2f56f811025a532bd3d4ea4e.jpg",
+      "link": "https://finance.yahoo.com/markets/currencies/articles/trade-now-fed-hiked-rates-151754223.html",
+      "published": "2026-09-17T15:17:54Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Adaptive raises $30m in funding for agentic construction accounting",
+      "image": "news-images/e939c9c68a9454bd67cc101f.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/adaptive-raises-30m-funding-agentic-150902252.html",
+      "published": "2026-09-17T15:09:02Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "What\u2019s the average car loan length?",
+      "image": "news-images/c298bbe5d1d8b98b519cfc0c.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/long-car-loan-163621954.html",
+      "published": "2026-09-17T14:50:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Strong Execution Strengthens\u00a0Macerich\u00a0(MAC) in Q2",
+      "image": "news-images/2d8b7e9d38391f0f99cd82df.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/strong-execution-strengthens-macerich-mac-144814109.html",
+      "published": "2026-09-17T14:48:14Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Starbucks (SBUX) Wins Big in Court, but One Finding Still Sticks",
+      "image": "news-images/68fac673abfb5ef01d149dc9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/starbucks-sbux-wins-big-court-144721274.html",
+      "published": "2026-09-17T14:47:21Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Novartis (NVS) and Ionis (IONS)\u2019 Big Cholesterol Bet Comes Up Short in Late-Stage Trial",
+      "image": "news-images/96a7246df95da6a3b82e968e.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/novartis-nvs-ionis-ions-big-152119015.html",
+      "published": "2026-09-17T15:21:19Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Chuck E. Cheese rival hits new low as customers pull back",
+      "image": "news-images/ec13e85c23c9d87fa5b8d494.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/chuck-e-cheese-rival-hits-150700860.html",
+      "published": "2026-09-17T15:07:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Luxembourg court halts Ardagh move to sell metal packaging unit",
-      "image": "news-images/6a5223cea19d956dddec0848.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/luxembourg-court-halts-ardagh-move-092612084.html",
-      "published": "2026-09-17T09:26:12Z",
+      "headline": "How Is PTC Inc.'s Stock Performance Compared to Other Tech-Software Stocks?",
+      "image": "news-images/c29bdfbbd3705f9e6c4b9875.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/ptc-inc-stock-performance-compared-144340989.html",
+      "published": "2026-09-17T14:43:40Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "Boeing (BA)\u2019s $8.4 Billion Supplier Buyback Keeps Turning Up New Costs",
+      "image": "news-images/6ea11b708b10d004708d5ff5.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/boeing-ba-8-4-billion-144356015.html",
+      "published": "2026-09-17T14:43:56Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Morning Bid: A timely hike",
-      "image": "news-images/ed278447c3f2972b1d42a487.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/morning-bid-timely-hike-103542140.html",
-      "published": "2026-09-17T10:35:42Z",
+      "headline": "How Is Warner Bros. Discovery's Stock Performance Compared to Other Entertainment Stocks",
+      "image": "news-images/a48a838c009aa222448f3c97.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/warner-bros-discoverys-stock-performance-144029291.html",
+      "published": "2026-09-17T14:40:29Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "I Sold Micron Before Q2 Earnings and It Fell 23%. Here\u2019s Why I'm Buying Before the Next Report.",
+      "image": "news-images/a72c8b7e6c89e555c9ed5f6d.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/sold-micron-q2-earnings-fell-143843816.html",
+      "published": "2026-09-17T14:38:43Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "The AI Boom Has a Power Problem. These 3 Utilities Are Getting Paid to Solve It.",
+      "image": "news-images/40545e38663ef92758b3b76d.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/ai-boom-power-problem-3-150644881.html",
+      "published": "2026-09-17T15:06:44Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Southwest (LUV) Finally Joins the Lounge Business it Long Rejected",
+      "image": "news-images/01a92289af675cee7ccddcdf.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/southwest-luv-finally-joins-lounge-143820941.html",
+      "published": "2026-09-17T14:38:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Average auto loan interest rates by credit score in 2026",
+      "image": "news-images/d70c6dae3b1d44b8904054d0.jpg",
+      "link": "https://finance.yahoo.com/news/average-car-loan-interest-rates-212521067.html",
+      "published": "2026-09-17T15:26:52Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Truckload carriers: Capacity exodus growing, not slowing",
+      "image": "news-images/6724c8ef16041297b3fa61ca.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/truckload-carriers-capacity-exodus-growing-143616028.html",
+      "published": "2026-09-17T14:36:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Medtronic (MDT) Raises its Outlook Again as Heart Device Demand Keeps Climbing",
+      "image": "news-images/16ab2d1981182b21389b816a.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/medtronic-mdt-raises-outlook-again-143459144.html",
+      "published": "2026-09-17T14:34:59Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "JEPI and JEPQ Yield Way More Than SCHD, but SCHD Could Produce More Passive Income Over the Long Term. Here's Why.",
+      "image": "news-images/0a507d709e6254683a478974.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/jepi-jepq-yield-way-more-150500652.html",
+      "published": "2026-09-17T15:05:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "How to save on auto loans as the federal funds rate changes",
+      "image": "news-images/b705e2857e8af18ad77fa355.jpg",
+      "link": "https://finance.yahoo.com/news/save-auto-loans-federal-funds-220313700.html",
+      "published": "2026-09-17T14:33:54Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "crypto",
+      "headline": "Ethereum Price Prediction: $2,400 Bounce Keeps $3,300 in Play",
+      "image": "news-images/442e2ab8b588c77005568436.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/ethereum-price-prediction-2-400-143354402.html",
+      "published": "2026-09-17T14:33:54Z",
       "sentiment": "neutral"
     },
     {
@@ -319,6 +271,54 @@
       "image": "news-images/1ef16d475fe9f0e00c94d912.jpg",
       "link": "https://finance.yahoo.com/personal-finance/personal-loans/article/settle-medical-bills-a-guide-to-debt-settlement-111100958.html",
       "published": "2026-09-17T11:11:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "Medicare changes coming in 2027: What to know before open enrollment",
+      "image": "news-images/73f180d1ee420f34779440c5.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/medicare-changes-coming-in-2027-what-to-know-before-open-enrollment-175500182.html",
+      "published": "2026-09-17T17:55:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Man, 31, Wants to Borrow $200K to Open Laundromat \u2014 Dave Ramsey Says You\u2019ve Been Lied To. \u2018It\u2019s Not a Passive Income\u2019",
+      "image": "news-images/665f3f37a72be25e8e3eb21e.jpg",
+      "link": "https://finance.yahoo.com/small-business/articles/man-31-wants-borrow-200k-150544463.html",
+      "published": "2026-09-17T15:05:44Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Mortgage preapproval vs. prequalification: Which should you choose?",
+      "image": "news-images/d7a4235d2e57b5a4540ad9a1.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-preapproval-vs-prequalification-182927362.html",
+      "published": "2026-09-17T18:29:27Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "$10,000 in a high-yield savings account or $10,000 in a CD: Which one will earn more in one year?",
+      "image": "news-images/93f6e5ec7a56b029ee082962.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/10000-high-yield-savings-account-vs-cd-earnings-one-year-211941165.html",
+      "published": "2026-09-17T21:19:41Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "How Large Does Your Portfolio Need to Be to Generate $10,600 a Month?",
+      "image": "news-images/8a26607e954252ad6c9b1183.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/large-does-portfolio-generate-10-150525404.html",
+      "published": "2026-09-17T15:05:25Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "How to compare credit cards before you apply",
+      "image": "news-images/a2435cf667ae9175814f780a.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/how-to-compare-credit-cards-213141307.html",
+      "published": "2026-09-17T21:31:41Z",
       "sentiment": "neutral"
     }
   ]
