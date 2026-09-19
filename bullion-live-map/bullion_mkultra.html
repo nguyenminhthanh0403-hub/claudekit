@@ -468,16 +468,14 @@
     color: var(--gold-dim); font-weight: 700; margin: 2px 0 0;
   }
 
-  /* ── Persona orb: narration-persona indicator + click/keyboard target,
-     centred at the origin of the orbital sphere — the same point every node
-     orbits, like the sun in a solar system — instead of a screen-corner
-     toggle button. Deliberately not connected to any node by a link/tube.
-     A child of #stage now (not a body-level fixed sibling) so it rides
-     along automatically when #stage itself shifts on panel-open, and its
-     centring lines up with the real glowing sphere the Renderer draws at
-     the WebGL scene's origin (see Renderer's sunMesh/setOrbState) — camera
-     panning is disabled (controls.enablePan = false) so that origin always
-     projects to dead-centre of the canvas, whatever the camera angle. ── */
+  /* ── Persona orb: narration-persona indicator + click/keyboard target.
+     Always docked in the bottom-right corner (see .orb-docked below) —
+     previously centred over the WebGL "sun" mesh at the scene origin while
+     on the Causal Link tab, but that put it front-and-center the instant
+     Causal Link became the default landing tab; moved permanently to the
+     corner so it never competes with the map. The sun mesh itself (see
+     Renderer's sunMesh/setOrbState) still renders and still recolors per
+     persona — it's just no longer glued to this clickable DOM overlay. ── */
   #persona-orb {
     position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%);
     z-index: 8;
@@ -505,11 +503,11 @@
   }
   #persona-orb.idle .orb-core { animation: orbBreathe 3.6s ease-in-out infinite; }
   @keyframes orbBreathe {
-    /* 0.3 sits a touch below NODE_BASE_OPACITY (0.4) — the orb reads as
-       slightly more translucent than a resting map node, glowing softly
-       in the persona color as it breathes. */
-    0%, 100% { transform: scale(1);    opacity: 0.3;  box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 10px 1px var(--orb-glow, transparent); }
-    50%      { transform: scale(1.12); opacity: 0.55; box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 22px 6px var(--orb-glow, transparent); }
+    /* Dimmer than the orb's original centred-on-map treatment — now that it
+       always sits docked over page content in the corner, it should read as
+       a quiet background affordance at rest, not compete for attention. */
+    0%, 100% { transform: scale(1);    opacity: 0.15; box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 8px 1px var(--orb-glow, transparent); }
+    50%      { transform: scale(1.12); opacity: 0.32; box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 16px 4px var(--orb-glow, transparent); }
   }
   #persona-orb.active .orb-core { opacity: 1; }
   #persona-orb:hover .orb-core,
@@ -521,6 +519,14 @@
     100% { transform: scale(1);    box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 transparent, 0 0 14px 2px var(--orb-glow, transparent); }
   }
   #persona-orb.nudge .orb-core { animation: orbNudgePulse 2s ease-out 3; }
+  /* nudge's box-shadow-only animation otherwise replaces (not layers on top
+     of) idle's opacity/scale breathe — the orb would sit at full opacity
+     for the whole nudge period (until the visitor interacts with it or
+     narration plays), undercutting the dimmer resting look above. Run both:
+     orbBreathe still owns opacity/transform, orbNudgePulse still owns the
+     gold pulse ring on box-shadow (later-listed animation wins ties on a
+     shared property, so the pulse ring stays visible). */
+  #persona-orb.idle.nudge .orb-core { animation: orbBreathe 3.6s ease-in-out infinite, orbNudgePulse 2s ease-out 3; }
   @keyframes orbNudgePulse {
     0%   { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 0 rgba(212,164,65,0.55), 0 0 14px 2px var(--orb-glow, transparent); }
     70%  { box-shadow: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 8px rgba(212,164,65,0), 0 0 14px 2px var(--orb-glow, transparent); }
@@ -644,9 +650,8 @@
     #app.panel-open #stage { transform: translateY(-16vh); }
     /* Keep the caption above the bottom sheet instead of buried under it */
     #app.panel-open #narration-caption { bottom: calc(62vh + 12px); max-width: 92vw; }
-    /* Only the docked (board-tab) orb needs to dodge the bottom sheet — the
-       centred 3D-stage orb never coexists with it (#stage is hidden while
-       the sheet's board tab is active). */
+    /* The orb is always docked now, so it always needs to dodge the bottom
+       sheet on mobile, on every tab, not just when the board tab is active. */
     #detail-panel.open ~ #persona-orb.orb-docked { transform: translateY(calc(-62vh - 12px)); }
   }
 
@@ -3017,17 +3022,24 @@ const Renderer = (function () {
     meshList.forEach(m => {
       const sel = m.userData.id === id;      // the actual clicked/hovered node
       const dim = !keep.has(m.userData.id);
+      const neighbor = !sel && !dim;         // connected to the clicked node, but not it
       // Selected orb goes fully opaque; neighbours stay translucent (base);
       // everything else dims. This is what makes a clicked node visibly pop.
       m.material.opacity = dim ? NODE_DIM_OPACITY : (sel ? 1 : NODE_BASE_OPACITY);
       m.userData.focusDim = dim; // read by updateHubPulse() to also fade a dimmed hub's emissive/glow
-      m.userData.glowBaseOpacity = dim ? 0.1 : (sel ? 0.85 : 0.5);
-      // Highlight the selected node with an emissive lift + scale-up. Hubs keep
-      // their own pulse-driven emissive (updateHubPulse owns it), so only touch
-      // emissive on non-hubs; scale applies to both and reads clearly either way.
+      m.userData.glowBaseOpacity = dim ? 0.1 : (sel ? 0.85 : (neighbor ? 0.7 : 0.5));
+      // Highlight the selected node with a strong emissive lift + scale-up.
+      // Neighbours get a softer emissive glow of their own (no scale-up, so
+      // the clicked node still reads as the one you picked) instead of just
+      // sitting at resting opacity like everything else that isn't dimmed.
+      // Hubs keep their own pulse-driven emissive (updateHubPulse owns it,
+      // fed by glowBaseOpacity above), so only touch emissive on non-hubs.
       if (sel) {
         if (!m.userData.isHub) { m.material.emissive.copy(m.material.color); m.material.emissiveIntensity = 0.75; }
         m.scale.setScalar(HIGHLIGHT_SCALE);
+      } else if (neighbor) {
+        if (!m.userData.isHub) { m.material.emissive.copy(m.material.color); m.material.emissiveIntensity = 0.35; }
+        m.scale.setScalar(1);
       } else {
         if (!m.userData.isHub) { m.material.emissive.setHex(0x000000); m.material.emissiveIntensity = 0; }
         m.scale.setScalar(1);
@@ -3901,15 +3913,13 @@ function showView(which) {
     el.classList.toggle('active', active);
     el.setAttribute('aria-selected', String(active));
   }
-  // The persona orb normally lives centred inside #stage (the solar-system
-  // "sun" position), but #stage goes display:none off the 3D view, which
-  // would take the orb down with it. Reparent it to <body> and dock it in
-  // the corner (same fallback the 2D map uses) so the narration toggle
-  // stays reachable while browsing any other tab/sub-view.
+  // The persona orb is always docked in the bottom-right corner now (see the
+  // CSS comment above #persona-orb) — always a child of <body>, on every
+  // tab, not just the fallback for non-3D views it used to be.
   const orb = document.getElementById('persona-orb');
   if (orb) {
-    orb.classList.toggle('orb-docked', !showCausal3d);
-    (showCausal3d ? stageEl : document.body).appendChild(orb);
+    orb.classList.add('orb-docked');
+    document.body.appendChild(orb);
   }
   // The 3D canvas sizes itself from #stage; while hidden it can read 0 width,
   // so re-fit it the moment we come back to the map (redraw() no-ops if the
