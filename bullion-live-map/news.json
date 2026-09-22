@@ -1,86 +1,6 @@
 {
-  "generated_at": "2026-09-21T22:33:39Z",
+  "generated_at": "2026-09-22T17:37:02Z",
   "headlines": [
-    {
-      "category": "tech",
-      "headline": "Jim Cramer sends strong signal to Apple stock investors",
-      "image": "news-images/e475a4a501e14dbedb76007b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/jim-cramer-sends-strong-signal-163300406.html",
-      "published": "2026-09-20T16:33:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "Dear Tesla Stock Fans, Mark Your Calendars for September 30",
-      "image": "news-images/8abe94984e6a8032acee6039.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dear-tesla-stock-fans-mark-140003840.html",
-      "published": "2026-09-20T14:00:03Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "The 11 S&P 500 Sectors Are Fading Quickly. Protect Yourself Against a Stock Market Crash Now.",
-      "image": "news-images/a267d790de2ba8736a439f77.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/11-p-500-sectors-fading-140003554.html",
-      "published": "2026-09-20T14:00:03Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "Like father, like son: David Ellison considers Nashville alongside Austin as future home for Paramount",
-      "image": "news-images/bd779becfc37c13e2952d5c1.jpg",
-      "link": "https://finance.yahoo.com/media-advertising/articles/father-son-david-ellison-considers-140000496.html",
-      "published": "2026-09-20T14:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "AVAX Eyes 90% Price Rally As Wall Street Tests Avalanche for 24/7 Tokenized Trading",
-      "image": "news-images/ddc6221fa7a8f27df4ef1ddc.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/avax-eyes-90-price-rally-140455182.html",
-      "published": "2026-09-20T14:04:55Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "consumer",
-      "headline": "Burger chain cancels breakfast at hundreds of restaurants",
-      "image": "news-images/de782745a475182b28d5a736.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/fast-food-giant-cancels-breakfast-041519870.html",
-      "published": "2026-09-21T04:15:19Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Don\u2019t even think about retiring if this is you in 2026 \u2014 5 red flags to watch (especially with Trump in the White House)",
-      "image": "news-images/76f6f7cafc5b75f95abdb965.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/don-t-even-think-retiring-141500099.html",
-      "published": "2026-09-20T14:15:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Nebius\u2019s Price Hike Suggests Michael Burry Made a Mistake and Is Shorting the Best Neocloud Stock",
-      "image": "news-images/9697417b3badfd5cfccc6231.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/nebius-price-hike-suggests-michael-142209026.html",
-      "published": "2026-09-20T14:22:09Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "How the 3M Stock Turnaround Is Happening Faster Than Expected",
-      "image": "news-images/23736ecdb87c72c37e803522.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/3m-stock-turnaround-happening-faster-131505697.html",
-      "published": "2026-09-20T13:15:05Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Domino's Pizza Stock Is Dirt Cheap, With 30% Potential Upside - What's the Best Play?",
-      "image": "news-images/ffd7500c750f9995eb8c8c9e.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dominos-pizza-stock-dirt-cheap-143002535.html",
-      "published": "2026-09-20T14:30:02Z",
-      "sentiment": "neutral"
-    },
     {
       "category": "financials",
       "headline": "Bank of America says buy tumbling shares of aviation giant",
@@ -90,235 +10,315 @@
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "How to Play AAPL Stock Amid Reports Apple Is Building Its Own AI Server",
-      "image": "news-images/a597057c1bd70fd4a970f1fb.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/play-aapl-stock-amid-reports-130641806.html",
-      "published": "2026-09-20T13:06:41Z",
+      "category": "energy",
+      "headline": "Stock market today: Dow slips, Nasdaq and S&P 500 drift higher as oil pares losses after Trump's UN address",
+      "image": "news-images/48474efbeb460402fe6645be.jpg",
+      "link": "https://finance.yahoo.com/markets/live/stock-market-today-tuesday-september-22-nasdaq-dow-sp-500-080625961.html",
+      "published": "2026-09-22T08:06:25Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "international",
+      "headline": "Private markets dealmaking is starting to mirror Greater China 's K-shaped economy",
+      "image": "news-images/7f8a109320b01f73d0ee6a4f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/private-markets-dealmaking-starting-mirror-172112209.html",
+      "published": "2026-09-22T17:21:12Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Are you \u2018secretly broke\u2019? Here are the 7 worst habits keeping Americans in the red",
-      "image": "news-images/dd16169f0f8635cfd7d9d492.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/secretly-broke-7-worst-habits-130500678.html",
-      "published": "2026-09-20T13:05:00Z",
+      "headline": "Rocket Lab Stock Breaks Above Key Trendline",
+      "image": "news-images/06779a3d1d87a291b72d5597.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/rocket-lab-stock-breaks-above-165728910.html",
+      "published": "2026-09-22T16:57:28Z",
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "Meta\u2019s New AI Agent Could Be the Missing Piece for META Stock",
-      "image": "news-images/595a2db5ada11b90c28595ae.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/meta-ai-agent-could-missing-130002359.html",
-      "published": "2026-09-20T13:00:02Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "financials",
-      "headline": "Scott Bessent helped George Soros net $1 billion breaking the Bank of England \u2014 now he's fighting a U.S. bond selloff",
-      "image": "news-images/8353ab3ad41a6a9f200651a3.jpg",
-      "link": "https://finance.yahoo.com/markets/currencies/articles/scott-bessent-helped-george-soros-130000046.html",
-      "published": "2026-09-20T13:00:00Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "other",
-      "headline": "Intuit Stock Analysis: Why Street Sees 34% Upside.",
-      "image": "news-images/d40d0d6bce86ef2f4ea8a779.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/intuit-stock-analysis-why-street-134844647.html",
-      "published": "2026-09-20T13:48:44Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Dick Portillo sold his restaurant empire for nearly $1B, but says he was happier before the deal",
-      "image": "news-images/02b35fe11b5ff6701b0508e0.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/dick-portillo-sold-restaurant-empire-130000099.html",
-      "published": "2026-09-20T13:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Inside Ciena\u2019s 2029 Roadmap: Ambitious Targets Meet Bullish Analyst Ratings",
-      "image": "news-images/b8efde88df10879b9369d50d.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/inside-ciena-2029-roadmap-ambitious-144204974.html",
-      "published": "2026-09-20T14:42:04Z",
+      "category": "international",
+      "headline": "Global diesel shortage from Iran, Ukraine wars to last into 2027",
+      "image": "news-images/494d23e205b9cebfabddc79d.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/global-diesel-shortage-iran-ukraine-181721706.html",
+      "published": "2026-09-21T18:17:21Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Is 63 the ideal age of retirement Americans think it is? Probably not \u2014 here\u2019s why",
-      "image": "news-images/57bfb8af496b7c83cc9d5ea5.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/63-ideal-age-retirement-americans-124500294.html",
-      "published": "2026-09-20T12:45:00Z",
+      "headline": "What credit score do you need for a balance transfer credit card?",
+      "image": "news-images/9b33498ae4964880491dc232.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-score-needed-for-balance-transfer-card-165714139.html",
+      "published": "2026-09-22T16:57:14Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Think buying a car in cash is a flex? Why millions of boomers are quietly wasting thousands in savings",
+      "image": "news-images/1e8f3289234d883a663609ee.jpg",
+      "link": "https://finance.yahoo.com/markets/articles/think-buying-car-cash-flex-165500324.html",
+      "published": "2026-09-22T16:55:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "federal",
-      "headline": "'This could be something more substantial': Wall Street braces for more Fed rate hikes",
-      "image": "news-images/ed41c5dc15348aa4a075174e.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/article/this-could-be-something-more-substantial-wall-street-braces-for-more-fed-rate-hikes-123400710.html",
-      "published": "2026-09-20T12:34:00Z",
+      "headline": "Fed's Barkin says economy may be firming, inflation not limited to energy, tariff shocks",
+      "image": "news-images/523afe89b1e0479bf5d5cd44.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/feds-barkin-says-economy-may-165255863.html",
+      "published": "2026-09-22T16:52:55Z",
       "sentiment": "neutral"
     },
     {
-      "category": "healthcare",
-      "headline": "Investors Dumped Ionis Pharmaceuticals Stock -- But Wall Street Hasn't Budged From Its Bullish Outlook",
-      "image": "news-images/35d2a4b48d0277278cf1a456.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/investors-dumped-ionis-pharmaceuticals-stock-135000704.html",
-      "published": "2026-09-20T13:50:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Michael Burry says he only invests in \u2018three-legged dogs\u2019 \u2014 though five legs would be even better",
-      "image": "news-images/9f403f754366e380b68b689c.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/michael-burry-says-only-invests-123000511.html",
-      "published": "2026-09-20T12:30:00Z",
+      "category": "crypto",
+      "headline": "CME Group to Launch Bitcoin Cash and Uniswap Futures",
+      "image": "news-images/6a55813852aeca9ff537edb0.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/cme-group-launch-bitcoin-cash-165200159.html",
+      "published": "2026-09-22T16:52:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Marathon Petroleum (MPC) Could Smash its All-Time High, UBS Says",
-      "image": "news-images/cc138d6d6fce081ecda07b2e.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/marathon-petroleum-mpc-could-smash-150634017.html",
-      "published": "2026-09-20T15:06:34Z",
+      "headline": "Kalshi asks CFTC to allow margin trading on prediction markets",
+      "image": "news-images/0c2ab32a4eae2d1b37e7f0b6.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/kalshi-asks-cftc-allow-margin-123918880.html",
+      "published": "2026-09-22T12:39:18Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Baker Hughes (BKR) Raises 2026 Guidance. But Investors Aren\u2019t Impressed",
-      "image": "news-images/016c4ce807d51036565499cf.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/baker-hughes-bkr-raises-2026-150954006.html",
-      "published": "2026-09-20T15:09:54Z",
+      "headline": "MillerKnoll, Inc. Q1 2027 Earnings Call Summary",
+      "image": "news-images/a4e4552fd515b662183d8abe.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/millerknoll-inc-q1-2027-earnings-165135862.html",
+      "published": "2026-09-22T16:51:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "consumer",
+      "headline": "Coinbase to Allow U.S. Retail Investors Buy IPO Shares",
+      "image": "news-images/f260c6b0e08564cdaf555b45.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/coinbase-allow-u-retail-investors-165100177.html",
+      "published": "2026-09-22T16:51:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "UBS Sees Phillips 66 (PSX) Blazing Past its Record High",
-      "image": "news-images/9bda5b81ab253407462a58c1.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/ubs-sees-phillips-66-psx-151252128.html",
-      "published": "2026-09-20T15:12:52Z",
-      "sentiment": "bullish"
+      "headline": "McDonald's has 1 shot to turn around its dreadful year",
+      "image": "news-images/6e63718fcfb53638549a5792.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/article/mcdonalds-has-1-shot-to-turn-around-its-dreadful-year-164554149.html",
+      "published": "2026-09-22T16:45:54Z",
+      "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Piper Sandler Flags Weakening Market Breadth as S&P 500 Declines 0.48%",
-      "image": "news-images/5e011e4774304590dab63a12.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/piper-sandler-flags-weakening-market-140200270.html",
-      "published": "2026-09-20T14:02:00Z",
+      "headline": "Why Gabelli Global Growth Fund Added Advanced Micro Devices (AMD) in Q2",
+      "image": "news-images/899d10be8d2f1bc6c2250a54.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-gabelli-global-growth-fund-141047976.html",
+      "published": "2026-09-22T16:39:47Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "The Nasdaq Set a Record and the Dow Lost 270 Points on the Same Morning",
+      "image": "news-images/eb672ceef911c39a08d61d06.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nasdaq-set-record-dow-lost-172637543.html",
+      "published": "2026-09-22T17:26:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Why Gabelli Global Growth Fund Added Micron Technology (MU) in Q2",
+      "image": "news-images/d1db319e2d369c0ed151ef6f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-gabelli-global-growth-fund-141037360.html",
+      "published": "2026-09-22T16:39:37Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why RPC (RES) Was a Q2 Detractor for Gabelli Small Cap Growth Fund",
+      "image": "news-images/f5779871193a4cf8c88d4657.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-rpc-res-q2-detractor-163646235.html",
+      "published": "2026-09-22T16:36:46Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Dana (DAN) Was a Q2 Detractor for Gabelli Small Cap Growth Fund",
+      "image": "news-images/d91d7671312f5732cbc4c6c0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-dana-dan-q2-detractor-163615111.html",
+      "published": "2026-09-22T16:36:15Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Graco (GGG) Was a Q2 Detractor for Gabelli Small Cap Growth Fund",
+      "image": "news-images/fbe8ccf25a7f0bf41bdfe6a8.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-graco-ggg-q2-detractor-163529754.html",
+      "published": "2026-09-22T16:35:29Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Shopify Stock Rocketed Higher Today",
+      "image": "news-images/4e67f1c30fcb758e47b7bd22.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-shopify-stock-rocketed-higher-172529706.html",
+      "published": "2026-09-22T17:25:29Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Myers Industries (MYE) Was a Top Performer for Gabelli in Q2",
+      "image": "news-images/53553711109257df09d743e5.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-myers-industries-mye-top-163520531.html",
+      "published": "2026-09-22T16:35:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Crane Co. (CR) Was Among Gabelli\u2019s Top Q2 Performers",
+      "image": "news-images/7fcbc75c6de0d9783b01afb9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-crane-co-cr-among-163509000.html",
+      "published": "2026-09-22T16:35:09Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Gorman-Rupp Co. (GRC) Was a Top Performer for Gabelli in Q2",
+      "image": "news-images/c45c5ebb153504905a0cf4e0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-gorman-rupp-co-grc-163458570.html",
+      "published": "2026-09-22T16:34:58Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Why Shopify Stock, Twilio Are Rising On Meta's Muse Rollout",
+      "image": "news-images/ed8bceba9ad1473af34a4ebf.jpg",
+      "link": "https://www.investors.com/news/technology/shopify-stock-shop-twilio-stock-twlo-meta-muse/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-22T16:31:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Is Palantir a Millionaire-Maker Stock?",
+      "image": "news-images/fc67c0720ade7d9d5992be19.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/palantir-millionaire-maker-stock-172500971.html",
+      "published": "2026-09-22T17:25:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Berkshire Hathaway Raises Stake In This Ramshackle Homebuilder",
+      "image": "news-images/a16c6f846c65cf35944ba2ff.jpg",
+      "link": "https://www.investors.com/news/berkshire-hathaway-lennar-homebuilders/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-22T16:30:09Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Stock Market Today: Dow Skids As Trump Threatens Iran; Apple Nears Buy Point (Live Coverage)",
+      "image": "news-images/eef906d37a12561679cb128e.jpg",
+      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-us-iran-peace-hopes-oil-prices-treasury-yields/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-22T16:17:39Z",
       "sentiment": "neutral"
     },
     {
       "category": "energy",
-      "headline": "Chevron (CVX) Supercharges its Venezuela Bet with More Oil Rigs",
-      "image": "news-images/27f771502c1de4afbe383b4c.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/chevron-cvx-supercharges-venezuela-bet-151837921.html",
-      "published": "2026-09-20T15:18:37Z",
+      "headline": "Saudi Pipeline Restart Fails to End Oil Market Tightness",
+      "image": "news-images/7347cb69acfb05a63f0cfbc3.jpg",
+      "link": "https://finance.yahoo.com/energy/articles/saudi-pipeline-restart-fails-end-161000625.html",
+      "published": "2026-09-22T16:10:00Z",
       "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Morgan Stanley Sees Shell (SHEL) Hitting New Highs",
-      "image": "news-images/bccb9354869914a6ffbe24a3.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/morgan-stanley-sees-shell-shel-152036523.html",
-      "published": "2026-09-20T15:20:36Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "NextEra\u2019s Nuclear Bet Just Got a $1.9 Billion Boost",
-      "image": "news-images/4f4cf6d9b3113257b1fd3951.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/nextera-nuclear-bet-just-got-152438612.html",
-      "published": "2026-09-20T15:24:38Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "BMO Capital Bets on a Rebound for Enbridge (ENB)",
-      "image": "news-images/99b76a36733557c9954aa6fe.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/bmo-capital-bets-rebound-enbridge-152940861.html",
-      "published": "2026-09-20T15:29:40Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "industrials",
-      "headline": "Manufacturing Openings Jumped 29%. At 63, a Factory Comeback Can Pause Social Security as Robots Move In.",
-      "image": "news-images/f62a31ff88ccbca73e13b000.jpg",
-      "link": "https://finance.yahoo.com/economy/policy/articles/manufacturing-openings-jumped-29-63-140159678.html",
-      "published": "2026-09-20T14:01:59Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "other",
-      "headline": "\u2018Even Though It\u2019s Bad for Berkshire\u2019 Billionaire Charlie Munger Said to Skip Insurance Because \u2018You\u2019re Paying for the Other Fellow\u2019s Frauds\u2019",
-      "image": "news-images/a5e580682bfb0f516ab1b941.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/even-though-bad-berkshire-billionaire-153002379.html",
-      "published": "2026-09-20T15:30:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "NextEra (NEE) and Dominion (D) Unveil a Bigger Pitch for Virginia",
-      "image": "news-images/b2420419bb12324cfac276e2.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/nextera-nee-dominion-d-unveil-153356972.html",
-      "published": "2026-09-20T15:33:56Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Morgan Stanley Sees More Fuel for Valero\u2019s (VLO) Rally",
-      "image": "news-images/9bda5b81ab253407462a58c1.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/morgan-stanley-sees-more-fuel-153825351.html",
-      "published": "2026-09-20T15:38:25Z",
-      "sentiment": "bullish"
     },
     {
       "category": "tech",
-      "headline": "How Is China Changing the AI Game for Advisors?",
-      "image": "news-images/ca0116110a8cb3a450dd131e.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/china-changing-ai-game-advisors-120000815.html",
-      "published": "2026-09-20T12:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "IDEXX Highlights Diagnostics Growth Drivers, Cancer Testing at Morgan Stanley Conference",
-      "image": "news-images/f5b41af84d4350e8460129e9.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/idexx-highlights-diagnostics-growth-drivers-140202271.html",
-      "published": "2026-09-20T14:02:02Z",
+      "headline": "Microsoft Scores Positive Reviews On AI Momentum",
+      "image": "news-images/6b1d9c17dbbd639d85a0ad6c.jpg",
+      "link": "https://www.investors.com/news/technology/microsoft-stock-positive-reviews-ai-momentum/?src=A00220&amp;yptr=yahoo",
+      "published": "2026-09-22T16:06:04Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "GE Vernova\u2019s (GEV) $200 Billion Backlog is Coming Sooner than Expected",
-      "image": "news-images/bbbbb66e586907f81fc2ab8b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/ge-vernova-gev-200-billion-154331999.html",
-      "published": "2026-09-20T15:43:31Z",
+      "headline": "Trump Accounts could help lower-income families most. Few have signed up.",
+      "image": "news-images/9f8eeada281f41079f97c75a.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/trump-accounts-could-help-lower-income-families-most-few-have-signed-up-143843357.html",
+      "published": "2026-09-22T14:38:43Z",
       "sentiment": "neutral"
     },
     {
-      "category": "financials",
-      "headline": "Morgan Stanley Sees Marathon Petroleum (MPC) Breaking into New Highs",
-      "image": "news-images/81164ae77769301d0adf11c6.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/morgan-stanley-sees-marathon-petroleum-154726182.html",
-      "published": "2026-09-20T15:47:26Z",
+      "category": "crypto",
+      "headline": "Bitcoin and ethereum prices today, Tuesday, September 22, 2026: Crypto prices continue to surge to prices last seen in January",
+      "image": "news-images/05b223d029dc486c01823e78.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-tuesday-september-22-2026-crypto-prices-continue-to-surge-to-prices-last-seen-in-january-114724449.html",
+      "published": "2026-09-22T11:47:24Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "international",
+      "headline": "Silver price today, Tuesday, September 22, 2026: Silver prices hit high mark ahead of U.S.- China talks this week",
+      "image": "news-images/b50311dc54b8cbf185751334.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-tuesday-september-22-2026-silver-prices-hit-high-mark-ahead-of-us--china-talks-this-week-111536074.html",
+      "published": "2026-09-22T11:15:36Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Viking Soars Alone as Obesity Complex Shrugs at Strong GLP-1 Results",
+      "image": "news-images/f25e622ecb1ccedaa64a95aa.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/viking-soars-alone-obesity-complex-172027334.html",
+      "published": "2026-09-22T17:20:27Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Gold price today, Tuesday, September 22, 2026: Gold prices holding as Chinese gold imports set record",
+      "image": "news-images/78a357f9875a1889ae5e1cc7.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-tuesday-september-22-2026-gold-prices-holding-as-chinese-gold-imports-set-record-104326063.html",
+      "published": "2026-09-22T10:43:26Z",
       "sentiment": "neutral"
     },
     {
       "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Monday, September 21, 2026: Refinance rates mostly lower",
-      "image": "news-images/731e7dcf2b6cd113d0e8cb0f.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-monday-september-21-2026-refinance-rates-mostly-lower-100000495.html",
-      "published": "2026-09-21T10:00:00Z",
+      "headline": "Mortgage and refinance interest rates today, Tuesday, September 22, 2026: Rates move lower, but 30-year still over 7%",
+      "image": "news-images/8a9a61a80d0b1e21fa59f78e.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-tuesday-september-22-2026-rates-move-lower-but-30-year-still-over-7-100000503.html",
+      "published": "2026-09-22T10:00:00Z",
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "Dario Amodei Predicted at Davos in January 2025 That AI Could Surpass Humans \"at Almost Everything\" Within 2 to 3 Years. With Anthropic's Revenue Up 7-Fold This Year, Is That Timeline Still on Track?",
-      "image": "news-images/08c5eaff9f3a5b60bb82d08f.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/dario-amodei-predicted-davos-january-134500977.html",
-      "published": "2026-09-20T13:45:00Z",
+      "category": "other",
+      "headline": "Best CD rates today, Tuesday, September 22, 2026: Lock in up to 4.40% APY",
+      "image": "news-images/7f18ecad78d4fee3d033758f.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-tuesday-september-22-2026-lock-in-up-to-440-apy-100000744.html",
+      "published": "2026-09-22T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Realty Income Has Outperformed the S&P 500 in 11 of 13 Stock Market Corrections Since 1994. Here's Why I'd Hold It Forever.",
+      "image": "news-images/a7c4eb77fea7037f06a76bf7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/realty-income-outperformed-p-500-172001489.html",
+      "published": "2026-09-22T17:20:01Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Work from home? Here are 5 ways to save money on remote work expenses.",
+      "image": "news-images/47dcd5b7c9a1363bd7f68b1c.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/how-to-save-money-working-from-home-142616852.html",
+      "published": "2026-09-21T14:26:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Redwire vs. Rocket Lab: Which Space Stock Is a Better Buy in 2026?",
+      "image": "news-images/5ba7c98177761f3236e6eda4.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/redwire-vs-rocket-lab-space-171935452.html",
+      "published": "2026-09-22T17:19:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Oracle cloud layoffs hit developers, engineers hardest",
+      "image": "news-images/0509b76ff3bff4193de8ea9d.jpg",
+      "link": "https://finance.yahoo.com/technology/articles/oracle-cloud-layoffs-hit-developers-171648789.html",
+      "published": "2026-09-22T17:16:48Z",
       "sentiment": "neutral"
     }
   ]
