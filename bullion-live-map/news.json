@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-23T17:49:46Z",
+  "generated_at": "2026-09-23T21:27:08Z",
   "headlines": [
     {
       "category": "other",
@@ -10,76 +10,12 @@
       "sentiment": "neutral"
     },
     {
-      "category": "consumer",
-      "headline": "Twin Bridge targets up to $600M for debut secondaries fund",
-      "image": "news-images/e7be75fb5dfeaa56204a3c6c.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/twin-bridge-targets-600m-debut-171733055.html",
-      "published": "2026-09-23T17:17:33Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Nvidia Scores Winning Streak: Trump-Xi Meeting, China Sales Outlook In Focus",
-      "image": "news-images/e7a0a86ad0a5504b812ca528.jpg",
-      "link": "https://www.investors.com/research/nvidia-nvda-stock-trump-china-ai-chip/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T17:00:17Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "What Freight Operators Should Actually Be Watching",
-      "image": "news-images/44412a86f4846c85ecfa4c13.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/freight-operators-actually-watching-165557089.html",
-      "published": "2026-09-23T16:55:57Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Stock market today: Dow, S&P 500, Nasdaq fall as 10-year yield surges to 2007 high ahead of Trump-Xi meeting",
-      "image": "news-images/6487e6d132dcca1353b41ddd.jpg",
-      "link": "https://finance.yahoo.com/markets/live/stock-market-today-wednesday-september-23-dow-sp-500-nasdaq-080556640.html",
-      "published": "2026-09-23T08:05:56Z",
-      "sentiment": "bullish"
-    },
-    {
       "category": "other",
       "headline": "Bessent just picked the one wage measure still rising",
       "image": "news-images/d9c5af4324984f0a10fa71b1.jpg",
       "link": "https://finance.yahoo.com/economy/articles/bessent-just-picked-one-wage-194700442.html",
       "published": "2026-09-22T19:47:00Z",
       "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Diesel Export Ban? Why It Could Backfire Fast",
-      "image": "news-images/fca3683108ad6b62a0bf33f7.jpg",
-      "link": "https://finance.yahoo.com/energy/articles/diesel-export-ban-why-could-165445740.html",
-      "published": "2026-09-23T16:54:45Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Diesel Prices Could Push More Capacity Out in Q4",
-      "image": "news-images/2a3e1805278297e81ce38a8b.jpg",
-      "link": "https://finance.yahoo.com/economy/articles/diesel-prices-could-push-more-165351809.html",
-      "published": "2026-09-23T16:53:51Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Trucking Insurance Fraud: Is Your Fleet Really Covered?",
-      "image": "news-images/36f1947b803ef6eb1bf4c84c.jpg",
-      "link": "https://finance.yahoo.com/small-business/articles/trucking-insurance-fraud-fleet-really-165233917.html",
-      "published": "2026-09-23T16:52:33Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Stock Market Today: Dow Off 300; These Software Firms Are Beating Alphabet (Live Coverage)",
-      "image": "news-images/e52e86a3d6e805f7c6a97af0.jpg",
-      "link": "https://www.investors.com/market-trend/stock-market-today/dow-jones-sp500-nasdaq-record-high-micron-sandisk/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T16:51:56Z",
-      "sentiment": "bullish"
     },
     {
       "category": "crypto",
@@ -90,155 +26,203 @@
       "sentiment": "neutral"
     },
     {
-      "category": "tech",
-      "headline": "Biotech Stocks Dive As Top 2% Names Take Hardest Hit",
-      "image": "news-images/00fe6a0d7df887b053aa6658.jpg",
-      "link": "https://www.investors.com/news/technology/biotech-stocks-oruka-ionis-rapport-climb-cullinan/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T16:49:51Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "10-Year Treasury Yield Jumps As Markets Bet On Two Fed Rate Hikes. Bessent Won't Fight It.",
-      "image": "news-images/15c9c6a41fefbc65df31e57c.jpg",
-      "link": "https://www.investors.com/news/10-year-treasury-yield-federal-reserve-bessent-buybacks-sp-500-pmi/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T16:35:02Z",
-      "sentiment": "bullish"
-    },
-    {
       "category": "other",
-      "headline": "Brookfield\u2019s GGP scores $800M CMBS refi for Oakbrook Center",
-      "image": "news-images/a4e86c4f859c1cac9cc2dbc5.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/brookfield-ggp-scores-800m-cmbs-163000079.html",
-      "published": "2026-09-23T16:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "McDonald's bets on hand-breaded chicken, AI drive-throughs to fend off Burger King",
-      "image": "news-images/d4c3bf073b60696ea4c3cc9d.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/article/mcdonalds-bets-on-hand-breaded-chicken-ai-drive-throughs-to-fend-off-burger-king-120418093.html",
-      "published": "2026-09-23T12:04:18Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Here\u2019s How Much Money the Average 65-Year-Old Leaves on the Table by Claiming Social Security Early",
-      "image": "news-images/e032a43138dde9cd2128d7bf.jpg",
-      "link": "https://finance.yahoo.com/healthcare/articles/much-money-average-65-old-173039165.html",
-      "published": "2026-09-23T17:30:39Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Renishaw Rides the AI Chip Boom to Record Results",
-      "image": "news-images/9f1c34c1d3e84bdee3cf3ca9.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/renishaw-rides-ai-chip-boom-161849385.html",
-      "published": "2026-09-23T16:18:49Z",
+      "headline": "Citizens Financial Stock: Is CFG Outperforming the Financial Sector?",
+      "image": "news-images/a9671c5a4bea223ed2305d4c.jpg",
+      "link": "https://finance.yahoo.com/news/citizens-financial-stock-cfg-outperforming-131514658.html",
+      "published": "2026-09-22T13:15:14Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Here's A Way To Cut Risk On This Top-Performing Stock",
-      "image": "news-images/92cb0d935ea38f30149050b1.jpg",
-      "link": "https://www.investors.com/research/options/micron-mu-stock-bull-call-spread-options/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T16:11:44Z",
+      "headline": "Kalshi Seeks To Offer Margin Trading On Its Platform",
+      "image": "news-images/e17d1a5315d2e5e2d09b8a72.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/kalshi-seeks-offer-margin-trading-131500335.html",
+      "published": "2026-09-22T13:15:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Carnival Corp Stock Looks Cheap to Value Investors Ahead of Earnings Next Week",
+      "image": "news-images/af6f9c06be59e854d5fb7df5.jpg",
+      "link": "https://finance.yahoo.com/news/carnival-corp-stock-looks-cheap-131502788.html",
+      "published": "2026-09-22T13:15:02Z",
       "sentiment": "neutral"
     },
     {
       "category": "energy",
-      "headline": "Oil up almost 2% as Iran's president vows to never surrender",
-      "image": "news-images/42ca32651b9125193a525967.jpg",
-      "link": "https://finance.yahoo.com/news/oil-falls-increased-gulf-supply-014402051.html",
-      "published": "2026-09-23T16:10:26Z",
+      "headline": "Wall Street Futures Mixed as Investors Monitor Oil Prices and Middle East Diplomacy: Dow Jones, S&P, Nasdaq",
+      "image": "news-images/fbf6273e90d0eb2cb10a447c.jpg",
+      "link": "https://finance.yahoo.com/markets/articles/wall-street-futures-mixed-investors-131338409.html",
+      "published": "2026-09-22T13:13:38Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "international",
+      "headline": "Binance Investigated By U.S. For Potential Sanctions Violations",
+      "image": "news-images/1e91ab589d907386e9f050da.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/binance-investigated-u-potential-sanctions-132500534.html",
+      "published": "2026-09-22T13:25:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Self-Storage Could Be Entering a New Growth Cycle \u2014 Baron Capital Re-Initiated Public Storage (PSA)",
+      "image": "news-images/eb814a29414d154e5775cbf0.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/self-storage-could-entering-growth-131101680.html",
+      "published": "2026-09-22T13:11:01Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "What Makes Prologis (PLD) a Strong Investment?",
+      "image": "news-images/ac99041ef686bab8eea91a08.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/makes-prologis-pld-strong-investment-130353173.html",
+      "published": "2026-09-22T13:03:53Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Ramit Sethi warns couple earning $112K with no mortgage they'll go broke if they keep spending 108% of their income",
+      "image": "news-images/f1472a0ff4f07c2588876090.jpg",
+      "link": "https://finance.yahoo.com/markets/articles/ramit-sethi-warns-couple-earning-130000343.html",
+      "published": "2026-09-22T13:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Why Cathie Wood Says SpaceX Stock Could Be a Deep-Value Buy",
+      "image": "news-images/934fb4e7f42282a54c9526d0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-cathie-wood-says-spacex-130002913.html",
+      "published": "2026-09-22T13:00:02Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Palantir, IBD Stock Of The Day, Flashes Buy Signal Amid Earnings, AI Momentum",
-      "image": "news-images/61ead9acb5f7c5223a32661b.jpg",
-      "link": "https://www.investors.com/research/ibd-stock-of-the-day/palantir-stock-buy-signal-earnings-ai-momentum/?src=A00220&amp;yptr=yahoo",
-      "published": "2026-09-23T16:02:03Z",
+      "headline": "Dear ON Semiconductor Stock Fans, Here\u2019s What You Need to Know About ON\u2019s Financial Analyst Day",
+      "image": "news-images/f9765038013034a1eeecd686.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/dear-semiconductor-stock-fans-know-130002440.html",
+      "published": "2026-09-22T13:00:02Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Credit pressure increases on BDC debt investments, led by software",
-      "image": "news-images/d3ef5609d7123a32c596dd90.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/credit-pressure-increases-bdc-debt-155637178.html",
-      "published": "2026-09-23T15:56:37Z",
+      "headline": "Equinix (EQIX) Positions to Benefit from Exponential Data Growth and Early-Stage Enterprise AI",
+      "image": "news-images/027612beff1e06ab4e78f0ee.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/equinix-eqix-positions-benefit-exponential-125701911.html",
+      "published": "2026-09-22T12:57:01Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Is Skyworks Solutions Stock Outperforming the Dow?",
+      "image": "news-images/67b5395357689654dc130144.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/skyworks-solutions-stock-outperforming-dow-125127017.html",
+      "published": "2026-09-22T12:51:27Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Sazerac to buy German spirits producer Berentzen",
+      "image": "news-images/966a3b22f2caa05263d6c2c8.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/sazerac-buy-german-spirits-producer-131700836.html",
+      "published": "2026-09-22T13:17:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Goldman Sachs says 'lower happiness' \u2014 not the economy \u2014 explains why consumer confidence hit its second-lowest level",
+      "image": "news-images/a1878a7cc88c958f60074c7b.jpg",
+      "link": "https://finance.yahoo.com/economy/articles/goldman-sachs-says-lower-happiness-133000625.html",
+      "published": "2026-09-22T13:30:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "David Einhorn says young Americans are too \u2018impatient\u2019 to buy homes. With mortgages near 7%, is he wildly out of touch?",
+      "image": "news-images/07b06f0532c7237894e39e16.jpg",
+      "link": "https://finance.yahoo.com/real-estate/articles/david-einhorn-says-young-americans-124500600.html",
+      "published": "2026-09-22T12:45:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Apple May Return to Servers With Its Own AI Chips. Nvidia Could Still Get Paid",
+      "image": "news-images/61459e7aab0329bb80c62721.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/apple-may-return-servers-own-124420628.html",
+      "published": "2026-09-22T12:44:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Amcor Stock: Is AMCR Outperforming the Consumer Cyclical Sector?",
+      "image": "news-images/f0337070bf9d9e995a8aad4f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/amcor-stock-amcr-outperforming-consumer-124224161.html",
+      "published": "2026-09-22T12:42:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "realestate",
+      "headline": "Woman, 29, Inherited $1.1M From Her Grandparents' Trust \u2014 Her Parents Say She 'Owes The Family' Since They 'Sacrificed Everything'",
+      "image": "news-images/41f55a2c8fa08188c12bb3b9.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/woman-29-inherited-1-1m-131508865.html",
+      "published": "2026-09-22T13:15:08Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "BMW CEO sees risk of cheap Chinese cars in Europe but opposes tariffs",
+      "image": "news-images/2e42a3f6b0ca01ea898ff83f.jpg",
+      "link": "https://finance.yahoo.com/news/bmw-ceo-sees-risk-cheap-124126317.html",
+      "published": "2026-09-22T12:41:26Z",
       "sentiment": "neutral"
     },
     {
       "category": "crypto",
-      "headline": "Bitcoin and ethereum prices today, Wednesday, September 23, 2026: Crypto prices open near 8-month highs. Is the crypto winter over?",
-      "image": "news-images/a2bb4b09a2c8501fa357a1b3.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/bitcoin-and-ethereum-prices-today-wednesday-september-23-2026-crypto-prices-open-near-8-month-highs-is-the-crypto-winter-over-113908671.html",
-      "published": "2026-09-23T11:39:08Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "international",
-      "headline": "Silver price today, Wednesday, September 23, 2026:  Silver prices settle ahead of key U.S.-China summit",
-      "image": "news-images/1e04954fd586518f661948ab.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-wednesday-september-23-2026-silver-prices-settle-ahead-of-key-us-china-summit-111845856.html",
-      "published": "2026-09-23T11:18:45Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "McDonald's Unveils $8.5B Plan To Accelerate Restaurant Improvements",
-      "image": "news-images/048b2c9a7a88c6dbb7f056de.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/mcdonalds-unveils-8-5b-plan-172524214.html",
-      "published": "2026-09-23T17:25:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "international",
-      "headline": "Gold price today, Wednesday, September 23, 2026: Gold holds as investors weigh China, Iran relations",
-      "image": "news-images/a9c6a4dfb25a30a6934500fb.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-wednesday-september-23-2026-gold-holds-as-investors-weigh-china-iran-relations-110649042.html",
-      "published": "2026-09-23T11:06:49Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Wednesday, September 23, 2026: Fixed rates find more room to fall",
-      "image": "news-images/c85eaff0f6875d335185cde5.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-wednesday-september-23-2026-fixed-rates-find-more-room-to-fall-100000875.html",
-      "published": "2026-09-23T10:00:00Z",
-      "sentiment": "bearish"
-    },
-    {
-      "category": "financials",
-      "headline": "Best CD rates today, Wednesday, September 23, 2026: Earn up to 4.40% APY with Happen Bank",
-      "image": "news-images/4d5a47c785c2a4f8c2a77b1c.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-wednesday-september-23-2026-earn-up-to-440-apy-with-happen-bank-100000312.html",
-      "published": "2026-09-23T10:00:00Z",
+      "headline": "'Crypto winter is over,' analyst says as bitcoin tops $86,000: Chart of the Day",
+      "image": "news-images/12cde7e935a65dcac3bcc7d2.jpg",
+      "link": "https://finance.yahoo.com/markets/article/crypto-winter-is-over-analyst-says-as-bitcoin-tops-86000-chart-of-the-day-124006079.html",
+      "published": "2026-09-22T12:40:06Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Should you apply for multiple credit cards at once?",
-      "image": "news-images/ad7575557cd61a1bf9200c12.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/should-you-apply-for-multiple-credit-cards-at-once-180015761.html",
-      "published": "2026-09-22T18:00:15Z",
+      "headline": "Soybeans Fading Back After Monday\u2019s Rally",
+      "image": "news-images/6701b5a5b53b4e6fec5cfca2.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/soybeans-fading-back-monday-rally-123810668.html",
+      "published": "2026-09-22T12:38:10Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "How Is CF Industries Stock Performance Compared to Other Agricultural Stocks",
+      "image": "news-images/a30723ac743c9285e31b990f.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/cf-industries-stock-performance-compared-123532860.html",
+      "published": "2026-09-22T12:35:32Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "industrials",
+      "headline": "BYD Isn't Just Exporting Cars. It's Becoming a Global Automaker.",
+      "image": "news-images/779507f56485dea8877867e1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/byd-isnt-just-exporting-cars-132000771.html",
+      "published": "2026-09-22T13:20:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "What credit score do you need for a balance transfer credit card?",
-      "image": "news-images/9b33498ae4964880491dc232.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-score-needed-for-balance-transfer-card-165714139.html",
-      "published": "2026-09-22T16:57:14Z",
+      "headline": "Xpeng\u2019s Tech-Licensing Expansion Meets a Core Auto Business Still Losing Money",
+      "image": "news-images/56485bfc5b1948b0a663c21a.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/xpeng-tech-licensing-expansion-meets-123610355.html",
+      "published": "2026-09-22T12:36:10Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Nine Mile Metals reports high-grade copper, silver and gold intercepts at Wedge Mine in New Brunswick",
-      "image": "news-images/e68fd3ed1f3344af9249537e.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/nine-mile-metals-reports-high-172100083.html",
-      "published": "2026-09-23T17:21:00Z",
+      "headline": "Palo Alto Networks unveils AI-powered cybersecurity service using Claude, GPT models",
+      "image": "news-images/f7af29717035f07b659bfc9b.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/palo-alto-networks-unveils-ai-133647470.html",
+      "published": "2026-09-22T13:36:47Z",
       "sentiment": "neutral"
     },
     {
@@ -251,42 +235,74 @@
     },
     {
       "category": "other",
-      "headline": "eBay CFO Peggy Alford Sells 2,716 Shares in Tax-Related Transaction",
-      "image": "news-images/01d0dcd5c2c497fbd7f61464.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/ebay-cfo-peggy-alford-sells-172001861.html",
-      "published": "2026-09-23T17:20:01Z",
+      "headline": "D-Wave Quantum\u2019s Revenue Hasn\u2019t Moved in Two Years. Here\u2019s Why That\u2019s a Problem.",
+      "image": "news-images/5a5df4bb5e7079392f6d0d0b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/d-wave-quantum-revenue-hasn-132000200.html",
+      "published": "2026-09-22T13:20:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Vanguard S&P 500 ETF Long-Term Outlook: What History Tells Investors",
-      "image": "news-images/ecb3ffe202f9eb9a0e30f477.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/vanguard-p-500-etf-long-172000201.html",
-      "published": "2026-09-23T17:20:00Z",
+      "headline": "What credit score do you need for a balance transfer credit card?",
+      "image": "news-images/9b33498ae4964880491dc232.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-score-needed-for-balance-transfer-card-165714139.html",
+      "published": "2026-09-22T16:57:14Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "XRP vs. Cardano: Which Is the Smarter Buy After Cardano\u2019s 30% Surge?",
-      "image": "news-images/2886abc77ac2455c106cc4f3.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/xrp-vs-cardano-smarter-buy-171856751.html",
-      "published": "2026-09-23T17:18:56Z",
-      "sentiment": "bullish"
-    },
-    {
-      "category": "consumer",
-      "headline": "Micron Price Target Raised to $1,300 by Citi on Stronger DRAM Pricing, Undersupply",
-      "image": "news-images/4828f74d55a636a661d429ef.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/micron-price-target-raised-1-171525886.html",
-      "published": "2026-09-23T17:15:25Z",
+      "headline": "Should you apply for multiple credit cards at once?",
+      "image": "news-images/ad7575557cd61a1bf9200c12.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/should-you-apply-for-multiple-credit-cards-at-once-180015761.html",
+      "published": "2026-09-22T18:00:15Z",
       "sentiment": "neutral"
     },
     {
       "category": "consumer",
-      "headline": "\u2018It doesn\u2019t seem fair\u2019: I\u2019m retired and have plenty of money. Why can\u2019t I qualify for a retail credit card?",
-      "image": "news-images/8d7cd42a4b3efc47ad4fe404.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/doesn-t-seem-fair-m-111500811.html",
-      "published": "2026-09-23T17:15:00Z",
+      "headline": "Rothschild Redburn starts Nebius at Sell with $84 target, implying 62% downside",
+      "image": "news-images/a0eb2d2dcad3d5c2cce74633.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/rothschild-redburn-starts-nebius-sell-131344717.html",
+      "published": "2026-09-22T13:13:44Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "federal",
+      "headline": "Mortgage and refinance interest rates today, Wednesday, September 23, 2026: Fixed rates find more room to fall",
+      "image": "news-images/c85eaff0f6875d335185cde5.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-wednesday-september-23-2026-fixed-rates-find-more-room-to-fall-100000875.html",
+      "published": "2026-09-23T10:00:00Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "tech",
+      "headline": "Nvidia stock valuation hits decade low despite profit boom",
+      "image": "news-images/de4de0c591626485a30eb964.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-stock-valuation-hits-decade-131932460.html",
+      "published": "2026-09-22T13:19:32Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Best CD rates today, Wednesday, September 23, 2026: Earn up to 4.40% APY with Happen Bank",
+      "image": "news-images/4d5a47c785c2a4f8c2a77b1c.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-wednesday-september-23-2026-earn-up-to-440-apy-with-happen-bank-100000312.html",
+      "published": "2026-09-23T10:00:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "international",
+      "headline": "Gold price today, Wednesday, September 23, 2026: Gold holds as investors weigh China, Iran relations",
+      "image": "news-images/a9c6a4dfb25a30a6934500fb.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-wednesday-september-23-2026-gold-holds-as-investors-weigh-china-iran-relations-110649042.html",
+      "published": "2026-09-23T11:06:49Z",
+      "sentiment": "bearish"
+    },
+    {
+      "category": "international",
+      "headline": "Silver price today, Wednesday, September 23, 2026:  Silver prices settle ahead of key U.S.-China summit",
+      "image": "news-images/1e04954fd586518f661948ab.jpg",
+      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-wednesday-september-23-2026-silver-prices-settle-ahead-of-key-us-china-summit-111845856.html",
+      "published": "2026-09-23T11:18:45Z",
       "sentiment": "neutral"
     }
   ]
