@@ -1,308 +1,324 @@
 {
-  "generated_at": "2026-09-23T21:27:08Z",
+  "generated_at": "2026-09-24T17:50:23Z",
   "headlines": [
     {
       "category": "other",
-      "headline": "Kalshi asks CFTC to allow margin trading on prediction markets",
-      "image": "news-images/0c2ab32a4eae2d1b37e7f0b6.jpg",
-      "link": "https://finance.yahoo.com/markets/options/articles/kalshi-asks-cftc-allow-margin-123918880.html",
-      "published": "2026-09-22T12:39:18Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Bessent just picked the one wage measure still rising",
-      "image": "news-images/d9c5af4324984f0a10fa71b1.jpg",
-      "link": "https://finance.yahoo.com/economy/articles/bessent-just-picked-one-wage-194700442.html",
-      "published": "2026-09-22T19:47:00Z",
+      "headline": "Ennis (EBF) Grows Sales but Earns Less. Are Legal Items Hiding a Better Business?",
+      "image": "news-images/2c6c3ab3b9fcf7ec160e6ab1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/ennis-ebf-grows-sales-earns-015226342.html",
+      "published": "2026-09-23T01:52:26Z",
       "sentiment": "neutral"
     },
     {
       "category": "crypto",
-      "headline": "Grant Cardone offers 10 Bitcoin bounty on finding a buyer for his private jet",
-      "image": "news-images/a163afe2b5e2bf259d66d2c5.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/grant-cardone-offers-10-bitcoin-201519149.html",
-      "published": "2026-09-22T20:15:19Z",
+      "headline": "Strive CEO: Bitcoin Could \u2018Go to Infinity' as Dollar Debt Crisis Breaks",
+      "image": "news-images/ebc7575e4f8631dc4a98f2bd.jpg",
+      "link": "https://finance.yahoo.com/markets/crypto/articles/strive-ceo-bitcoin-could-infinity-015100441.html",
+      "published": "2026-09-23T01:51:00Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Citizens Financial Stock: Is CFG Outperforming the Financial Sector?",
-      "image": "news-images/a9671c5a4bea223ed2305d4c.jpg",
-      "link": "https://finance.yahoo.com/news/citizens-financial-stock-cfg-outperforming-131514658.html",
-      "published": "2026-09-22T13:15:14Z",
+      "headline": "Westinghouse Air Brake (WAB) Signs $700 Million-Plus Rail Services Deal. Can Profits Grow?",
+      "image": "news-images/3aae3644997a2a1d6eb6c8ad.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/westinghouse-air-brake-wab-signs-014350177.html",
+      "published": "2026-09-23T01:43:50Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Kalshi Seeks To Offer Margin Trading On Its Platform",
-      "image": "news-images/e17d1a5315d2e5e2d09b8a72.jpg",
-      "link": "https://finance.yahoo.com/markets/options/articles/kalshi-seeks-offer-margin-trading-131500335.html",
-      "published": "2026-09-22T13:15:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Carnival Corp Stock Looks Cheap to Value Investors Ahead of Earnings Next Week",
-      "image": "news-images/af6f9c06be59e854d5fb7df5.jpg",
-      "link": "https://finance.yahoo.com/news/carnival-corp-stock-looks-cheap-131502788.html",
-      "published": "2026-09-22T13:15:02Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "energy",
-      "headline": "Wall Street Futures Mixed as Investors Monitor Oil Prices and Middle East Diplomacy: Dow Jones, S&P, Nasdaq",
-      "image": "news-images/fbf6273e90d0eb2cb10a447c.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/wall-street-futures-mixed-investors-131338409.html",
-      "published": "2026-09-22T13:13:38Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "international",
-      "headline": "Binance Investigated By U.S. For Potential Sanctions Violations",
-      "image": "news-images/1e91ab589d907386e9f050da.jpg",
-      "link": "https://finance.yahoo.com/markets/crypto/articles/binance-investigated-u-potential-sanctions-132500534.html",
-      "published": "2026-09-22T13:25:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Self-Storage Could Be Entering a New Growth Cycle \u2014 Baron Capital Re-Initiated Public Storage (PSA)",
-      "image": "news-images/eb814a29414d154e5775cbf0.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/self-storage-could-entering-growth-131101680.html",
-      "published": "2026-09-22T13:11:01Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "What Makes Prologis (PLD) a Strong Investment?",
-      "image": "news-images/ac99041ef686bab8eea91a08.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/makes-prologis-pld-strong-investment-130353173.html",
-      "published": "2026-09-22T13:03:53Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "realestate",
-      "headline": "Ramit Sethi warns couple earning $112K with no mortgage they'll go broke if they keep spending 108% of their income",
-      "image": "news-images/f1472a0ff4f07c2588876090.jpg",
-      "link": "https://finance.yahoo.com/markets/articles/ramit-sethi-warns-couple-earning-130000343.html",
-      "published": "2026-09-22T13:00:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Why Cathie Wood Says SpaceX Stock Could Be a Deep-Value Buy",
-      "image": "news-images/934fb4e7f42282a54c9526d0.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/why-cathie-wood-says-spacex-130002913.html",
-      "published": "2026-09-22T13:00:02Z",
+      "headline": "Vista Gold (VGZ) Agrees to Sale. Can its Buyer Fund the Mt Todd Gold Mine?",
+      "image": "news-images/e2b0c39b748ea59061738c87.jpg",
+      "link": "https://finance.yahoo.com/markets/commodities/articles/vista-gold-vgz-agrees-sale-014206537.html",
+      "published": "2026-09-23T01:42:06Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Dear ON Semiconductor Stock Fans, Here\u2019s What You Need to Know About ON\u2019s Financial Analyst Day",
-      "image": "news-images/f9765038013034a1eeecd686.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/dear-semiconductor-stock-fans-know-130002440.html",
-      "published": "2026-09-22T13:00:02Z",
+      "headline": "This Little-Known AI Chip Stock Doubled. Its New Chips Now Double Optical Speed",
+      "image": "news-images/51cc0d94ac4af7db4f7b07b7.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/little-known-ai-chip-stock-042916921.html",
+      "published": "2026-09-23T04:29:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Titan International (TWI) Signs ITM Sale. How Much of the $285 Million is New Cash?",
+      "image": "news-images/3c517ffe3831b2f26787864c.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/titan-international-twi-signs-itm-012718577.html",
+      "published": "2026-09-23T01:26:44Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "May Mobility's SPAC Merger: Is This a Road to Nowhere for Investors?",
+      "image": "news-images/75d584c5bbd7a2ec52f020e2.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/may-mobilitys-spac-merger-road-015000118.html",
+      "published": "2026-09-23T01:50:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "SK Hynix Is Eyeing Intel\u2019s (INTC) Ohio Site. Why Micron (MU) Should Pay Attention",
+      "image": "news-images/1e323fc2190e94d498c3e0a9.jpg",
+      "link": "https://finance.yahoo.com/technology/articles/sk-hynix-eyeing-intel-intc-043316388.html",
+      "published": "2026-09-23T04:33:16Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Equinix (EQIX) Positions to Benefit from Exponential Data Growth and Early-Stage Enterprise AI",
-      "image": "news-images/027612beff1e06ab4e78f0ee.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/equinix-eqix-positions-benefit-exponential-125701911.html",
-      "published": "2026-09-22T12:57:01Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Is Skyworks Solutions Stock Outperforming the Dow?",
-      "image": "news-images/67b5395357689654dc130144.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/skyworks-solutions-stock-outperforming-dow-125127017.html",
-      "published": "2026-09-22T12:51:27Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "realestate",
-      "headline": "Sazerac to buy German spirits producer Berentzen",
-      "image": "news-images/966a3b22f2caa05263d6c2c8.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/sazerac-buy-german-spirits-producer-131700836.html",
-      "published": "2026-09-22T13:17:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "financials",
-      "headline": "Goldman Sachs says 'lower happiness' \u2014 not the economy \u2014 explains why consumer confidence hit its second-lowest level",
-      "image": "news-images/a1878a7cc88c958f60074c7b.jpg",
-      "link": "https://finance.yahoo.com/economy/articles/goldman-sachs-says-lower-happiness-133000625.html",
-      "published": "2026-09-22T13:30:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "realestate",
-      "headline": "David Einhorn says young Americans are too \u2018impatient\u2019 to buy homes. With mortgages near 7%, is he wildly out of touch?",
-      "image": "news-images/07b06f0532c7237894e39e16.jpg",
-      "link": "https://finance.yahoo.com/real-estate/articles/david-einhorn-says-young-americans-124500600.html",
-      "published": "2026-09-22T12:45:00Z",
+      "headline": "Pat Gelsinger Just Backed a $100 Million Challenge to Nvidia\u2019s AI Networking Moat. AMD Could Benefit",
+      "image": "news-images/8a6c5887d6c5f34763c20faa.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/pat-gelsinger-just-backed-100-042433352.html",
+      "published": "2026-09-23T04:24:33Z",
       "sentiment": "neutral"
     },
     {
       "category": "tech",
-      "headline": "Apple May Return to Servers With Its Own AI Chips. Nvidia Could Still Get Paid",
-      "image": "news-images/61459e7aab0329bb80c62721.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/apple-may-return-servers-own-124420628.html",
-      "published": "2026-09-22T12:44:20Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Amcor Stock: Is AMCR Outperforming the Consumer Cyclical Sector?",
-      "image": "news-images/f0337070bf9d9e995a8aad4f.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/amcor-stock-amcr-outperforming-consumer-124224161.html",
-      "published": "2026-09-22T12:42:24Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "realestate",
-      "headline": "Woman, 29, Inherited $1.1M From Her Grandparents' Trust \u2014 Her Parents Say She 'Owes The Family' Since They 'Sacrificed Everything'",
-      "image": "news-images/41f55a2c8fa08188c12bb3b9.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/woman-29-inherited-1-1m-131508865.html",
-      "published": "2026-09-22T13:15:08Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "BMW CEO sees risk of cheap Chinese cars in Europe but opposes tariffs",
-      "image": "news-images/2e42a3f6b0ca01ea898ff83f.jpg",
-      "link": "https://finance.yahoo.com/news/bmw-ceo-sees-risk-cheap-124126317.html",
-      "published": "2026-09-22T12:41:26Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "crypto",
-      "headline": "'Crypto winter is over,' analyst says as bitcoin tops $86,000: Chart of the Day",
-      "image": "news-images/12cde7e935a65dcac3bcc7d2.jpg",
-      "link": "https://finance.yahoo.com/markets/article/crypto-winter-is-over-analyst-says-as-bitcoin-tops-86000-chart-of-the-day-124006079.html",
-      "published": "2026-09-22T12:40:06Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Soybeans Fading Back After Monday\u2019s Rally",
-      "image": "news-images/6701b5a5b53b4e6fec5cfca2.jpg",
-      "link": "https://finance.yahoo.com/markets/commodities/articles/soybeans-fading-back-monday-rally-123810668.html",
-      "published": "2026-09-22T12:38:10Z",
+      "headline": "Lumentum Jumped Nearly 10% While Corning Barely Moved. Is the AI Optics Trade Splitting Apart?",
+      "image": "news-images/2f34cba8a768e436d25a26c1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lumentum-jumped-nearly-10-while-041957023.html",
+      "published": "2026-09-23T04:19:57Z",
       "sentiment": "bullish"
     },
     {
       "category": "other",
-      "headline": "How Is CF Industries Stock Performance Compared to Other Agricultural Stocks",
-      "image": "news-images/a30723ac743c9285e31b990f.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/cf-industries-stock-performance-compared-123532860.html",
-      "published": "2026-09-22T12:35:32Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "industrials",
-      "headline": "BYD Isn't Just Exporting Cars. It's Becoming a Global Automaker.",
-      "image": "news-images/779507f56485dea8877867e1.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/byd-isnt-just-exporting-cars-132000771.html",
-      "published": "2026-09-22T13:20:00Z",
+      "headline": "Intel (INTC) Could Get a Fresh Valuation for Altera. AMD (AMD) Is the Rival to Watch",
+      "image": "news-images/899ece157f9f8af7a7be79d7.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/intel-intc-could-fresh-valuation-041710849.html",
+      "published": "2026-09-23T04:17:10Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Xpeng\u2019s Tech-Licensing Expansion Meets a Core Auto Business Still Losing Money",
-      "image": "news-images/56485bfc5b1948b0a663c21a.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/xpeng-tech-licensing-expansion-meets-123610355.html",
-      "published": "2026-09-22T12:36:10Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "tech",
-      "headline": "Palo Alto Networks unveils AI-powered cybersecurity service using Claude, GPT models",
-      "image": "news-images/f7af29717035f07b659bfc9b.jpg",
-      "link": "https://finance.yahoo.com/technology/ai/articles/palo-alto-networks-unveils-ai-133647470.html",
-      "published": "2026-09-22T13:36:47Z",
+      "headline": "Why AutoZone Stock Rallied Today",
+      "image": "news-images/70e33a515878248e165b67e0.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-autozone-stock-rallied-today-020051614.html",
+      "published": "2026-09-23T02:00:51Z",
       "sentiment": "neutral"
     },
     {
       "category": "other",
-      "headline": "Trump Accounts could help lower-income families most. Few have signed up.",
-      "image": "news-images/9f8eeada281f41079f97c75a.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/trump-accounts-could-help-lower-income-families-most-few-have-signed-up-143843357.html",
-      "published": "2026-09-22T14:38:43Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "D-Wave Quantum\u2019s Revenue Hasn\u2019t Moved in Two Years. Here\u2019s Why That\u2019s a Problem.",
-      "image": "news-images/5a5df4bb5e7079392f6d0d0b.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/d-wave-quantum-revenue-hasn-132000200.html",
-      "published": "2026-09-22T13:20:00Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "What credit score do you need for a balance transfer credit card?",
-      "image": "news-images/9b33498ae4964880491dc232.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/credit-score-needed-for-balance-transfer-card-165714139.html",
-      "published": "2026-09-22T16:57:14Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "other",
-      "headline": "Should you apply for multiple credit cards at once?",
-      "image": "news-images/ad7575557cd61a1bf9200c12.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/credit-cards/article/should-you-apply-for-multiple-credit-cards-at-once-180015761.html",
-      "published": "2026-09-22T18:00:15Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "consumer",
-      "headline": "Rothschild Redburn starts Nebius at Sell with $84 target, implying 62% downside",
-      "image": "news-images/a0eb2d2dcad3d5c2cce74633.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/rothschild-redburn-starts-nebius-sell-131344717.html",
-      "published": "2026-09-22T13:13:44Z",
-      "sentiment": "neutral"
-    },
-    {
-      "category": "federal",
-      "headline": "Mortgage and refinance interest rates today, Wednesday, September 23, 2026: Fixed rates find more room to fall",
-      "image": "news-images/c85eaff0f6875d335185cde5.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/mortgages/article/mortgage-and-refinance-interest-rates-today-wednesday-september-23-2026-fixed-rates-find-more-room-to-fall-100000875.html",
-      "published": "2026-09-23T10:00:00Z",
+      "headline": "Why Bernstein Still Sees 46% Upside in Zscaler (ZS) but Downgraded Palo Alto (PANW)",
+      "image": "news-images/8de635ad0c68ac14164b1b78.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/why-bernstein-still-sees-46-041316215.html",
+      "published": "2026-09-23T04:13:16Z",
       "sentiment": "bearish"
     },
     {
       "category": "tech",
-      "headline": "Nvidia stock valuation hits decade low despite profit boom",
-      "image": "news-images/de4de0c591626485a30eb964.jpg",
-      "link": "https://finance.yahoo.com/markets/stocks/articles/nvidia-stock-valuation-hits-decade-131932460.html",
-      "published": "2026-09-22T13:19:32Z",
+      "headline": "\u201cThe New Clippy\u201d: Benioff Uses Salesforce\u2019s Biggest Product Launch in Years to Challenge Microsoft",
+      "image": "news-images/7e78b0fa9032aed74f956079.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/clippy-benioff-uses-salesforce-biggest-044653952.html",
+      "published": "2026-09-23T04:46:53Z",
       "sentiment": "neutral"
     },
     {
       "category": "financials",
-      "headline": "Best CD rates today, Wednesday, September 23, 2026: Earn up to 4.40% APY with Happen Bank",
-      "image": "news-images/4d5a47c785c2a4f8c2a77b1c.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/banking/article/best-cd-rates-today-wednesday-september-23-2026-earn-up-to-440-apy-with-happen-bank-100000312.html",
-      "published": "2026-09-23T10:00:00Z",
+      "headline": "Nike (NKE): Wall Street Tests Whether the Turnaround Can Outrun Weak Demand Ahead of Q1 Results",
+      "image": "news-images/47b969c1229e7dc80d25f6a1.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/nike-nke-wall-street-tests-040747520.html",
+      "published": "2026-09-23T04:07:47Z",
       "sentiment": "neutral"
     },
     {
-      "category": "international",
-      "headline": "Gold price today, Wednesday, September 23, 2026: Gold holds as investors weigh China, Iran relations",
-      "image": "news-images/a9c6a4dfb25a30a6934500fb.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/gold-price-today-wednesday-september-23-2026-gold-holds-as-investors-weigh-china-iran-relations-110649042.html",
-      "published": "2026-09-23T11:06:49Z",
-      "sentiment": "bearish"
+      "category": "other",
+      "headline": "Sports Betting Looks for a Parlay Into Funds",
+      "image": "news-images/73480eb44780bc00a0dc2485.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/sports-betting-looks-parlay-funds-040100974.html",
+      "published": "2026-09-23T04:01:00Z",
+      "sentiment": "neutral"
     },
     {
-      "category": "international",
-      "headline": "Silver price today, Wednesday, September 23, 2026:  Silver prices settle ahead of key U.S.-China summit",
-      "image": "news-images/1e04954fd586518f661948ab.jpg",
-      "link": "https://finance.yahoo.com/personal-finance/investing/article/silver-price-today-wednesday-september-23-2026-silver-prices-settle-ahead-of-key-us-china-summit-111845856.html",
-      "published": "2026-09-23T11:18:45Z",
+      "category": "financials",
+      "headline": "BMO Sees Loan Demand Surge as Returns Rise Toward 2027 Targets",
+      "image": "news-images/536bd0f15afb8a0a0eb27ebb.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bmo-sees-loan-demand-surge-020206941.html",
+      "published": "2026-09-23T02:02:06Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "other",
+      "headline": "Goldman Leads Bidding for $37 Billion Palmer Square, a CLO Powerhouse",
+      "image": "news-images/bfa942a44ba3a49e974320e0.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/goldman-leads-bidding-37-billion-040100673.html",
+      "published": "2026-09-23T04:01:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Wedbush Goes Old School with Analog Economy ETF",
+      "image": "news-images/768788b09f14ee283fbbe080.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/wedbush-goes-old-school-analog-040300728.html",
+      "published": "2026-09-23T04:03:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "For Sale: What Asset Managers Want in Indie ETF Shops",
+      "image": "news-images/22d6321c45f190fe4ce3fefa.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/sale-asset-managers-want-indie-040200939.html",
+      "published": "2026-09-23T04:02:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "How Is Incyte\u2019s Stock Performance Compared to Other Biotech Stocks?",
+      "image": "news-images/7077b88df9537360892b7f7e.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/incyte-stock-performance-compared-other-045305372.html",
+      "published": "2026-09-23T04:53:05Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Nvidia doubles down on selling to both sides of the AI race",
+      "image": "news-images/b80c445decd5d62477e40589.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/nvidia-doubles-down-selling-both-020300627.html",
+      "published": "2026-09-23T02:03:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "NewAmsterdam Pharma (NAMS) Wins EU Approvals. Can Cholesterol Pills Drive Royalties?",
+      "image": "news-images/869750f19dc7bf56635e63c9.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/newamsterdam-pharma-nams-wins-eu-012024900.html",
+      "published": "2026-09-23T01:20:24Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Chewy (CHWY) vs. Petco (WOOF): Proven Growth Story or Turnaround Bet?",
+      "image": "news-images/718e0a4795697aba8ca6120e.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/chewy-chwy-vs-petco-woof-045607515.html",
+      "published": "2026-09-23T04:56:07Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Chinese beauty product exporters are sitting pretty despite US trade dispute",
+      "image": "news-images/d474dae8817b544b923dc9d9.jpg",
+      "link": "https://finance.yahoo.com/economy/policy/articles/chinese-beauty-product-exporters-sitting-033541899.html",
+      "published": "2026-09-23T03:35:41Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Interparfums (IPAR) Extends Cavalli Fragrance Deal Through 2046. Can it Boost Profits?",
+      "image": "news-images/159cc8d8e4042f0778894861.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/interparfums-ipar-extends-cavalli-fragrance-011630256.html",
+      "published": "2026-09-23T01:16:30Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Bank of America backs Meta stock after Muse surprise",
+      "image": "news-images/d0005b4849aa8060b768608e.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/bank-america-backs-meta-stock-020300157.html",
+      "published": "2026-09-23T02:03:00Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "On Holding (ONON) Outlines Ambitious Goals and $1B Buyback, Jumps 7.6%",
+      "image": "news-images/2983dc4cb11a0ef2aa81bc00.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/holding-onon-outlines-ambitious-goals-025141918.html",
+      "published": "2026-09-23T02:51:41Z",
+      "sentiment": "bullish"
+    },
+    {
+      "category": "tech",
+      "headline": "Can Accenture (ACN) Profit From AI Safety While AI Pressures Its Own Business Model?",
+      "image": "news-images/3be1335d4c0706f61e97d697.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/accenture-acn-profit-ai-safety-051220155.html",
+      "published": "2026-09-23T05:12:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Hudson Technologies (HDSN) Signs Icorium Deal. Can Better Refrigerant Recycling Lift Margins?",
+      "image": "news-images/a5c854245281b6a63f8c140a.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/hudson-technologies-hdsn-signs-icorium-010854703.html",
+      "published": "2026-09-23T01:08:54Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Lockheed Martin (LMT) Is Spending Ahead on JATM. Will a Multiyear Contract Follow?",
+      "image": "news-images/9d7e7909ec96c23a8b136899.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/lockheed-martin-lmt-spending-ahead-052004669.html",
+      "published": "2026-09-23T05:20:04Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "The Couple Who Retired at 62 With $1.4 Million and Paid Almost Nothing in Taxes for Eight Years",
+      "image": "news-images/a7e20a8956735af742a32582.jpg",
+      "link": "https://finance.yahoo.com/markets/options/articles/couple-retired-62-1-4-014508781.html",
+      "published": "2026-09-23T01:45:08Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Cantor Fitzgerald Sees Big Upside in Securitize (SECZ): Is It Time to Buy?",
+      "image": "news-images/062321275d40ae53cd9044bf.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/cantor-fitzgerald-sees-big-upside-052416150.html",
+      "published": "2026-09-23T05:24:16Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "tech",
+      "headline": "Palantir Reveals Its AI Sovereignty Strategy And Wall Street Is Starting to Believe It",
+      "image": "news-images/4d9aa0397f03fe3ec2ee5d5f.jpg",
+      "link": "https://finance.yahoo.com/technology/ai/articles/palantir-reveals-ai-sovereignty-strategy-054053859.html",
+      "published": "2026-09-23T05:40:53Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "financials",
+      "headline": "Churchill Downs (CHDN) Prices $500 Million Loan. Could Interest Costs Rise?",
+      "image": "news-images/796d3b3db7684c9722233432.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/churchill-downs-chdn-prices-500-005951580.html",
+      "published": "2026-09-23T00:59:51Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Atlanticus Holdings (ATLC) Sells Auto Finance Unit. Can it Replace Lost Earnings?",
+      "image": "news-images/846ec5c170c2c5c5377ac35b.jpg",
+      "link": "https://finance.yahoo.com/markets/stocks/articles/atlanticus-holdings-atlc-sells-auto-005703318.html",
+      "published": "2026-09-23T00:57:03Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "A 45-Year-Old Inherits Dad\u2019s $1 Million IRA and Discovers the IRS Already Owns a Chunk of It",
+      "image": "news-images/f6e32198c7098839178f932f.jpg",
+      "link": "https://finance.yahoo.com/markets/currencies/articles/45-old-inherits-dad-1-020410593.html",
+      "published": "2026-09-23T02:04:10Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "healthcare",
+      "headline": "Innate Pharma (IPHA) Closes Sobi Deal. Can the New Funding Keep Drug Trials on Track?",
+      "image": "news-images/196fddb651538f6997b79290.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/innate-pharma-ipha-closes-sobi-004020490.html",
+      "published": "2026-09-23T00:40:20Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Treace Medical (TMCI) Reports Five-Year Bunion Results. Can Evidence Drive Adoption?",
+      "image": "news-images/c7fd9059cec60945e665a214.jpg",
+      "link": "https://finance.yahoo.com/healthcare/articles/treace-medical-tmci-reports-five-003835445.html",
+      "published": "2026-09-23T00:38:35Z",
+      "sentiment": "neutral"
+    },
+    {
+      "category": "other",
+      "headline": "Pinterest (PINS) Announces Visual Search Ads. Can Shopping Interest Bring More Revenue?",
+      "image": "news-images/14deb0ad639e48af8f1eca53.jpg",
+      "link": "https://finance.yahoo.com/media-advertising/articles/pinterest-pins-announces-visual-search-003258719.html",
+      "published": "2026-09-23T00:32:58Z",
       "sentiment": "neutral"
     }
   ]
