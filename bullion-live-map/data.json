@@ -19,18 +19,18 @@
     "dow": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo ^DJI",
-      "value": 51726.5
+      "value": 51256.07
     },
     "dxy": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo DX-Y.NYB",
-      "value": 101.03
+      "value": 101.3
     },
     "fed_bs": {
       "cadence": "weekly",
@@ -43,16 +43,16 @@
     "fed_decision_kalshi": {
       "cadence": "fomc",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Kalshi KXFED ladder, bucketed against FRED DFEDTARU",
       "value": {
         "buckets": {
           "cut25": 0.0,
-          "cut50plus": 0.015,
-          "hike25": 0.665,
-          "hike50plus": 0.01,
-          "hold": 0.32
+          "cut50plus": 0.01,
+          "hike25": 0.64,
+          "hike50plus": 0.015,
+          "hold": 0.34
         },
         "current_upper": 4.0,
         "event": "KXFED-26OCT",
@@ -62,16 +62,16 @@
     "fed_decision_polymarket": {
       "cadence": "fomc",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Polymarket 'Fed Decision' event",
       "value": {
         "buckets": {
           "cut25": 0.0055,
-          "cut50plus": 0.0025,
-          "hike25": 0.695,
-          "hike50plus": 0.0075,
-          "hold": 0.305
+          "cut50plus": 0.0035,
+          "hike25": 0.645,
+          "hike50plus": 0.0095,
+          "hold": 0.345
         },
         "event": "fed-decision-in-october-20260617190323537",
         "meeting_close": "2026-10-29"
@@ -80,32 +80,32 @@
     "ffr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-21",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-22",
       "source": "FRED DFF",
       "value": 3.88
     },
     "gold_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo GC=F",
-      "value": 4323.1
+      "value": 4289.4
     },
     "hy_oas": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-22",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-23",
       "source": "FRED BAMLH0A0HYM2",
-      "value": 2.68
+      "value": 2.73
     },
     "ig_oas": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-22",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-23",
       "source": "FRED BAMLC0A0CM",
       "value": 0.77
     },
@@ -128,10 +128,10 @@
     "nasdaq": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo ^IXIC",
-      "value": 26982.38
+      "value": 26779.23
     },
     "nfci": {
       "cadence": "weekly",
@@ -152,50 +152,50 @@
     "rrp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-22",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-23",
       "source": "FRED RRPONTSYD",
       "value": 0.5
     },
     "sofr": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-22",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-23",
       "source": "FRED SOFR",
       "value": 3.87
     },
     "spx": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo ^GSPC",
-      "value": 7724.52
+      "value": 7680.24
     },
     "tbill_3m": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-21",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-22",
       "source": "FRED DTB3",
-      "value": 4.02
+      "value": 4.01
     },
     "us10y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-21",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-22",
       "source": "FRED DGS10",
       "value": 4.96
     },
     "us2y": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-22",
-      "ref_date": "2026-09-21",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-22",
       "source": "FRED DGS2",
-      "value": 4.76
+      "value": 4.71
     },
     "usd_reserve_share": {
       "cadence": "quarterly",
@@ -216,71 +216,50 @@
     "wti_px": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-16",
-      "ref_date": "2026-09-15",
+      "published": "2026-09-23",
+      "ref_date": "2026-09-22",
       "source": "FRED DCOILWTICO",
-      "value": 107.02
+      "value": 96.41
     },
     "xle": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo XLE",
-      "value": 62.43
+      "value": 63.09
     },
     "xlf": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo XLF",
-      "value": 54.97
+      "value": 54.38
     },
     "xlk": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo XLK",
-      "value": 194.75
+      "value": 193.22
     },
     "xlp": {
       "cadence": "daily",
       "class": "measured",
-      "published": "2026-09-23",
-      "ref_date": "2026-09-23",
+      "published": "2026-09-24",
+      "ref_date": "2026-09-24",
       "source": "Yahoo XLP",
-      "value": 82.72
+      "value": 82.5
     }
   },
-  "generated_at": "2026-09-23T14:52:02Z",
+  "generated_at": "2026-09-24T14:53:02Z",
   "history": {
     "2025-09-01": {
       "cpi_yoy": 3.0,
       "m2": 22176.1,
       "nfp_mom": 76.0
-    },
-    "2025-09-23": {
-      "dow": 46292.78,
-      "dxy": 97.26,
-      "ffr": 4.09,
-      "gold_px": 3815.7,
-      "hy_oas": 2.71,
-      "ig_oas": 0.75,
-      "nasdaq": 22573.47,
-      "rrp": 14.4,
-      "sofr": 4.12,
-      "spx": 6656.92,
-      "tbill_3m": 3.86,
-      "us10y": 4.12,
-      "us2y": 3.53,
-      "vix": 16.6,
-      "wti_px": 63.76,
-      "xle": 44.59,
-      "xlf": 53.76,
-      "xlk": 140.11,
-      "xlp": 78.35
     },
     "2025-09-24": {
       "dow": 46121.28,
@@ -6000,6 +5979,7 @@
       "us10y": 5.01,
       "us2y": 4.74,
       "vix": 17.7,
+      "wti_px": 103.62,
       "xle": 64.03,
       "xlf": 55.93,
       "xlk": 183.93,
@@ -6021,6 +6001,7 @@
       "us10y": 4.94,
       "us2y": 4.67,
       "vix": 15.4,
+      "wti_px": 103.21,
       "xle": 64.48,
       "xlf": 55.88,
       "xlk": 188.06,
@@ -6042,6 +6023,7 @@
       "us10y": 5.01,
       "us2y": 4.76,
       "vix": 14.8,
+      "wti_px": 101.44,
       "xle": 64.31,
       "xlf": 55.86,
       "xlk": 189.6,
@@ -6068,29 +6050,52 @@
       "us10y": 4.96,
       "us2y": 4.76,
       "vix": 14.9,
+      "wti_px": 96.97,
       "xle": 62.46,
       "xlf": 55.9,
       "xlk": 194.85,
       "xlp": 81.92
     },
     "2026-09-22": {
+      "ffr": 3.88,
       "gold_px": 4376.4,
       "hy_oas": 2.68,
       "ig_oas": 0.77,
       "rrp": 0.5,
       "sofr": 3.87,
-      "vix": 14.2
+      "tbill_3m": 4.01,
+      "us10y": 4.96,
+      "us2y": 4.71,
+      "vix": 14.2,
+      "wti_px": 96.41,
+      "xle": 61.78,
+      "xlf": 54.8
     },
     "2026-09-23": {
-      "dow": 51726.5,
-      "dxy": 101.04,
-      "gold_px": 4323.1,
-      "nasdaq": 26982.38,
-      "spx": 7724.52,
-      "xle": 62.43,
-      "xlf": 54.97,
-      "xlk": 194.75,
-      "xlp": 82.72
+      "dow": 51511.59,
+      "dxy": 101.1,
+      "gold_px": 4318.4,
+      "hy_oas": 2.73,
+      "ig_oas": 0.77,
+      "nasdaq": 26936.04,
+      "rrp": 0.5,
+      "sofr": 3.87,
+      "spx": 7706.03,
+      "xle": 62.37,
+      "xlf": 54.54,
+      "xlk": 195.34,
+      "xlp": 82.43
+    },
+    "2026-09-24": {
+      "dow": 51256.07,
+      "dxy": 101.3,
+      "gold_px": 4289.4,
+      "nasdaq": 26779.23,
+      "spx": 7680.24,
+      "xle": 63.1,
+      "xlf": 54.38,
+      "xlk": 193.22,
+      "xlp": 82.5
     }
   },
   "schema": 2
