@@ -719,6 +719,42 @@
   .health-bar-wrap { margin: 2px 0 4px; }
   .health-bar-bg { height: 7px; background: var(--bg-deep); border-radius: 0; overflow: hidden; border: 1px solid var(--border); }
   .health-bar-fill { height: 100%; border-radius: 0; transition: width 0.8s ease, background 0.8s ease; }
+
+  /* Per-dimension macro read (2026-09-25). Everything a row claims is visible
+     without clicking, per the bullion-descriptions render contract: no
+     chevrons, no expand toggles. Colour is redundant reinforcement only, the
+     sign and the words carry the meaning on their own. */
+  #dimension-rows { margin-top: 4px; }
+  .dim-scale { font-size: 10.5px; color: var(--text-dim); line-height: 1.5; margin-bottom: 7px; }
+  .dim-row { border: 1px solid var(--border); border-left: 2px solid var(--border);
+             background: var(--bg-panel2); padding: 8px 9px; margin-bottom: 6px; }
+  .dim-row.dim-stress { border-left-color: #e0654f; }
+  .dim-row.dim-calm   { border-left-color: #7bbf8e; }
+  .dim-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .dim-name { font-size: 12px; font-weight: 600; letter-spacing: 0.02em; }
+  .dim-z { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .dim-z.dim-stress { color: #e0654f; }
+  .dim-z.dim-calm { color: #7bbf8e; }
+  .dim-z.dim-neutral { color: var(--text-dim); }
+  .dim-verdict { font-size: 11.5px; color: var(--text); margin-top: 2px; }
+  .dim-driver { font-size: 11px; color: var(--text-dim); line-height: 1.55; margin-top: 6px; }
+  .dim-driver b { color: var(--text); font-weight: 600; }
+  .dim-tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.05em;
+             border: 1px solid var(--border); padding: 0 4px; white-space: nowrap; }
+  .dim-flag { display: block; margin-top: 3px; color: var(--gold); }
+  .dim-read { display: block; margin-top: 3px; padding-top: 3px; border-top: 1px dashed var(--border); }
+  .dim-why { margin-top: 7px; padding-top: 5px; border-top: 1px solid var(--border); }
+  .dim-why-label { font-size: 9.5px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-dim); }
+  .dim-why-row { font-size: 11px; color: var(--text-dim); line-height: 1.55; margin-top: 3px; }
+  .dim-why-row b { color: var(--text); font-weight: 600; }
+  .dim-gap { font-size: 11px; color: var(--text-dim); font-style: italic; line-height: 1.55; }
+  .dim-caveat { font-size: 10.5px; color: var(--text-dim); margin-top: 6px;
+                padding-top: 4px; border-top: 1px dashed var(--border); line-height: 1.5; }
+  .dim-empty { font-size: 11px; color: var(--text-dim); }
+  .dim-shock-note { font-size: 10.5px; line-height: 1.5; color: var(--gold);
+                    border: 1px solid var(--gold); padding: 5px 7px; margin-bottom: 7px; }
+  .dim-prov { font-size: 10px; text-transform: uppercase; letter-spacing: 0.05em;
+              color: var(--text-dim); margin-top: 2px; }
   .run-btn { display: flex; align-items: center; gap: 6px; justify-content: center; width: 100%; font-size: 12px; padding: 9px; border-radius: 0; border: 1px solid var(--accent); background: var(--bg-panel2); color: var(--accent); cursor: pointer; transition: background 0.15s, color 0.15s; font-weight: 500; }
   .run-btn:hover { background: var(--accent); color: #fff; }
   .run-btn:disabled { opacity: 0.5; cursor: default; }
@@ -1123,6 +1159,7 @@
       <div class="health-bar-wrap">
         <div class="health-bar-bg"><div class="health-bar-fill" id="health-bar" style="width:0%;background:var(--gold)"></div></div>
       </div>
+      <div id="dimension-rows"></div>
       <div class="narrative-box" id="narrative-box">Tap "Run macro analysis" for a quantitative read on current conditions.</div>
       <div id="impacts-section" class="hidden" style="margin-top:8px">
         <div class="drawer-label" id="impacts-label">Node impact multipliers</div>
@@ -6236,6 +6273,7 @@ function runMacroAnalysis() {
   const barColor = composite.score > 70 ? '#7bbf8e' : composite.score > 45 ? '#e0b15a' : '#e0654f';
   document.getElementById('health-bar').style.width = composite.score + '%';
   document.getElementById('health-bar').style.background = barColor;
+  renderDimensionReads(composite, live);
   nodeMultipliers = nodes.mults;
   renderImpacts(nodeMultipliers, null,
     state.shock ? 'Scenario node impact multipliers' : 'Current-conditions node impact multipliers');
@@ -6437,7 +6475,7 @@ function openAuditLog() {
 
   const macroEngineSection =
     '<h3>Macro engine methodology</h3><p class="audit-note">Node-level current-conditions readings below are computed from real driver deviations run through the existing, individually-sourced <code>NODE_ELASTICITY</code> matrix (not AI, not PCA). ' +
-    'The health score above is a hierarchical, equal-weighted composite over 7 fields in 5 categories (Credit: HY/IG spreads; Volatility: VIX; Equity valuation: SPX; Funding: Fed balance sheet, RRP; Safe assets: yield curve slope) &mdash; each field is sign-aligned to a fixed &ldquo;more stress&rdquo;/&ldquo;less stress&rdquo; convention and z-scored against its own historical baseline, averaged within category, then averaged across categories. This replaced an earlier PCA-weighted version that was found inverted under real stress and disabled; see ' +
+    'The health score above is a hierarchical, equal-weighted composite over 7 fields in 5 categories (Credit: HY/IG spreads; Volatility: VIX; Equity valuation: SPX; Funding: Fed balance sheet, RRP; Safe assets: yield curve slope) &mdash; each field is sign-aligned to a fixed &ldquo;more stress&rdquo;/&ldquo;less stress&rdquo; convention and z-scored against its own historical baseline, averaged within category, then averaged across categories. The panel beneath it breaks that same computation back out into its five categories, each showing its own signed z, the fields driving it, the length of history it is measured against, and what the audited causal links on this map say moves it. Unverified links are excluded and the row says so. Note that a field can sit far from its average and still lower the stress read, which is flagged in place rather than averaged away. This replaced an earlier PCA-weighted version that was found inverted under real stress and disabled; see ' +
     '<code>docs/superpowers/specs/2026-08-11-bullion-mkultra-composite-score-fix-design.md</code> for the full methodology and why PCA-discovered weights were abandoned. ' +
     'The mean/std each field is scored against was last computed <b>' + (BASELINE_STATS.generated_at || 'unknown date') + '</b> (<code>backfill_baseline.py</code>, refreshed automatically once a year by <code>annual-baseline-refresh.yml</code> — a much slower cadence than the daily live-data cron, since a 15yr/2yr mean/std drifts slowly), so a long enough gap since that date is itself a caveat on every z-score below.</p>' +
     '<h3>Macro engine node coverage</h3><p class="audit-note">' + macroCoverageNote + '</p>' +
@@ -6616,13 +6654,175 @@ document.addEventListener('click', (e) => {
 // !beginnerMode) therefore always renders the plain-English variant now,
 // never the expert/cited one, until something re-exposes a toggle for it.
 
+// ─── PER-DIMENSION MACRO READ (2026-09-25) ──────────────────────────────────
+// computeCompositeScore already computes a signed z per category and then
+// discards it: only leadingCategory survived, for one clause of narration.
+// This surfaces the five categories themselves, because a single averaged
+// score hides two things the project's done-criteria specifically ask for:
+//
+//   1. Baseline windows differ. Credit, Volatility and Safe assets are
+//      z-scored against 15 years of history; Equity valuation and Funding
+//      against 2. Averaging them hides how much less is known about two of
+//      the five, so each row states its own window.
+//   2. A field can be far from normal AND calming at the same time. An spx
+//      well above its mean LOWERS the stress read (stress_sign is -1) while
+//      being the most stretched number on the board. That is exactly the
+//      "what is being inflated" question, and the composite answers it with
+//      the one number that looks most benign.
+//
+// Causal explanations are NOT authored here. They are read out of the audited
+// LINKS graph (already merged with PLUMBING_LINKS at load). Per the
+// bullion-descriptions standard, an unaudited guess rendered authoritatively
+// is worse than an honest gap, so aud:false links are excluded and the row
+// says so rather than quietly dropping them.
+// Of the 7 composite fields, only these are actually moved by a running
+// scenario: compositeLiveFromState overrides vix/spx/us10y/us2y (curve_slope
+// is derived from the latter two). hy_oas, ig_oas, fed_bs and rrp have no
+// driver anywhere in the 5-variable model and stay at their REAL live values
+// under a shock -- a documented model limitation, not a bug. That means a
+// shocked panel mixes hypothetical and live numbers, so it must say which is
+// which rather than present them as one coherent read.
+const DIM_SHOCKABLE_FIELDS = ['vix', 'spx', 'curve_slope'];
+const DIM_FIELD_META = {
+  hy_oas:      { label:'High-yield spread',        kind:'market',       fmt:function(v){ return v.toFixed(2) + '%'; } },
+  ig_oas:      { label:'Investment-grade spread',  kind:'market',       fmt:function(v){ return v.toFixed(2) + '%'; } },
+  vix:         { label:'VIX',                      kind:'market',       fmt:function(v){ return v.toFixed(1); } },
+  spx:         { label:'S&P 500',                  kind:'market',       fmt:function(v){ return Math.round(v).toLocaleString('en-US'); } },
+  fed_bs:      { label:'Fed balance sheet',        kind:'administered', fmt:function(v){ return '$' + (v/1e6).toFixed(2) + 'T'; } },
+  rrp:         { label:'Reverse repo balance',     kind:'administered', fmt:function(v){ return '$' + v.toFixed(1) + 'B'; } },
+  curve_slope: { label:'10Y minus 2Y',             kind:'market',       fmt:function(v){ return v.toFixed(2) + ' pts'; } },
+};
+function dimBand(sz) {
+  var a = Math.abs(sz);
+  return a < 0.5 ? 'in its normal range' : (a <= 1.5 ? 'somewhat outside normal' : 'well outside normal');
+}
+function dimDirection(sz) { return sz > 0 ? 'more stress than usual' : 'less stress than usual'; }
+function dimNodeLabel(id) { var n = NODES.find(function(x){ return x.id === id; }); return n ? n.label : id; }
+
+function buildDimensionReads(composite, live) {
+  var withSlope = Object.assign({}, live);
+  if (typeof live.us10y === 'number' && typeof live.us2y === 'number') {
+    withSlope.curve_slope = live.us10y - live.us2y;
+  }
+  var byCat = {};
+  Object.keys(BASELINE_STATS.stress_sign).forEach(function(f){
+    var c = BASELINE_STATS.category[f];
+    (byCat[c] = byCat[c] || []).push(f);
+  });
+  return Object.keys(composite.categoryContributions).map(function(cat){
+    var sz = composite.categoryContributions[cat];
+    var all = byCat[cat] || [];
+    var used = all.filter(function(f){ return composite.fieldsUsed.indexOf(f) >= 0; });
+    var drivers = used.map(function(f){
+      var st = BASELINE_STATS.fields[f], v = withSlope[f];
+      var z = _clip3((v - st.mean) / st.std);
+      var signedZ = BASELINE_STATS.stress_sign[f] * z;
+      var meta = DIM_FIELD_META[f] || { label:f, kind:'market', fmt:function(x){ return String(x); } };
+      var guide = METRIC_GUIDE.find(function(m){ return m.field === f; });
+      return { f:f, label:meta.label, kind:meta.kind, shown:meta.fmt(v), z:z, signedZ:signedZ,
+               window:st.window_years, read:guide ? guide.read : null, src:guide ? guide.src : null,
+               shockable: DIM_SHOCKABLE_FIELDS.indexOf(f) >= 0,
+               calmingButFar: Math.abs(z) >= 1.5 && signedZ < 0 };
+    });
+    var nodeIds = [];
+    used.forEach(function(f){
+      var n = FIELD_TO_NODE[f];
+      if (n && nodeIds.indexOf(n) < 0) nodeIds.push(n);
+    });
+    var causes = [], excluded = 0;
+    nodeIds.forEach(function(nid){
+      LINKS.filter(function(l){ return l.t === nid; }).forEach(function(l){
+        if (l.aud === false) { excluded++; return; }
+        causes.push({ from:l.s, w:l.w, why:l.why });
+      });
+    });
+    causes.sort(function(a,b){ return b.w - a.w; });
+    return {
+      cat:cat, signedZ:sz, band:dimBand(sz), direction:dimDirection(sz), drivers:drivers,
+      anyShockable: drivers.some(function(d){ return d.shockable; }),
+      minWindow: drivers.length ? Math.min.apply(null, drivers.map(function(d){ return d.window; })) : null,
+      causes: causes.slice(0, 3), excludedUnaudited: excluded,
+      missing: all.filter(function(f){ return composite.fieldsUsed.indexOf(f) < 0; }),
+    };
+  }).sort(function(a,b){ return b.signedZ - a.signedZ; });
+}
+
+function renderDimensionReads(composite, live) {
+  var box = document.getElementById('dimension-rows');
+  if (!box) return;
+  var reads = buildDimensionReads(composite, live);
+  if (!reads.length) {
+    box.innerHTML = '<div class="dim-empty">No dimension has enough live data to read right now.</div>';
+    return;
+  }
+  var shocked = !!state.shock;
+  var head = '<div class="drawer-label" style="margin-top:10px">What is driving that score</div>'
+    + '<div class="dim-scale">Each dimension is measured against its own history, in standard deviations. '
+    + 'A positive number means more stress than usual. A negative number means less.</div>';
+  if (shocked) {
+    head += '<div class="dim-shock-note">A scenario is running, so this panel is mixed. '
+      + 'Only volatility, equity valuation and safe assets respond to it. Credit and funding have '
+      + 'no driver in the scenario model and are still showing real live data. Rows are marked.</div>';
+  }
+  box.innerHTML = head + reads.map(function(r){
+    var cls = r.signedZ > 0.5 ? 'dim-stress' : (r.signedZ < -0.5 ? 'dim-calm' : 'dim-neutral');
+    var h = '<div class="dim-row ' + cls + '">'
+      + '<div class="dim-head"><span class="dim-name">' + escapeHTML(r.cat) + '</span>'
+      + '<span class="dim-z ' + cls + '">' + (r.signedZ > 0 ? '+' : '') + r.signedZ.toFixed(2) + '</span></div>'
+      + (shocked ? '<div class="dim-prov">' + (r.anyShockable
+            ? 'Hypothetical. This dimension is responding to the running scenario.'
+            : 'Real live data. This dimension does not respond to the running scenario.') + '</div>' : '')
+      + '<div class="dim-verdict">' + r.band + ', ' + r.direction + '.</div>';
+    r.drivers.forEach(function(d){
+      h += '<div class="dim-driver"><b>' + escapeHTML(d.label) + '</b> at ' + escapeHTML(d.shown) + ' is '
+        + (Math.abs(d.z) < 0.05
+            ? 'sitting right on its own average'
+            : Math.abs(d.z).toFixed(1) + ' standard deviations ' + (d.z >= 0 ? 'above' : 'below') + ' its own average')
+        + (d.kind === 'administered' ? ' <span class="dim-tag">set by policy, not the market</span>' : '')
+        + '.';
+      if (d.calmingButFar) {
+        h += ' <span class="dim-flag">It is far from normal and still lowers the stress read, '
+          + 'which makes it the clearest candidate for what is inflated right now.</span>';
+      }
+      if (d.read) {
+        h += '<span class="dim-read">How to read it: ' + enrichText(d.read)
+          + (d.src ? ' <i>' + escapeHTML(d.src) + '</i>' : '') + '</span>';
+      }
+      h += '</div>';
+    });
+    if (r.causes.length) {
+      h += '<div class="dim-why"><span class="dim-why-label">What moves it</span>';
+      r.causes.forEach(function(c){
+        h += '<div class="dim-why-row"><b>' + escapeHTML(dimNodeLabel(c.from)) + '</b> &middot; '
+          + strengthWord(c.w) + '. ' + enrichText(c.why) + '</div>';
+      });
+      h += '</div>';
+    } else {
+      h += '<div class="dim-why dim-gap">This map carries no verified causal links into '
+        + escapeHTML(r.cat.toLowerCase()) + ', so nothing is claimed here about what moves it.</div>';
+    }
+    var notes = [];
+    if (r.minWindow && r.minWindow < 15) {
+      notes.push('Baseline is only ' + r.minWindow + ' years of history, a weaker read than the 15-year dimensions.');
+    }
+    if (r.excludedUnaudited) {
+      notes.push(r.excludedUnaudited + ' causal link' + (r.excludedUnaudited > 1 ? 's' : '')
+        + ' into this dimension ' + (r.excludedUnaudited > 1 ? 'are' : 'is')
+        + ' unverified and excluded, so this list is partial.');
+    }
+    if (r.missing.length) notes.push('No live data for: ' + escapeHTML(r.missing.join(', ')) + '.');
+    if (notes.length) h += '<div class="dim-caveat">' + notes.join(' ') + '</div>';
+    return h + '</div>';
+  }).join('');
+}
+
 // ─── METRIC GUIDE (Mk9) ─────────────────────────────────────────────────────
 // The map used to show US2Y, VIX, DXY and so on with no explanation of what any
 // of them ARE, which made the whole metrics panel opaque to a beginner. Each
 // entry answers three questions: what is it, why does it matter, and how do I
 // read the number in front of me.
 const METRIC_GUIDE = [
-  { name:'VIX (the "Fear Index")',
+  { name:'VIX (the "Fear Index")', field:'vix',
     what:'The market\u2019s expectation of how violently the S&P 500 will swing over the next 30 days, calculated from the prices people are paying for S&P options. It is not a forecast of direction. It measures expected turbulence, not expected loss.',
     matter:'It matters because it is the market\u2019s own pulse reading. Fear is the trigger that turns a price move into a chain reaction: when the VIX jumps, funds cut risk, brokers demand more collateral, and money floods out of stocks and into Treasuries and gold all at once. That is why the VIX node on this map has so many outgoing arrows.',
     read:'Below 15 = complacent. 15 to 20 = normal. Above 30 = genuine panic. It hit roughly 82 in March 2020, its highest close on record. The VIX and daily S&P returns correlate around -0.74 (CBOE) \u2014 the tightest relationship anywhere on this map.',
@@ -6637,7 +6837,7 @@ const METRIC_GUIDE = [
     matter:'It matters because it is the anchor price of the entire economy. Your mortgage rate is priced off it. Corporate borrowing is priced off it. Stock valuations are discounted against it \u2014 which is why a rising 10Y hits long-duration tech hardest. If one number deserves to be called the world\u2019s most important, this is it.',
     read:'Moves less than the 2Y for the same Fed action, roughly half as much. In a panic it FALLS, because frightened money buys Treasuries and pushes prices up (which pushes yields down). That inverse relationship confuses everyone at first.',
     src:'Source: FRED (DGS10).' },
-  { name:'The Spread (10Y minus 2Y)',
+  { name:'The Spread (10Y minus 2Y)', field:'curve_slope',
     what:'Simply the 10Y yield minus the 2Y yield, quoted in basis points (1bp = 0.01%). Normally it is positive: lending for ten years is riskier than lending for two, so it should pay more.',
     matter:'It matters because when it goes NEGATIVE \u2014 an "inverted curve" \u2014 it means the market expects the Fed to be cutting rates soon, which usually means the market expects a recession. An inversion has preceded every U.S. recession since 1955, with only one false signal, though the lag has run anywhere from six months to two years.',
     read:'Positive = normal. Near zero = flat, the market is uncertain. Negative = inversion, the classic recession warning. Note the trap: the recession usually arrives AFTER the curve un-inverts, not while it is inverted.',
@@ -6652,7 +6852,7 @@ const METRIC_GUIDE = [
     matter:'It matters because roughly half of all international trade is invoiced in dollars, and a great deal of foreign debt is issued in dollars. When the dollar strengthens, every foreign borrower\u2019s debt gets heavier in their own currency, and everything priced in dollars \u2014 oil, gold, copper \u2014 gets more expensive for the rest of the world. A strong dollar is a global tightening.',
     read:'Rose about 19% in 2022 as the Fed hiked. It is the transmission belt from U.S. policy to emerging-market stress.',
     src:'Source: ICE.' },
-  { name:'SPX (the S&P 500)',
+  { name:'SPX (the S&P 500)', field:'spx',
     what:'An index of 500 large U.S. public companies, weighted by market value. It is the default shorthand for "the stock market".',
     matter:'It matters as the scoreboard rather than the engine. Most of what moves it originates elsewhere on this map \u2014 in rates, in inflation, in fear. It is worth watching precisely because it aggregates all of them into one number.',
     read:'Cap-weighted, so a handful of mega-cap tech names carry outsized influence. When you see the S&P and the Nasdaq diverge, that concentration is usually why.',
@@ -6672,6 +6872,26 @@ const METRIC_GUIDE = [
     matter:'It matters because oil is an input cost to nearly everything physical, so it feeds straight into headline inflation, which feeds into Fed policy, which feeds into every rate on this map. It is also the cleanest live read on geopolitical risk: when a supply route is threatened, crude moves first.',
     read:'A roughly $10/bbl rise adds about 0.3 to 0.4 percentage points to headline CPI (IMF). Core CPI absorbs less, since core strips energy out directly \u2014 but the second-round effects still leak in through transport and manufacturing.',
     src:'Source: EIA.' },
+  { name:'High-Yield Spread (HY OAS)', field:'hy_oas',
+    what:'The extra yearly interest a risky company pays to borrow, on top of what the U.S. government pays for a loan of the same length. Quoted in percentage points. OAS stands for option-adjusted spread.',
+    matter:'It matters because it is the market pricing the odds of companies failing to pay their debts. When it is narrow, lenders are relaxed and even weak borrowers get cheap money. When it widens quickly, credit is closing, and the companies with the least margin for error lose access to cash first.',
+    read:'Roughly 3 percentage points is the 15-year average. Under 3 is easy credit. Above 6 has historically meant real distress, and it passed 10 in both the 2008 crisis and March 2020.',
+    src:'Source: FRED (BAMLH0A0HYM2).' },
+  { name:'Investment-Grade Spread (IG OAS)', field:'ig_oas',
+    what:'The same measure as the high-yield spread, but for companies rated safe enough that pension funds and insurers are permitted to hold their debt.',
+    matter:'It matters because investment-grade borrowers are the large, stable companies. When their borrowing cost rises, stress has spread past the weakest names and reached the core of the corporate economy.',
+    read:'About 0.9 percentage points is the 15-year average. It moves in a far narrower band than high yield, so a shift that looks small here carries the same signal as a large move there.',
+    src:'Source: FRED (BAMLC0A0CM).' },
+  { name:'Fed Balance Sheet', field:'fed_bs',
+    what:'The total value of assets the Federal Reserve owns, mostly Treasury bonds and mortgage-backed securities. It grows when the Fed buys bonds and shrinks when it lets them mature without replacing them.',
+    matter:'It matters because buying bonds puts newly created cash into the financial system, and letting them run off pulls cash back out. This is the main lever the Fed has left once moving interest rates alone is not doing enough.',
+    read:'It sat near $0.9T before 2008 and peaked near $9T in 2022. Growth is loosening, shrinking is tightening. The direction matters far more than the level.',
+    src:'Source: FRED (WALCL).' },
+  { name:'Reverse Repo Balance (RRP)', field:'rrp',
+    what:'Cash that money market funds and banks park overnight at the Federal Reserve instead of lending it elsewhere, taking bonds as collateral in return. Measured in billions of dollars.',
+    matter:'It matters as a measure of cash with nowhere better to go. A large balance means the system is holding spare money it does not want to lend out. As it drains toward zero that cushion is gone, and the funding market has much less slack if something goes wrong.',
+    read:'It was effectively zero before 2021, peaked above $2,500B in 2022, and has since drained close to zero again. Near zero means the cushion is used up.',
+    src:'Source: FRED (RRPONTSYD).' },
 ];
 function buildMetricGuideHTML() {
   const box = document.getElementById('metricguide-box');
