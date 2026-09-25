@@ -120,7 +120,73 @@ why it matters. Not self-assessed. One panel run closes criteria 1 and 2 togethe
 Not a mandate to restart the composite health score, redesign the nav again, or add features not
 listed above. Anything not on this list is an idea for the someday list, per stage 4.
 
+## Final Refine scope — declared by the owner 2026-09-25
+
+**This is the last work Bullion gets.** Three items, below. When they and criteria 1-4 are met,
+Bullion is released and closed. Per stage 6, anything not on this list is an idea for the someday
+list, not a reason to reopen.
+
+### R1. Tutorials
+
+Extend the existing first-run coach (sequential, dismissible, `#coach`) to cover what it currently
+does not: the Analysis tab, the composite score, and the new per-dimension panel. Reuse the
+component that already exists. Do not build a second tutorial system.
+
+**Met when:** a stage-5 panel member who has never seen the map reaches the Analysis tab, runs an
+analysis, and reads one dimension row **without being told how**. Observed, not self-assessed.
+
+### R2. UI design
+
+**One pass, one punch list.** Walk the app at phone width and desktop width, write every visual
+defect found into a single list, fix that list, stop. A defect discovered after the list is closed
+goes on the someday list unless it is a genuine bug.
+
+**Met when:** the written punch list is empty, and no horizontal scroll or overlapping text exists
+on any of the three tabs at 390px and 1280px wide.
+
+The known candidate going in: the dimension rows render at ~1248px wide in the Analysis panel,
+which is a very long line length for prose meant to be read carefully.
+
+### R3. Calibration — verified or visibly marked
+
+**Not "make every number measured."** The map is already honest: all 93 links carry a `stat`, 8 of
+them explicitly admit an unstable or contested relationship, and 4 use `sign:0` rather than assert a
+direction that does not hold. Re-fitting the 72 `directional` links into `measured` ones is a
+per-link research project with no end, and it is **explicitly out of scope.**
+
+The real gap is labeling, and it is finite. Nineteen items:
+
+| Item | Count | Resolution |
+|---|---|---|
+| Links at `conf:'unverified'` | 3 | Audit, or confirm each renders dashed with its audit badge |
+| Links at `aud:false` | 2 | `china→tsy`, `geo→credit`. Audit or confirm marked |
+| `NODE_ELASTICITY` cells at `conf:'unverified'` | 4 | Confirm each surfaces its tier in the impacts list |
+| Nodes with no `Source:` line in `expert` | 10 | Add one, or accept while expert stays unreachable |
+
+**Met when:** every one of the 19 is either resolved or demonstrably rendered with its
+not-verified marker visible to the reader. Counted, not estimated.
+
+⚠️ Auditing `geo→credit` may well mean flipping its sign or setting `sign:0` — its own `stat`
+concedes a 2025 study found a small spread *decrease* per 1-SD rise in the Caldara & Iacoviello
+Geopolitical Risk Index. That is an audit event and a substantive claim about the world, not a
+formatting tweak. Say plainly what changed and why.
+
+⚠️ The 10 missing `Source:` lines are currently invisible, because `beginnerMode` is permanently
+true and the expert arrays are unreachable. Fixing them only matters if an expert toggle is ever
+re-exposed. Decide which, and write the decision down rather than leaving it ambiguous.
+
+### One honest note on "never touching it again"
+
+Released does not mean unmaintained. `daily-data.yml`, `news-hourly.yml` and
+`annual-baseline-refresh.yml` keep running after this, and a data source can break. Fixing a dead
+cron later is **maintenance**, not reopening Refine. That distinction is what keeps "we are done"
+true rather than technically false the first time FRED changes an endpoint.
+
 ## How Bullion ends
 
-Released: tag a version, short changelog of what it does and does not do. Not buried — it works,
-it is public, and it is the strongest thing in the portfolio.
+Released: tag a version (`v1.0`), write a short changelog of what it does and what it does not do,
+and stop. Not buried — it works, it is public, and it is the strongest thing in the portfolio.
+
+The full bar for release: criteria 1, 2, 3a, 3b and 4 met, plus R1, R2 and R3 above. Criteria 3a
+and 4 were already met on 2026-09-25. Criterion 2 is built and committed (`60aa26a`) but still
+needs the panel. Criterion 3b is the only one with no code at all.
